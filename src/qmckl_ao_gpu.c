@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
 
 #include <qmckl.h>
 
@@ -12,12 +13,12 @@
 #endif
 
 
-/* ao_vgl_gaussian (OMP offload) */
-
+/* OPENMP FUNCTIONS */
 #ifdef HAVE_OPENMP_OFFLOAD
 
-// Compute OMP offload
+/* BASIC OFFLOAD */
 
+// Compute
 
 #pragma omp declare target
 qmckl_exit_code
@@ -478,12 +479,10 @@ qmckl_compute_ao_vgl_gaussian_omp_offload (
 }
 
 
-// Provide OMP offload
+// Provide
 
 qmckl_exit_code qmckl_provide_ao_vgl_omp_offload(qmckl_context context)
 {
-
-  printf("qmckl_provide_ao_vgl_omp_offload\n");
 
   if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT) {
     return qmckl_failwith( context,
@@ -570,7 +569,7 @@ qmckl_exit_code qmckl_provide_ao_vgl_omp_offload(qmckl_context context)
 }
 
 
-// Get OMP offload
+// Get
 
 qmckl_exit_code
 qmckl_get_ao_basis_ao_vgl_omp_offload (qmckl_context context,

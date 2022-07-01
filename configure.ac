@@ -58,15 +58,10 @@ CFLAGS="${CFLAGS} -Iinclude -DHAVE_HPC"
 
 ## Enable GPU offloading
 
-# GPU offloading
-AC_ARG_ENABLE(gpu, [AS_HELP_STRING([--enable-gpu],[openmp|openacc : Determine which GPU-offloaded functions to enable])], enable_gpu=$enableval, enable_gpu=no)
-AS_IF([test "$enable_gpu" = "yes"], [enable_gpu="openmp"]) # yes equals to OpenMP
-
 # OpenMP offloading
-HAVE_OPENMP_OFFLOAD="no"
-AS_IF([test "$enable_gpu" = "openmp"], [
+AC_ARG_ENABLE(openmp, [AS_HELP_STRING([--enable-openmp],[Enable OpenMP offloaded functions])], HAVE_OPENMP_OFFLOAD=yes, HAVE_OPENMP_OFFLOAD=no)
+AS_IF([test "$HAVE_OPENMP_OFFLOAD" = "yes"], [
   AC_DEFINE([HAVE_OPENMP_OFFLOAD], [1], [If defined, activate OpenMP-offloaded routines])
-  HAVE_OPENMP_OFFLOAD="yes"
 
   case $CC in
     *gcc*)
@@ -81,34 +76,36 @@ AS_IF([test "$enable_gpu" = "openmp"], [
   esac
 ])
 
+
+# Device pointers (if OpenMP is enabled)
+AC_ARG_WITH(device-pointers, [AS_HELP_STRING([--with-device-pointers],[Enable OpenMP functions using device pointers to optimize memory transfers])], DEVICE_POINTERS_TMP=yes, DEVICE_POINTERS_TMP=no)
+HAVE_DEVICE_POINTERS="no"
+AS_IF([test "DEVICE_POINTERS_TMP" = "yes" && test "HAVE_OPENMP_OFFLOAD" = "yes"], [
+  HAVE_DEVICE_POINTERS="yes"
+  AC_DEFINE([HAVE_DEVICE_POINTERS], [1], [If defined, use device pointers (requires to enable OpenMP)])
+])
+
+# cuBLAS versions (if OpenMP is enabled)
+# TODO
+
+
 # OpenACC offloading
-HAVE_OPENACC_OFFLOAD="no"
-AS_IF([test "$enable_gpu" = "openacc"], [
+AC_ARG_ENABLE(openacc, [AS_HELP_STRING([--enable-openacc],[Enable OpenACC offloaded functions])], HAVE_OPENACC_OFFLOAD=yes, HAVE_OPENACC_OFFLOAD=no)
+AS_IF([test "$HAVE_OPENACC_OFFLOAD" = "yes"], [
   AC_DEFINE([HAVE_OPENACC_OFFLOAD], [1], [If defined, activate OpenACC-offloaded routines])
-  HAVE_OPENACC_OFFLOAD="yes"
 
   case $CC in
     *gcc*)
           CFLAGS="$CFLAGS -fopenacc"
           ;;
     *nvc*)
-          CFLAGS="$CFLAGS -acc=gpu"
+          CFLAGS="$CFLAGS -mp=acc"
           ;;
 
     *)
-          echo "Warning : compiler not supported for OpenACC offload. Make sure to define necessary flags manually."
+          echo "Warning : compiler not supported for OpenMP offload. Make sure to define necessary flags manually."
   esac
 ])
-
-# Device pointers
-# BUG Even if the AC_DEFINE should execute only when gpu=openmp and device-pointers are set,
-# the device pointers will appear as defined in the output if only device_pointers is set
-# Maybe this could be related to autoconf vars being cached ?
-AC_ARG_WITH(device-pointers, [AS_HELP_STRING([--with-device-pointers],[Use device pointers on offloaded functions to optimize memory transfers])], HAVE_DEVICE_POINTERS=$withval, HAVE_DEVICE_POINTERS=no)
-AS_IF([test "$HAVE_DEVICE_POINTERS" = "yes" && test "$enable_gpu" = "openmp"], [
-  AC_DEFINE([HAVE_DEVICE_POINTERS], [1], [If defined, use device pointers (requires to enable OpenMP)])
-])
-
 
 # Print configure status
 AC_OUTPUT
@@ -120,20 +117,21 @@ ${PACKAGE_NAME} Version ${PACKAGE_VERSION}
 
 Prefix: '${prefix}'
 
-CC..............: ${CC}
-CFLAGS..........: ${CFLAGS}
-LDFLAGS:........: ${LDFLAGS}
+CC.................: ${CC}
+CFLAGS.............: ${CFLAGS}
+LDFLAGS:...........: ${LDFLAGS}
 
-OpenMP offload...: ${HAVE_OPENMP_OFFLOAD}
-OpenACC offload..: ${HAVE_OPENACC_OFFLOAD}
-Device pointers..: ${HAVE_DEVICE_POINTERS}
+OpenMP offload.....: ${HAVE_OPENMP_OFFLOAD}
+  Device pointers..: ${HAVE_DEVICE_POINTERS}
+  cuBLAS versions..: ${HAVE_CUBLAS}
+OpenACC offload....: ${HAVE_OPENACC_OFFLOAD}
 
 
 Now type 'make @<:@<target>@:>@'
 where the optional <target> is:
-  all           - build the library
-  check         - run tests [TODO]
-  install       - install ${PACKAGE_NAME}
+  all           - build ${PACKAGE_NAME}
+  TODO check    - run tests
+  install       - install
 --------------------------------------------------"
 
 # TODO Write tests? But this requires linking with an already installed QMCkl,
