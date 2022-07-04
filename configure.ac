@@ -2,7 +2,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 #
-# QMCkl - Quantum Monte Carlo kernel library
+# QMCkl - Quantum Monte Carlo kernel library (GPU addon)
 #
 # BSD 3-Clause License
 #
@@ -51,9 +51,8 @@ AC_CONFIG_MACRO_DIRS([m4])
 AC_ENABLE_SHARED
 AC_ENABLE_STATIC
 
-
 # Add mandatory CFLAGS
-CFLAGS="${CFLAGS} -Iinclude -DHAVE_HPC"
+CFLAGS="-Iinclude -DHAVE_HPC ${CFLAGS}"
 
 
 ## Enable GPU offloading
@@ -86,6 +85,7 @@ AS_IF([test "DEVICE_POINTERS_TMP" = "yes" && test "HAVE_OPENMP_OFFLOAD" = "yes"]
 ])
 
 # cuBLAS versions (if OpenMP is enabled)
+AC_ARG_WITH(cublas, [AS_HELP_STRING([--with-cublas],[Enable OpenMP functions using cuBLAS ccalls])], HAVE_CUBLAS=yes, HAVE_CUBLAS=no)
 # TODO
 
 
@@ -106,6 +106,38 @@ AS_IF([test "$HAVE_OPENACC_OFFLOAD" = "yes"], [
           echo "Warning : compiler not supported for OpenMP offload. Make sure to define necessary flags manually."
   esac
 ])
+
+
+
+# Fallback solution if nothing is enabled :
+# (probably because no GPU argument have been provided),
+# Enable OpenMP by default
+AS_IF([test "$HAVE_OPENMP_OFFLOAD" = "no"], [
+  AS_IF([test "$HAVE_OPENACC_OFFLOAD" = "no"], [
+
+    AC_OUTPUT
+    echo \
+    "Warning: No GPU functions could be enabled using the passed arguments. Enabling OpenMP offload by default."
+
+
+    HAVE_OPENMP_OFFLOAD="yes"
+    AC_DEFINE([HAVE_OPENMP_OFFLOAD], [1], [If defined, activate OpenMP-offloaded routines])
+
+    case $CC in
+      *gcc*)
+            CFLAGS="$CFLAGS -fopenmp"
+            ;;
+      *nvc*)
+            CFLAGS="$CFLAGS -mp=gpu"
+            ;;
+
+      *)
+            echo "Warning : compiler not supported for OpenMP offload. Make sure to define necessary flags manually."
+    esac
+
+  ])
+])
+
 
 # Print configure status
 AC_OUTPUT
