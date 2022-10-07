@@ -14,7 +14,6 @@ qmckl_exit_code qmckl_init_determinant(qmckl_context context);
 
 
 char      qmckl_get_determinant_type             (const qmckl_context context);
-int64_t   qmckl_get_determinant_walk_num         (const qmckl_context context);
 int64_t   qmckl_get_determinant_det_num_alpha    (const qmckl_context context);
 int64_t   qmckl_get_determinant_det_num_beta     (const qmckl_context context);
 int64_t*   qmckl_get_determinant_mo_index_alpha  (const qmckl_context context);

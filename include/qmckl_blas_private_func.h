@@ -3,70 +3,30 @@
 #include "qmckl_blas_private_type.h"
 
 qmckl_vector
-qmckl_vector_alloc( qmckl_context context, 
+qmckl_vector_alloc( qmckl_context context,
                     const int64_t size);
-
-qmckl_vector
-qmckl_vector_alloc_device( qmckl_context context,
-                           const int64_t size,
-                           int device_id);
 
 qmckl_exit_code
 qmckl_vector_free( qmckl_context context,
                    qmckl_vector* vector);
-
-qmckl_exit_code
-qmckl_vector_free_device( qmckl_context context,
-                          qmckl_vector* vector,
-	                      int device_id);
 
 qmckl_matrix
 qmckl_matrix_alloc( qmckl_context context,
                     const int64_t size1,
                     const int64_t size2);
 
-#ifdef HAVE_DEVICE_POINTERS
-qmckl_matrix
-qmckl_matrix_alloc_device( qmckl_context context,
-                           const int64_t size1,
-                           const int64_t size2,
-                           int device_id);
-#endif
-
 qmckl_exit_code
 qmckl_matrix_free( qmckl_context context,
                    qmckl_matrix* matrix);
 
-#ifdef HAVE_DEVICE_POINTERS
-qmckl_exit_code
-qmckl_matrix_free_device( qmckl_context context,
-                          qmckl_matrix* matrix,
-                          int device_id);
-#endif
-
 qmckl_tensor
-qmckl_tensor_alloc( qmckl_context context, 
+qmckl_tensor_alloc( qmckl_context context,
                     const int64_t order,
                     const int64_t* size);
 
-#ifdef HAVE_DEVICE_POINTERS
-qmckl_tensor
-qmckl_tensor_alloc_device( qmckl_context context,
-                           const int64_t order,
-                           const int64_t* size,
-	                       int device_id);
-#endif
-
 qmckl_exit_code
-qmckl_tensor_free (qmckl_context context, 
+qmckl_tensor_free (qmckl_context context,
                    qmckl_tensor* tensor);
-
-#ifdef HAVE_DEVICE_POINTERS
-qmckl_exit_code
-qmckl_tensor_free_device (qmckl_context context,
-                          qmckl_tensor* tensor,
-	                      int device_id);
-#endif
 
 /* Vector -> Matrix */
 
@@ -131,21 +91,11 @@ qmckl_vector_set(qmckl_vector vector, double value);
 qmckl_matrix
 qmckl_matrix_set(qmckl_matrix matrix, double value);
 
-#ifdef HAVE_DEVICE_POINTERS
-qmckl_matrix
-qmckl_matrix_set_device(qmckl_matrix matrix, double value);
-#endif
-
 /* Tensor */
 
 
 qmckl_tensor
 qmckl_tensor_set(qmckl_tensor tensor, double value);
-
-#ifdef HAVE_DEVICE_POINTERS
-qmckl_tensor
-qmckl_tensor_set_device(qmckl_tensor tensor, double value);
-#endif
 
 /* Copy to/from to ~double*~ */
 
@@ -174,29 +124,11 @@ qmckl_vector_of_double(const qmckl_context context,
                        const int64_t size_max,
                        qmckl_vector* vector);
 
-#ifdef HAVE_DEVICE_POINTERS
-qmckl_exit_code
-qmckl_vector_of_double_device(const qmckl_context context,
-                              const double* target,
-                              const int64_t size_max,
-                              qmckl_vector* vector,
-                              int device_id);
-#endif
-
 qmckl_exit_code
 qmckl_matrix_of_double(const qmckl_context context,
                        const double* target,
                        const int64_t size_max,
                        qmckl_matrix* matrix);
-
-#ifdef HAVE_DEVICE_POINTERS
-qmckl_exit_code
-qmckl_matrix_of_double_device(const qmckl_context context,
-                              const double* target,
-                              const int64_t size_max,
-                              qmckl_matrix* matrix,
-                              int device_id);
-#endif
 
 qmckl_exit_code
 qmckl_tensor_of_double(const qmckl_context context,
@@ -255,12 +187,5 @@ qmckl_exit_code
 qmckl_transpose (qmckl_context context,
                  const qmckl_matrix A,
                  qmckl_matrix At );
-
-#ifdef HAVE_DEVICE_POINTERS
-qmckl_exit_code
-qmckl_transpose_device (qmckl_context context,
-                        const qmckl_matrix A,
-                        qmckl_matrix At );
-#endif
 
 #endif

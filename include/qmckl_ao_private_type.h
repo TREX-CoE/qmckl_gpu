@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <inttypes.h>
 #include "qmckl_blas_private_type.h"
 
 /* Data structure                                                 :noexport: */

@@ -52,16 +52,47 @@ AC_ENABLE_SHARED
 AC_ENABLE_STATIC
 
 # Add mandatory CFLAGS
-CFLAGS="-Iinclude -DHAVE_HPC ${CFLAGS}"
+CFLAGS="-DHAVE_HPC -Iinclude ${CFLAGS}"
 
 
-## Enable GPU offloading
+## Enable the different function types (OpenMP, OpenACC, device)
 
 # OpenMP offloading
-AC_ARG_ENABLE(openmp, [AS_HELP_STRING([--enable-openmp],[Enable OpenMP offloaded functions])], HAVE_OPENMP_OFFLOAD=yes, HAVE_OPENMP_OFFLOAD=no)
-AS_IF([test "$HAVE_OPENMP_OFFLOAD" = "yes"], [
-  AC_DEFINE([HAVE_OPENMP_OFFLOAD], [1], [If defined, activate OpenMP-offloaded routines])
+AC_ARG_ENABLE(openmp, [AS_HELP_STRING([--enable-openmp],[Enable OpenMP offloaded functions])], have_openmp=yes, have_openmp=no)
 
+# OpenACC offloading
+AC_ARG_ENABLE(openacc, [AS_HELP_STRING([--enable-openacc],[Enable OpenACC offloaded functions])], have_openacc=yes, have_openacc=no)
+
+# OpenMP + device pointers
+AC_ARG_ENABLE(device, [AS_HELP_STRING([--enable-device],[Enable device pointers OpenMP functions])], have_device=yes, have_device=no)
+
+# TODO Add cuBLAS functions at some point ?
+
+# Fallback solution if nothing is enabled :
+# (probably because no GPU argument have been provided),
+# Enable OpenMP by default
+AS_IF([
+  test "$have_openmp"  = "no" &&
+  test "$have_openacc" = "no" &&
+  test "$have_device"  = "no"
+ ], [
+
+    AC_OUTPUT
+    echo \
+    "Warning: No GPU functions could be enabled using the passed arguments. Enabling OpenMP offload by default."
+
+    have_openmp="yes"
+])
+
+AM_CONDITIONAL([HAVE_OPENMP],  [test "x$have_openmp"  = "xyes"])
+AM_CONDITIONAL([HAVE_OPENACC], [test "x$have_openacc" = "xyes"])
+AM_CONDITIONAL([HAVE_DEVICE],  [test "x$have_device"  = "xyes"])
+
+## Add compilers flags depending on what has been enabled
+AS_IF([
+  test "$have_openmp" = "yes" ||
+  test "$have_device" = "yes"
+], [
   case $CC in
     *gcc*)
           CFLAGS="$CFLAGS -fopenmp"
@@ -71,29 +102,12 @@ AS_IF([test "$HAVE_OPENMP_OFFLOAD" = "yes"], [
           ;;
 
     *)
-          echo "Warning : compiler not supported for OpenMP offload. Make sure to define necessary flags manually."
+          echo "Warning : compiler not recognized for OpenMP. Make sure to define necessary flags manually."
   esac
 ])
 
 
-# Device pointers (if OpenMP is enabled)
-AC_ARG_WITH(device-pointers, [AS_HELP_STRING([--with-device-pointers],[Enable OpenMP functions using device pointers to optimize memory transfers])], DEVICE_POINTERS_TMP=yes, DEVICE_POINTERS_TMP=no)
-HAVE_DEVICE_POINTERS="no"
-AS_IF([test "DEVICE_POINTERS_TMP" = "yes" && test "HAVE_OPENMP_OFFLOAD" = "yes"], [
-  HAVE_DEVICE_POINTERS="yes"
-  AC_DEFINE([HAVE_DEVICE_POINTERS], [1], [If defined, use device pointers (requires to enable OpenMP)])
-])
-
-# cuBLAS versions (if OpenMP is enabled)
-AC_ARG_WITH(cublas, [AS_HELP_STRING([--with-cublas],[Enable OpenMP functions using cuBLAS ccalls])], HAVE_CUBLAS=yes, HAVE_CUBLAS=no)
-# TODO
-
-
-# OpenACC offloading
-AC_ARG_ENABLE(openacc, [AS_HELP_STRING([--enable-openacc],[Enable OpenACC offloaded functions])], HAVE_OPENACC_OFFLOAD=yes, HAVE_OPENACC_OFFLOAD=no)
-AS_IF([test "$HAVE_OPENACC_OFFLOAD" = "yes"], [
-  AC_DEFINE([HAVE_OPENACC_OFFLOAD], [1], [If defined, activate OpenACC-offloaded routines])
-
+AS_IF([test "$have_openacc" = "yes"], [
   case $CC in
     *gcc*)
           CFLAGS="$CFLAGS -fopenacc"
@@ -103,40 +117,10 @@ AS_IF([test "$HAVE_OPENACC_OFFLOAD" = "yes"], [
           ;;
 
     *)
-          echo "Warning : compiler not supported for OpenMP offload. Make sure to define necessary flags manually."
+          echo "Warning : compiler not supported for OpenACC. Make sure to define necessary flags manually."
   esac
 ])
 
-
-
-# Fallback solution if nothing is enabled :
-# (probably because no GPU argument have been provided),
-# Enable OpenMP by default
-AS_IF([test "$HAVE_OPENMP_OFFLOAD" = "no"], [
-  AS_IF([test "$HAVE_OPENACC_OFFLOAD" = "no"], [
-
-    AC_OUTPUT
-    echo \
-    "Warning: No GPU functions could be enabled using the passed arguments. Enabling OpenMP offload by default."
-
-
-    HAVE_OPENMP_OFFLOAD="yes"
-    AC_DEFINE([HAVE_OPENMP_OFFLOAD], [1], [If defined, activate OpenMP-offloaded routines])
-
-    case $CC in
-      *gcc*)
-            CFLAGS="$CFLAGS -fopenmp"
-            ;;
-      *nvc*)
-            CFLAGS="$CFLAGS -mp=gpu"
-            ;;
-
-      *)
-            echo "Warning : compiler not supported for OpenMP offload. Make sure to define necessary flags manually."
-    esac
-
-  ])
-])
 
 
 # Print configure status
@@ -153,10 +137,9 @@ CC.................: ${CC}
 CFLAGS.............: ${CFLAGS}
 LDFLAGS:...........: ${LDFLAGS}
 
-OpenMP offload.....: ${HAVE_OPENMP_OFFLOAD}
-  Device pointers..: ${HAVE_DEVICE_POINTERS}
-  cuBLAS versions..: ${HAVE_CUBLAS}
-OpenACC offload....: ${HAVE_OPENACC_OFFLOAD}
+OpenMP offload.....: ${have_openmp}
+OpenACC offload....: ${have_openacc}
+Device offload.....: ${have_device}
 
 
 Now type 'make @<:@<target>@:>@'

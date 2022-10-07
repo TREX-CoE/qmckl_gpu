@@ -7,7 +7,7 @@
 
 
 typedef struct qmckl_mo_basis_struct {
-  int64_t   mo_num;
+  int64_t  mo_num;
   double * restrict coefficient;
   double * restrict coefficient_t;
 
@@ -18,14 +18,6 @@ typedef struct qmckl_mo_basis_struct {
 
   int32_t   uninitialized;
   bool      provided;
-
-#ifdef HAVE_DEVICE_POINTERS
-  double * restrict coefficient_device;
-  double * restrict coefficient_t_device;
-
-  double * restrict mo_vgl_device;
-  double * restrict mo_value_device;
-#endif
 } qmckl_mo_basis_struct;
 
 #endif

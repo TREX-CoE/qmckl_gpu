@@ -28,32 +28,6 @@ qmckl_exit_code qmckl_compute_ee_distance (
 /* Provide                                                        :noexport: */
 
 
-qmckl_exit_code qmckl_provide_ee_distance_rescaled(qmckl_context context);
-
-qmckl_exit_code qmckl_compute_ee_distance_rescaled (
-          const qmckl_context context,
-          const int64_t elec_num,
-          const double rescale_factor_kappa_ee,
-          const int64_t walk_num,
-          const double* coord,
-          double* const ee_distance_rescaled );
-
-/* Provide                                                        :noexport: */
-
-
-qmckl_exit_code qmckl_provide_ee_distance_rescaled_deriv_e(qmckl_context context);
-
-qmckl_exit_code qmckl_compute_ee_distance_rescaled_deriv_e (
-          const qmckl_context context,
-          const int64_t elec_num,
-          const double rescale_factor_kappa_ee,
-          const int64_t walk_num,
-          const double* coord,
-          double* const ee_distance_rescaled_deriv_e );
-
-/* Provide                                                        :noexport: */
-
-
 qmckl_exit_code qmckl_provide_ee_potential(qmckl_context context);
 
 /* Provide                                                        :noexport: */
@@ -69,36 +43,6 @@ qmckl_exit_code qmckl_compute_en_distance (
           const double* elec_coord,
           const double* nucl_coord,
           double* const en_distance );
-
-/* Provide                                                        :noexport: */
-
-
-qmckl_exit_code qmckl_provide_en_distance_rescaled(qmckl_context context);
-
-qmckl_exit_code qmckl_compute_en_distance_rescaled (
-          const qmckl_context context,
-          const int64_t elec_num,
-          const int64_t nucl_num,
-          const double  rescale_factor_kappa_en,
-          const int64_t walk_num,
-          const double* elec_coord,
-          const double* nucl_coord,
-          double* const en_distance_rescaled );
-
-/* Provide                                                        :noexport: */
-
-
-qmckl_exit_code qmckl_provide_en_distance_rescaled_deriv_e(qmckl_context context);
-
-qmckl_exit_code qmckl_compute_en_distance_rescaled_deriv_e (
-          const qmckl_context context,
-          const int64_t elec_num,
-          const int64_t nucl_num,
-          const double  rescale_factor_kappa_en,
-          const int64_t walk_num,
-          const double* elec_coord,
-          const double* nucl_coord,
-          double* const en_distance_rescaled_deriv_e );
 
 /* Provide                                                        :noexport: */
 

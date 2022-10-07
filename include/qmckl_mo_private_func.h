@@ -21,18 +21,20 @@ qmckl_exit_code qmckl_init_mo_basis(qmckl_context context);
 
 qmckl_exit_code qmckl_finalize_mo_basis(qmckl_context context);
 
-#ifdef HAVE_DEVICE_POINTERS
-qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context context, int device_id);
-#endif
+/* Provide */
+
+/* #+CALL: write_provider_header( group="mo_basis", data="mo_value" ) */
+
+/* #+RESULTS: */
+
+qmckl_exit_code qmckl_provide_mo_basis_mo_value(qmckl_context context);
 
 /* Provide */
 
+/* #+CALL: write_provider_header( group="mo_basis", data="mo_vgl" ) */
 
-qmckl_exit_code qmckl_provide_mo_value(qmckl_context context);
+/* #+RESULTS: */
 
-/* Provide */
-
-
-qmckl_exit_code qmckl_provide_mo_vgl(qmckl_context context);
+qmckl_exit_code qmckl_provide_mo_basis_mo_vgl(qmckl_context context);
 
 #endif
