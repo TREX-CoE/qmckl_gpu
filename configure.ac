@@ -121,6 +121,22 @@ AS_IF([test "$have_openacc" = "yes"], [
   esac
 ])
 
+AS_IF([
+  test "$have_device" = "yes"
+], [
+  case $CC in
+    *gcc*)
+          CFLAGS="$CFLAGS -lomp"
+          ;;
+    *nvc*)
+          CFLAGS="$CFLAGS -lomp"
+          ;;
+
+    *)
+          echo "Warning : compiler not recognized for OpenMP. Make sure to define necessary flags manually."
+  esac
+])
+
 
 
 # Print configure status

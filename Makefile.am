@@ -7,3 +7,11 @@ libqmckl_gpu_la_SOURCES = ""
 if HAVE_OPENMP
  libqmckl_gpu_la_SOURCES += src/qmckl_ao_openmp.c
 endif
+
+if HAVE_OPENACC
+ libqmckl_gpu_la_SOURCES += src/qmckl_ao_openacc.c
+endif
+
+if HAVE_DEVICE
+ libqmckl_gpu_la_SOURCES += src/qmckl_ao_device.c
+endif

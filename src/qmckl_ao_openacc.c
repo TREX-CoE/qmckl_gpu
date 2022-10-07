@@ -5,10 +5,9 @@
 // COMPUTE
 //**********
 
-// TODO Inline this function
-#pragma omp declare target
+#pragma acc routine seq
 qmckl_exit_code
-qmckl_ao_polynomial_transp_vgl_hpc_omp_offload (const qmckl_context context,
+qmckl_ao_polynomial_transp_vgl_hpc_acc_offload (const qmckl_context context,
                                     const double* restrict X,
                                     const double* restrict R,
                                     const int32_t lmax,
@@ -17,8 +16,8 @@ qmckl_ao_polynomial_transp_vgl_hpc_omp_offload (const qmckl_context context,
                                     double* restrict const VGL,
                                     const int64_t ldv )
 {
-
-  // assert (ctx != NULL && X != NULL && R != NULL && n != NULL && VGL != NULL);
+  const qmckl_context_struct* ctx = (qmckl_context_struct*) context;
+  assert (ctx != NULL && X != NULL && R != NULL && n != NULL && VGL != NULL);
   if (lmax < 0) return QMCKL_INVALID_ARG_4;
   if (ldl < 3) return QMCKL_INVALID_ARG_7;
 
@@ -120,11 +119,10 @@ qmckl_ao_polynomial_transp_vgl_hpc_omp_offload (const qmckl_context context,
   *n = m;
   return QMCKL_SUCCESS;
 }
-#pragma omp end declare target
 
 
 qmckl_exit_code
-qmckl_compute_ao_vgl_gaussian_omp_offload (
+qmckl_compute_ao_vgl_gaussian_acc_offload (
                                            const qmckl_context context,
                                            const int64_t ao_num,
                                            const int64_t shell_num,
@@ -192,8 +190,8 @@ qmckl_compute_ao_vgl_gaussian_omp_offload (
   int expo_per_nucleus_size_0 = expo_per_nucleus.size[0];
   int expo_per_nucleus_size_1 = expo_per_nucleus.size[1];
 
-  #pragma omp target enter data \
-  map(to:prim_num_per_nucleus[0:nucl_num],         \
+  #pragma acc data \
+  copyin(prim_num_per_nucleus[0:nucl_num],         \
          coord[0:3*point_num],                     \
          nucl_coord[0:3*nucl_num],                 \
          nucleus_index[0:nucl_num],                \
@@ -206,12 +204,12 @@ qmckl_compute_ao_vgl_gaussian_omp_offload (
          coef_mat[0:nucl_num*shell_max*prim_max],\
          ao_index[0:shell_num+1]\
   )\
-  map(alloc:ao_vgl[0:point_num*5*ao_num],\
-            poly_vgl_shared[0:point_num*5*size_max]\
-  )
+  create(poly_vgl_shared[0:point_num*5*size_max])\
+	copy(ao_vgl[0:point_num*5*ao_num])
   {
 
-    #pragma omp target teams distribute parallel for simd
+
+    #pragma acc parallel loop independent gang worker vector
     for (int64_t ipoint=0 ; ipoint < point_num ; ++ipoint) {
 
       double * poly_vgl = &(poly_vgl_shared[ipoint*5*size_max]);
@@ -284,7 +282,7 @@ qmckl_compute_ao_vgl_gaussian_omp_offload (
           break;
 
         default:
-          rc = qmckl_ao_polynomial_transp_vgl_hpc_omp_offload(context, e_coord, n_coord,
+          rc = qmckl_ao_polynomial_transp_vgl_hpc_acc_offload(context, e_coord, n_coord,
                                                   nucleus_max_ang_mom[inucl],
                                                   &n_poly, (int64_t) 3,
                                                   poly_vgl, size_max);
@@ -452,7 +450,6 @@ qmckl_compute_ao_vgl_gaussian_omp_offload (
         }
       }
     }
-    #pragma omp target update from(ao_vgl[0:point_num*5*ao_num])
   }
 
   free(ao_index);
@@ -463,13 +460,7 @@ qmckl_compute_ao_vgl_gaussian_omp_offload (
 }
 
 
-
-//**********
-// PROVIDE
-//**********
-
-
-qmckl_exit_code qmckl_provide_ao_vgl_omp_offload(qmckl_context context)
+qmckl_exit_code qmckl_provide_ao_vgl_acc_offload(qmckl_context context)
 {
 
   if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT) {
@@ -520,7 +511,7 @@ qmckl_exit_code qmckl_provide_ao_vgl_omp_offload(qmckl_context context)
 
 
     if (ctx->ao_basis.type == 'G') {
-      rc = qmckl_compute_ao_vgl_gaussian_omp_offload(context,
+      rc = qmckl_compute_ao_vgl_gaussian_acc_offload(context,
                                                      ctx->ao_basis.ao_num,
                                                      ctx->ao_basis.shell_num,
                                                      ctx->ao_basis.prim_num_per_nucleus,
@@ -559,7 +550,7 @@ qmckl_exit_code qmckl_provide_ao_vgl_omp_offload(qmckl_context context)
 //**********
 
 qmckl_exit_code
-qmckl_get_ao_basis_ao_vgl_omp_offload (qmckl_context context,
+qmckl_get_ao_basis_ao_vgl_acc_offload (qmckl_context context,
                                        double* const ao_vgl,
                                        const int64_t size_max)
 {
@@ -573,7 +564,7 @@ qmckl_get_ao_basis_ao_vgl_omp_offload (qmckl_context context,
 
   qmckl_exit_code rc;
 
-  rc = qmckl_provide_ao_vgl_omp_offload(context);
+  rc = qmckl_provide_ao_vgl_acc_offload(context);
   if (rc != QMCKL_SUCCESS) return rc;
 
   qmckl_context_struct* const ctx = (qmckl_context_struct*) context;
@@ -593,7 +584,7 @@ qmckl_get_ao_basis_ao_vgl_omp_offload (qmckl_context context,
 
 
 qmckl_exit_code
-qmckl_get_ao_basis_ao_vgl_inplace_omp_offload (qmckl_context context,
+qmckl_get_ao_basis_ao_vgl_inplace_acc_offload (qmckl_context context,
                                                double* const ao_vgl,
                                                const int64_t size_max)
 {
@@ -625,7 +616,7 @@ qmckl_get_ao_basis_ao_vgl_inplace_omp_offload (qmckl_context context,
 
   ctx->ao_basis.ao_vgl = ao_vgl;
 
-  rc = qmckl_provide_ao_vgl_omp_offload(context);
+  rc = qmckl_provide_ao_vgl_acc_offload(context);
   if (rc != QMCKL_SUCCESS) return rc;
 
   ctx->ao_basis.ao_vgl = old_array;
