@@ -1,4 +1,4 @@
-#include "include/qmckl_gpu.h"
+#include "include/qmckl_ao_gpu.h"
 #include <omp.h>
 
 
@@ -553,17 +553,17 @@ qmckl_compute_ao_vgl_gaussian_device_pointers (
 // PROVIDE
 //**********
 
-qmckl_exit_code qmckl_provide_ao_basis_ao_vgl_device(qmckl_context context_device, int device_id)
+qmckl_exit_code qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context, int device_id)
 {
 
-  if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT) {
+  if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT) {
     return qmckl_failwith( context,
                            QMCKL_INVALID_CONTEXT,
                            "qmckl_provide_ao_basis_ao_vgl_device",
                            NULL);
   }
 
-  qmckl_context_struct* const ctx = (qmckl_context_struct*) context;
+  qmckl_context_struct_device* const ctx = (qmckl_context_struct*) context;
   assert (ctx != NULL);
 
   if (!ctx->ao_basis.provided) {
@@ -652,7 +652,7 @@ qmckl_get_ao_basis_ao_vgl_device (qmckl_context_device context,
   rc = qmckl_provide_ao_basis_ao_vgl_device(context, device_id);
   if (rc != QMCKL_SUCCESS) return rc;
 
-  qmckl_context_struct* const ctx = (qmckl_context_struct*) context;
+  qmckl_context_struct_device* const ctx = (qmckl_context_struct*) context;
   assert (ctx != NULL);
 
   int64_t sze = ctx->ao_basis.ao_num * 5 * ctx->point.num;

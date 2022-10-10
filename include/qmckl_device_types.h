@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <qmckl.h>
 
+#include "qmckl_numprec_private_type.h"
+
 
 //**********
 // BLAS types (matrices, ...)
@@ -18,20 +20,13 @@ typedef struct qmckl_vector_device {
   int64_t size;
 } qmckl_vector_device;
 
+// Matrix
 typedef struct qmckl_matrix_device {
   double* restrict data;
   double* restrict data_device;
 
   int64_t size[2];
 } qmckl_matrix_device;
-
-// Matrix
-typedef struct qmckl_matrix {
-  double* restrict data;
-  double* restrict data_device;
-
-  int64_t size[2];
-} qmckl_matrix;
 
 // Tensor
 #define QMCKL_TENSOR_ORDER_MAX_DEVICE 16
@@ -76,14 +71,14 @@ typedef struct qmckl_nucleus_struct_device {
 typedef struct qmckl_walker_struct_device {
   int64_t num;
   qmckl_point_struct_device point;
-} qmckl_walker;
+} qmckl_walker_device;
 
 typedef struct qmckl_electron_struct_device {
   int64_t        num;
   int64_t        up_num;
   int64_t        down_num;
-  qmckl_walker   walker;
-  qmckl_walker   walker_old;
+  qmckl_walker_device   walker;
+  qmckl_walker_device   walker_old;
   double         rescale_factor_kappa_ee;
   double         rescale_factor_kappa_en;
   uint64_t        ee_distance_date;
@@ -216,4 +211,7 @@ typedef struct qmckl_context_struct_device {
   qmckl_determinant_struct          det;
   qmckl_local_energy_struct         local_energy;
 
-} qmckl_context_struct;
+} qmckl_context_struct_device;
+
+
+typedef int64_t qmckl_context_device;
