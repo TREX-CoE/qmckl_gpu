@@ -9,14 +9,14 @@
 // TODO Inline this function
 #pragma omp declare target
 qmckl_exit_code
-qmckl_ao_polynomial_transp_vgl_hpc_device (const qmckl_context context,
-                                    const double* restrict X,
-                                    const double* restrict R,
-                                    const int32_t lmax,
-                                    int64_t* restrict n,
-                                    const int64_t ldl,
-                                    double* restrict const VGL,
-                                    const int64_t ldv )
+qmckl_ao_polynomial_transp_vgl_hpc_device (const qmckl_context_device context,
+                                           const double* restrict X,
+                                           const double* restrict R,
+                                           const int32_t lmax,
+                                           int64_t* restrict n,
+                                           const int64_t ldl,
+                                           double* restrict const VGL,
+                                           const int64_t ldv )
 {
 
   // assert (ctx != NULL && X != NULL && R != NULL && n != NULL && VGL != NULL);
@@ -127,7 +127,7 @@ qmckl_ao_polynomial_transp_vgl_hpc_device (const qmckl_context context,
 
 qmckl_exit_code
 qmckl_compute_ao_vgl_gaussian_device_pointers (
-                                           const qmckl_context context,
+                                           const qmckl_context_device context,
                                            const int64_t ao_num,
                                            const int64_t shell_num,
                                            const int32_t* restrict prim_num_per_nucleus,
@@ -141,8 +141,8 @@ qmckl_compute_ao_vgl_gaussian_device_pointers (
                                            const int32_t* restrict nucleus_max_ang_mom,
                                            const int32_t* restrict shell_ang_mom,
                                            const double* restrict ao_factor,
-                                           const qmckl_matrix expo_per_nucleus,
-                                           const qmckl_tensor coef_per_nucleus,
+                                           const qmckl_matrix_device expo_per_nucleus,
+                                           const qmckl_tensor_device coef_per_nucleus,
                                            double* restrict const ao_vgl,
 
                                            int device_id )
@@ -553,7 +553,7 @@ qmckl_compute_ao_vgl_gaussian_device_pointers (
 // PROVIDE
 //**********
 
-qmckl_exit_code qmckl_provide_ao_basis_ao_vgl_device(qmckl_context context, int device_id)
+qmckl_exit_code qmckl_provide_ao_basis_ao_vgl_device(qmckl_context context_device, int device_id)
 {
 
   if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT) {
@@ -634,7 +634,7 @@ qmckl_exit_code qmckl_provide_ao_basis_ao_vgl_device(qmckl_context context, int 
 //**********
 
 qmckl_exit_code
-qmckl_get_ao_basis_ao_vgl_device (qmckl_context context,
+qmckl_get_ao_basis_ao_vgl_device (qmckl_context_device context,
                                   double* const ao_vgl,
                                   const int64_t size_max,
                                   int device_id)
