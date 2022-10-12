@@ -15,6 +15,7 @@
 #include "qmckl_blas_private_func.h"
 
 #include "qmckl_device_types.h"
+#include "qmckl_memory_device.h"
 
 
 qmckl_vector_device

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <qmckl.h>
 
 #include <stdint.h>

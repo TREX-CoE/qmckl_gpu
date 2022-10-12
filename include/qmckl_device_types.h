@@ -6,6 +6,11 @@
 #include <qmckl.h>
 
 #include "qmckl_numprec_private_type.h"
+#include "qmckl_error_private_type.h"
+#include "qmckl_mo_private_type.h"
+#include "qmckl_jastrow_private_type.h"
+#include "qmckl_determinant_private_type.h"
+#include "qmckl_local_energy_private_type.h"
 
 
 //**********
@@ -173,6 +178,27 @@ typedef struct qmckl_ao_basis_struct_device {
 } qmckl_ao_basis_struct_device;
 
 
+typedef struct qmckl_mo_basis_struct_device {
+  int64_t  mo_num;
+  double * restrict coefficient;
+  double * restrict coefficient_t;
+
+  double * restrict mo_vgl;
+  double * restrict mo_value;
+  uint64_t  mo_vgl_date;
+  uint64_t  mo_value_date;
+
+  int32_t   uninitialized;
+  bool      provided;
+
+  double * restrict coefficient_device;
+  double * restrict coefficient_t_device;
+
+  double * restrict mo_vgl_device;
+  double * restrict mo_value_device;
+} qmckl_mo_basis_struct_device;
+
+
 //**********
 // Main context type
 //**********
@@ -206,7 +232,7 @@ typedef struct qmckl_context_struct_device {
   qmckl_nucleus_struct_device       nucleus;
   qmckl_electron_struct_device      electron;
   qmckl_ao_basis_struct_device      ao_basis;
-  qmckl_mo_basis_struct             mo_basis; // TODO
+  qmckl_mo_basis_struct_device      mo_basis;
   qmckl_jastrow_struct              jastrow; // TODO
   qmckl_determinant_struct          det;
   qmckl_local_energy_struct         local_energy;

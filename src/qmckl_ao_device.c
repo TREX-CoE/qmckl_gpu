@@ -563,7 +563,7 @@ qmckl_exit_code qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device contex
                            NULL);
   }
 
-  qmckl_context_struct_device* const ctx = (qmckl_context_struct*) context;
+  qmckl_context_struct_device* const ctx = (qmckl_context_struct_device*) context;
   assert (ctx != NULL);
 
   if (!ctx->ao_basis.provided) {
@@ -652,7 +652,7 @@ qmckl_get_ao_basis_ao_vgl_device (qmckl_context_device context,
   rc = qmckl_provide_ao_basis_ao_vgl_device(context, device_id);
   if (rc != QMCKL_SUCCESS) return rc;
 
-  qmckl_context_struct_device* const ctx = (qmckl_context_struct*) context;
+  qmckl_context_struct_device* const ctx = (qmckl_context_struct_device*) context;
   assert (ctx != NULL);
 
   int64_t sze = ctx->ao_basis.ao_num * 5 * ctx->point.num;
