@@ -18,6 +18,8 @@
 #include "qmckl_ao_private_func.h"
 
 #include "qmckl_device_types.h"
+#include "qmckl_context_device.h"
+#include "qmckl_memory_device.h"
 
 
 // qmckl_ao_openmp.c

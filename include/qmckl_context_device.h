@@ -13,6 +13,8 @@
 #include "qmckl_memory_private_func.h"
 
 #include "qmckl_device_types.h"
+#include "qmckl_memory_device.h"
+#include "qmckl_blas_device.h"
 
 
 qmckl_context_device qmckl_context_create_device();
@@ -20,7 +22,7 @@ qmckl_context_device qmckl_context_create_device();
 qmckl_exit_code
 qmckl_context_destroy_device (const qmckl_context_device context);
 
-qmckl_context_device qmckl_context_check(const qmckl_context_device context);
+qmckl_context_device qmckl_context_check_device(const qmckl_context_device context);
 
 qmckl_exit_code
 qmckl_set_error_device(qmckl_context_device context,
