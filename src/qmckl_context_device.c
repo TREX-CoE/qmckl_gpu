@@ -8,7 +8,7 @@
 // MISC
 //**********
 
-qmckl_context_device qmckl_context_check(const qmckl_context_device context) {
+qmckl_context_device qmckl_context_check_device(const qmckl_context_device context) {
 
   if (context == QMCKL_NULL_CONTEXT)
     return QMCKL_NULL_CONTEXT;
