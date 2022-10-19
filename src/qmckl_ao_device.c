@@ -1,5 +1,4 @@
 #include "include/qmckl_ao_gpu.h"
-#include <omp.h>
 
 //**********
 // COMPUTE

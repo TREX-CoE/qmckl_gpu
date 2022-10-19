@@ -7,11 +7,11 @@ lib_LTLIBRARIES = libqmckl_gpu.la
 libqmckl_gpu_la_SOURCES = ""
 
 if HAVE_OPENMP
- libqmckl_gpu_la_SOURCES += src/qmckl_ao_openmp.c
+ libqmckl_gpu_la_SOURCES += src/qmckl_ao_openmp.c src/qmckl_jastrow_openmp.c
 endif
 
 if HAVE_OPENACC
- libqmckl_gpu_la_SOURCES += src/qmckl_ao_openacc.c
+ libqmckl_gpu_la_SOURCES += src/qmckl_ao_openacc.c src/qmckl_jastrow_openacc.c
 endif
 
 if HAVE_DEVICE

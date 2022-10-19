@@ -53,3 +53,14 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
                                                  double *const ao_vgl,
                                                  const int64_t size_max,
                                                  int device_id);
+
+//**********
+// JASTROW
+//**********
+
+// qmckl_jastrow_openmp.c
+qmckl_exit_code qmckl_get_jastrow_tmp_c_omp_offload(qmckl_context context,
+                                                    double *const tmp_c);
+
+qmckl_exit_code qmckl_get_jastrow_dtmp_c_omp_offload(qmckl_context context,
+                                                     double *const dtmp_c);
