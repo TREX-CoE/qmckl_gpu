@@ -1,8 +1,6 @@
 #ifndef QMCKL_ELECTRON_HPF
 #define QMCKL_ELECTRON_HPF
 
-
-
 /* The ~uninitialized~ integer contains one bit set to one for each */
 /* initialization function which has not been called. It becomes equal */
 /* to zero after all initialization functions have been called. The */
@@ -10,42 +8,33 @@
 /* Some values are initialized by default, and are not concerned by */
 /* this mechanism. */
 
-
 qmckl_exit_code qmckl_init_electron(qmckl_context context);
 
 /* Provide                                                        :noexport: */
 
-
 qmckl_exit_code qmckl_provide_ee_distance(qmckl_context context);
 
-qmckl_exit_code qmckl_compute_ee_distance (
-          const qmckl_context context,
-          const int64_t elec_num,
-          const int64_t walk_num,
-          const double* coord,
-          double* const ee_distance );
+qmckl_exit_code qmckl_compute_ee_distance(const qmckl_context context,
+                                          const int64_t elec_num,
+                                          const int64_t walk_num,
+                                          const double *coord,
+                                          double *const ee_distance);
 
 /* Provide                                                        :noexport: */
-
 
 qmckl_exit_code qmckl_provide_ee_potential(qmckl_context context);
 
 /* Provide                                                        :noexport: */
 
-
 qmckl_exit_code qmckl_provide_en_distance(qmckl_context context);
 
-qmckl_exit_code qmckl_compute_en_distance (
-          const qmckl_context context,
-          const int64_t elec_num,
-          const int64_t nucl_num,
-          const int64_t walk_num,
-          const double* elec_coord,
-          const double* nucl_coord,
-          double* const en_distance );
+qmckl_exit_code
+qmckl_compute_en_distance(const qmckl_context context, const int64_t elec_num,
+                          const int64_t nucl_num, const int64_t walk_num,
+                          const double *elec_coord, const double *nucl_coord,
+                          double *const en_distance);
 
 /* Provide                                                        :noexport: */
-
 
 qmckl_exit_code qmckl_provide_en_potential(qmckl_context context);
 
