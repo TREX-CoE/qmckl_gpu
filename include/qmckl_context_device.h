@@ -19,6 +19,9 @@
 #include "qmckl_blas_device.h"
 
 
+void qmckl_lock_device(qmckl_context_device context);
+void qmckl_unlock_device(const qmckl_context_device context);
+
 qmckl_context_device qmckl_context_create_device();
 
 qmckl_exit_code

@@ -14,8 +14,7 @@ void* qmckl_malloc_host(qmckl_context_device context, const qmckl_memory_info_st
   }
   memset(pointer, 0, info.size);
 
-  // TODO Device locks
-  // qmckl_lock(context);
+  qmckl_lock_device(context);
   {
     /* If qmckl_memory_struct is full, reallocate a larger one */
     if (ctx->memory.n_allocated == ctx->memory.array_size) {
@@ -24,7 +23,7 @@ void* qmckl_malloc_host(qmckl_context_device context, const qmckl_memory_info_st
                                                           2L * old_size *
                                                           sizeof(qmckl_memory_info_struct));
       if (new_array == NULL) {
-        qmckl_unlock(context);
+        qmckl_unlock_device(context);
         free(pointer);
         return NULL;
       }
@@ -46,7 +45,7 @@ void* qmckl_malloc_host(qmckl_context_device context, const qmckl_memory_info_st
     ctx->memory.element[pos].pointer = pointer;
     ctx->memory.n_allocated += (size_t) 1;
   }
-  // qmckl_unlock(context);
+  qmckl_unlock_device(context);
 
   return pointer;
 }
@@ -70,8 +69,7 @@ qmckl_exit_code qmckl_free_host(qmckl_context_device context, void * const ptr) 
 
   qmckl_context_struct* const ctx = (qmckl_context_struct*) context;
 
-  // TODO Device locks
-  // qmckl_lock(context);
+  qmckl_lock_device(context);
   {
     /* Find pointer in array of saved pointers */
     size_t pos = (size_t) 0;
@@ -81,7 +79,7 @@ qmckl_exit_code qmckl_free_host(qmckl_context_device context, void * const ptr) 
 
     if (pos >= ctx->memory.array_size) {
       /* Not found */
-      //qmckl_unlock(context);
+      qmckl_unlock_device(context);
       return qmckl_failwith_device(context,
                             QMCKL_INVALID_ARG_2,
                             "qmckl_free_host",
@@ -93,7 +91,7 @@ qmckl_exit_code qmckl_free_host(qmckl_context_device context, void * const ptr) 
     memset( &(ctx->memory.element[pos]), 0, sizeof(qmckl_memory_info_struct) );
     ctx->memory.n_allocated -= (size_t) 1;
   }
-  //qmckl_unlock(context);
+  qmckl_unlock_device(context);
 
   return QMCKL_SUCCESS;
 }
@@ -116,8 +114,7 @@ void* qmckl_malloc_device(qmckl_context_device context, const qmckl_memory_info_
   // Memset to 0 of size info.size
   // memset(pointer, 0, info.size);
 
-  // TODO Locks ?
-  //qmckl_lock(context);
+  qmckl_lock_device(context);
   {
     /* If qmckl_memory_struct is full, reallocate a larger one */
     if (ctx->memory.n_allocated == ctx->memory.array_size) {
@@ -126,7 +123,7 @@ void* qmckl_malloc_device(qmckl_context_device context, const qmckl_memory_info_
                                                           2L * old_size *
                                                           sizeof(qmckl_memory_info_struct));
       if (new_array == NULL) {
-        //qmckl_unlock(context);
+        qmckl_unlock_device(context);
         free(pointer);
         return NULL;
       }
@@ -148,7 +145,7 @@ void* qmckl_malloc_device(qmckl_context_device context, const qmckl_memory_info_
     ctx->memory.element[pos].pointer = pointer;
     ctx->memory.n_allocated += (size_t) 1;
   }
-  // qmckl_unlock(context);
+  qmckl_unlock_device(context);
 
   return pointer;
 }
@@ -172,8 +169,7 @@ qmckl_exit_code qmckl_free_device(qmckl_context_device context, void * const ptr
 
   qmckl_context_struct_device* const ctx = (qmckl_context_struct_device*) context;
 
-  // TODO Commented locks for now, should we implement locks/unlocks for device contexts ?
-  //qmckl_lock(context);
+  qmckl_lock_device(context);
   {
     /* Find pointer in array of saved pointers */
     size_t pos = (size_t) 0;
@@ -183,7 +179,7 @@ qmckl_exit_code qmckl_free_device(qmckl_context_device context, void * const ptr
 
     if (pos >= ctx->memory.array_size) {
       /* Not found */
-      // qmckl_unlock(context);
+      qmckl_unlock_device(context);
       return qmckl_failwith_device(context,
                                    QMCKL_FAILURE,
                                    "qmckl_free_device",
@@ -195,7 +191,7 @@ qmckl_exit_code qmckl_free_device(qmckl_context_device context, void * const ptr
     memset( &(ctx->memory.element[pos]), 0, sizeof(qmckl_memory_info_struct) );
     ctx->memory.n_allocated -= (size_t) 1;
   }
-  // qmckl_unlock(context);
+  qmckl_unlock_device(context);
 
   return QMCKL_SUCCESS;
 }

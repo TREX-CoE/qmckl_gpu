@@ -3,6 +3,36 @@
 
 #include "../include/qmckl_context_device.h"
 
+//**********
+// LOCKING
+//**********
+
+void qmckl_lock_device(qmckl_context_device context) {
+  if (context == QMCKL_NULL_CONTEXT)
+    return ;
+  qmckl_context_struct_device* const ctx = (qmckl_context_struct_device*) context;
+  errno = 0;
+  int rc = pthread_mutex_lock( &(ctx->mutex) );
+  if (rc != 0) {
+    fprintf(stderr, "DEBUG qmckl_lock:%s\n", strerror(rc) );
+    fflush(stderr);
+  }
+  assert (rc == 0);
+  ctx->lock_count += 1;
+}
+
+void qmckl_unlock_device(const qmckl_context_device context) {
+  qmckl_context_struct_device* const ctx = (qmckl_context_struct_device*) context;
+  int rc = pthread_mutex_unlock( &(ctx->mutex) );
+  if (rc != 0) {
+    fprintf(stderr, "DEBUG qmckl_unlock:%s\n", strerror(rc) );
+    fflush(stderr);
+  }
+  assert (rc == 0);
+  ctx->lock_count -= 1;
+}
+
+
 
 //**********
 // MISC
@@ -42,8 +72,7 @@ qmckl_set_error_device(qmckl_context_device context,
   /* The context is assumed to exist. */
   assert (qmckl_context_check_device(context) != QMCKL_NULL_CONTEXT);
 
-  // TODO Locks for device ?
-  //qmckl_lock(context);
+  qmckl_lock_device(context);
   {
     qmckl_context_struct* const ctx = (qmckl_context_struct*) context;
     assert (ctx != NULL); /* Impossible because the context is valid. */
@@ -52,7 +81,7 @@ qmckl_set_error_device(qmckl_context_device context,
     strncpy(ctx->error.function, function_name, QMCKL_MAX_FUN_LEN-1);
     strncpy(ctx->error.message, message, QMCKL_MAX_MSG_LEN-1);
   }
-  //qmckl_unlock(context);
+  qmckl_unlock_device(context);
 
   return QMCKL_SUCCESS;
 }
@@ -278,8 +307,7 @@ qmckl_context_destroy_device (const qmckl_context_device context)
   qmckl_context_struct_device* const ctx = (qmckl_context_struct_device*) context;
   assert (ctx != NULL);  /* Shouldn't be possible because the context is valid */
 
-  // NOTE Commented locks for now, implement them later for device contexts ?
-  // qmckl_lock(context);
+  qmckl_lock_device(context);
   {
     /* Memory: Remove all allocated data */
     // TODO This should properly support combined host/device arrays at some point
@@ -295,7 +323,7 @@ qmckl_context_destroy_device (const qmckl_context_device context)
     ctx->memory.element = NULL;
     ctx->memory.array_size = (size_t) 0;
   }
-  //qmckl_unlock(context);
+  qmckl_unlock_device(context);
 
   ctx->tag = INVALID_TAG;
 

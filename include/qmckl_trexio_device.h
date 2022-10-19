@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 #include <trexio.h>
 #include <stdlib.h>
@@ -17,6 +19,11 @@
 #include "qmckl_memory_device.h"
 #include "qmckl_context_device.h"
 
+// Prototype for standard QMCkl function
+trexio_t* qmckl_trexio_open_X(const char* file_name, qmckl_exit_code* rc);
+
+
+// Prototypes for our new device variants
 
 qmckl_exit_code
 qmckl_get_nucleus_num_device (const qmckl_context_device context, int64_t* const num);

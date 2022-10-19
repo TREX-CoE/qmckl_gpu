@@ -1,5 +1,4 @@
-#ifndef QMCKL_CONTEXT_HPT
-#define QMCKL_CONTEXT_HPT
+#pragma once
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
@@ -80,7 +79,3 @@ typedef struct qmckl_context_struct {
 
 #define VALID_TAG   0xBEEFFACE
 #define INVALID_TAG 0xDEADBEEF
-
-/* [[file:../org/qmckl_context.org::*End of files][End of files:1]] */
-#endif
-/* End of files:1 ends here */
