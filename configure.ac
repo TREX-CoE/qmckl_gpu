@@ -71,13 +71,8 @@ AC_ARG_ENABLE(device, [AS_HELP_STRING([--enable-device],[Enable device pointers 
 # Fallback solution if nothing is enabled :
 # (probably because no GPU argument have been provided),
 # Enable OpenMP by default
-AS_IF([
-  test "$have_openmp"  = "no" &&
-  test "$have_openacc" = "no" &&
-  test "$have_device"  = "no"
- ], [
-
-    AC_OUTPUT
+AS_IF([ test "x$have_openmp"  = "xno" -a "x$have_openacc" = "xno" -a  "x$have_device"  = "xno" ], [ 
+	AC_OUTPUT 
     echo \
     "Warning: No GPU functions could be enabled using the passed arguments. Enabling OpenMP offload by default."
 
@@ -89,10 +84,7 @@ AM_CONDITIONAL([HAVE_OPENACC], [test "x$have_openacc" = "xyes"])
 AM_CONDITIONAL([HAVE_DEVICE],  [test "x$have_device"  = "xyes"])
 
 ## Add compilers flags depending on what has been enabled
-AS_IF([
-  test "$have_openmp" = "yes" ||
-  test "$have_device" = "yes"
-], [
+AS_IF([ test "x$have_openmp" = "xyes" -o "x$have_device" = "xyes" ], [
   case $CC in
     *gcc*)
           CFLAGS="$CFLAGS -fopenmp"
@@ -107,7 +99,7 @@ AS_IF([
 ])
 
 
-AS_IF([test "$have_openacc" = "yes"], [
+AS_IF([test "x$have_openacc" = "xyes"], [
   case $CC in
     *gcc*)
           CFLAGS="$CFLAGS -fopenacc"
@@ -121,9 +113,7 @@ AS_IF([test "$have_openacc" = "yes"], [
   esac
 ])
 
-AS_IF([
-  test "$have_device" = "yes"
-], [
+AS_IF([ test "x$have_device" = "xyes" ], [
   case $CC in
     *gcc*)
           CFLAGS="$CFLAGS -lomp"
