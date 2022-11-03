@@ -203,6 +203,21 @@ qmckl_exit_code qmckl_init_ao_basis_device(qmckl_context_device context) {
   return QMCKL_SUCCESS;
 }
 
+qmckl_exit_code qmckl_init_mo_basis_device(qmckl_context_device context) {
+
+  if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT) {
+    return false;
+  }
+
+  qmckl_context_struct_device* const ctx = (qmckl_context_struct_device*) context;
+  assert (ctx != NULL);
+
+  ctx->mo_basis.uninitialized = (1 << 2) - 1;
+
+  return QMCKL_SUCCESS;
+}
+
+
 qmckl_context_device qmckl_context_create_device() {
 
   qmckl_context_struct_device *const ctx =
@@ -258,7 +273,7 @@ qmckl_context_device qmckl_context_create_device() {
     rc = qmckl_init_ao_basis_device(context);
     assert(rc == QMCKL_SUCCESS);
 
-    rc = qmckl_init_mo_basis(context); // TODO
+    rc = qmckl_init_mo_basis_device(context);
     assert(rc == QMCKL_SUCCESS);
 
     rc = qmckl_init_determinant(context);
