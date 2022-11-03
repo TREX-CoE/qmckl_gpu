@@ -49,7 +49,7 @@ qmckl_get_ao_basis_ao_vgl_omp_offload (qmckl_context context,
 As a general rule, each type of GPU functions comes with its own suffix. In order to call such functions, one can simply append the corresponding suffix to the standard `get` function name. Here is a table summarizing the different function types, their suffixes, and the configure flag used to enable them: 
 
 | Function type | Suffix | Configure flag |
-| ----------- | ----------- |
+| ----------- | ----------- | ----------- |
 | Simple OpenMP offload | `_omp_offload` | `--enable-openmp` |
 | Simple OpenACC offload | `_acc_offload` | `--enable-openacc` |
 | OpenMP + device pointers | `_device` | `--enable-device` |
