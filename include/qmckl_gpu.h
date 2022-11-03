@@ -64,3 +64,15 @@ qmckl_exit_code qmckl_get_jastrow_tmp_c_omp_offload(qmckl_context context,
 
 qmckl_exit_code qmckl_get_jastrow_dtmp_c_omp_offload(qmckl_context context,
                                                      double *const dtmp_c);
+
+//**********
+// ELECTRON
+//**********
+
+qmckl_exit_code
+qmckl_set_electron_coord_device(qmckl_context_device context,
+                                const char transp,
+                                const int64_t walk_num,
+                                const double* coord,
+                                const int64_t size_max,
+                                int device_id);

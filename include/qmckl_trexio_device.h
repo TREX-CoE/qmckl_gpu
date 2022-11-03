@@ -24,6 +24,21 @@ trexio_t *qmckl_trexio_open_X(const char *file_name, qmckl_exit_code *rc);
 
 // Prototypes for our new device variants
 
+qmckl_exit_code
+qmckl_set_electron_coord_device(qmckl_context_device context,
+                                const char transp,
+                                const int64_t walk_num,
+                                const double* coord,
+                                const int64_t size_max,
+                                int device_id);
+
+qmckl_exit_code qmckl_set_point_device (qmckl_context_device context,
+                                        const char transp,
+                                        const int64_t num,
+                                        const double* coord,
+										const int64_t size_max,
+                                        int device_id);
+
 qmckl_exit_code qmckl_get_nucleus_num_device(const qmckl_context_device context,
                                              int64_t *const num);
 qmckl_exit_code qmckl_set_nucleus_num_device(qmckl_context_device context,

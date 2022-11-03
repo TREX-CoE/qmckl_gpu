@@ -18,4 +18,3 @@ if HAVE_DEVICE
  libqmckl_gpu_la_SOURCES += src/qmckl_context_device.c src/qmckl_memory_device.c \
  src/qmckl_blas_device.c src/qmckl_trexio_device.c src/qmckl_ao_device.c
 endif
-

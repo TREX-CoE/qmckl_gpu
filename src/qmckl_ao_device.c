@@ -31,7 +31,7 @@ qmckl_exit_code qmckl_ao_polynomial_transp_vgl_hpc_device(
 
   const double Y[3] = {X[0] - R[0], X[1] - R[1], X[2] - R[2]};
 
-  assert(size_max > lmax + 3);
+  //assert(size_max > lmax + 3);
 
   for (int32_t k = 0; k < 4; ++k) {
     vgl2[k] = 0.0;
