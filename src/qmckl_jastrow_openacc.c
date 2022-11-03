@@ -1,10 +1,8 @@
 #include "include/qmckl_jastrow_gpu.h"
 
-
 //**********
 // COMPUTE
 //**********
-
 
 qmckl_exit_code qmckl_compute_tmp_c_acc_offload(
     const qmckl_context context, const int64_t cord_num, const int64_t elec_num,
@@ -79,7 +77,6 @@ qmckl_exit_code qmckl_compute_tmp_c_acc_offload(
   return QMCKL_SUCCESS;
 }
 
-
 qmckl_exit_code qmckl_compute_dtmp_c_acc_offload(
     const qmckl_context context, const int64_t cord_num, const int64_t elec_num,
     const int64_t nucl_num, const int64_t walk_num,
@@ -153,8 +150,6 @@ qmckl_exit_code qmckl_compute_dtmp_c_acc_offload(
 
   return QMCKL_SUCCESS;
 }
-
-
 
 //**********
 // PROVIDE
@@ -260,9 +255,8 @@ qmckl_exit_code qmckl_provide_dtmp_c_acc_offload(qmckl_context context) {
   return QMCKL_SUCCESS;
 }
 
-
-qmckl_exit_code qmckl_provide_factor_een_deriv_e_acc_offload(qmckl_context context)
-{
+qmckl_exit_code
+qmckl_provide_factor_een_deriv_e_acc_offload(qmckl_context context) {
 
   qmckl_exit_code rc;
 
@@ -270,40 +264,48 @@ qmckl_exit_code qmckl_provide_factor_een_deriv_e_acc_offload(qmckl_context conte
     return QMCKL_NULL_CONTEXT;
   }
 
-  qmckl_context_struct* const ctx = (qmckl_context_struct*) context;
-  assert (ctx != NULL);
+  qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+  assert(ctx != NULL);
 
   /* Check if en rescaled distance is provided */
   rc = qmckl_provide_een_rescaled_e(context);
-  if(rc != QMCKL_SUCCESS) return rc;
+  if (rc != QMCKL_SUCCESS)
+    return rc;
 
   /* Check if en rescaled distance derivatives is provided */
   rc = qmckl_provide_een_rescaled_n(context);
-  if(rc != QMCKL_SUCCESS) return rc;
+  if (rc != QMCKL_SUCCESS)
+    return rc;
 
   /* Check if en rescaled distance is provided */
   rc = qmckl_provide_een_rescaled_e_deriv_e(context);
-  if(rc != QMCKL_SUCCESS) return rc;
+  if (rc != QMCKL_SUCCESS)
+    return rc;
 
   /* Check if en rescaled distance derivatives is provided */
   rc = qmckl_provide_een_rescaled_n_deriv_e(context);
-  if(rc != QMCKL_SUCCESS) return rc;
+  if (rc != QMCKL_SUCCESS)
+    return rc;
 
   /* Check if en rescaled distance derivatives is provided */
   rc = qmckl_provide_cord_vect_full(context);
-  if(rc != QMCKL_SUCCESS) return rc;
+  if (rc != QMCKL_SUCCESS)
+    return rc;
 
   /* Check if en rescaled distance derivatives is provided */
   rc = qmckl_provide_lkpm_combined_index(context);
-  if(rc != QMCKL_SUCCESS) return rc;
+  if (rc != QMCKL_SUCCESS)
+    return rc;
 
   /* Check if tmp_c is provided */
   rc = qmckl_provide_tmp_c_omp_offload(context);
-  if(rc != QMCKL_SUCCESS) return rc;
+  if (rc != QMCKL_SUCCESS)
+    return rc;
 
   /* Check if dtmp_c is provided */
   rc = qmckl_provide_dtmp_c_omp_offload(context);
-  if(rc != QMCKL_SUCCESS) return rc;
+  if (rc != QMCKL_SUCCESS)
+    return rc;
 
   /* Compute if necessary */
   if (ctx->date > ctx->jastrow.factor_een_deriv_e_date) {
@@ -317,31 +319,24 @@ qmckl_exit_code qmckl_provide_factor_een_deriv_e_acc_offload(qmckl_context conte
     if (ctx->jastrow.factor_een_deriv_e == NULL) {
 
       qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-      mem_info.size = 4 * ctx->electron.num * ctx->electron.walker.num * sizeof(double);
-      double* factor_een_deriv_e = (double*) qmckl_malloc(context, mem_info);
+      mem_info.size =
+          4 * ctx->electron.num * ctx->electron.walker.num * sizeof(double);
+      double *factor_een_deriv_e = (double *)qmckl_malloc(context, mem_info);
 
       if (factor_een_deriv_e == NULL) {
-        return qmckl_failwith( context,
-                               QMCKL_ALLOCATION_FAILED,
-                               "qmckl_provide_factor_een_deriv_e_acc_offload",
-                               NULL);
+        return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
+                              "qmckl_provide_factor_een_deriv_e_acc_offload",
+                              NULL);
       }
       ctx->jastrow.factor_een_deriv_e = factor_een_deriv_e;
     }
 
-    rc = qmckl_compute_factor_een_deriv_e(context,
-                                          ctx->electron.walker.num,
-                                          ctx->electron.num,
-                                          ctx->nucleus.num,
-                                          ctx->jastrow.cord_num,
-                                          ctx->jastrow.dim_cord_vect,
-                                          ctx->jastrow.cord_vect_full,
-                                          ctx->jastrow.lkpm_combined_index,
-                                          ctx->jastrow.tmp_c,
-                                          ctx->jastrow.dtmp_c,
-                                          ctx->jastrow.een_rescaled_n,
-                                          ctx->jastrow.een_rescaled_n_deriv_e,
-                                          ctx->jastrow.factor_een_deriv_e);
+    rc = qmckl_compute_factor_een_deriv_e(
+        context, ctx->electron.walker.num, ctx->electron.num, ctx->nucleus.num,
+        ctx->jastrow.cord_num, ctx->jastrow.dim_cord_vect,
+        ctx->jastrow.cord_vect_full, ctx->jastrow.lkpm_combined_index,
+        ctx->jastrow.tmp_c, ctx->jastrow.dtmp_c, ctx->jastrow.een_rescaled_n,
+        ctx->jastrow.een_rescaled_n_deriv_e, ctx->jastrow.factor_een_deriv_e);
     if (rc != QMCKL_SUCCESS) {
       return rc;
     }
@@ -352,11 +347,9 @@ qmckl_exit_code qmckl_provide_factor_een_deriv_e_acc_offload(qmckl_context conte
   return QMCKL_SUCCESS;
 }
 
-
 //**********
 // GET
 //**********
-
 
 qmckl_exit_code qmckl_get_jastrow_tmp_c_acc_offload(qmckl_context context,
                                                     double *const tmp_c) {
@@ -418,12 +411,9 @@ qmckl_exit_code qmckl_get_jastrow_dtmp_c_acc_offload(qmckl_context context,
   return QMCKL_SUCCESS;
 }
 
-
-qmckl_exit_code
-qmckl_get_jastrow_factor_een_deriv_e_acc_offload(qmckl_context context,
-                                     double* const factor_een_deriv_e,
-                                     const int64_t size_max)
-{
+qmckl_exit_code qmckl_get_jastrow_factor_een_deriv_e_acc_offload(
+    qmckl_context context, double *const factor_een_deriv_e,
+    const int64_t size_max) {
   if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT) {
     return QMCKL_NULL_CONTEXT;
   }
@@ -431,19 +421,20 @@ qmckl_get_jastrow_factor_een_deriv_e_acc_offload(qmckl_context context,
   qmckl_exit_code rc;
 
   rc = qmckl_provide_factor_een_deriv_e_acc_offload(context);
-  if (rc != QMCKL_SUCCESS) return rc;
+  if (rc != QMCKL_SUCCESS)
+    return rc;
 
-  qmckl_context_struct* const ctx = (qmckl_context_struct*) context;
-  assert (ctx != NULL);
+  qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+  assert(ctx != NULL);
 
   int64_t sze = ctx->electron.walker.num * 4 * ctx->electron.num;
   if (size_max < sze) {
-    return qmckl_failwith( context,
-                           QMCKL_INVALID_ARG_3,
-                           "qmckl_get_jastrow_factor_een_deriv_e_acc_offload",
-                           "Array too small. Expected 4*walk_num*elec_num");
+    return qmckl_failwith(context, QMCKL_INVALID_ARG_3,
+                          "qmckl_get_jastrow_factor_een_deriv_e_acc_offload",
+                          "Array too small. Expected 4*walk_num*elec_num");
   }
-  memcpy(factor_een_deriv_e, ctx->jastrow.factor_een_deriv_e, sze*sizeof(double));
+  memcpy(factor_een_deriv_e, ctx->jastrow.factor_een_deriv_e,
+         sze * sizeof(double));
 
   return QMCKL_SUCCESS;
 }

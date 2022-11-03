@@ -209,14 +209,14 @@ qmckl_exit_code qmckl_init_mo_basis_device(qmckl_context_device context) {
     return false;
   }
 
-  qmckl_context_struct_device* const ctx = (qmckl_context_struct_device*) context;
-  assert (ctx != NULL);
+  qmckl_context_struct_device *const ctx =
+      (qmckl_context_struct_device *)context;
+  assert(ctx != NULL);
 
   ctx->mo_basis.uninitialized = (1 << 2) - 1;
 
   return QMCKL_SUCCESS;
 }
-
 
 qmckl_context_device qmckl_context_create_device() {
 

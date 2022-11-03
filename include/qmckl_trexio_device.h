@@ -11,12 +11,12 @@
 
 #include <omp.h>
 
-#include <qmckl.h>
-#include "qmckl_memory_private_type.h"
 #include "qmckl_memory_private_func.h"
+#include "qmckl_memory_private_type.h"
+#include <qmckl.h>
 
-#include "qmckl_device_types.h"
 #include "qmckl_context_device.h"
+#include "qmckl_device_types.h"
 #include "qmckl_memory_device.h"
 
 // Prototype for standard QMCkl function
@@ -25,19 +25,14 @@ trexio_t *qmckl_trexio_open_X(const char *file_name, qmckl_exit_code *rc);
 // Prototypes for our new device variants
 
 qmckl_exit_code
-qmckl_set_electron_coord_device(qmckl_context_device context,
-                                const char transp,
-                                const int64_t walk_num,
-                                const double* coord,
-                                const int64_t size_max,
-                                int device_id);
+qmckl_set_electron_coord_device(qmckl_context_device context, const char transp,
+                                const int64_t walk_num, const double *coord,
+                                const int64_t size_max, int device_id);
 
-qmckl_exit_code qmckl_set_point_device (qmckl_context_device context,
-                                        const char transp,
-                                        const int64_t num,
-                                        const double* coord,
-										const int64_t size_max,
-                                        int device_id);
+qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
+                                       const char transp, const int64_t num,
+                                       const double *coord,
+                                       const int64_t size_max, int device_id);
 
 qmckl_exit_code qmckl_get_nucleus_num_device(const qmckl_context_device context,
                                              int64_t *const num);
