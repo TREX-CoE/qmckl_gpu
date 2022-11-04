@@ -3,6 +3,16 @@
 
 #include "../include/qmckl_context_device.h"
 
+//**********
+// MISC FUNCTIONS
+//**********
+
+qmckl_exit_code
+qmckl_context_touch_device(const qmckl_context_device context)
+{
+  return qmckl_context_touch((qmckl_context) context);
+}
+
 
 //**********
 // CONTEXT CREATE/DESTROY
@@ -14,8 +24,7 @@ qmckl_exit_code qmckl_init_point_device(qmckl_context_device context) {
     return false;
   }
 
-  qmckl_context_struct *const ctx =
-      (qmckl_context_struct *)context;
+  qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
   assert(ctx != NULL);
 
   memset(&(ctx->point), 0, sizeof(qmckl_point_struct));
@@ -25,12 +34,11 @@ qmckl_exit_code qmckl_init_point_device(qmckl_context_device context) {
 
 qmckl_exit_code qmckl_init_electron_device(qmckl_context_device context) {
 
-  if (qmckl_context_check((qmckl_context) context) == QMCKL_NULL_CONTEXT) {
+  if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
     return false;
   }
 
-  qmckl_context_struct *const ctx =
-      (qmckl_context_struct *)context;
+  qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
   assert(ctx != NULL);
 
   ctx->electron.uninitialized = (1 << 1) - 1;
@@ -44,12 +52,11 @@ qmckl_exit_code qmckl_init_electron_device(qmckl_context_device context) {
 
 qmckl_exit_code qmckl_init_nucleus_device(qmckl_context_device context) {
 
-  if (qmckl_context_check((qmckl_context) context) == QMCKL_NULL_CONTEXT) {
+  if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
     return false;
   }
 
-  qmckl_context_struct *const ctx =
-      (qmckl_context_struct *)context;
+  qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
   assert(ctx != NULL);
 
   ctx->nucleus.uninitialized = (1 << 3) - 1;
@@ -62,13 +69,12 @@ qmckl_exit_code qmckl_init_nucleus_device(qmckl_context_device context) {
 
 qmckl_exit_code qmckl_init_ao_basis_device(qmckl_context_device context) {
 
-  if (qmckl_context_check((qmckl_context) context) == QMCKL_NULL_CONTEXT) {
+  if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
     return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
                           "qmckl_init_ao_basis_device", NULL);
   }
 
-  qmckl_context_struct *const ctx =
-      (qmckl_context_struct *)context;
+  qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
   assert(ctx != NULL);
 
   ctx->ao_basis.uninitialized = (1 << 14) - 1;
@@ -81,12 +87,11 @@ qmckl_exit_code qmckl_init_ao_basis_device(qmckl_context_device context) {
 
 qmckl_exit_code qmckl_init_mo_basis_device(qmckl_context_device context) {
 
-  if (qmckl_context_check((qmckl_context) context) == QMCKL_NULL_CONTEXT) {
+  if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
     return false;
   }
 
-  qmckl_context_struct *const ctx =
-      (qmckl_context_struct *)context;
+  qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
   assert(ctx != NULL);
 
   ctx->mo_basis.uninitialized = (1 << 2) - 1;
@@ -97,8 +102,7 @@ qmckl_exit_code qmckl_init_mo_basis_device(qmckl_context_device context) {
 qmckl_context_device qmckl_context_create_device() {
 
   qmckl_context_struct *const ctx =
-      (qmckl_context_struct *)malloc(
-          sizeof(qmckl_context_struct));
+      (qmckl_context_struct *)malloc(sizeof(qmckl_context_struct));
 
   if (ctx == NULL) {
     return QMCKL_NULL_CONTEXT;
@@ -176,19 +180,18 @@ qmckl_context_device qmckl_context_create_device() {
   return (qmckl_context_device)ctx;
 }
 
-qmckl_exit_code
-qmckl_context_destroy_device(const qmckl_context_device context, int device_id) {
+qmckl_exit_code qmckl_context_destroy_device(const qmckl_context_device context,
+                                             int device_id) {
 
   const qmckl_context_device checked_context =
-      qmckl_context_check((qmckl_context) context);
+      qmckl_context_check((qmckl_context)context);
   if (checked_context == QMCKL_NULL_CONTEXT)
     return QMCKL_INVALID_CONTEXT;
 
-  qmckl_context_struct *const ctx =
-      (qmckl_context_struct *)context;
+  qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
   assert(ctx != NULL); /* Shouldn't be possible because the context is valid */
 
-  qmckl_lock((qmckl_context) context);
+  qmckl_lock((qmckl_context)context);
   {
     /* Memory: Remove all allocated data */
     // TODO This should free memory on device
@@ -205,7 +208,7 @@ qmckl_context_destroy_device(const qmckl_context_device context, int device_id) 
     ctx->memory.element = NULL;
     ctx->memory.array_size = (size_t)0;
   }
-  qmckl_unlock((qmckl_context) context);
+  qmckl_unlock((qmckl_context)context);
 
   ctx->tag = INVALID_TAG;
 

@@ -27,17 +27,6 @@ qmckl_exit_code qmckl_init_ao_basis(qmckl_context context);
 
 qmckl_exit_code qmckl_finalize_basis (qmckl_context context);
 
-#ifdef HAVE_DEVICE_POINTERS
-qmckl_exit_code qmckl_finalize_basis_device (qmckl_context context, int device_id);
-#endif
-
-#ifdef HAVE_HPC
-qmckl_exit_code qmckl_finalize_basis_hpc (qmckl_context context);
-#endif
-
-#if defined(HAVE_HPC) && defined(HAVE_DEVICE_POINTERS)
-qmckl_exit_code qmckl_finalize_basis_hpc_device (qmckl_context context, int device_pointer);
-#endif
 
 /* Provide                                                        :noexport: */
 
@@ -102,38 +91,9 @@ qmckl_exit_code qmckl_provide_ao_basis_ao_value(qmckl_context context);
 
 /* #+RESULTS: */
 
-qmckl_exit_code qmckl_provide_ao_basis_ao_value_device(qmckl_context context, int64_t device_id);
 
 qmckl_exit_code qmckl_provide_ao_value(qmckl_context context);
 
-/* Device pointers version */
-
-
-
-#ifdef HAVE_DEVICE_POINTERS
-
-qmckl_exit_code
-qmckl_compute_ao_vgl_gaussian_device_pointers (
-                                           const qmckl_context context,
-                                           const int64_t ao_num,
-                                           const int64_t shell_num,
-                                           const int32_t* restrict prim_num_per_nucleus,
-                                           const int64_t point_num,
-                                           const int64_t nucl_num,
-                                           const double* restrict coord,
-                                           const double* restrict nucl_coord,
-                                           const int64_t* restrict nucleus_index,
-                                           const int64_t* restrict nucleus_shell_num,
-                                           const double* nucleus_range,
-                                           const int32_t* restrict nucleus_max_ang_mom,
-                                           const int32_t* restrict shell_ang_mom,
-                                           const double* restrict ao_factor,
-                                           const qmckl_matrix expo_per_nucleus,
-                                           const qmckl_tensor coef_per_nucleus,
-                                           double* restrict const ao_vgl,
-
-                                           int device_id );
-#endif
 
 /* Interfaces */
 /*  #  #+CALL: generate_c_header(table=qmckl_ao_vgl_args_doc,rettyp=get_value("CRetType"),fname="qmckl_compute_ao_vgl")) */
@@ -206,16 +166,5 @@ qmckl_exit_code qmckl_compute_ao_vgl_hpc_gaussian (
 /* #+RESULTS: */
 
 qmckl_exit_code qmckl_provide_ao_basis_ao_vgl(qmckl_context context);
-
-/* DEVICE POITERS */
-
-
-qmckl_exit_code qmckl_provide_ao_basis_ao_vgl_device(qmckl_context context, int64_t const device_id);
-
-qmckl_exit_code qmckl_provide_ao_vgl(qmckl_context context);
-
-#ifdef HAVE_DEVICE_POINTERS
-qmckl_exit_code qmckl_provide_ao_vgl_device(qmckl_context context, int device_id);
-#endif
 
 #endif
