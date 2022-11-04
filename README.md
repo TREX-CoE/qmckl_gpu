@@ -17,7 +17,7 @@ make
 make install
 ```
 
-The only other requirement is a compiler toolchain that supports OpenMP or OpenACC offloading for your chosen target(s). Linking with QMCkl to build QMCkl GPU is not needed.
+The only other requirement for **building** the library is a compiler toolchain that supports OpenMP or OpenACC offloading for your chosen target(s). Linking with QMCkl to build QMCkl GPU is not needed (but it is when linking an executable that uses QMCkl GPU).
 
 
 ## Enabling the different GPU functions
@@ -68,7 +68,7 @@ This library is an addon meant to be used on top of the main [QMCkl library](htt
 Both `qmckl.h` and `qmckl_gpu.h` should also be included in C codes.
 
 **Notes :** 
-- QMCkl GPU should be linked with an HPC-enabled QMCkl (configure QMCkl with `--enable-hpc`, see the [QMCkl README](https://github.com/TREX-CoE/qmckl/blob/master/README.md))
+- QMCkl GPU should be linked with an HPC-enabled QMCkl (configure QMCkl with `--enable-hpc`, see the [QMCkl README](https://github.com/TREX-CoE/qmckl/blob/master/README.md)), as well as with [TREXIO](https://github.com/TREX-CoE/trexio).
 - While it is possible to use different compilers to build QMCkl, QMCkl GPU and your final executable, doing so might result in some missing symbols when linking your final executable. In that case, you would have to manually tell your linker where to find those symbols (which might come from different libc or libm implementations being simultaneously, for instance).
 
 The next sections provide explanations on how this library should be used in your code.
