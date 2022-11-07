@@ -27,7 +27,8 @@ qmckl_vector qmckl_vector_alloc_omp_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_vector_free_omp_device(qmckl_context_device context,
-                                             qmckl_vector *vector, int device_id) {
+                                             qmckl_vector *vector,
+                                             int device_id) {
   /* Always true */
   assert(vector->data != NULL);
 
@@ -78,8 +79,8 @@ qmckl_vector_of_double_omp_device(const qmckl_context_device context,
 //**********
 
 qmckl_matrix qmckl_matrix_alloc_omp_device(qmckl_context_device context,
-                                           const int64_t size1, const int64_t size2,
-                                           int device_id) {
+                                           const int64_t size1,
+                                           const int64_t size2, int device_id) {
   /* Should always be true by contruction */
   assert(size1 * size2 > (int64_t)0);
 
@@ -101,7 +102,8 @@ qmckl_matrix qmckl_matrix_alloc_omp_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_matrix_free_omp_device(qmckl_context_device context,
-                                             qmckl_matrix *matrix, int device_id) {
+                                             qmckl_matrix *matrix,
+                                             int device_id) {
   /* Always true */
   assert(matrix->data != NULL);
 
@@ -146,12 +148,14 @@ qmckl_matrix_of_double_omp_device(const qmckl_context_device context,
 
   if (matrix.size[0] * matrix.size[1] == 0) {
     return qmckl_failwith(context, QMCKL_INVALID_ARG_4,
-                          "qmckl_matrix_of_double_omp_device", "Matrix not allocated");
+                          "qmckl_matrix_of_double_omp_device",
+                          "Matrix not allocated");
   }
 
   if (matrix.size[0] * matrix.size[1] != size_max) {
     return qmckl_failwith(context, QMCKL_INVALID_ARG_4,
-                          "qmckl_matrix_of_double_omp_device", "Wrong vector size");
+                          "qmckl_matrix_of_double_omp_device",
+                          "Wrong vector size");
   }
 
   omp_target_memcpy(matrix.data, target, size_max * sizeof(double), 0, 0,
@@ -162,24 +166,26 @@ qmckl_matrix_of_double_omp_device(const qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_transpose_omp_device(qmckl_context_device context,
-                                           const qmckl_matrix A, qmckl_matrix At) {
+                                           const qmckl_matrix A,
+                                           qmckl_matrix At) {
   if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
     return QMCKL_INVALID_CONTEXT;
   }
 
   if (A.size[0] < 1) {
-    return qmckl_failwith(context, QMCKL_INVALID_ARG_2, "qmckl_transpose_omp_device",
-                          "Invalid size for A");
+    return qmckl_failwith(context, QMCKL_INVALID_ARG_2,
+                          "qmckl_transpose_omp_device", "Invalid size for A");
   }
 
   if (At.data == NULL) {
-    return qmckl_failwith(context, QMCKL_INVALID_ARG_3, "qmckl_transpose_omp_device",
+    return qmckl_failwith(context, QMCKL_INVALID_ARG_3,
+                          "qmckl_transpose_omp_device",
                           "Output matrix not allocated");
   }
 
   if (At.size[0] != A.size[1] || At.size[1] != A.size[0]) {
-    return qmckl_failwith(context, QMCKL_INVALID_ARG_3, "qmckl_transpose_omp_device",
-                          "Invalid size for At");
+    return qmckl_failwith(context, QMCKL_INVALID_ARG_3,
+                          "qmckl_transpose_omp_device", "Invalid size for At");
   }
 
   double *A_data = A.data;
@@ -205,8 +211,8 @@ qmckl_exit_code qmckl_transpose_omp_device(qmckl_context_device context,
 //**********
 
 qmckl_tensor qmckl_tensor_alloc_omp_device(qmckl_context context,
-                                           const int64_t order, const int64_t *size,
-                                           int device_id) {
+                                           const int64_t order,
+                                           const int64_t *size, int device_id) {
   /* Should always be true by contruction */
   assert(order > 0);
   assert(order <= QMCKL_TENSOR_ORDER_MAX);
@@ -235,7 +241,8 @@ qmckl_tensor qmckl_tensor_alloc_omp_device(qmckl_context context,
 }
 
 qmckl_exit_code qmckl_tensor_free_omp_device(qmckl_context_device context,
-                                             qmckl_tensor *tensor, int device_id) {
+                                             qmckl_tensor *tensor,
+                                             int device_id) {
   /* Always true */
   assert(tensor->data != NULL);
 

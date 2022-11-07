@@ -5,7 +5,8 @@
 //**********
 
 void *qmckl_malloc_omp_device(qmckl_context_device context,
-                          const qmckl_memory_info_struct info, int device_id) {
+                              const qmckl_memory_info_struct info,
+                              int device_id) {
 
   assert(qmckl_context_check((qmckl_context)context) != QMCKL_NULL_CONTEXT);
 
@@ -59,8 +60,8 @@ void *qmckl_malloc_omp_device(qmckl_context_device context,
   return pointer;
 }
 
-qmckl_exit_code qmckl_free_omp_device(qmckl_context_device context, void *const ptr,
-                                  int device_id) {
+qmckl_exit_code qmckl_free_omp_device(qmckl_context_device context,
+                                      void *const ptr, int device_id) {
 
   if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
     return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,

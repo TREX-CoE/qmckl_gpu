@@ -130,8 +130,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_omp_device(
     const int64_t *restrict nucleus_shell_num, const double *nucleus_range,
     const int32_t *restrict nucleus_max_ang_mom,
     const int32_t *restrict shell_ang_mom, const double *restrict ao_factor,
-    const qmckl_matrix expo_per_nucleus,
-    const qmckl_tensor coef_per_nucleus, double *restrict const ao_vgl,
+    const qmckl_matrix expo_per_nucleus, const qmckl_tensor coef_per_nucleus,
+    double *restrict const ao_vgl,
 
     int device_id) {
 
@@ -532,19 +532,18 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_omp_device(
 
 qmckl_exit_code
 qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
-                                     int device_id) {
+                                         int device_id) {
 
-  if (qmckl_context_check((qmckl_context) context) == QMCKL_NULL_CONTEXT) {
+  if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
     return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
                           "qmckl_provide_ao_basis_ao_vgl_omp_device", NULL);
   }
 
-  qmckl_context_struct *const ctx =
-      (qmckl_context_struct *)context;
+  qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
   assert(ctx != NULL);
 
   if (!ctx->ao_basis.provided) {
-    return qmckl_failwith((qmckl_context) context, QMCKL_NOT_PROVIDED,
+    return qmckl_failwith((qmckl_context)context, QMCKL_NOT_PROVIDED,
                           "qmckl_ao_basis_ao_vgl_omp_device", NULL);
   }
 
@@ -572,12 +571,10 @@ qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
     if (ctx->ao_basis.type == 'G') {
       rc = qmckl_compute_ao_vgl_gaussian_device_omp_device(
           context, ctx->ao_basis.ao_num, ctx->ao_basis.shell_num,
-          ctx->ao_basis.prim_num_per_nucleus, ctx->point.num,
-          ctx->nucleus.num, ctx->point.coord.data,
-          ctx->nucleus.coord.data, ctx->ao_basis.nucleus_index,
-          ctx->ao_basis.nucleus_shell_num,
-          ctx->ao_basis.nucleus_range,
-          ctx->ao_basis.nucleus_max_ang_mom,
+          ctx->ao_basis.prim_num_per_nucleus, ctx->point.num, ctx->nucleus.num,
+          ctx->point.coord.data, ctx->nucleus.coord.data,
+          ctx->ao_basis.nucleus_index, ctx->ao_basis.nucleus_shell_num,
+          ctx->ao_basis.nucleus_range, ctx->ao_basis.nucleus_max_ang_mom,
           ctx->ao_basis.shell_ang_mom, ctx->ao_basis.ao_factor,
           ctx->ao_basis.expo_per_nucleus, ctx->ao_basis.coef_per_nucleus,
           ctx->ao_basis.ao_vgl, device_id);
@@ -600,13 +597,13 @@ qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
 // GET
 //**********
 
-qmckl_exit_code qmckl_get_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
-                                                     double *const ao_vgl,
-                                                     const int64_t size_max,
-                                                     int device_id) {
+qmckl_exit_code
+qmckl_get_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
+                                     double *const ao_vgl,
+                                     const int64_t size_max, int device_id) {
 
-  if (qmckl_context_check((qmckl_context) context) == QMCKL_NULL_CONTEXT) {
-    return qmckl_failwith((qmckl_context) context, QMCKL_INVALID_CONTEXT,
+  if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
+    return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
                           "qmckl_get_ao_basis_ao_vgl_omp_device", NULL);
   }
 
@@ -616,19 +613,18 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_omp_device(qmckl_context_device contex
   if (rc != QMCKL_SUCCESS)
     return rc;
 
-  qmckl_context_struct *const ctx =
-      (qmckl_context_struct *)context;
+  qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
   assert(ctx != NULL);
 
   int64_t sze = ctx->ao_basis.ao_num * 5 * ctx->point.num;
   if (size_max < sze) {
-    return qmckl_failwith((qmckl_context) context, QMCKL_INVALID_ARG_3,
+    return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_3,
                           "qmckl_get_ao_basis_ao_vgl_omp_device",
                           "input array too small");
   }
 
-  omp_target_memcpy(ao_vgl, ctx->ao_basis.ao_vgl,
-                    (size_t)sze * sizeof(double), 0, 0, device_id, device_id);
+  omp_target_memcpy(ao_vgl, ctx->ao_basis.ao_vgl, (size_t)sze * sizeof(double),
+                    0, 0, device_id, device_id);
 
   return QMCKL_SUCCESS;
 }
