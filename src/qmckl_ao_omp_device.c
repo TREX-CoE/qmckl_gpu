@@ -6,7 +6,7 @@
 
 // TODO Inline this function
 #pragma omp declare target
-qmckl_exit_code qmckl_ao_polynomial_transp_vgl_hpc_device(
+qmckl_exit_code qmckl_ao_polynomial_transp_vgl_hpc_omp_device(
     const qmckl_context_device context, const double *restrict X,
     const double *restrict R, const int32_t lmax, int64_t *restrict n,
     const int64_t ldl, double *restrict const VGL, const int64_t ldv) {
@@ -121,7 +121,7 @@ qmckl_exit_code qmckl_ao_polynomial_transp_vgl_hpc_device(
 }
 #pragma omp end declare target
 
-qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_pointers(
+qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_omp_device(
     const qmckl_context_device context, const int64_t ao_num,
     const int64_t shell_num, const int32_t *restrict prim_num_per_nucleus,
     const int64_t point_num, const int64_t nucl_num,
@@ -315,7 +315,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_pointers(
 
         default:
 
-          rc = qmckl_ao_polynomial_transp_vgl_hpc_device(
+          rc = qmckl_ao_polynomial_transp_vgl_hpc_omp_device(
               context, e_coord, n_coord, nucleus_max_ang_mom[inucl], &n_poly,
               (int64_t)3, poly_vgl, size_max);
 
@@ -531,12 +531,12 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_pointers(
 //**********
 
 qmckl_exit_code
-qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context,
+qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
                                      int device_id) {
 
   if (qmckl_context_check((qmckl_context) context) == QMCKL_NULL_CONTEXT) {
     return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
-                          "qmckl_provide_ao_basis_ao_vgl_device", NULL);
+                          "qmckl_provide_ao_basis_ao_vgl_omp_device", NULL);
   }
 
   qmckl_context_struct *const ctx =
@@ -545,7 +545,7 @@ qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context,
 
   if (!ctx->ao_basis.provided) {
     return qmckl_failwith((qmckl_context) context, QMCKL_NOT_PROVIDED,
-                          "qmckl_ao_basis_ao_vgl_device", NULL);
+                          "qmckl_ao_basis_ao_vgl_omp_device", NULL);
   }
 
   /* Compute if necessary */
@@ -560,7 +560,7 @@ qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context,
       mem_info.size =
           ctx->ao_basis.ao_num * 5 * ctx->point.num * sizeof(double);
       double *ao_vgl =
-          (double *)qmckl_malloc_device(context, mem_info, device_id);
+          (double *)qmckl_malloc_omp_device(context, mem_info, device_id);
 
       if (ao_vgl == NULL) {
         return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -570,7 +570,7 @@ qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context,
     }
 
     if (ctx->ao_basis.type == 'G') {
-      rc = qmckl_compute_ao_vgl_gaussian_device_pointers(
+      rc = qmckl_compute_ao_vgl_gaussian_device_omp_device(
           context, ctx->ao_basis.ao_num, ctx->ao_basis.shell_num,
           ctx->ao_basis.prim_num_per_nucleus, ctx->point.num,
           ctx->nucleus.num, ctx->point.coord.data,
@@ -600,19 +600,19 @@ qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context,
 // GET
 //**********
 
-qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
-                                                 double *const ao_vgl,
-                                                 const int64_t size_max,
-                                                 int device_id) {
+qmckl_exit_code qmckl_get_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
+                                                     double *const ao_vgl,
+                                                     const int64_t size_max,
+                                                     int device_id) {
 
   if (qmckl_context_check((qmckl_context) context) == QMCKL_NULL_CONTEXT) {
     return qmckl_failwith((qmckl_context) context, QMCKL_INVALID_CONTEXT,
-                          "qmckl_get_ao_basis_ao_vgl_device", NULL);
+                          "qmckl_get_ao_basis_ao_vgl_omp_device", NULL);
   }
 
   qmckl_exit_code rc;
 
-  rc = qmckl_provide_ao_basis_ao_vgl_device(context, device_id);
+  rc = qmckl_provide_ao_basis_ao_vgl_omp_device(context, device_id);
   if (rc != QMCKL_SUCCESS)
     return rc;
 
@@ -623,7 +623,7 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
   int64_t sze = ctx->ao_basis.ao_num * 5 * ctx->point.num;
   if (size_max < sze) {
     return qmckl_failwith((qmckl_context) context, QMCKL_INVALID_ARG_3,
-                          "qmckl_get_ao_basis_ao_vgl_device",
+                          "qmckl_get_ao_basis_ao_vgl_omp_device",
                           "input array too small");
   }
 

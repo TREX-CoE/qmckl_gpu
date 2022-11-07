@@ -25,7 +25,7 @@ The only other requirement for **building** the library is a compiler toolchain 
 Enabling one kind of GPU functions in the configure step will expose variants of the usual `get` functions. For instance, in order to perform atomic orbitals computations, and by configuring QMCkl GPU with
 
 ```
-./configure --enable-openmp
+./configure --enable-omp-offload
 ```
 
 users will still have access to the standard
@@ -50,9 +50,10 @@ As a general rule, each type of GPU functions comes with its own suffix. In orde
 
 | Function type | Suffix | Configure flag |
 | ----------- | ----------- | ----------- |
-| Simple OpenMP offload | `_omp_offload` | `--enable-openmp` |
-| Simple OpenACC offload | `_acc_offload` | `--enable-openacc` |
-| OpenMP + device pointers | `_device` | `--enable-device` |
+| Simple OpenMP offload | `_omp_offload` | `--enable-omp-offload` |
+| Simple OpenACC offload | `_acc_offload` | `--enable-acc-offload` |
+| OpenMP + device pointers | `[_omp]_device` | `--enable-omp-device` |
+| **[TODO]** OpenACC + device pointers | `[_acc]_device` | `--enable-acc-device` |
 
 **Note:** Using at least one of those arguments is mandatory, as doing otherwise would result in an empty library. If none is specified, `--enable-openmp` will be toggled on by default.
 
