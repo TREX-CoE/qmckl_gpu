@@ -486,15 +486,6 @@ qmckl_exit_code qmckl_provide_ao_vgl_acc_offload(qmckl_context context) {
 
     qmckl_exit_code rc;
 
-    /* Provide required data */
-#ifndef HAVE_HPC
-    rc = qmckl_provide_ao_basis_shell_vgl(context);
-    if (rc != QMCKL_SUCCESS) {
-      return qmckl_failwith(context, rc, "qmckl_provide_ao_basis_shell_vgl",
-                            NULL);
-    }
-#endif
-
     /* Allocate array */
     if (ctx->ao_basis.ao_vgl == NULL) {
 

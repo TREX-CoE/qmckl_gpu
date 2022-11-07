@@ -74,14 +74,14 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_acc_offload(qmckl_context context,
 qmckl_exit_code qmckl_get_ao_basis_ao_vgl_inplace_acc_offload(
     qmckl_context context, double *const ao_vgl, const int64_t size_max);
 
-// qmckl_ao_device.c
+// qmckl_ao_omp_device.c
 
-qmckl_exit_code qmckl_ao_polynomial_transp_vgl_hpc_device(
+qmckl_exit_code qmckl_ao_polynomial_transp_vgl_hpc_omp_device(
     const qmckl_context_device context, const double *restrict X,
     const double *restrict R, const int32_t lmax, int64_t *restrict n,
     const int64_t ldl, double *restrict const VGL, const int64_t ldv);
 
-qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_pointers(
+qmckl_exit_code qmckl_compute_ao_vgl_gaussian_omp_device(
     const qmckl_context_device context, const int64_t ao_num,
     const int64_t shell_num, const int32_t *restrict prim_num_per_nucleus,
     const int64_t point_num, const int64_t nucl_num,
@@ -90,16 +90,16 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_pointers(
     const int64_t *restrict nucleus_shell_num, const double *nucleus_range,
     const int32_t *restrict nucleus_max_ang_mom,
     const int32_t *restrict shell_ang_mom, const double *restrict ao_factor,
-    const qmckl_matrix_device expo_per_nucleus,
-    const qmckl_tensor_device coef_per_nucleus, double *restrict const ao_vgl,
+    const qmckl_matrix expo_per_nucleus,
+    const qmckl_tensor coef_per_nucleus, double *restrict const ao_vgl,
 
     int device_id);
 
 qmckl_exit_code
-qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context,
+qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
                                      int device_id);
 
-qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
+qmckl_exit_code qmckl_get_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
                                                  double *const ao_vgl,
                                                  const int64_t size_max,
                                                  int device_id);

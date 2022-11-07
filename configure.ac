@@ -58,33 +58,38 @@ CFLAGS="-DHAVE_HPC -Iinclude ${CFLAGS}"
 ## Enable the different function types (OpenMP, OpenACC, device)
 
 # OpenMP offloading
-AC_ARG_ENABLE(openmp, [AS_HELP_STRING([--enable-openmp],[Enable OpenMP offloaded functions])], have_openmp=yes, have_openmp=no)
+AC_ARG_ENABLE(omp_offload, [AS_HELP_STRING([--enable-omp-offload],[Enable OpenMP offloaded functions])], have_omp_offload=yes, have_omp_offload=no)
 
 # OpenACC offloading
-AC_ARG_ENABLE(openacc, [AS_HELP_STRING([--enable-openacc],[Enable OpenACC offloaded functions])], have_openacc=yes, have_openacc=no)
+AC_ARG_ENABLE(acc_offload, [AS_HELP_STRING([--enable-acc-offload],[Enable OpenACC offloaded functions])], have_acc_offload=yes, have_acc_offload=no)
 
 # OpenMP + device pointers
-AC_ARG_ENABLE(device, [AS_HELP_STRING([--enable-device],[Enable device pointers OpenMP functions])], have_device=yes, have_device=no)
+AC_ARG_ENABLE(omp_device, [AS_HELP_STRING([--enable-omp-device],[Enable OpenMP device pointers functions])], have_omp_device=yes, have_omp_device=no)
+
+# OpenACC + device pointers
+AC_ARG_ENABLE(acc_device, [AS_HELP_STRING([--enable-acc-device],[Enable OpenACC device pointers functions])], have_acc_device=yes, have_acc_device=no)
+
 
 # TODO Add cuBLAS functions at some point ?
 
 # Fallback solution if nothing is enabled :
 # (probably because no GPU argument have been provided),
 # Enable OpenMP by default
-AS_IF([ test "x$have_openmp"  = "xno" -a "x$have_openacc" = "xno" -a  "x$have_device"  = "xno" ], [ 
+AS_IF([ test "x$have_omp_offload"  = "xno" -a "x$have_acc_offload" = "xno" -a  "x$have_omp_device"  = "xno" -a "x$have_acc_device"  = "xno"], [
 	AC_OUTPUT 
     echo \
     "Warning: No GPU functions could be enabled using the passed arguments. Enabling OpenMP offload by default."
 
-    have_openmp="yes"
+    have_omp_offload="yes"
 ])
 
-AM_CONDITIONAL([HAVE_OPENMP],  [test "x$have_openmp"  = "xyes"])
-AM_CONDITIONAL([HAVE_OPENACC], [test "x$have_openacc" = "xyes"])
-AM_CONDITIONAL([HAVE_DEVICE],  [test "x$have_device"  = "xyes"])
+AM_CONDITIONAL([HAVE_OMP_OFFLOAD], [test "x$have_omp_offload"  = "xyes"])
+AM_CONDITIONAL([HAVE_ACC_OFFLOAD], [test "x$have_acc_offload" = "xyes"])
+AM_CONDITIONAL([HAVE_OMP_DEVICE],  [test "x$have_omp_device"  = "xyes"])
+AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc_device"  = "xyes"])
 
 ## Add compilers flags depending on what has been enabled
-AS_IF([ test "x$have_openmp" = "xyes" -o "x$have_device" = "xyes" ], [
+AS_IF([ test "x$have_omp_offload" = "xyes" -o "x$have_omp_device" = "xyes" ], [
   case $CC in
     *gcc*)
           CFLAGS="$CFLAGS -fopenmp"
@@ -98,8 +103,7 @@ AS_IF([ test "x$have_openmp" = "xyes" -o "x$have_device" = "xyes" ], [
   esac
 ])
 
-
-AS_IF([test "x$have_openacc" = "xyes"], [
+AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc_device" = "xyes"], [
   case $CC in
     *gcc*)
           CFLAGS="$CFLAGS -fopenacc"
@@ -112,21 +116,6 @@ AS_IF([test "x$have_openacc" = "xyes"], [
           echo "Warning : compiler not supported for OpenACC. Make sure to define necessary flags manually."
   esac
 ])
-
-AS_IF([ test "x$have_device" = "xyes" ], [
-  case $CC in
-    *gcc*)
-          CFLAGS="$CFLAGS -lomp"
-          ;;
-    *nvc*)
-          CFLAGS="$CFLAGS -lomp"
-          ;;
-
-    *)
-          echo "Warning : compiler not recognized for OpenMP. Make sure to define necessary flags manually."
-  esac
-])
-
 
 
 # Print configure status
@@ -143,9 +132,10 @@ CC.................: ${CC}
 CFLAGS.............: ${CFLAGS}
 LDFLAGS:...........: ${LDFLAGS}
 
-OpenMP offload.....: ${have_openmp}
-OpenACC offload....: ${have_openacc}
-Device offload.....: ${have_device}
+OpenMP offload.....: ${have_omp_offload}
+OpenACC offload....: ${have_acc_offload}
+OpenMP device......: ${have_omp_device}
+OpenACC device.....: ${have_acc_device}
 
 
 Now type 'make @<:@<target>@:>@'
@@ -155,5 +145,4 @@ where the optional <target> is:
   install       - install
 --------------------------------------------------"
 
-# TODO Write tests? But this requires linking with an already installed QMCkl,
-# which is not necessary when simply building the library
+# TODO Write tests?
