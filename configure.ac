@@ -54,8 +54,9 @@ AC_ENABLE_STATIC
 # Add mandatory CFLAGS
 CFLAGS="-DHAVE_HPC -Iinclude ${CFLAGS}"
 
-
+####
 ## Enable the different function types (OpenMP, OpenACC, device)
+####
 
 # OpenMP offloading
 AC_ARG_ENABLE(omp_offload, [AS_HELP_STRING([--enable-omp-offload],[Enable OpenMP offloaded functions])], have_omp_offload=yes, have_omp_offload=no)
@@ -69,56 +70,114 @@ AC_ARG_ENABLE(omp_device, [AS_HELP_STRING([--enable-omp-device],[Enable OpenMP d
 # OpenACC + device pointers
 AC_ARG_ENABLE(acc_device, [AS_HELP_STRING([--enable-acc-device],[Enable OpenACC device pointers functions])], have_acc_device=yes, have_acc_device=no)
 
+# Enable all OpenMP
+AC_ARG_ENABLE(openmp, [AS_HELP_STRING([--enable-openmp],[Enable all OpenMP function types])], have_openmp=yes, have_openmp=no)
+
+# Enable all OpenACC
+AC_ARG_ENABLE(openacc, [AS_HELP_STRING([--enable-openacc],[Enable all OpenACC function types])], have_openacc=yes, have_openacc=no)
+
+
+# If --enable-openmp has been passed, we set both OpenMP offload & device to "yes" manually
+AS_IF([test "x$have_openmp" = "xyes"], [
+	have_omp_offload="yes"
+	have_omp_device="yes"
+])
+
+# If --enable-openacc has been passed, we set both OpenACC offload & device to "yes" manually
+AS_IF([test "x$have_openacc" = "xyes"], [
+	have_acc_offload="yes"
+	have_acc_device="yes"
+])
 
 # TODO Add cuBLAS functions at some point ?
 
+
+####
+## Perform checks on what has been enabled (at least one function type, no OpenACC and OpenMP at the same time)
+####
+
 # Fallback solution if nothing is enabled :
 # (probably because no GPU argument have been provided),
-# Enable OpenMP by default
+# Enable OpenMP offload by default
 AS_IF([ test "x$have_omp_offload"  = "xno" -a "x$have_acc_offload" = "xno" -a  "x$have_omp_device"  = "xno" -a "x$have_acc_device"  = "xno"], [
-	AC_OUTPUT 
-    echo \
-    "Warning: No GPU functions could be enabled using the passed arguments. Enabling OpenMP offload by default."
+	AC_OUTPUT
+	echo \
+	"Warning: No GPU functions could be enabled using the passed arguments. Enabling OpenMP offload by default."
 
-    have_omp_offload="yes"
+	have_omp_offload="yes"
 ])
+
+# Make sure that OpenMP and OpenACC are not enabled at the same time
+# Do we have at least one OpenMP ?
+AS_IF([test "x$have_omp_offload"  = "xyes" -o "x$have_omp_device" = "xyes"], [
+	have_one_omp=yes
+], [
+	have_one_omp=no
+])
+# Do we have at least one OpenACC ?
+AS_IF([test "x$have_acc_offload"  = "xyes" -o "x$have_acc_device" = "xyes"], [
+	have_one_acc=yes
+], [
+	have_one_acc=no
+])
+
+
+AS_IF([test "x$have_one_omp" = "xyes" -a  "x$have_one_acc" = "xyes"], [
+	AC_OUTPUT
+	echo \
+	"Error: Enabling both OpenMP and OpenACC at the same time is not enabled"
+	exit 1
+])
+
+
+####
+## Set compiler flags
+####
+
+## Add compilers flags depending on what has been enabled
+AS_IF([test "x$have_omp_offload" = "xyes" -o "x$have_omp_device" = "xyes"], [
+	case $CC in
+		*gcc*)
+			CFLAGS="$CFLAGS -fopenmp"
+			;;
+		*nvc*)
+			CFLAGS="$CFLAGS -mp=gpu"
+			;;
+
+		*)
+			echo "Warning : compiler not recognized for OpenMP. Make sure to add necessary offload flags manually."
+	esac
+])
+
+AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc_device" = "xyes"], [
+	case $CC in
+		*gcc*)
+			CFLAGS="$CFLAGS -fopenacc"
+			;;
+		*nvc*)
+			CFLAGS="$CFLAGS -mp=acc"
+		;;
+
+		*)
+			echo "Warning : compiler not supported for OpenACC. Make sure to add necessary offload flags manually."
+	esac
+])
+
+
+####
+## Define Makefile variables
+####
 
 AM_CONDITIONAL([HAVE_OMP_OFFLOAD], [test "x$have_omp_offload"  = "xyes"])
 AM_CONDITIONAL([HAVE_ACC_OFFLOAD], [test "x$have_acc_offload" = "xyes"])
 AM_CONDITIONAL([HAVE_OMP_DEVICE],  [test "x$have_omp_device"  = "xyes"])
 AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc_device"  = "xyes"])
 
-## Add compilers flags depending on what has been enabled
-AS_IF([ test "x$have_omp_offload" = "xyes" -o "x$have_omp_device" = "xyes" ], [
-  case $CC in
-    *gcc*)
-          CFLAGS="$CFLAGS -fopenmp"
-          ;;
-    *nvc*)
-          CFLAGS="$CFLAGS -mp=gpu"
-          ;;
 
-    *)
-          echo "Warning : compiler not recognized for OpenMP. Make sure to define necessary flags manually."
-  esac
-])
-
-AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc_device" = "xyes"], [
-  case $CC in
-    *gcc*)
-          CFLAGS="$CFLAGS -fopenacc"
-          ;;
-    *nvc*)
-          CFLAGS="$CFLAGS -mp=acc"
-          ;;
-
-    *)
-          echo "Warning : compiler not supported for OpenACC. Make sure to define necessary flags manually."
-  esac
-])
-
-
+####
 # Print configure status
+####
+
 AC_OUTPUT
 
 echo \

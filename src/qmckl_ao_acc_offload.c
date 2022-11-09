@@ -1,5 +1,7 @@
 #include "include/qmckl_ao_gpu.h"
 
+#pragma acc routine(sqrt) seq
+
 //**********
 // COMPUTE
 //**********
@@ -10,7 +12,6 @@ qmckl_exit_code qmckl_ao_polynomial_transp_vgl_hpc_acc_offload(
     const double *restrict R, const int32_t lmax, int64_t *restrict n,
     const int64_t ldl, double *restrict const VGL, const int64_t ldv) {
   const qmckl_context_struct *ctx = (qmckl_context_struct *)context;
-  assert(ctx != NULL && X != NULL && R != NULL && n != NULL && VGL != NULL);
   if (lmax < 0)
     return QMCKL_INVALID_ARG_4;
   if (ldl < 3)
@@ -30,7 +31,6 @@ qmckl_exit_code qmckl_ao_polynomial_transp_vgl_hpc_acc_offload(
 
   const double Y[3] = {X[0] - R[0], X[1] - R[1], X[2] - R[2]};
 
-  assert(size_max > lmax + 3);
 
   for (int32_t k = 0; k < 4; ++k) {
     vgl2[k] = 0.0;
@@ -269,7 +269,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_acc_offload(
               context, e_coord, n_coord, nucleus_max_ang_mom[inucl], &n_poly,
               (int64_t)3, poly_vgl, size_max);
 
-          assert(rc == QMCKL_SUCCESS);
           break;
         }
 
@@ -475,7 +474,6 @@ qmckl_exit_code qmckl_provide_ao_vgl_acc_offload(qmckl_context context) {
   }
 
   qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
-  assert(ctx != NULL);
 
   if (!ctx->ao_basis.provided) {
     return qmckl_failwith(context, QMCKL_NOT_PROVIDED, "qmckl_ao_vgl", NULL);
@@ -547,7 +545,6 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_acc_offload(qmckl_context context,
     return rc;
 
   qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
-  assert(ctx != NULL);
 
   int64_t sze = ctx->ao_basis.ao_num * 5 * ctx->point.num;
   if (size_max < sze) {
@@ -570,7 +567,6 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_inplace_acc_offload(
   qmckl_exit_code rc;
 
   qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
-  assert(ctx != NULL);
 
   int64_t sze = ctx->ao_basis.ao_num * 5 * ctx->point.num;
   if (size_max < sze) {
