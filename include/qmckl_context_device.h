@@ -20,7 +20,7 @@
 
 qmckl_exit_code
 qmckl_context_destroy_omp_device(const qmckl_context_device context,
-                                 int device_id);
+				 int device_id);
 
 qmckl_exit_code qmckl_context_touch_device(const qmckl_context_device context);
 qmckl_exit_code

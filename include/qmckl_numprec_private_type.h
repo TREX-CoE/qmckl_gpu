@@ -10,8 +10,8 @@
 /* :end: */
 
 typedef struct qmckl_numprec_struct {
-  uint32_t precision;
-  uint32_t range;
+	uint32_t precision;
+	uint32_t range;
 } qmckl_numprec_struct;
 
 /* [[file:../org/qmckl_numprec.org::*End of files][End of files:1]] */

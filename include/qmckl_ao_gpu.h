@@ -41,8 +41,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_omp_offload(
 qmckl_exit_code qmckl_provide_ao_vgl_omp_offload(qmckl_context context);
 
 qmckl_exit_code qmckl_get_ao_basis_ao_vgl_omp_offload(qmckl_context context,
-                                                      double *const ao_vgl,
-                                                      const int64_t size_max);
+						      double *const ao_vgl,
+						      const int64_t size_max);
 
 qmckl_exit_code qmckl_get_ao_basis_ao_vgl_inplace_omp_offload(
     qmckl_context context, double *const ao_vgl, const int64_t size_max);
@@ -68,8 +68,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_acc_offload(
 qmckl_exit_code qmckl_provide_ao_vgl_acc_offload(qmckl_context context);
 
 qmckl_exit_code qmckl_get_ao_basis_ao_vgl_acc_offload(qmckl_context context,
-                                                      double *const ao_vgl,
-                                                      const int64_t size_max);
+						      double *const ao_vgl,
+						      const int64_t size_max);
 
 qmckl_exit_code qmckl_get_ao_basis_ao_vgl_inplace_acc_offload(
     qmckl_context context, double *const ao_vgl, const int64_t size_max);
@@ -97,9 +97,9 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_omp_device(
 
 qmckl_exit_code
 qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
-                                         int device_id);
+					 int device_id);
 
 qmckl_exit_code
 qmckl_get_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
-                                     double *const ao_vgl,
-                                     const int64_t size_max, int device_id);
+				     double *const ao_vgl,
+				     const int64_t size_max, int device_id);

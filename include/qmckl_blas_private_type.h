@@ -9,13 +9,13 @@
 /*   | ~data~   | ~double*~ | Elements                | */
 
 typedef struct qmckl_vector {
-  double *restrict data;
+	double *restrict data;
 
 #ifdef HAVE_DEVICE_POINTERS
-  double *restrict data_device;
+	double *restrict data_device;
 #endif
 
-  int64_t size;
+	int64_t size;
 } qmckl_vector;
 
 /* Matrix */
@@ -29,13 +29,13 @@ typedef struct qmckl_vector {
 /*   in the first dimension are consecutive in memory. */
 
 typedef struct qmckl_matrix {
-  double *restrict data;
+	double *restrict data;
 
 #ifdef HAVE_DEVICE_POINTERS
-  double *restrict data_device;
+	double *restrict data_device;
 #endif
 
-  int64_t size[2];
+	int64_t size[2];
 } qmckl_matrix;
 
 /* Tensor */
@@ -54,12 +54,12 @@ typedef struct qmckl_matrix {
 #define QMCKL_TENSOR_ORDER_MAX 16
 
 typedef struct qmckl_tensor {
-  double *restrict data;
-  int64_t order;
-  int64_t size[QMCKL_TENSOR_ORDER_MAX];
+	double *restrict data;
+	int64_t order;
+	int64_t size[QMCKL_TENSOR_ORDER_MAX];
 
 #ifdef HAVE_DEVICE_POINTERS
-  double *restrict data_device;
+	double *restrict data_device;
 #endif
 } qmckl_tensor;
 

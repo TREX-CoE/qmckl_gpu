@@ -15,9 +15,9 @@ qmckl_exit_code qmckl_init_nucleus(qmckl_context context);
 qmckl_exit_code qmckl_provide_nn_distance(qmckl_context context);
 
 qmckl_exit_code qmckl_compute_nn_distance(const qmckl_context context,
-                                          const int64_t nucl_num,
-                                          const double *coord,
-                                          double *const nn_distance);
+					  const int64_t nucl_num,
+					  const double *coord,
+					  double *const nn_distance);
 
 /* Provide                                                        :noexport: */
 
@@ -33,9 +33,9 @@ qmckl_exit_code qmckl_compute_nn_distance_rescaled(
 qmckl_exit_code qmckl_provide_nucleus_repulsion(qmckl_context context);
 
 qmckl_exit_code qmckl_compute_nucleus_repulsion(const qmckl_context context,
-                                                const int64_t nucl_num,
-                                                const double *charge,
-                                                const double *nn_distance,
-                                                double *energy);
+						const int64_t nucl_num,
+						const double *charge,
+						const double *nn_distance,
+						double *energy);
 
 #endif

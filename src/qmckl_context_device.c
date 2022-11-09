@@ -8,7 +8,7 @@
 //**********
 
 qmckl_exit_code qmckl_context_touch_device(const qmckl_context_device context) {
-  return qmckl_context_touch((qmckl_context)context);
+	return qmckl_context_touch((qmckl_context)context);
 }
 
 //**********
@@ -18,5 +18,5 @@ qmckl_exit_code qmckl_context_touch_device(const qmckl_context_device context) {
 // OpenMP/OpenACC dependent
 
 qmckl_context_device qmckl_context_create_device() {
-  return (qmckl_context_device)qmckl_context_create();
+	return (qmckl_context_device)qmckl_context_create();
 }

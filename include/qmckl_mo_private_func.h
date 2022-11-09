@@ -18,7 +18,7 @@ qmckl_exit_code qmckl_finalize_mo_basis(qmckl_context context);
 
 #ifdef HAVE_DEVICE_POINTERS
 qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context context,
-                                               int64_t device_id);
+					       int64_t device_id);
 #endif
 
 /* Provide */
@@ -34,7 +34,7 @@ qmckl_exit_code qmckl_provide_mo_basis_mo_value(qmckl_context context);
 /* #+RESULTS: */
 
 qmckl_exit_code qmckl_provide_mo_basis_mo_value_device(qmckl_context context,
-                                                       const int64_t device_id);
+						       const int64_t device_id);
 
 /* Provide */
 
@@ -47,13 +47,13 @@ qmckl_exit_code qmckl_provide_mo_basis_mo_vgl(qmckl_context context);
 /* Device pointers */
 
 qmckl_exit_code qmckl_provide_mo_basis_mo_vgl_device(qmckl_context context,
-                                                     int64_t device_id);
+						     int64_t device_id);
 
 /* Mixte AO/MOxAO */
 
 qmckl_exit_code
 qmckl_provide_ao_mo_basis_ao_mo_vgl_device(qmckl_context context,
-                                           int64_t device_id);
+					   int64_t device_id);
 
 /* MOxAO in the same kernel */
 

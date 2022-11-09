@@ -7,12 +7,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <qmckl.h>
 #include "qmckl_context_private_type.h"
 #include "qmckl_jastrow_private_func.h"
 #include "qmckl_jastrow_private_type.h"
-#include "qmckl_memory_private_type.h"
 #include "qmckl_memory_private_func.h"
+#include "qmckl_memory_private_type.h"
+#include <qmckl.h>
 
 // qmckl_jastrow_openmp.c
 
@@ -36,10 +36,10 @@ qmckl_exit_code
 qmckl_provide_factor_een_deriv_e_omp_offload(qmckl_context context);
 
 qmckl_exit_code qmckl_get_jastrow_tmp_c_omp_offload(qmckl_context context,
-                                                    double *const tmp_c);
+						    double *const tmp_c);
 
 qmckl_exit_code qmckl_get_jastrow_dtmp_c_omp_offload(qmckl_context context,
-                                                     double *const dtmp_c);
+						     double *const dtmp_c);
 
 qmckl_exit_code qmckl_get_jastrow_factor_een_deriv_e_omp_offload(
     qmckl_context context, double *const factor_een_deriv_e,
@@ -67,10 +67,10 @@ qmckl_exit_code
 qmckl_provide_factor_een_deriv_e_acc_offload(qmckl_context context);
 
 qmckl_exit_code qmckl_get_jastrow_tmp_c_acc_offload(qmckl_context context,
-                                                    double *const tmp_c);
+						    double *const tmp_c);
 
 qmckl_exit_code qmckl_get_jastrow_dtmp_c_acc_offload(qmckl_context context,
-                                                     double *const dtmp_c);
+						     double *const dtmp_c);
 
 qmckl_exit_code qmckl_get_jastrow_factor_een_deriv_e_acc_offload(
     qmckl_context context, double *const factor_een_deriv_e,

@@ -31,5 +31,5 @@ fi
 
 
 # Apply formatting
-clang-format -i $qmckl_gpu_path/src/*.c
-clang-format -i $qmckl_gpu_path/include/*.h
+clang-format -style="{UseTab: Always, IndentWidth: 8, TabWidth: 8}" -i $qmckl_gpu_path/src/*.c
+clang-format -style="{UseTab: Always, IndentWidth: 8, TabWidth: 8}" -i $qmckl_gpu_path/include/*.h

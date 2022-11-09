@@ -11,9 +11,9 @@
 
 typedef struct qmckl_error_struct {
 
-  qmckl_exit_code exit_code;
-  char function[QMCKL_MAX_FUN_LEN];
-  char message[QMCKL_MAX_MSG_LEN];
+	qmckl_exit_code exit_code;
+	char function[QMCKL_MAX_FUN_LEN];
+	char message[QMCKL_MAX_MSG_LEN];
 
 } qmckl_error_struct;
 

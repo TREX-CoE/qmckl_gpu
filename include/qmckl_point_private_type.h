@@ -6,9 +6,9 @@
 /* Data structure */
 
 typedef struct qmckl_point_struct {
-  int64_t num;
-  uint64_t date;
-  qmckl_matrix coord;
+	int64_t num;
+	uint64_t date;
+	qmckl_matrix coord;
 } qmckl_point_struct;
 
 #endif
