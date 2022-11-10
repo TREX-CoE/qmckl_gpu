@@ -5,7 +5,7 @@
 //**********
 
 void *qmckl_malloc_host(qmckl_context_device context,
-			const qmckl_memory_info_struct info) {
+						const qmckl_memory_info_struct info) {
 	qmckl_context context_base = (qmckl_context)context;
 	return qmckl_malloc(context_base, info);
 }

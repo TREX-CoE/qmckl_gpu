@@ -38,23 +38,23 @@ qmckl_exit_code qmckl_provide_ao_basis_shell_vgl(qmckl_context context);
 /*  #  (Commented because the header needs to go into h_private_func) */
 
 qmckl_exit_code qmckl_compute_ao_value_doc(
-    const qmckl_context context, const int64_t ao_num, const int64_t shell_num,
-    const int64_t point_num, const int64_t nucl_num, const double *coord,
-    const double *nucl_coord, const int64_t *nucleus_index,
-    const int64_t *nucleus_shell_num, const double *nucleus_range,
-    const int32_t *nucleus_max_ang_mom, const int32_t *shell_ang_mom,
-    const double *ao_factor, const double *shell_vgl, double *const ao_value);
+	const qmckl_context context, const int64_t ao_num, const int64_t shell_num,
+	const int64_t point_num, const int64_t nucl_num, const double *coord,
+	const double *nucl_coord, const int64_t *nucleus_index,
+	const int64_t *nucleus_shell_num, const double *nucleus_range,
+	const int32_t *nucleus_max_ang_mom, const int32_t *shell_ang_mom,
+	const double *ao_factor, const double *shell_vgl, double *const ao_value);
 
 #ifdef HAVE_HPC
 qmckl_exit_code qmckl_compute_ao_value_hpc_gaussian(
-    const qmckl_context context, const int64_t ao_num, const int64_t shell_num,
-    const int32_t *prim_num_per_nucleus, const int64_t point_num,
-    const int64_t nucl_num, const double *coord, const double *nucl_coord,
-    const int64_t *nucleus_index, const int64_t *nucleus_shell_num,
-    const double *nucleus_range, const int32_t *nucleus_max_ang_mom,
-    const int32_t *shell_ang_mom, const double *ao_factor,
-    const qmckl_matrix expo_per_nucleus, const qmckl_tensor coef_per_nucleus,
-    double *const ao_value);
+	const qmckl_context context, const int64_t ao_num, const int64_t shell_num,
+	const int32_t *prim_num_per_nucleus, const int64_t point_num,
+	const int64_t nucl_num, const double *coord, const double *nucl_coord,
+	const int64_t *nucleus_index, const int64_t *nucleus_shell_num,
+	const double *nucleus_range, const int32_t *nucleus_max_ang_mom,
+	const int32_t *shell_ang_mom, const double *ao_factor,
+	const qmckl_matrix expo_per_nucleus, const qmckl_tensor coef_per_nucleus,
+	double *const ao_value);
 #endif
 
 /* Provide                                                       :noexport: */
@@ -78,34 +78,34 @@ qmckl_exit_code qmckl_provide_ao_value(qmckl_context context);
 /* #+RESULTS: */
 
 qmckl_exit_code qmckl_compute_ao_vgl_doc(
-    const qmckl_context context, const int64_t ao_num, const int64_t shell_num,
-    const int64_t point_num, const int64_t nucl_num, const double *coord,
-    const double *nucl_coord, const int64_t *nucleus_index,
-    const int64_t *nucleus_shell_num, const double *nucleus_range,
-    const int32_t *nucleus_max_ang_mom, const int32_t *shell_ang_mom,
-    const double *ao_factor, const double *shell_vgl, double *const ao_vgl);
+	const qmckl_context context, const int64_t ao_num, const int64_t shell_num,
+	const int64_t point_num, const int64_t nucl_num, const double *coord,
+	const double *nucl_coord, const int64_t *nucleus_index,
+	const int64_t *nucleus_shell_num, const double *nucleus_range,
+	const int32_t *nucleus_max_ang_mom, const int32_t *shell_ang_mom,
+	const double *ao_factor, const double *shell_vgl, double *const ao_vgl);
 
 #ifdef HAVE_OPENMP_OFFLOAD
 qmckl_exit_code qmckl_compute_ao_vgl_gaussian_omp_offload(
-    const qmckl_context context, const int64_t ao_num, const int64_t shell_num,
-    const int32_t *prim_num_per_nucleus, const int64_t point_num,
-    const int64_t nucl_num, const double *coord, const double *nucl_coord,
-    const int64_t *nucleus_index, const int64_t *nucleus_shell_num,
-    const double *nucleus_range, const int32_t *nucleus_max_ang_mom,
-    const int32_t *shell_ang_mom, const double *ao_factor,
-    const qmckl_matrix expo_per_nucleus, const qmckl_tensor coef_per_nucleus,
-    double *const ao_vgl);
+	const qmckl_context context, const int64_t ao_num, const int64_t shell_num,
+	const int32_t *prim_num_per_nucleus, const int64_t point_num,
+	const int64_t nucl_num, const double *coord, const double *nucl_coord,
+	const int64_t *nucleus_index, const int64_t *nucleus_shell_num,
+	const double *nucleus_range, const int32_t *nucleus_max_ang_mom,
+	const int32_t *shell_ang_mom, const double *ao_factor,
+	const qmckl_matrix expo_per_nucleus, const qmckl_tensor coef_per_nucleus,
+	double *const ao_vgl);
 #elif HAVE_HPC
 
 qmckl_exit_code qmckl_compute_ao_vgl_hpc_gaussian(
-    const qmckl_context context, const int64_t ao_num, const int64_t shell_num,
-    const int32_t *prim_num_per_nucleus, const int64_t point_num,
-    const int64_t nucl_num, const double *coord, const double *nucl_coord,
-    const int64_t *nucleus_index, const int64_t *nucleus_shell_num,
-    const double *nucleus_range, const int32_t *nucleus_max_ang_mom,
-    const int32_t *shell_ang_mom, const double *ao_factor,
-    const qmckl_matrix expo_per_nucleus, const qmckl_tensor coef_per_nucleus,
-    double *const ao_vgl);
+	const qmckl_context context, const int64_t ao_num, const int64_t shell_num,
+	const int32_t *prim_num_per_nucleus, const int64_t point_num,
+	const int64_t nucl_num, const double *coord, const double *nucl_coord,
+	const int64_t *nucleus_index, const int64_t *nucleus_shell_num,
+	const double *nucleus_range, const int32_t *nucleus_max_ang_mom,
+	const int32_t *shell_ang_mom, const double *ao_factor,
+	const qmckl_matrix expo_per_nucleus, const qmckl_tensor coef_per_nucleus,
+	double *const ao_vgl);
 #endif
 
 /* Provide                                                       :noexport: */

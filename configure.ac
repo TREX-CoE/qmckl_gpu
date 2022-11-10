@@ -138,7 +138,7 @@ AS_IF([test "x$have_one_omp" = "xyes" -a  "x$have_one_acc" = "xyes"], [
 AS_IF([test "x$have_omp_offload" = "xyes" -o "x$have_omp_device" = "xyes"], [
 	case $CC in
 		*gcc*)
-			CFLAGS="$CFLAGS -fopenmp"
+			CFLAGS="$CFLAGS -fopenmp -foffload=-lm"
 			;;
 		*nvc*)
 			CFLAGS="$CFLAGS -mp=gpu"
@@ -152,10 +152,11 @@ AS_IF([test "x$have_omp_offload" = "xyes" -o "x$have_omp_device" = "xyes"], [
 AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc_device" = "xyes"], [
 	case $CC in
 		*gcc*)
-			CFLAGS="$CFLAGS -fopenacc"
+			CFLAGS="$CFLAGS -fopenacc -foffload=-lm"
+			LDFLAGS="$LDFLAGS -lm"
 			;;
 		*nvc*)
-			CFLAGS="$CFLAGS -mp=acc"
+			CFLAGS="$CFLAGS -acc=gpu"
 		;;
 
 		*)

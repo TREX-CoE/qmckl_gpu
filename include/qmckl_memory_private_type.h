@@ -10,7 +10,7 @@ typedef struct qmckl_memory_info_struct {
 } qmckl_memory_info_struct;
 
 static const qmckl_memory_info_struct qmckl_memory_info_struct_zero = {
-    .size = (size_t)0, .pointer = NULL};
+	.size = (size_t)0, .pointer = NULL};
 
 typedef struct qmckl_memory_struct {
 	size_t n_allocated;
