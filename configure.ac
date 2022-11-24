@@ -51,6 +51,13 @@ AC_CONFIG_MACRO_DIRS([m4])
 AC_ENABLE_SHARED
 AC_ENABLE_STATIC
 
+
+### Find QMCkl
+
+AC_CHECK_LIB([qmckl], [qmckl_context_create], [], [PKG_CHECK_MODULES([QMCKL], [qmckl]) ])
+AC_CHECK_HEADERS([qmckl.h], [], [AC_MSG_ERROR("qmckl.h not found")])
+
+
 # Add mandatory CFLAGS
 CFLAGS="-DHAVE_HPC -Iinclude ${CFLAGS}"
 
