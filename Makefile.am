@@ -1,4 +1,6 @@
-ACLOCAL_AMFLAGS = -I m4 -I include
+ACLOCAL_AMFLAGS = -I m4 -I include 
+
+AM_CPPFLAGS  = -I$(top_builddir)/src -I$(top_builddir)/include -I$(top_srcdir)/qmckl/src
 
 include_HEADERS = include/qmckl_gpu.h
 
@@ -9,7 +11,8 @@ libqmckl_gpu_la_SOURCES = ""
 
 # Enable OpenMP offload
 if HAVE_OMP_OFFLOAD
- libqmckl_gpu_la_SOURCES += src/qmckl_ao_omp_offload.c src/qmckl_jastrow_omp_offload.c
+ libqmckl_gpu_la_SOURCES += src/qmckl_ao_omp_offload.c 
+#                            src/qmckl_jastrow_omp_offload.c
 endif
 
 # Enable OpenACC offload

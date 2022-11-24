@@ -13,9 +13,9 @@ qmckl_exit_code qmckl_set_electron_num_omp_device(qmckl_context_device context,
 qmckl_exit_code qmckl_set_point_omp_device(qmckl_context_device context,
 										   const char transp, const int64_t num,
 										   const double *coord,
-										   const int64_t size_max,
-										   int device_id) {
+										   const int64_t size_max) {
 
+	const size_t device_id = qmckl_get_device_id(context);
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return QMCKL_NULL_CONTEXT;
 	}
@@ -89,8 +89,9 @@ qmckl_exit_code qmckl_set_point_omp_device(qmckl_context_device context,
 
 qmckl_exit_code qmckl_set_electron_coord_omp_device(
 	qmckl_context context, const char transp, const int64_t walk_num,
-	const double *coord, const int64_t size_max, const int32_t device_id) {
+	const double *coord, const int64_t size_max) {
 
+	const size_t device_id = qmckl_get_device_id(context);
 	int32_t mask = 0; // coord can be changed
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
@@ -140,7 +141,7 @@ qmckl_exit_code qmckl_set_electron_coord_omp_device(
 
 	qmckl_exit_code rc;
 	rc = qmckl_set_point_omp_device(context, transp, walk_num * elec_num, coord,
-									size_max, device_id);
+									size_max);
 	if (rc != QMCKL_SUCCESS)
 		return rc;
 
