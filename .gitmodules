@@ -1,0 +1,3 @@
+[submodule "qmckl"]
+	path = qmckl
+	url = git@github.com:trex-coe/qmckl

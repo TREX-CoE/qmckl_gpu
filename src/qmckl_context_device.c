@@ -17,6 +17,13 @@ qmckl_exit_code qmckl_context_touch_device(const qmckl_context_device context) {
 // NOTE The context destroy function frees some memory, so its implementation is
 // OpenMP/OpenACC dependent
 
-qmckl_context_device qmckl_context_create_device() {
-	return (qmckl_context_device)qmckl_context_create();
+qmckl_context_device qmckl_context_create_device(int device_id) {
+	qmckl_context_device = (qmckl_context_device) qmckl_context_create();
+
+	qmckl_context_device_struct* const ds = malloc(sizeof(qmckl_context_device_struct));
+	assert (ds != NULL);
+	memset(ds, 0, sizeof(qmckl_context_device_struct));
+       	ds->device_id = device_id;
+	ctx->qmckl_extra = (void*) ds;
+	return ctx;
 }

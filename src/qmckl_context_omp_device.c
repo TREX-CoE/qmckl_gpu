@@ -16,8 +16,8 @@ qmckl_context_touch_omp_device(const qmckl_context_device context) {
 // CONTEXT CREATE
 //**********
 
-qmckl_context_device qmckl_context_create_omp_device() {
-	return (qmckl_context_device)qmckl_context_create();
+qmckl_context_device qmckl_context_create_omp_device(int device_id) {
+	return (qmckl_context_device)qmckl_context_create(device_id);
 }
 
 //**********
@@ -39,6 +39,7 @@ qmckl_context_destroy_omp_device(const qmckl_context_device context,
 
 	qmckl_lock((qmckl_context)context);
 	{
+		free(ctx->ds);
 		/* Memory: Remove all allocated data */
 		for (size_t pos = (size_t)0; pos < ctx->memory.array_size; ++pos) {
 			if (ctx->memory.element[pos].pointer != NULL) {
