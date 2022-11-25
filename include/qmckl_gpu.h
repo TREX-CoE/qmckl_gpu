@@ -55,10 +55,8 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_inplace_acc_offload(
 	qmckl_context context, double *const ao_vgl, const int64_t size_max);
 
 // qmckl_ao_device.c
-qmckl_exit_code
-qmckl_get_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
-									 double *const ao_vgl,
-									 const int64_t size_max);
+qmckl_exit_code qmckl_get_ao_basis_ao_vgl_omp_device(
+	qmckl_context_device context, double *const ao_vgl, const int64_t size_max);
 
 //**********
 // JASTROW
@@ -79,9 +77,7 @@ qmckl_exit_code qmckl_set_electron_coord_omp_device(
 	qmckl_context_device context, const char transp, const int64_t walk_num,
 	const double *coord, const int64_t size_max);
 
-qmckl_exit_code qmckl_set_point_omp_device (
-		                 qmckl_context_device context,
-                                 const char transp,
-                                 const int64_t num,
-                                 const double* coord,
-                                 const int64_t size_max);
+qmckl_exit_code qmckl_set_point_omp_device(qmckl_context_device context,
+										   const char transp, const int64_t num,
+										   const double *coord,
+										   const int64_t size_max);

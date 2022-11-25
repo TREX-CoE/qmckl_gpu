@@ -1,16 +1,20 @@
 #include "../include/qmckl_memory_device.h"
 
+// This file contains functions prototypes for context memory management
+// functions (on device only, we expect most if not all of the context
+// memory to be allocated on device in most cases)
+
 //**********
 // DEVICE MEMORY
 //**********
 
 void *qmckl_malloc_omp_device(qmckl_context_device context,
-							  const qmckl_memory_info_struct info,
-							  int device_id) {
+							  const qmckl_memory_info_struct info) {
 
 	assert(qmckl_context_check((qmckl_context)context) != QMCKL_NULL_CONTEXT);
 
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	int device_id = qmckl_get_device_id(context);
 
 	/* Allocate memory and zero it */
 	void *pointer = omp_target_alloc(info.size, device_id);
@@ -61,7 +65,7 @@ void *qmckl_malloc_omp_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_free_omp_device(qmckl_context_device context,
-									  void *const ptr, int device_id) {
+									  void *const ptr) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
@@ -74,6 +78,7 @@ qmckl_exit_code qmckl_free_omp_device(qmckl_context_device context,
 	}
 
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	int device_id = qmckl_get_device_id(context);
 
 	qmckl_lock((qmckl_context)context);
 	{

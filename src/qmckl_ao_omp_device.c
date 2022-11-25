@@ -598,7 +598,7 @@ qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
 			mem_info.size =
 				ctx->ao_basis.ao_num * 5 * ctx->point.num * sizeof(double);
 			double *ao_vgl =
-				(double *)qmckl_malloc_omp_device(context, mem_info, device_id);
+				(double *)qmckl_malloc_omp_device(context, mem_info);
 
 			if (ao_vgl == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,

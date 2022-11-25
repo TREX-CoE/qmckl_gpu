@@ -24,7 +24,7 @@ endif
 # (equivalent to HAVE_OMP_DEVICE || HAVE_ACC_DEVICE,
 # since  this is not possible in Automake)
 if HAVE_OMP_DEVICE
- libqmckl_gpu_la_SOURCES += src/qmckl_context_device.c src/qmckl_memory_device.c \
+ libqmckl_gpu_la_SOURCES += src/qmckl_context_omp_device.c src/qmckl_memory_device.c \
  src/qmckl_trexio_device.c
 else
 if HAVE_ACC_DEVICE

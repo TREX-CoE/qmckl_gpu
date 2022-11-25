@@ -8,7 +8,7 @@
 //**********
 
 qmckl_vector qmckl_vector_alloc_omp_device(qmckl_context_device context,
-										   const int64_t size, int device_id) {
+										   const int64_t size) {
 	/* Should always be true by contruction */
 	assert(size > (int64_t)0);
 
@@ -17,7 +17,7 @@ qmckl_vector qmckl_vector_alloc_omp_device(qmckl_context_device context,
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = size * sizeof(double);
-	result.data = qmckl_malloc_omp_device(context, mem_info, device_id);
+	result.data = qmckl_malloc_omp_device(context, mem_info);
 
 	if (result.data == NULL) {
 		result.size = (int64_t)0;
@@ -27,14 +27,13 @@ qmckl_vector qmckl_vector_alloc_omp_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_vector_free_omp_device(qmckl_context_device context,
-											 qmckl_vector *vector,
-											 int device_id) {
+											 qmckl_vector *vector) {
 	/* Always true */
 	assert(vector->data != NULL);
 
 	qmckl_exit_code rc;
 
-	rc = qmckl_free_omp_device(context, vector->data, device_id);
+	rc = qmckl_free_omp_device(context, vector->data);
 	if (rc != QMCKL_SUCCESS) {
 		return rc;
 	}
@@ -47,10 +46,12 @@ qmckl_exit_code qmckl_vector_free_omp_device(qmckl_context_device context,
 qmckl_exit_code
 qmckl_vector_of_double_omp_device(const qmckl_context_device context,
 								  const double *target, const int64_t size_max,
-								  qmckl_vector *vector_out, int device_id) {
+								  qmckl_vector *vector_out) {
 
-	// Accepts an host array an copies it in the device section of
+	// Accepts an host array and copies it in the device section of
 	// vector_out (assuming the vector is already allocated)
+
+	int device_id = qmckl_get_device_id(context);
 
 	qmckl_vector vector = *vector_out;
 	/* Always true by construction */
@@ -80,7 +81,7 @@ qmckl_vector_of_double_omp_device(const qmckl_context_device context,
 
 qmckl_matrix qmckl_matrix_alloc_omp_device(qmckl_context_device context,
 										   const int64_t size1,
-										   const int64_t size2, int device_id) {
+										   const int64_t size2) {
 	/* Should always be true by contruction */
 	assert(size1 * size2 > (int64_t)0);
 
@@ -92,7 +93,7 @@ qmckl_matrix qmckl_matrix_alloc_omp_device(qmckl_context_device context,
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = size1 * size2 * sizeof(double);
 	result.data =
-		(double *)qmckl_malloc_omp_device(context, mem_info, device_id);
+		(double *)qmckl_malloc_omp_device(context, mem_info);
 
 	if (result.data == NULL) {
 		result.size[0] = (int64_t)0;
@@ -103,14 +104,13 @@ qmckl_matrix qmckl_matrix_alloc_omp_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_matrix_free_omp_device(qmckl_context_device context,
-											 qmckl_matrix *matrix,
-											 int device_id) {
+											 qmckl_matrix *matrix) {
 	/* Always true */
 	assert(matrix->data != NULL);
 
 	qmckl_exit_code rc;
 
-	rc = qmckl_free_omp_device(context, matrix->data, device_id);
+	rc = qmckl_free_omp_device(context, matrix->data);
 	if (rc != QMCKL_SUCCESS) {
 		return rc;
 	}
@@ -138,10 +138,12 @@ qmckl_matrix qmckl_matrix_set_omp_device(qmckl_matrix matrix, double value) {
 qmckl_exit_code
 qmckl_matrix_of_double_omp_device(const qmckl_context_device context,
 								  const double *target, const int64_t size_max,
-								  qmckl_matrix *matrix_out, int device_id) {
+								  qmckl_matrix *matrix_out) {
 
-	// Accepts an host array an copies it in the device section of matrix
+	// Accepts an host array and copies it in the device section of matrix
 	// (assuming the matrix is already allocated)
+
+	int device_id = qmckl_get_device_id(context);
 
 	qmckl_matrix matrix = *matrix_out;
 	/* Always true by construction */
@@ -215,7 +217,7 @@ qmckl_exit_code qmckl_transpose_omp_device(qmckl_context_device context,
 
 qmckl_tensor qmckl_tensor_alloc_omp_device(qmckl_context context,
 										   const int64_t order,
-										   const int64_t *size, int device_id) {
+										   const int64_t *size) {
 	/* Should always be true by contruction */
 	assert(order > 0);
 	assert(order <= QMCKL_TENSOR_ORDER_MAX);
@@ -235,7 +237,7 @@ qmckl_tensor qmckl_tensor_alloc_omp_device(qmckl_context context,
 	mem_info.size = prod_size * sizeof(double);
 
 	result.data =
-		(double *)qmckl_malloc_omp_device(context, mem_info, device_id);
+		(double *)qmckl_malloc_omp_device(context, mem_info);
 
 	if (result.data == NULL) {
 		memset(&result, 0, sizeof(qmckl_tensor));
@@ -245,14 +247,13 @@ qmckl_tensor qmckl_tensor_alloc_omp_device(qmckl_context context,
 }
 
 qmckl_exit_code qmckl_tensor_free_omp_device(qmckl_context_device context,
-											 qmckl_tensor *tensor,
-											 int device_id) {
+											 qmckl_tensor *tensor) {
 	/* Always true */
 	assert(tensor->data != NULL);
 
 	qmckl_exit_code rc;
 
-	rc = qmckl_free_omp_device(context, tensor->data, device_id);
+	rc = qmckl_free_omp_device(context, tensor->data);
 	if (rc != QMCKL_SUCCESS) {
 		return rc;
 	}
