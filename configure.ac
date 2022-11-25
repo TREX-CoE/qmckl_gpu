@@ -57,6 +57,36 @@ AC_ENABLE_STATIC
 AC_CHECK_LIB([qmckl], [qmckl_context_create], [], [PKG_CHECK_MODULES([QMCKL], [qmckl]) ])
 AC_CHECK_HEADERS([qmckl.h], [], [AC_MSG_ERROR("qmckl.h not found")])
 
+# TREXIO
+AC_ARG_WITH([trexio],
+            [AS_HELP_STRING([--without-trexio],
+                            [disable support for TREXIO])],
+            [with_trexio=$withval],
+            [with_trexio=yes])
+
+AS_CASE([$with_trexio],
+  [no], [],
+  [yes],
+  [AC_CHECK_LIB([trexio], [trexio_open], [],
+                [PKG_CHECK_MODULES([TREXIO], [trexio]) ])
+   CFLAGS="$CFLAGS $TREXIO_CFLAGS"
+   LIBS="$LIBS $TREXIO_LIBS"
+   AC_CHECK_HEADERS([trexio.h], [],
+                    [AC_MSG_ERROR("trexio.h not found")])
+   AC_DEFINE([HAVE_TREXIO], [1], [Define if TREXIO support is available])
+   ARGS="${ARGS} trexio"],
+  [AS_IF([test ! -d "$withval"],
+         [AC_MSG_ERROR([--with-trexio=$withval: argument is not a directory])])
+   TREXIO_LIBS="-L$with_trexio/lib -ltrexio"
+   TREXIO_CFLAGS="-I$with_trexio/include"
+   CFLAGS="$CFLAGS $TREXIO_CFLAGS"
+   LIBS="$LIBS $TREXIO_LIBS"
+   AC_CHECK_HEADERS([trexio.h], [],
+                    [AC_MSG_ERROR("trexio.h not found")])
+   AC_DEFINE([HAVE_TREXIO], [1], [Define if TREXIO support is available])
+   ARGS="${ARGS} trexio"
+  ])
+
 
 # Add mandatory CFLAGS
 CFLAGS="-DHAVE_HPC -Iinclude ${CFLAGS}"

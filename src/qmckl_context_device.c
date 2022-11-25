@@ -18,7 +18,7 @@ qmckl_exit_code qmckl_context_touch_device(const qmckl_context_device context) {
 // OpenMP/OpenACC dependent
 
 qmckl_context_device qmckl_context_create_device(int device_id) {
-	qmckl_context_device = (qmckl_context_device) qmckl_context_create();
+	qmckl_context_struct* const ctx = (qmckl_context_struct*) qmckl_context_create();
 
 	qmckl_context_device_struct* const ds = malloc(sizeof(qmckl_context_device_struct));
 	assert (ds != NULL);

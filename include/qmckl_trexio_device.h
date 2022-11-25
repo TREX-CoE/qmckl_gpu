@@ -38,13 +38,12 @@ qmckl_exit_code qmckl_set_electron_num_omp_device(qmckl_context_device context,
 
 qmckl_exit_code qmckl_set_electron_coord_omp_device(
 	qmckl_context_device context, const char transp, const int64_t walk_num,
-	const double *coord, const int64_t size_max, int device_id);
+	const double *coord, const int64_t size_max);
 
 qmckl_exit_code qmckl_set_point_omp_device(qmckl_context_device context,
-										   const char transp, const int64_t num,
-										   const double *coord,
-										   const int64_t size_max,
-										   int device_id);
+					const char transp, const int64_t num,
+					const double *coord,
+					const int64_t size_max);
 
 //**********
 // NUCLEUS GETTERS/SETTERS
