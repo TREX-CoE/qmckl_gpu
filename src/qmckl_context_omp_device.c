@@ -39,7 +39,7 @@ qmckl_context_destroy_omp_device(const qmckl_context_device context,
 
 	qmckl_lock((qmckl_context)context);
 	{
-		free(ctx->ds);
+		free(ctx->qmckl_extra);
 		/* Memory: Remove all allocated data */
 		for (size_t pos = (size_t)0; pos < ctx->memory.array_size; ++pos) {
 			if (ctx->memory.element[pos].pointer != NULL) {
