@@ -43,6 +43,7 @@
 module qmckl_gpu
   use, intrinsic :: iso_c_binding
   use qmckl
+   integer, parameter :: qmckl_context_device = c_int64_t
 
 interface
    integer (qmckl_context_device) function qmckl_context_create_omp_device(device_id) bind(C)
@@ -68,14 +69,14 @@ interface
 end interface
 
 interface
-  integer(c_int32_t) function qmckl_get_ao_basis_ao_num_omp_device(context, &
+  integer(c_int32_t) function qmckl_set_ao_basis_ao_num_omp_device(context, &
        num) bind(C)
     use, intrinsic :: iso_c_binding
     import
     implicit none
     integer (qmckl_context_device) , intent(in)  , value :: context
     integer (c_int64_t) , intent(in)  , value :: num
-  end function qmckl_set_ao_basis_ao_num
+  end function qmckl_set_ao_basis_ao_num_omp_device
 end interface
 
 interface
@@ -87,7 +88,7 @@ interface
      integer (qmckl_context_device) , intent(in)  , value :: context
      double precision,     intent(out)         :: ao_vgl(*)
      integer (c_int64_t) , intent(in)  , value :: size_max
-   end function qmckl_get_ao_basis_ao_vgl
+   end function qmckl_get_ao_basis_ao_vgl_omp_device
 end interface
 
 interface
