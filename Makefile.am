@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS = -I m4 -I include
 
 AM_CPPFLAGS  = -I$(top_builddir)/src -I$(top_builddir)/include -I$(top_srcdir)/qmckl/src
 
-include_HEADERS = include/qmckl_gpu.h
+include_HEADERS = include/qmckl_gpu.h include/qmckl_gpu_f.F90
 
 lib_LTLIBRARIES = libqmckl_gpu.la
 
