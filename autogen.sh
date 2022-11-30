@@ -4,7 +4,7 @@ install_qmckl()
 	cd qmckl
 	./autogen.sh
 	./configure --enable-hpc --disable-doc
-	make -j 
+	make source -j 
 
 }
 
