@@ -9,5 +9,5 @@ install_qmckl()
 }
 
 test -f qmckl/configure || \
-	(git submodule update --init && install_qmckl)
+ 	(git config --global url."https://github.com/".insteadOf "git@github.com:" && git submodule update --init && install_qmckl)
 autoreconf -is
