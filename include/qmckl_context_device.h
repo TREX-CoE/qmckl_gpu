@@ -32,14 +32,8 @@ qmckl_exit_code
 qmckl_context_destroy_omp_device(const qmckl_context_device context);
 
 qmckl_exit_code qmckl_context_touch_device(const qmckl_context_device context);
-qmckl_exit_code
-qmckl_context_touch_omp_device(const qmckl_context_device context);
-qmckl_exit_code
-qmckl_context_touch_acc_device(const qmckl_context_device context);
 
 qmckl_context_device qmckl_context_create_device();
-qmckl_context_device qmckl_context_create_omp_device();
-qmckl_context_device qmckl_context_create_acc_device();
 
 static inline size_t qmckl_get_device_id(qmckl_context_device context) {
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;

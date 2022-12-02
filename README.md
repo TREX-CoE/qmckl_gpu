@@ -2,13 +2,12 @@
 
 <img src="https://trex-coe.eu/sites/default/files/styles/responsive_no_crop/public/2022-01/QMCkl%20code.png?itok=UvOUClA5" width=200>
 
-This repository is a work-in-progress GPU addon to the [QMCkl library](https://github.com/TREX-CoE/qmckl). It provides alternatives to the standard QMCkl functions to perform computations on GPU. The library is based on OpenMP offload and OpenACC, as to support a wide variety of compilers and targets.
-
+This repository is a work-in-progress GPU addon to the [QMCkl library](https://github.com/TREX-CoE/qmckl). It provides alternatives to the standard QMCkl functions to perform computations on GPU. The library is based on OpenMP offload and OpenACC, as to support a wide variety of compilers and targets combinations.
 
 
 # Basic installation
 
-The project uses Autotools :
+The project uses GNU Autotools :
 
 ```
 bash autogen.sh
@@ -17,45 +16,20 @@ make
 make install
 ```
 
-The only other requirement for **building** the library is a compiler toolchain that supports OpenMP or OpenACC offloading for your chosen target(s). Linking with QMCkl to build QMCkl GPU is not needed (but it is when linking an executable that uses QMCkl GPU).
+The only other requirement for **building** the library is a compiler toolchain that supports OpenMP or OpenACC offloading for your chosen target(s). Linking with QMCkl to build QMCkl GPU is not needed (but it is when building an executable that uses QMCkl GPU).
 
 
-## Enabling the different GPU functions
+## Enabling either OpenMP or OpenACC
 
-Enabling one kind of GPU functions in the configure step will expose variants of the usual `get` functions. For instance, in order to perform atomic orbitals computations, and by configuring QMCkl GPU with
-
-```
-./configure --enable-omp-offload
-```
-
-users will still have access to the standard
+Enabling either OpenMP and OpenACC is done at configure time, where (exactly) one of the two options has to be specified :
 
 ```
-qmckl_exit_code
-qmckl_get_ao_basis_ao_vgl(qmckl_context context,
-                          double* const ao_vgl,
-                          const int64_t size_max);
+./configure --enable-[omp|acc]
 ```
 
-function when linking their program with `-lqmckl`. However, additonally linking with `-lqmckl_gpu` will also expose
+In either case, the library interface is going to be exactly the same, as all of the OpenMP/OpenACC specific syntaxes are wrapped inside  QMCkl GPU's functions.
 
-```
-qmckl_exit_code
-qmckl_get_ao_basis_ao_vgl_omp_offload (qmckl_context context,
-                                       double* const ao_vgl,
-                                       const int64_t size_max);
-```
-
-As a general rule, each type of GPU functions comes with its own suffix. In order to call such functions, one can simply append the corresponding suffix to the standard `get` function name. Here is a table summarizing the different function types, their suffixes, and the configure flag used to enable them: 
-
-| Function type | Suffix | Configure flag |
-| ----------- | ----------- | ----------- |
-| Simple OpenMP offload | `_omp_offload` | `--enable-omp-offload` |
-| Simple OpenACC offload | `_acc_offload` | `--enable-acc-offload` |
-| OpenMP + device pointers | `[_omp]_device` | `--enable-omp-device` |
-| **[TODO]** OpenACC + device pointers | `[_acc]_device` | `--enable-acc-device` |
-
-**Note:** Using at least one of those arguments is mandatory, as doing otherwise would result in an empty library. If none is specified, `--enable-openmp` will be toggled on by default.
+**Note:** Using at exactly one of those arguments is mandatory, as doing otherwise would result in an empty library. If none is specified, Autotools will attempt to build the library with `--enable-omp` as a fallback solution.
 
 
 # Basic usage
@@ -68,19 +42,35 @@ This library is an addon meant to be used on top of the main [QMCkl library](htt
 
 Both `qmckl.h` and `qmckl_gpu.h` should also be included in C codes.
 
+For instance, when linking their program with `-lqmckl`, users will have access to the "standard"
+
+```
+qmckl_exit_code
+qmckl_get_ao_basis_ao_vgl(qmckl_context context,
+                          double* const ao_vgl,
+                          const int64_t size_max);
+```
+
+QMCkl function. And additionally, linking with `-lqmckl_gpu` will also expose
+
+```
+qmckl_exit_code
+qmckl_get_ao_basis_ao_vgl_device (qmckl_context_device context,
+                                  double* const ao_vgl,
+                                  const int64_t size_max);
+```
+
+which performs the same task on a GPU, using memory allocated there.
+
 **Notes :** 
 - QMCkl GPU should be linked with an HPC-enabled QMCkl (configure QMCkl with `--enable-hpc`, see the [QMCkl README](https://github.com/TREX-CoE/qmckl/blob/master/README.md)), as well as with [TREXIO](https://github.com/TREX-CoE/trexio).
-- While it is possible to use different compilers to build QMCkl, QMCkl GPU and your final executable, doing so might result in some missing symbols when linking your final executable. In that case, you would have to manually tell your linker where to find those symbols (which might come from different libc or libm implementations being simultaneously, for instance).
+- While it is possible to use different compilers to build QMCkl, QMCkl GPU and your final executable, doing so might result in some missing symbols when linking your final executable. In that case, you would have to manually tell your linker where to find those symbols (which might come from different libc or libm implementations being simultaneously, for instance). 
 
-The next sections provide explanations on how this library should be used in your code.
+The next sections provides more advanced explanations on how this library should be used compared to the standard CPU QMCkl.
 
 
-## Difference between "offload" and "device pointers" functions
+## Using the "device" context and functions
 
-The library provides to main function types : the **basic "offload" functions**, which handle all data transfers between the CPU and the GPU internally, as well as **the more advanced "device pointers" functions**, which work all the way with memory allocatd on the GPU. The remainder of this section provides more details on the inner working of these two functions types, and outlines their advantages and inconvenients.
-
-When calling an **offload function**, everything gets executed as in the CPU version of QMCkl, at the exception of some computation kernels that are offloaded "on the fly". This means that memory is allocated and transferred to the GPU just before the computation, only to be transferred back to the CPU and freed just after. This makes them easy to use, as **they can be called just like the standard CPU functions**, but at the cost of performance when calling these kernels repeatedly (such as in a QMC simulation), because it **repeats some costly and avoidable data transfers**.
-
-This is why the use of the **device functions** is advised to get the **full benefits of GPU offloading**. These functions work directly and (almost) exclusively on the GPU memory, referenced by "device pointers". This way, memory transfers can be greatly reduced. Typically the entry data set would need to be transferred once from CPU to GPU at the beginning of a QMC simulation, and the results would be transferred once at the very end. The main dowside is that **this will typically require the user to perform a few GPU allocations themself as well as explicitly using the device version of each QMCkl function they might need**, which requires a bit more care.
+The library works on a variant of the `qmckl_context` type: `qmckl_context_device`. It has the same structure as the default context, but contains a few additional and GPU-related informations, such as the OpenMP/OpenACC ID of the device you are allocating memory on and doing your offload to. This type comes with its own variants of the classic QMCkl functions. These functions work directly and (almost) exclusively on the GPU memory, referenced by "device pointers". As a rule of thumb, you should always pass such device pointers as arguments of these functions. This way, memory transfers are greatly reduced compared to a "naive" approach where memory is transferred back and forth everytime we need to perform a computation on GPU. Typically the entry data set would need to be allocated/transferred once from CPU to GPU at the beginning of a QMC simulation, and the results would be transferred on demand only when they are needed elsewhere. The main dowside is that **this will likely require the user to perform a few GPU allocations themself**, which requires a bit more care than using the CPU library.
 
 **TODO** More detailed explanations on device pointer functions use, dedicated .md documentation files ?

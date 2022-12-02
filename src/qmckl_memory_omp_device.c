@@ -5,10 +5,10 @@
 // memory to be allocated on device in most cases)
 
 //**********
-// DEVICE MEMORY
+// ALLOCS / FREES
 //**********
 
-void *qmckl_malloc_omp_device(qmckl_context_device context,
+void *qmckl_malloc_device(qmckl_context_device context,
 							  const qmckl_memory_info_struct info) {
 
 	assert(qmckl_context_check((qmckl_context)context) != QMCKL_NULL_CONTEXT);
@@ -64,7 +64,7 @@ void *qmckl_malloc_omp_device(qmckl_context_device context,
 	return pointer;
 }
 
-qmckl_exit_code qmckl_free_omp_device(qmckl_context_device context,
+qmckl_exit_code qmckl_free_device(qmckl_context_device context,
 									  void *const ptr) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
@@ -102,6 +102,130 @@ qmckl_exit_code qmckl_free_omp_device(qmckl_context_device context,
 		memset(&(ctx->memory.element[pos]), 0,
 			   sizeof(qmckl_memory_info_struct));
 		ctx->memory.n_allocated -= (size_t)1;
+	}
+	qmckl_unlock((qmckl_context)context);
+
+	return QMCKL_SUCCESS;
+}
+
+
+//**********
+// MEMCPYS
+//**********
+
+qmckl_exit_code qmckl_memcpy_H2D(qmckl_context_device context,
+								 void *const dest, void *const src,
+								 size_t size) {
+
+	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
+							  "qmckl_memcpy_H2D", NULL);
+	}
+
+	if (dest == NULL) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_2,
+							  "qmckl_memcpu_H2D", "NULL dest pointer");
+	}
+
+	if (src == NULL) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_3,
+							  "qmckl_memcpu_H2D", "NULL src pointer");
+	}
+
+	int device_id = qmckl_get_device_id(context);
+
+	qmckl_lock((qmckl_context)context);
+	{
+		int ret = omp_target_memcpy(
+			dest, src,
+			size,
+			0, 0,
+			device_id, omp_get_initial_device()
+		);
+		if(ret) {
+			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
+							      "qmckl_memcpy_H2D", "Call to omp_target_memcpy failed");
+		}
+	}
+	qmckl_unlock((qmckl_context)context);
+
+	return QMCKL_SUCCESS;
+}
+
+
+qmckl_exit_code qmckl_memcpy_D2H(qmckl_context_device context,
+								 void *const dest, void *const src,
+								 size_t size) {
+
+	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
+							  "qmckl_memcpy_D2H", NULL);
+	}
+
+	if (dest == NULL) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_2,
+							  "qmckl_memcpu_D2H", "NULL dest pointer");
+	}
+
+	if (src == NULL) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_3,
+							  "qmckl_memcpu_D2H", "NULL src pointer");
+	}
+
+	int device_id = qmckl_get_device_id(context);
+
+	qmckl_lock((qmckl_context)context);
+	{
+		int ret = omp_target_memcpy(
+			dest, src,
+			size,
+			0, 0,
+			omp_get_initial_device(), device_id
+		);
+		if(ret) {
+			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
+							      "qmckl_memcpy_D2H", "Call to omp_target_memcpy failed");
+		}
+	}
+	qmckl_unlock((qmckl_context)context);
+
+	return QMCKL_SUCCESS;
+}
+
+
+qmckl_exit_code qmckl_memcpy_D2D(qmckl_context_device context,
+								 void *const dest, void *const src,
+								 size_t size) {
+
+	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
+							  "qmckl_memcpy_D2D", NULL);
+	}
+
+	if (dest == NULL) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_2,
+							  "qmckl_memcpu_D2D", "NULL dest pointer");
+	}
+
+	if (src == NULL) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_3,
+							  "qmckl_memcpu_D2D", "NULL src pointer");
+	}
+
+	int device_id = qmckl_get_device_id(context);
+
+	qmckl_lock((qmckl_context)context);
+	{
+		int ret = omp_target_memcpy(
+			dest, src,
+			size,
+			0, 0,
+			device_id, device_id
+		);
+		if(ret) {
+			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
+							      "qmckl_memcpy_D2D", "Call to omp_target_memcpy failed");
+		}
 	}
 	qmckl_unlock((qmckl_context)context);
 
