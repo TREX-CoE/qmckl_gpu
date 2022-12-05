@@ -45,6 +45,7 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 										   const double *coord,
 										   const int64_t size_max);
 
+
 //**********
 // NUCLEUS GETTERS/SETTERS
 //**********

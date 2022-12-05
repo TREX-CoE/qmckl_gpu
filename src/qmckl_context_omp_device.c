@@ -25,7 +25,8 @@ qmckl_context_destroy_device(const qmckl_context_device context) {
 
 	qmckl_lock((qmckl_context)context);
 	{
-		/* Host memory: Remove all allocated data */
+		free(ctx->qmckl_extra);
+		/* Memory: Remove all allocated data */
 		for (size_t pos = (size_t)0; pos < ctx->memory.array_size; ++pos) {
 			if (ctx->memory.element[pos].pointer != NULL) {
 				omp_target_free(ctx->memory.element[pos].pointer, device_id);

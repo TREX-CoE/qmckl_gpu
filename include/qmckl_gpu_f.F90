@@ -42,43 +42,8 @@
 !
 module qmckl_gpu
   use, intrinsic :: iso_c_binding
-integer  , parameter :: qmckl_context = c_int64_t
-integer  , parameter :: qmckl_context_device = c_int64_t
-integer*8, parameter :: QMCKL_NULL_CONTEXT = 0
-integer  , parameter :: qmckl_exit_code = c_int32_t
-
-integer(qmckl_exit_code), parameter :: QMCKL_SUCCESS                  = 0
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_1            = 1
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_2            = 2
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_3            = 3
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_4            = 4
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_5            = 5
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_6            = 6
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_7            = 7
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_8            = 8
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_9            = 9
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_10           = 10
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_11           = 11
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_12           = 12
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_13           = 13
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_14           = 14
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_15           = 15
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_16           = 16
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_17           = 17
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_18           = 18
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_19           = 19
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_ARG_20           = 20
-integer(qmckl_exit_code), parameter :: QMCKL_FAILURE                  = 101
-integer(qmckl_exit_code), parameter :: QMCKL_ERRNO                    = 102
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_CONTEXT          = 103
-integer(qmckl_exit_code), parameter :: QMCKL_ALLOCATION_FAILED        = 104
-integer(qmckl_exit_code), parameter :: QMCKL_DEALLOCATION_FAILED      = 105
-integer(qmckl_exit_code), parameter :: QMCKL_NOT_PROVIDED             = 106
-integer(qmckl_exit_code), parameter :: QMCKL_OUT_OF_BOUNDS            = 107
-integer(qmckl_exit_code), parameter :: QMCKL_ALREADY_SET              = 108
-integer(qmckl_exit_code), parameter :: QMCKL_INVALID_EXIT_CODE        = 109
-! Fortran interface
-
+  use qmckl
+   integer, parameter :: qmckl_context_device = c_int64_t
 
 interface
    integer (qmckl_context_device) function qmckl_context_create_omp_device(device_id) bind(C)
@@ -104,14 +69,14 @@ interface
 end interface
 
 interface
-  integer(c_int32_t) function qmckl_get_ao_basis_ao_num_omp_device(context, &
+  integer(c_int32_t) function qmckl_set_ao_basis_ao_num_omp_device(context, &
        num) bind(C)
     use, intrinsic :: iso_c_binding
     import
     implicit none
     integer (qmckl_context_device) , intent(in)  , value :: context
     integer (c_int64_t) , intent(in)  , value :: num
-  end function qmckl_set_ao_basis_ao_num
+  end function qmckl_set_ao_basis_ao_num_omp_device
 end interface
 
 interface
@@ -123,7 +88,7 @@ interface
      integer (qmckl_context_device) , intent(in)  , value :: context
      double precision,     intent(out)         :: ao_vgl(*)
      integer (c_int64_t) , intent(in)  , value :: size_max
-   end function qmckl_get_ao_basis_ao_vgl
+   end function qmckl_get_ao_basis_ao_vgl_omp_device
 end interface
 
 interface
