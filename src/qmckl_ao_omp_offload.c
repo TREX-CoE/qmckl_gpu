@@ -271,8 +271,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_omp_offload(
 
 				default:
 					qmckl_ao_polynomial_transp_vgl_hpc_omp_offload(
-					context, e_coord, n_coord, nucleus_max_ang_mom[inucl],
-					&n_poly, (int64_t)3, poly_vgl, size_max);
+						context, e_coord, n_coord, nucleus_max_ang_mom[inucl],
+						&n_poly, (int64_t)3, poly_vgl, size_max);
 
 					break;
 				}

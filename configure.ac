@@ -1,4 +1,3 @@
-
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 #
@@ -54,7 +53,7 @@ AC_ENABLE_STATIC
 
 ### Find QMCkl
 
-AC_CHECK_LIB([qmckl], [qmckl_context_create], [], [PKG_CHECK_MODULES([QMCKL], [qmckl]) ])
+#AC_CHECK_LIB([qmckl], [qmckl_context_create], [], [PKG_CHECK_MODULES([QMCKL], [qmckl]) ])
 AC_CHECK_HEADERS([qmckl.h], [], [AC_MSG_ERROR("qmckl.h not found")])
 
 # TREXIO
@@ -95,36 +94,17 @@ CFLAGS="-DHAVE_HPC -Iinclude ${CFLAGS}"
 ## Enable the different function types (OpenMP, OpenACC, device)
 ####
 
-# OpenMP offloading
+# OpenMP offloading (legacy, kept for now)
 AC_ARG_ENABLE(omp_offload, [AS_HELP_STRING([--enable-omp-offload],[Enable OpenMP offloaded functions])], have_omp_offload=yes, have_omp_offload=no)
 
-# OpenACC offloading
+# OpenACC offloading (legacy, kept for now)
 AC_ARG_ENABLE(acc_offload, [AS_HELP_STRING([--enable-acc-offload],[Enable OpenACC offloaded functions])], have_acc_offload=yes, have_acc_offload=no)
 
 # OpenMP + device pointers
-AC_ARG_ENABLE(omp_device, [AS_HELP_STRING([--enable-omp-device],[Enable OpenMP device pointers functions])], have_omp_device=yes, have_omp_device=no)
+AC_ARG_ENABLE(omp, [AS_HELP_STRING([--enable-omp],[Enable OpenMP device pointers functions])], have_omp=yes, have_omp=no)
 
 # OpenACC + device pointers
-AC_ARG_ENABLE(acc_device, [AS_HELP_STRING([--enable-acc-device],[Enable OpenACC device pointers functions])], have_acc_device=yes, have_acc_device=no)
-
-# Enable all OpenMP
-AC_ARG_ENABLE(openmp, [AS_HELP_STRING([--enable-openmp],[Enable all OpenMP function types])], have_openmp=yes, have_openmp=no)
-
-# Enable all OpenACC
-AC_ARG_ENABLE(openacc, [AS_HELP_STRING([--enable-openacc],[Enable all OpenACC function types])], have_openacc=yes, have_openacc=no)
-
-
-# If --enable-openmp has been passed, we set both OpenMP offload & device to "yes" manually
-AS_IF([test "x$have_openmp" = "xyes"], [
-	have_omp_offload="yes"
-	have_omp_device="yes"
-])
-
-# If --enable-openacc has been passed, we set both OpenACC offload & device to "yes" manually
-AS_IF([test "x$have_openacc" = "xyes"], [
-	have_acc_offload="yes"
-	have_acc_device="yes"
-])
+AC_ARG_ENABLE(acc_device, [AS_HELP_STRING([--enable-acc],[Enable OpenACC device pointers functions])], have_acc=yes, have_acc=no)
 
 # TODO Add cuBLAS functions at some point ?
 
@@ -136,30 +116,15 @@ AS_IF([test "x$have_openacc" = "xyes"], [
 # Fallback solution if nothing is enabled :
 # (probably because no GPU argument have been provided),
 # Enable OpenMP offload by default
-AS_IF([ test "x$have_omp_offload"  = "xno" -a "x$have_acc_offload" = "xno" -a  "x$have_omp_device"  = "xno" -a "x$have_acc_device"  = "xno"], [
+AS_IF([ test "x$have_omp" = "xno" -a "x$have_acc" = "xno"], [
 	AC_OUTPUT
 	echo \
-	"Warning: No GPU functions could be enabled using the passed arguments. Enabling OpenMP offload by default."
-
-	have_omp_offload="yes"
+	"Warning: Neither OpenMP or OpenACC could be enabled using the passed arguments. Attempting to enable OpenMP as fallback."
+	have_omp="yes"
 ])
 
 # Make sure that OpenMP and OpenACC are not enabled at the same time
-# Do we have at least one OpenMP ?
-AS_IF([test "x$have_omp_offload"  = "xyes" -o "x$have_omp_device" = "xyes"], [
-	have_one_omp=yes
-], [
-	have_one_omp=no
-])
-# Do we have at least one OpenACC ?
-AS_IF([test "x$have_acc_offload"  = "xyes" -o "x$have_acc_device" = "xyes"], [
-	have_one_acc=yes
-], [
-	have_one_acc=no
-])
-
-
-AS_IF([test "x$have_one_omp" = "xyes" -a  "x$have_one_acc" = "xyes"], [
+AS_IF([test "x$have_omp" = "xyes" -a  "x$have_acc" = "xyes"], [
 	AC_OUTPUT
 	echo \
 	"Error: Enabling both OpenMP and OpenACC at the same time is not enabled"
@@ -172,7 +137,7 @@ AS_IF([test "x$have_one_omp" = "xyes" -a  "x$have_one_acc" = "xyes"], [
 ####
 
 ## Add compilers flags depending on what has been enabled
-AS_IF([test "x$have_omp_offload" = "xyes" -o "x$have_omp_device" = "xyes"], [
+AS_IF([test "x$have_omp_offload" = "xyes" -o "x$have_omp" = "xyes"], [
 	case $CC in
 		*gcc*)
 			CFLAGS="$CFLAGS -fopenmp -foffload=-lm"
@@ -186,7 +151,7 @@ AS_IF([test "x$have_omp_offload" = "xyes" -o "x$have_omp_device" = "xyes"], [
 	esac
 ])
 
-AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc_device" = "xyes"], [
+AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc" = "xyes"], [
 	case $CC in
 		*gcc*)
 			CFLAGS="$CFLAGS -fopenacc -foffload=-lm"
@@ -208,8 +173,8 @@ AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc_device" = "xyes"], [
 
 AM_CONDITIONAL([HAVE_OMP_OFFLOAD], [test "x$have_omp_offload"  = "xyes"])
 AM_CONDITIONAL([HAVE_ACC_OFFLOAD], [test "x$have_acc_offload" = "xyes"])
-AM_CONDITIONAL([HAVE_OMP_DEVICE],  [test "x$have_omp_device"  = "xyes"])
-AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc_device"  = "xyes"])
+AM_CONDITIONAL([HAVE_OMP_DEVICE],  [test "x$have_omp"  = "xyes"])
+AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc"  = "xyes"])
 
 
 ####
@@ -229,11 +194,8 @@ CC.................: ${CC}
 CFLAGS.............: ${CFLAGS}
 LDFLAGS:...........: ${LDFLAGS}
 
-OpenMP offload.....: ${have_omp_offload}
-OpenACC offload....: ${have_acc_offload}
-OpenMP device......: ${have_omp_device}
-OpenACC device.....: ${have_acc_device}
-
+OpenMP ............: ${have_omp}
+OpenACC ...........: ${have_acc}
 
 Now type 'make @<:@<target>@:>@'
 where the optional <target> is:

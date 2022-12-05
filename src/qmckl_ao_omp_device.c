@@ -133,9 +133,13 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_omp_device(
 	const int32_t *restrict nucleus_max_ang_mom,
 	const int32_t *restrict shell_ang_mom, const double *restrict ao_factor,
 	const qmckl_matrix expo_per_nucleus, const qmckl_tensor coef_per_nucleus,
-	double *restrict const ao_vgl,
+	double *restrict const ao_vgl) {
 
-	int device_id) {
+
+	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	assert(ctx != NULL);
+	int device_id = qmckl_get_device_id(context);
+
 
 	int32_t *lstart_h = omp_target_alloc(32 * sizeof(int32_t), device_id);
 
@@ -210,8 +214,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_omp_device(
 
 	/* Don't compute polynomials when the radial part is zero. */
 	double cutoff = -log(1.e-12);
-
-	qmckl_exit_code rc;
 
 	double *poly_vgl_shared = (double *)omp_target_alloc(
 		point_num * 5 * size_max * sizeof(double), device_id);
@@ -321,7 +323,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_omp_device(
 
 				default:
 
-					rc = qmckl_ao_polynomial_transp_vgl_hpc_omp_device(
+					qmckl_ao_polynomial_transp_vgl_hpc_omp_device(
 						context, e_coord, n_coord, nucleus_max_ang_mom[inucl],
 						&n_poly, (int64_t)3, poly_vgl, size_max);
 
@@ -570,8 +572,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_omp_device(
 //**********
 
 qmckl_exit_code
-qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
-										 int device_id) {
+qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
@@ -598,7 +599,7 @@ qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
 			mem_info.size =
 				ctx->ao_basis.ao_num * 5 * ctx->point.num * sizeof(double);
 			double *ao_vgl =
-				(double *)qmckl_malloc_omp_device(context, mem_info, device_id);
+				(double *)qmckl_malloc_device(context, mem_info);
 
 			if (ao_vgl == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -616,8 +617,7 @@ qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
 				ctx->ao_basis.nucleus_shell_num, ctx->ao_basis.nucleus_range,
 				ctx->ao_basis.nucleus_max_ang_mom, ctx->ao_basis.shell_ang_mom,
 				ctx->ao_basis.ao_factor, ctx->ao_basis.expo_per_nucleus,
-				ctx->ao_basis.coef_per_nucleus, ctx->ao_basis.ao_vgl,
-				device_id);
+				ctx->ao_basis.coef_per_nucleus, ctx->ao_basis.ao_vgl);
 		} else {
 			printf("Device pointers version of ao_vgl only "
 				   "supports 'G' as its "
@@ -641,7 +641,7 @@ qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
 qmckl_exit_code
 qmckl_get_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
 									 double *const ao_vgl,
-									 const int64_t size_max, int device_id) {
+									 const int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
@@ -650,12 +650,13 @@ qmckl_get_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
 
 	qmckl_exit_code rc;
 
-	rc = qmckl_provide_ao_basis_ao_vgl_omp_device(context, device_id);
+	rc = qmckl_provide_ao_basis_ao_vgl_omp_device(context);
 	if (rc != QMCKL_SUCCESS)
 		return rc;
 
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
+	int device_id = qmckl_get_device_id(context);
 
 	int64_t sze = ctx->ao_basis.ao_num * 5 * ctx->point.num;
 	if (size_max < sze) {
