@@ -8,13 +8,11 @@ lib_LTLIBRARIES = libqmckl_gpu.la
 
 libqmckl_gpu_la_SOURCES = ""
 
-# test_qmckl_f  = tests/qmckl_f.F90
-# test_qmckl_fo = tests/qmckl_f.o
-# $(test_qmckl_fo): $(test_qmckl_f)
-
-TESTS = test_qmckl_ao_f 
+# Tests
+TESTS = test_qmckl_ao_f test_qmckl_mo 
 check_PROGRAMS = $(TESTS)
 test_qmckl_ao_f_SOURCES = tests/test_qmckl_ao.c tests/qmckl_f.F90 tests/chbrclf.h tests/test_qmckl_ao_f.F90  
+test_qmckl_mo_SOURCES = tests/test_qmckl_mo.c  
 
 # Enable OpenMP offload
 if HAVE_OMP_OFFLOAD
