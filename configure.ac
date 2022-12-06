@@ -41,6 +41,7 @@ AM_INIT_AUTOMAKE([-Wall subdir-objects])
 AM_PROG_AR
 
 AC_PROG_CC
+AC_PROG_FC
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
@@ -200,6 +201,14 @@ AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc_device" = "xyes"], [
 			echo "Warning : compiler not supported for OpenACC. Make sure to add necessary offload flags manually."
 	esac
 ])
+
+# Specific options required with some compilers
+AS_CASE([$FC],
+ [*ifort*], [FCFLAGS="$FCFLAGS -nofor-main"],
+ [*nvfortran*], [FCFLAGS="$FCFLAGS -fPIC -Mnomain"],
+ [*pgf90*], [FCFLAGS="$FCFLAGS -fPIC -Mnomain"],
+ [*pgf77*], [FCFLAGS="$FCFLAGS -fPIC -Mnomain"],
+ [])
 
 
 ####
