@@ -91,15 +91,12 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_omp_device(
 	const int32_t *restrict nucleus_max_ang_mom,
 	const int32_t *restrict shell_ang_mom, const double *restrict ao_factor,
 	const qmckl_matrix expo_per_nucleus, const qmckl_tensor coef_per_nucleus,
-	double *restrict const ao_vgl,
-
-	int device_id);
+	double *restrict const ao_vgl);
 
 qmckl_exit_code
-qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
-										 int device_id);
+qmckl_provide_ao_basis_ao_vgl_omp_device(qmckl_context_device context);
 
 qmckl_exit_code
 qmckl_get_ao_basis_ao_vgl_omp_device(qmckl_context_device context,
 									 double *const ao_vgl,
-									 const int64_t size_max, int device_id);
+									 const int64_t size_max);
