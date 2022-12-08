@@ -35,7 +35,7 @@
 
 AC_PREREQ([2.69])
 
-AC_INIT([qmckl_gpu],[0.0.1],[https://github.com/TREX-CoE/qmckl/issues],[],[https://trex-coe.github.io/qmckl/index.html]	)
+AC_INIT([qmckl_gpu],[0.0.1],[https://github.com/TREX-CoE/qmckl_gpu/issues],[],[https://trex-coe.github.io/qmckl/index.html]	)
 AM_INIT_AUTOMAKE([-Wall subdir-objects])
 AM_PROG_AR
 
@@ -104,7 +104,7 @@ AC_ARG_ENABLE(acc_offload, [AS_HELP_STRING([--enable-acc-offload],[Enable OpenAC
 AC_ARG_ENABLE(omp, [AS_HELP_STRING([--enable-omp],[Enable OpenMP device pointers functions])], have_omp=yes, have_omp=no)
 
 # OpenACC + device pointers
-AC_ARG_ENABLE(acc_device, [AS_HELP_STRING([--enable-acc],[Enable OpenACC device pointers functions])], have_acc=yes, have_acc=no)
+AC_ARG_ENABLE(acc, [AS_HELP_STRING([--enable-acc],[Enable OpenACC device pointers functions])], have_acc=yes, have_acc=no)
 
 # TODO Add cuBLAS functions at some point ?
 

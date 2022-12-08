@@ -37,7 +37,8 @@ endif
 if HAVE_OMP_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_context_omp_device.c \
   src/qmckl_memory_omp_device.c src/qmckl_blas_omp_device.c \
-  src/qmckl_trexio_omp_device.c src/qmckl_ao_omp_device.c
+  src/qmckl_trexio_omp_device.c src/qmckl_ao_omp_device.c \
+  src/qmckl_jastrow_omp_device.c
 endif
 
 # TODO Enable OpenACC-specific device functions

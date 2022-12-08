@@ -29,7 +29,7 @@ Enabling either OpenMP and OpenACC is done at configure time, where (exactly) on
 
 In either case, the library interface is going to be exactly the same, as all of the OpenMP/OpenACC specific syntaxes are wrapped inside  QMCkl GPU's functions.
 
-**Note:** Using at exactly one of those arguments is mandatory, as doing otherwise would result in an empty library. If none is specified, Autotools will attempt to build the library with `--enable-omp` as a fallback solution.
+**Note:** Using exactly one of those arguments is mandatory, as doing otherwise would result in an empty library. If none is specified, Autotools will throw a warning message and attempt to build the library with `--enable-omp` as a fallback solution.
 
 
 # Basic usage

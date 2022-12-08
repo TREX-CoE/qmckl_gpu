@@ -1,3 +1,8 @@
+#pragma once
+
+// This file contains functions prototypes for BLAS related functions
+// (mostly manipulation of the device, matrix and tensor types)
+
 #include <qmckl.h>
 
 #include <assert.h>
@@ -14,7 +19,7 @@
 #include "qmckl_blas_private_func.h"
 #include "qmckl_memory_private_func.h"
 
-#include "qmckl_device_types.h"
+#include "qmckl_context_device.h"
 #include "qmckl_memory_device.h"
 
 qmckl_vector qmckl_vector_alloc_device(qmckl_context_device context,

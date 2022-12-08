@@ -1,4 +1,4 @@
-#include "../include/qmckl_trexio_device.h"
+#include "qmckl_trexio_device.h"
 
 //**********
 // ELECTRON/POINT GETTERS/SETTERS
