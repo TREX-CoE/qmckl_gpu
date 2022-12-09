@@ -1,6 +1,6 @@
 // This is the header file meant to be included by the users.
-// It contains prototypes for all GPU functions, and definition of
-// _device variants fo the structure datatypes.
+// It contains prototypes for all GPU public functions, and definition of
+// the _device context variant.
 
 #pragma once
 
@@ -35,7 +35,6 @@ qmckl_exit_code qmckl_trexio_read_device(const qmckl_context_device context,
 // AO
 //**********
 
-// qmckl_ao_openmp.c
 qmckl_exit_code
 qmckl_get_ao_basis_ao_num_device(const qmckl_context_device context,
 								 int64_t *const ao_num);
@@ -43,18 +42,9 @@ qmckl_exit_code
 qmckl_get_ao_basis_ao_num_device(const qmckl_context_device context,
 									 int64_t *const ao_num);
 
-qmckl_exit_code qmckl_get_ao_basis_ao_vgl_inplace_omp_offload(
+qmckl_exit_code qmckl_get_ao_basis_ao_vgl_inplace_offload(
 	qmckl_context context, double *const ao_vgl, const int64_t size_max);
 
-// qmckl_ao_acc.c
-qmckl_exit_code qmckl_get_ao_basis_ao_vgl_acc_offload(qmckl_context context,
-													  double *const ao_vgl,
-													  const int64_t size_max);
-
-qmckl_exit_code qmckl_get_ao_basis_ao_vgl_inplace_acc_offload(
-	qmckl_context context, double *const ao_vgl, const int64_t size_max);
-
-// qmckl_ao_device.c
 qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(
 	qmckl_context_device context, double *const ao_vgl, const int64_t size_max);
 
@@ -62,12 +52,7 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(
 // JASTROW
 //**********
 
-// qmckl_jastrow_openmp.c
-qmckl_exit_code qmckl_get_jastrow_tmp_c_omp_offload(qmckl_context context,
-													double *const tmp_c);
-
-qmckl_exit_code qmckl_get_jastrow_dtmp_c_omp_offload(qmckl_context context,
-													 double *const dtmp_c);
+// TODO Jastrow has been reworked recently
 
 //**********
 // ELECTRON

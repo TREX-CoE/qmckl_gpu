@@ -1,7 +1,6 @@
 #pragma once
 
-// This file contains functions prototypes for context memory management
-// functions
+// This file contains functions prototypes for memory management functions
 
 #include <qmckl.h>
 
@@ -17,7 +16,6 @@
 #include "qmckl_memory_private_type.h"
 
 #include "qmckl_context_device.h"
-#include "qmckl_device_types.h"
 
 
 /* Allocs & frees */

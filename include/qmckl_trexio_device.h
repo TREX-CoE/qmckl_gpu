@@ -1,5 +1,8 @@
 #pragma once
 
+// This file contains functions prototypes for functions initializing the
+// context from a TREXIO file
+
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
@@ -16,8 +19,8 @@
 #include "qmckl_memory_private_func.h"
 
 #include "qmckl_context_device.h"
-#include "qmckl_device_types.h"
 #include "qmckl_memory_device.h"
+#include "qmckl_blas_device.h"
 
 // Prototype for standard QMCkl function
 trexio_t *qmckl_trexio_open_X(const char *file_name, qmckl_exit_code *rc);

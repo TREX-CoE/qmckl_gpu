@@ -1,8 +1,8 @@
 #pragma once
 
 // This file contains prototypes for device context related functions,
-// ass well as the definition of qmckl_context_device_struct, which
-// contains additional and device-related data.
+// as well as the definition of qmckl_context_device and
+// qmckl_context_device_struct, the device specific datatypes for context
 
 #include <qmckl.h>
 
@@ -19,14 +19,14 @@
 #include "qmckl_context_private_type.h"
 #include "qmckl_memory_private_func.h"
 
-#include "qmckl_blas_device.h"
-#include "qmckl_device_types.h"
-#include "qmckl_memory_device.h"
+
+typedef int64_t qmckl_context_device;
 
 typedef struct {
 	size_t device_id;
 	qmckl_memory_struct memory;
 } qmckl_context_device_struct;
+
 
 qmckl_exit_code
 qmckl_context_destroy_omp_device(const qmckl_context_device context);
