@@ -40,6 +40,7 @@ AM_INIT_AUTOMAKE([-Wall subdir-objects])
 AM_PROG_AR
 
 AC_PROG_CC
+AC_PROG_FC
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
@@ -54,7 +55,7 @@ AC_ENABLE_STATIC
 ### Find QMCkl
 
 #AC_CHECK_LIB([qmckl], [qmckl_context_create], [], [PKG_CHECK_MODULES([QMCKL], [qmckl]) ])
-AC_CHECK_HEADERS([qmckl.h], [], [AC_MSG_ERROR("qmckl.h not found")])
+#AC_CHECK_HEADERS([qmckl.h], [], [AC_MSG_ERROR("qmckl.h not found")])
 
 # TREXIO
 AC_ARG_WITH([trexio],
@@ -165,6 +166,14 @@ AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc" = "xyes"], [
 			echo "Warning : compiler not supported for OpenACC. Make sure to add necessary offload flags manually."
 	esac
 ])
+
+# Specific options required with some compilers
+AS_CASE([$FC],
+ [*ifort*], [FCFLAGS="$FCFLAGS -nofor-main"],
+ [*nvfortran*], [FCFLAGS="$FCFLAGS -fPIC -Mnomain"],
+ [*pgf90*], [FCFLAGS="$FCFLAGS -fPIC -Mnomain"],
+ [*pgf77*], [FCFLAGS="$FCFLAGS -fPIC -Mnomain"],
+ [])
 
 
 ####
