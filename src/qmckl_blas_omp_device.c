@@ -1,7 +1,8 @@
 #include "../include/qmckl_blas_device.h"
 #include <omp.h>
 
-// NOTE Device versions of these functions will be added as they are needed
+// This file provides OpenMP implementations of BLAS functions (mostly initialization and
+// manipulation of vector, matrix, ... types). All functions accept device pointers.
 
 //**********
 // VECTOR
@@ -48,9 +49,6 @@ qmckl_vector_of_double_device(const qmckl_context_device context,
 								  const double *target, const int64_t size_max,
 								  qmckl_vector *vector_out) {
 
-	// Accepts an host array and copies it in the device section of
-	// vector_out (assuming the vector is already allocated)
-
 	int device_id = qmckl_get_device_id(context);
 
 	qmckl_vector vector = *vector_out;
@@ -69,7 +67,7 @@ qmckl_vector_of_double_device(const qmckl_context_device context,
 	}
 
 	omp_target_memcpy(vector.data, target, vector.size * sizeof(double), 0, 0,
-					  device_id, omp_get_initial_device());
+					  device_id, device_id);
 
 	*vector_out = vector;
 	return QMCKL_SUCCESS;
@@ -140,7 +138,6 @@ qmckl_matrix_of_double_device(const qmckl_context_device context,
 								  const double *target, const int64_t size_max,
 								  qmckl_matrix *matrix_out) {
 
-	// Accepts an host array and copies it in the device section of matrix
 	// (assuming the matrix is already allocated)
 
 	int device_id = qmckl_get_device_id(context);
@@ -162,7 +159,7 @@ qmckl_matrix_of_double_device(const qmckl_context_device context,
 	}
 
 	omp_target_memcpy(matrix.data, target, size_max * sizeof(double), 0, 0,
-					  device_id, omp_get_initial_device());
+					  device_id, device_id);
 
 	*matrix_out = matrix;
 	return QMCKL_SUCCESS;
@@ -218,7 +215,7 @@ qmckl_exit_code qmckl_transpose_device(qmckl_context_device context,
 qmckl_tensor qmckl_tensor_alloc_device(qmckl_context context,
 										   const int64_t order,
 										   const int64_t *size) {
-	/* Should always be true by contruction */
+	/* Should always be true by construction */
 	assert(order > 0);
 	assert(order <= QMCKL_TENSOR_ORDER_MAX);
 	assert(size != NULL);

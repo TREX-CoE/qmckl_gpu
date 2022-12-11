@@ -1,5 +1,11 @@
 #include "qmckl_trexio_device.h"
 
+// This file provides wrappers to standard QMCkl functions accessible with the
+// _device suffix. Includes OpenMP implementations.
+// All getters/setters work with device pointers. Except when initializing the
+// context from a TREXIO file, transferring data from/to the GPU must be handled
+// by the user.
+
 //**********
 // ELECTRON/POINT GETTERS/SETTERS
 //**********
@@ -166,9 +172,6 @@ qmckl_set_nucleus_charge_device(qmckl_context_device context,
 	}
 
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
-
-	// This accepts a host pointer and copies it in context as a device
-	// pointer
 
 	if (charge == NULL) {
 		return qmckl_failwith(context, QMCKL_INVALID_ARG_2,
@@ -1251,8 +1254,6 @@ qmckl_exit_code qmckl_set_ao_basis_nucleus_index_device(
 
 	int device_id = qmckl_get_device_id(context);
 
-	// Accepts an host array and copies it on device
-
 	int32_t mask = 1 << 4;
 
 	const int64_t nucl_num = ctx->nucleus.num;
@@ -1291,7 +1292,7 @@ qmckl_exit_code qmckl_set_ao_basis_nucleus_index_device(
 	}
 
 	omp_target_memcpy(new_array, nucleus_index, mem_info.size, 0, 0, device_id,
-					  omp_get_initial_device());
+					  device_id);
 
 	ctx->ao_basis.nucleus_index = new_array;
 
@@ -1319,8 +1320,6 @@ qmckl_exit_code qmckl_set_ao_basis_nucleus_shell_num_device(
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
-
-	// Accepts an host device and copies it on device.
 
 	int32_t mask = 1 << 3;
 
@@ -1360,7 +1359,7 @@ qmckl_exit_code qmckl_set_ao_basis_nucleus_shell_num_device(
 	}
 
 	omp_target_memcpy(new_array, nucleus_shell_num, mem_info.size, 0, 0,
-					  device_id, omp_get_initial_device());
+					  device_id, device_id);
 
 	ctx->ao_basis.nucleus_shell_num = new_array;
 
@@ -1388,8 +1387,6 @@ qmckl_exit_code qmckl_set_ao_basis_shell_ang_mom_device(
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
-
-	// Accepts an host array and copies it on device.
 
 	int32_t mask = 1 << 5;
 
@@ -1429,7 +1426,7 @@ qmckl_exit_code qmckl_set_ao_basis_shell_ang_mom_device(
 	}
 
 	omp_target_memcpy(new_array, shell_ang_mom, mem_info.size, 0, 0, device_id,
-					  omp_get_initial_device());
+					  device_id);
 
 	ctx->ao_basis.shell_ang_mom = new_array;
 
@@ -1457,8 +1454,6 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_num_device(
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
-
-	// Accepts an host array and copies it on device
 
 	int32_t mask = 1 << 6;
 
@@ -1498,7 +1493,7 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_num_device(
 	}
 
 	omp_target_memcpy(new_array, shell_prim_num, mem_info.size, 0, 0, device_id,
-					  omp_get_initial_device());
+					  device_id);
 
 	ctx->ao_basis.shell_prim_num = new_array;
 
@@ -1526,8 +1521,6 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_index_device(
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
-
-	// Accepts an host array and copies it on device
 
 	int32_t mask = 1 << 7;
 
@@ -1567,7 +1560,7 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_index_device(
 	}
 
 	omp_target_memcpy(new_array, shell_prim_index, mem_info.size, 0, 0,
-					  device_id, omp_get_initial_device());
+					  device_id, device_id);
 
 	ctx->ao_basis.shell_prim_index = new_array;
 
@@ -1595,8 +1588,6 @@ qmckl_exit_code qmckl_set_ao_basis_shell_factor_device(
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
-
-	// Accepts an host array and copies it on device
 
 	int32_t mask = 1 << 8;
 
@@ -1636,7 +1627,7 @@ qmckl_exit_code qmckl_set_ao_basis_shell_factor_device(
 	}
 
 	omp_target_memcpy(new_array, shell_factor, mem_info.size, 0, 0, device_id,
-					  omp_get_initial_device());
+					  device_id);
 
 	ctx->ao_basis.shell_factor = new_array;
 
@@ -1663,8 +1654,6 @@ qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
-
-	// Accepts an host array and copies it on device
 
 	int32_t mask = 1 << 9;
 
@@ -1703,7 +1692,7 @@ qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
 	}
 
 	omp_target_memcpy(new_array, exponent, mem_info.size, 0, 0, device_id,
-					  omp_get_initial_device());
+					  device_id);
 
 	ctx->ao_basis.exponent = new_array;
 
@@ -1730,8 +1719,6 @@ qmckl_exit_code qmckl_set_ao_basis_coefficient_device(
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
-
-	// Accepts an host array and copies it on device
 
 	int32_t mask = 1 << 10;
 
@@ -1771,7 +1758,7 @@ qmckl_exit_code qmckl_set_ao_basis_coefficient_device(
 	}
 
 	omp_target_memcpy(new_array, coefficient, mem_info.size, 0, 0, device_id,
-					  omp_get_initial_device());
+					  device_id);
 
 	ctx->ao_basis.coefficient = new_array;
 
@@ -1838,7 +1825,7 @@ qmckl_exit_code qmckl_set_ao_basis_prim_factor_device(
 	}
 
 	omp_target_memcpy(new_array, prim_factor, mem_info.size, 0, 0, device_id,
-					  omp_get_initial_device());
+					  device_id);
 
 	ctx->ao_basis.prim_factor = new_array;
 
@@ -1867,8 +1854,6 @@ qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
-
-	// Accepts an host array and copies it on device
 
 	int32_t mask = 1 << 13;
 
@@ -1907,7 +1892,7 @@ qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
 	}
 
 	omp_target_memcpy(new_array, ao_factor, mem_info.size, 0, 0, device_id,
-					  omp_get_initial_device());
+					  device_id);
 
 	ctx->ao_basis.ao_factor = new_array;
 
@@ -2056,7 +2041,7 @@ qmckl_exit_code qmckl_set_mo_basis_coefficient_device(
 	}
 
 	omp_target_memcpy(new_array, coefficient, mem_info.size, 0, 0, device_id,
-					  omp_get_initial_device());
+					  device_id);
 
 	ctx->mo_basis.coefficient = new_array;
 
@@ -2139,29 +2124,33 @@ qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 		mem_info.size = nucleus_num * sizeof(double);
 
-		double *nucl_charge = (double *)qmckl_malloc_host(context, mem_info);
+		double *nucl_charge_h = (double *)qmckl_malloc_host(context, mem_info);
+		double *nucl_charge_d = (double *)qmckl_malloc_device(context, mem_info);
 
-		if (nucl_charge == NULL) {
+		if (nucl_charge_h == NULL || nucl_charge_d == NULL) {
 			return qmckl_failwith(
 				(qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 				"qmckl_trexio_read_nucleus_X_device", NULL);
 		}
 
-		assert(nucl_charge != NULL);
+		assert(nucl_charge_h != NULL && nucl_charge_d != NULL);
 
 		rcio =
-			trexio_read_safe_nucleus_charge_64(file, nucl_charge, nucleus_num);
+			trexio_read_safe_nucleus_charge_64(file, nucl_charge_h, nucleus_num);
 		if (rcio != TREXIO_SUCCESS) {
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 								  "trexio_read_nucleus_charge",
 								  trexio_string_of_error(rcio));
 		}
 
-		rc = qmckl_set_nucleus_charge_device(context, nucl_charge,
+		qmckl_memcpy_H2D(context, nucl_charge_d, nucl_charge_h, mem_info.size);
+		rc = qmckl_set_nucleus_charge_device(context, nucl_charge_d,
 												 nucleus_num);
 
-		qmckl_free_host(context, nucl_charge);
-		nucl_charge = NULL;
+		qmckl_free_host(context, nucl_charge_h);
+		qmckl_free_device(context, nucl_charge_d);
+		nucl_charge_h = NULL;
+		nucl_charge_d = NULL;
 
 		if (rc != QMCKL_SUCCESS)
 			return rc;
@@ -2170,27 +2159,31 @@ qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = nucleus_num * 3 * sizeof(double);
 
-	double *nucl_coord = (double *)qmckl_malloc_host(context, mem_info);
+	double *nucl_coord_h = (double *)qmckl_malloc_host(context, mem_info);
+	double *nucl_coord_d = (double *)qmckl_malloc_device(context, mem_info);
 
-	if (nucl_coord == NULL) {
+	if (nucl_coord_h == NULL || nucl_coord_d == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 							  "qmckl_trexio_read_nucleus_X_device", NULL);
 	}
 
-	assert(nucl_coord != NULL);
+	assert(nucl_coord_h != NULL && nucl_coord_d != NULL);
 
-	rcio = trexio_read_safe_nucleus_coord_64(file, nucl_coord, 3 * nucleus_num);
+	rcio = trexio_read_safe_nucleus_coord_64(file, nucl_coord_h, 3 * nucleus_num);
 	if (rcio != TREXIO_SUCCESS) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 							  "trexio_read_nucleus_charge",
 							  trexio_string_of_error(rcio));
 	}
 
+	qmckl_memcpy_H2D(context, nucl_coord_d, nucl_coord_h, mem_info.size);
 	rc = qmckl_set_nucleus_coord_device(
-		(qmckl_context)context, 'N', nucl_coord, 3 * nucleus_num);
+		(qmckl_context)context, 'N', nucl_coord_d, 3 * nucleus_num);
 
-	qmckl_free_host(context, nucl_coord);
-	nucl_coord = NULL;
+	qmckl_free_host(context, nucl_coord_h);
+	qmckl_free_device(context, nucl_coord_d);
+	nucl_coord_h = NULL;
+	nucl_coord_d = NULL;
 
 	if (rc != QMCKL_SUCCESS) {
 		return rc;
@@ -2282,10 +2275,13 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 
 		/* Allocate array for data */
 		mem_info.size = nucleus_num * sizeof(int64_t);
-		int64_t *nucleus_index =
+		int64_t *nucleus_index_h =
 			(int64_t *)qmckl_malloc_host(context, mem_info);
+		int64_t *nucleus_index_d =
+			(int64_t *)qmckl_malloc_device(context, mem_info);
 
-		if (nucleus_index == NULL) {
+
+		if (nucleus_index_h == NULL || nucleus_index_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
 								  QMCKL_ALLOCATION_FAILED,
 								  "qmckl_trexio_read_basis_nucleus_"
@@ -2293,15 +2289,17 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 								  NULL);
 		}
 
-		assert(nucleus_index != NULL);
+		assert(nucleus_index_h != NULL && nucleus_index_d != NULL);
 
 		/* Allocate temporary array */
 		mem_info.size = shell_num * sizeof(int64_t);
 		int64_t *tmp_array = (int64_t *)qmckl_malloc_host(context, mem_info);
 
 		if (tmp_array == NULL) {
-			qmckl_free_host(context, nucleus_index);
-			nucleus_index = NULL;
+			qmckl_free_host(context, nucleus_index_h);
+			qmckl_free_device(context, nucleus_index_d);
+			nucleus_index_h = NULL;
+			nucleus_index_d = NULL;
 			return qmckl_failwith((qmckl_context)context,
 								  QMCKL_ALLOCATION_FAILED,
 								  "qmckl_trexio_read_basis_nucleus_"
@@ -2317,19 +2315,24 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		if (rcio != TREXIO_SUCCESS) {
 			qmckl_free_host(context, tmp_array);
 			tmp_array = NULL;
-			qmckl_free_host(context, nucleus_index);
-			nucleus_index = NULL;
+			qmckl_free_host(context, nucleus_index_h);
+			qmckl_free_device(context, nucleus_index_d);
+			nucleus_index_h = NULL;
+			nucleus_index_d = NULL;
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 								  "trexio_read_basis_nucleus_index",
 								  trexio_string_of_error(rcio));
 		}
 
 		/* Reformat data */
+		qmckl_memcpy_H2D(context, nucleus_index_d, nucleus_index_h, mem_info.size);
 		rc = qmckl_set_ao_basis_nucleus_index_device(
-			context, nucleus_index, nucleus_num);
+			context, nucleus_index_d, nucleus_num);
 		if (rc != QMCKL_SUCCESS) {
-			qmckl_free_host(context, nucleus_index);
-			nucleus_index = NULL;
+			qmckl_free_host(context, nucleus_index_h);
+			qmckl_free_device(context, nucleus_index_d);
+			nucleus_index_h = NULL;
+			nucleus_index_d = NULL;
 			return rc;
 		}
 
@@ -2338,24 +2341,28 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			if (k < 0 || k >= nucleus_num) {
 				qmckl_free_host(context, tmp_array);
 				tmp_array = NULL;
-				qmckl_free_host(context, nucleus_index);
-				nucleus_index = NULL;
+				qmckl_free_host(context, nucleus_index_h);
+				qmckl_free_device(context, nucleus_index_d);
+				nucleus_index_h = NULL;
+				nucleus_index_d = NULL;
 				return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 									  "trexio_read_basis_nucleus_index",
 									  "Irrelevant data in TREXIO file");
 			}
-			nucleus_index[k] = i;
+			nucleus_index_h[k] = i;
 		}
 
 		qmckl_free_host(context, tmp_array);
 		tmp_array = NULL;
 
 		/* Store data */
-		rc = qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index,
+		rc = qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index_d,
 														 shell_num);
 
-		qmckl_free_host(context, nucleus_index);
-		nucleus_index = NULL;
+		qmckl_free_host(context, nucleus_index_h);
+		qmckl_free_device(context, nucleus_index_d);
+		nucleus_index_h = NULL;
+		nucleus_index_d = NULL;
 
 		if (rc != QMCKL_SUCCESS)
 			return rc;
@@ -2366,10 +2373,12 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 
 		/* Allocate array for data */
 		mem_info.size = nucleus_num * sizeof(int64_t);
-		int64_t *nucleus_shell_num =
+		int64_t *nucleus_shell_num_h =
 			(int64_t *)qmckl_malloc_host(context, mem_info);
+		int64_t *nucleus_shell_num_d =
+			(int64_t *)qmckl_malloc_device(context, mem_info);
 
-		if (nucleus_shell_num == NULL) {
+		if (nucleus_shell_num_h == NULL) {
 			return qmckl_failwith((qmckl_context)context,
 								  QMCKL_ALLOCATION_FAILED,
 								  "qmckl_trexio_read_basis_nucleus_"
@@ -2377,15 +2386,16 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 								  NULL);
 		}
 
-		assert(nucleus_shell_num != NULL);
+		assert(nucleus_shell_num_h != NULL);
 
 		/* Allocate temporary array */
 		mem_info.size = shell_num * sizeof(int64_t);
 		int64_t *tmp_array = (int64_t *)qmckl_malloc_host(context, mem_info);
 
 		if (tmp_array == NULL) {
-			qmckl_free_host(context, nucleus_shell_num);
-			nucleus_shell_num = NULL;
+			qmckl_free_host(context, nucleus_shell_num_h);
+			qmckl_free_device(context, nucleus_shell_num_d);
+			nucleus_shell_num_h = NULL;
 			return qmckl_failwith((qmckl_context)context,
 								  QMCKL_ALLOCATION_FAILED,
 								  "qmckl_trexio_read_basis_nucleus_"
@@ -2401,8 +2411,9 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		if (rcio != TREXIO_SUCCESS) {
 			qmckl_free_host(context, tmp_array);
 			tmp_array = NULL;
-			qmckl_free_host(context, nucleus_shell_num);
-			nucleus_shell_num = NULL;
+			qmckl_free_host(context, nucleus_shell_num_h);
+			qmckl_free_device(context, nucleus_shell_num_d);
+			nucleus_shell_num_h = NULL;
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 								  "trexio_read_basis_nucleus_shell_num",
 								  trexio_string_of_error(rcio));
@@ -2410,7 +2421,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 
 		/* Reformat data */
 		for (int i = 0; i < nucleus_num; ++i) {
-			nucleus_shell_num[i] = 0;
+			nucleus_shell_num_h[i] = 0;
 		}
 
 		for (int i = 0; i < shell_num; ++i) {
@@ -2418,24 +2429,28 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			if (k < 0 || k >= nucleus_num) {
 				qmckl_free_host(context, tmp_array);
 				tmp_array = NULL;
-				qmckl_free_host(context, nucleus_shell_num);
-				nucleus_shell_num = NULL;
+				qmckl_free_host(context, nucleus_shell_num_h);
+				qmckl_free_device(context, nucleus_shell_num_d);
+				nucleus_shell_num_h = NULL;
 				return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 									  "trexio_read_basis_nucleus_shell_num",
 									  "Irrelevant data in TREXIO file");
 			}
-			nucleus_shell_num[k] += 1;
+			nucleus_shell_num_h[k] += 1;
 		}
 
 		qmckl_free_host(context, tmp_array);
 		tmp_array = NULL;
 
 		/* Store data */
+		qmckl_memcpy_H2D(context, nucleus_shell_num_d, nucleus_shell_num_h, mem_info.size);
 		rc = qmckl_set_ao_basis_nucleus_shell_num_device(
-			context, nucleus_shell_num, shell_num);
+			context, nucleus_shell_num_d, shell_num);
 
-		qmckl_free_host(context, nucleus_shell_num);
-		nucleus_shell_num = NULL;
+		qmckl_free_host(context, nucleus_shell_num_h);
+		qmckl_free_device(context, nucleus_shell_num_d);
+		nucleus_shell_num_h = NULL;
+		nucleus_shell_num_d = NULL;
 
 		if (rc != QMCKL_SUCCESS)
 			return rc;
@@ -2447,10 +2462,13 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		/* Allocate array for data */
 		mem_info.size = shell_num * sizeof(int32_t);
 
-		int32_t *shell_ang_mom =
+		int32_t *shell_ang_mom_h =
 			(int32_t *)qmckl_malloc_host(context, mem_info);
+		int32_t *shell_ang_mom_d =
+			(int32_t *)qmckl_malloc_device(context, mem_info);
 
-		if (shell_ang_mom == NULL) {
+
+		if (shell_ang_mom_h == NULL || shell_ang_mom_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
 								  QMCKL_ALLOCATION_FAILED,
 								  "qmckl_trexio_read_basis_shell_"
@@ -2458,25 +2476,30 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 								  NULL);
 		}
 
-		assert(shell_ang_mom != NULL);
+		assert(shell_ang_mom_h != NULL && shell_ang_mom_d != NULL);
 
 		/* Read data */
-		rcio = trexio_read_safe_basis_shell_ang_mom_32(file, shell_ang_mom,
+		rcio = trexio_read_safe_basis_shell_ang_mom_32(file, shell_ang_mom_h,
 													   shell_num);
 		if (rcio != TREXIO_SUCCESS) {
-			qmckl_free_host(context, shell_ang_mom);
-			shell_ang_mom = NULL;
+			qmckl_free_host(context, shell_ang_mom_h);
+			qmckl_free_device(context, shell_ang_mom_d);
+			shell_ang_mom_h = NULL;
+			shell_ang_mom_d = NULL;
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 								  "trexio_read_basis_shell_ang_mom",
 								  trexio_string_of_error(rcio));
 		}
 
 		/* Store data */
-		rc = qmckl_set_ao_basis_shell_ang_mom_device(context, shell_ang_mom,
+		qmckl_memcpy_H2D(context, shell_ang_mom_d, shell_ang_mom_h, mem_info.size);
+		rc = qmckl_set_ao_basis_shell_ang_mom_device(context, shell_ang_mom_d,
 														 shell_num);
 
-		qmckl_free_host(context, shell_ang_mom);
-		shell_ang_mom = NULL;
+		qmckl_free_host(context, shell_ang_mom_h);
+		qmckl_free_device(context, shell_ang_mom_d);
+		shell_ang_mom_h = NULL;
+		shell_ang_mom_d = NULL;
 
 		if (rc != QMCKL_SUCCESS)
 			return rc;
@@ -2488,10 +2511,13 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		/* Allocate array for data */
 		mem_info.size = shell_num * sizeof(int64_t);
 
-		int64_t *shell_prim_num =
+		int64_t *shell_prim_num_h =
 			(int64_t *)qmckl_malloc_host(context, mem_info);
+		int64_t *shell_prim_num_d =
+			(int64_t *)qmckl_malloc_device(context, mem_info);
 
-		if (shell_prim_num == NULL) {
+
+		if (shell_prim_num_h == NULL || shell_prim_num_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
 								  QMCKL_ALLOCATION_FAILED,
 								  "qmckl_trexio_read_basis_shell_"
@@ -2499,7 +2525,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 								  NULL);
 		}
 
-		assert(shell_prim_num != NULL);
+		assert(shell_prim_num_h != NULL && shell_prim_num_d != NULL);
 
 		/* Allocate temporary array */
 		mem_info.size = prim_num * sizeof(int64_t);
@@ -2507,8 +2533,10 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		int64_t *tmp_array = (int64_t *)qmckl_malloc_host(context, mem_info);
 
 		if (tmp_array == NULL) {
-			qmckl_free_host(context, shell_prim_num);
-			shell_prim_num = NULL;
+			qmckl_free_host(context, shell_prim_num_h);
+			qmckl_free_device(context, shell_prim_num_d);
+			shell_prim_num_h = NULL;
+			shell_prim_num_d = NULL;
 			return qmckl_failwith((qmckl_context)context,
 								  QMCKL_ALLOCATION_FAILED,
 								  "qmckl_trexio_read_basis_shell_"
@@ -2521,8 +2549,10 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		/* Read data */
 		rcio = trexio_read_safe_basis_shell_index_64(file, tmp_array, prim_num);
 		if (rcio != TREXIO_SUCCESS) {
-			qmckl_free_host(context, shell_prim_num);
-			shell_prim_num = NULL;
+			qmckl_free_host(context, shell_prim_num_h);
+			qmckl_free_device(context, shell_prim_num_d);
+			shell_prim_num_h = NULL;
+			shell_prim_num_d = NULL;
 			qmckl_free_host(context, tmp_array);
 			tmp_array = NULL;
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -2532,30 +2562,34 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 
 		/* Reformat data */
 		for (int i = 0; i < shell_num; ++i) {
-			shell_prim_num[i] = 0;
+			shell_prim_num_h[i] = 0;
 		}
 
 		for (int i = 0; i < prim_num; ++i) {
 			const int k = tmp_array[i];
 			if (k < 0 || k >= shell_num) {
 				qmckl_free_host(context, tmp_array);
-				qmckl_free_host(context, shell_prim_num);
+				qmckl_free_host(context, shell_prim_num_h);
+				qmckl_free_device(context, shell_prim_num_d);
 				return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 									  "trexio_read_basis_shell_prim_num",
 									  "Irrelevant data in TREXIO file");
 			}
-			shell_prim_num[k] += 1;
+			shell_prim_num_h[k] += 1;
 		}
 
 		qmckl_free_host(context, tmp_array);
 		tmp_array = NULL;
 
 		/* Store data */
+		qmckl_memcpy_H2D(context, shell_prim_num_d, shell_prim_num_h, mem_info.size);
 		rc = qmckl_set_ao_basis_shell_prim_num_device(
-			context, shell_prim_num, shell_num);
+			context, shell_prim_num_d, shell_num);
 
-		qmckl_free_host(context, shell_prim_num);
-		shell_prim_num = NULL;
+		qmckl_free_host(context, shell_prim_num_h);
+		qmckl_free_device(context, shell_prim_num_d);
+		shell_prim_num_h = NULL;
+		shell_prim_num_d = NULL;
 
 		if (rc != QMCKL_SUCCESS)
 			return rc;
@@ -2567,10 +2601,13 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		/* Allocate array for data */
 		mem_info.size = shell_num * sizeof(int64_t);
 
-		int64_t *shell_prim_index =
+		int64_t *shell_prim_index_h =
 			(int64_t *)qmckl_malloc_host(context, mem_info);
+		int64_t *shell_prim_index_d =
+			(int64_t *)qmckl_malloc_device(context, mem_info);
 
-		if (shell_prim_index == NULL) {
+
+		if (shell_prim_index_h == NULL || shell_prim_index_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
 								  QMCKL_ALLOCATION_FAILED,
 								  "qmckl_trexio_read_basis_shell_"
@@ -2578,7 +2615,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 								  NULL);
 		}
 
-		assert(shell_prim_index != NULL);
+		assert(shell_prim_index_h != NULL && shell_prim_index_d != NULL);
 
 		/* Allocate temporary array */
 		mem_info.size = prim_num * sizeof(int64_t);
@@ -2598,8 +2635,10 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		/* Read data */
 		rcio = trexio_read_safe_basis_shell_index_64(file, tmp_array, prim_num);
 		if (rcio != TREXIO_SUCCESS) {
-			qmckl_free_host(context, shell_prim_index);
-			shell_prim_index = NULL;
+			qmckl_free_host(context, shell_prim_index_h);
+			qmckl_free_device(context, shell_prim_index_d);
+			shell_prim_index_h = NULL;
+			shell_prim_index_d = NULL;
 			qmckl_free_host(context, tmp_array);
 			tmp_array = NULL;
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -2613,24 +2652,29 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			if (k < 0 || k >= shell_num) {
 				qmckl_free_host(context, tmp_array);
 				tmp_array = NULL;
-				qmckl_free_host(context, shell_prim_index);
-				shell_prim_index = NULL;
+				qmckl_free_host(context, shell_prim_index_h);
+				qmckl_free_device(context, shell_prim_index_d);
+				shell_prim_index_h = NULL;
+				shell_prim_index_d = NULL;
 				return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 									  "trexio_read_basis_shell_prim_index",
 									  "Irrelevant data in TREXIO file");
 			}
-			shell_prim_index[k] = i;
+			shell_prim_index_h[k] = i;
 		}
 
 		qmckl_free_host(context, tmp_array);
 		tmp_array = NULL;
 
 		/* Store data */
+		qmckl_memcpy_H2D(context, shell_prim_index_d, shell_prim_index_h, mem_info.size);
 		rc = qmckl_set_ao_basis_shell_prim_index_device(
-			context, shell_prim_index, shell_num);
+			context, shell_prim_index_d, shell_num);
 
-		qmckl_free_host(context, shell_prim_index);
-		shell_prim_index = NULL;
+		qmckl_free_host(context, shell_prim_index_h);
+		qmckl_free_device(context, shell_prim_index_d);
+		shell_prim_index_h = NULL;
+		shell_prim_index_d = NULL;
 
 		if (rc != QMCKL_SUCCESS)
 			return rc;
@@ -2642,33 +2686,39 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		/* Allocate array for data */
 		mem_info.size = shell_num * sizeof(double);
 
-		double *shell_factor = (double *)qmckl_malloc_host(context, mem_info);
+		double *shell_factor_h = (double *)qmckl_malloc_host(context, mem_info);
+		double *shell_factor_d = (double *)qmckl_malloc_device(context, mem_info);
 
-		if (shell_factor == NULL) {
+		if (shell_factor_h == NULL || shell_factor_d == NULL) {
 			return qmckl_failwith(
 				(qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 				"qmckl_trexio_read_basis_shell_factor_X_device", NULL);
 		}
 
-		assert(shell_factor != NULL);
+		assert(shell_factor_h != NULL && shell_factor_d != NULL);
 
 		/* Read data */
-		rcio = trexio_read_safe_basis_shell_factor_64(file, shell_factor,
+		rcio = trexio_read_safe_basis_shell_factor_64(file, shell_factor_h,
 													  shell_num);
 		if (rcio != TREXIO_SUCCESS) {
-			qmckl_free_host(context, shell_factor);
-			shell_factor = NULL;
+			qmckl_free_host(context, shell_factor_h);
+			qmckl_free_device(context, shell_factor_d);
+			shell_factor_h = NULL;
+			shell_factor_d = NULL;
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 								  "trexio_read_basis_shell_factor",
 								  trexio_string_of_error(rcio));
 		}
 
 		/* Store data */
-		rc = qmckl_set_ao_basis_shell_factor_device(context, shell_factor,
+		qmckl_memcpy_H2D(context, shell_factor_d, shell_factor_h, mem_info.size);
+		rc = qmckl_set_ao_basis_shell_factor_device(context, shell_factor_d,
 														shell_num);
 
-		qmckl_free_host(context, shell_factor);
-		shell_factor = NULL;
+		qmckl_free_host(context, shell_factor_h);
+		qmckl_free_device(context, shell_factor_d);
+		shell_factor_h = NULL;
+		shell_factor_d = NULL;
 
 		if (rc != QMCKL_SUCCESS)
 			return rc;
@@ -2680,31 +2730,37 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		/* Allocate array for data */
 		mem_info.size = prim_num * sizeof(double);
 
-		double *exponent = (double *)qmckl_malloc_host(context, mem_info);
+		double *exponent_h = (double *)qmckl_malloc_host(context, mem_info);
+		double *exponent_d = (double *)qmckl_malloc_device(context, mem_info);
 
-		if (exponent == NULL) {
+		if (exponent_h == NULL || exponent_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
 								  QMCKL_ALLOCATION_FAILED,
 								  "qmckl_trexio_read_basis_exponent_X", NULL);
 		}
 
-		assert(exponent != NULL);
+		assert(exponent_h != NULL && exponent_d != NULL);
 
 		/* Read data */
-		rcio = trexio_read_safe_basis_exponent_64(file, exponent, prim_num);
+		rcio = trexio_read_safe_basis_exponent_64(file, exponent_h, prim_num);
 		if (rcio != TREXIO_SUCCESS) {
-			qmckl_free_host(context, exponent);
-			exponent = NULL;
+			qmckl_free_host(context, exponent_h);
+			qmckl_free_device(context, exponent_d);
+			exponent_h = NULL;
+			exponent_d = NULL;
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 								  "trexio_read_basis_exponent",
 								  trexio_string_of_error(rcio));
 		}
 
 		/* Store data */
-		rc = qmckl_set_ao_basis_exponent_device(context, exponent, prim_num);
+		qmckl_memcpy_H2D(context, exponent_d, exponent_h, mem_info.size);
+		rc = qmckl_set_ao_basis_exponent_device(context, exponent_d, prim_num);
 
-		qmckl_free_host(context, exponent);
-		exponent = NULL;
+		qmckl_free_host(context, exponent_h);
+		qmckl_free_device(context, exponent_d);
+		exponent_h = NULL;
+		exponent_d = NULL;
 
 		if (rc != QMCKL_SUCCESS)
 			return rc;
@@ -2716,33 +2772,39 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		/* Allocate array for data */
 		mem_info.size = prim_num * sizeof(double);
 
-		double *coefficient = (double *)qmckl_malloc_host(context, mem_info);
+		double *coefficient_h = (double *)qmckl_malloc_host(context, mem_info);
+		double *coefficient_d = (double *)qmckl_malloc_device(context, mem_info);
 
-		if (coefficient == NULL) {
+		if (coefficient_h == NULL || coefficient_d == NULL) {
 			return qmckl_failwith(
 				(qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 				"qmckl_trexio_read_basis_coefficient_X_device", NULL);
 		}
 
-		assert(coefficient != NULL);
+		assert(coefficient_h != NULL && coefficient_d != NULL);
 
 		/* Read data */
 		rcio =
-			trexio_read_safe_basis_coefficient_64(file, coefficient, prim_num);
+			trexio_read_safe_basis_coefficient_64(file, coefficient_h, prim_num);
 		if (rcio != TREXIO_SUCCESS) {
-			qmckl_free_host(context, coefficient);
-			coefficient = NULL;
+			qmckl_free_host(context, coefficient_h);
+			qmckl_free_device(context, coefficient_d);
+			coefficient_h = NULL;
+			coefficient_d = NULL;
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 								  "trexio_read_basis_coefficient",
 								  trexio_string_of_error(rcio));
 		}
 
 		/* Store data */
-		rc = qmckl_set_ao_basis_coefficient_device(context, coefficient,
+		qmckl_memcpy_H2D(context, coefficient_d, coefficient_h, mem_info.size);
+		rc = qmckl_set_ao_basis_coefficient_device(context, coefficient_d,
 													   prim_num);
 
-		qmckl_free_host(context, coefficient);
-		coefficient = NULL;
+		qmckl_free_host(context, coefficient_h);
+		qmckl_free_device(context, coefficient_d);
+		coefficient_h = NULL;
+		coefficient_d = NULL;
 
 		if (rc != QMCKL_SUCCESS)
 			return rc;
@@ -2754,33 +2816,39 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		/* Allocate array for data */
 		mem_info.size = prim_num * sizeof(double);
 
-		double *prim_factor = (double *)qmckl_malloc_host(context, mem_info);
+		double *prim_factor_h = (double *)qmckl_malloc_host(context, mem_info);
+		double *prim_factor_d = (double *)qmckl_malloc_device(context, mem_info);
 
-		if (prim_factor == NULL) {
+		if (prim_factor_h == NULL || prim_factor_d == NULL) {
 			return qmckl_failwith(
 				(qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 				"qmckl_trexio_read_basis_prim_factor_X_device", NULL);
 		}
 
-		assert(prim_factor != NULL);
+		assert(prim_factor_h != NULL && prim_factor_d != NULL);
 
 		/* Read data */
 		rcio =
-			trexio_read_safe_basis_prim_factor_64(file, prim_factor, prim_num);
+			trexio_read_safe_basis_prim_factor_64(file, prim_factor_h, prim_num);
 		if (rcio != TREXIO_SUCCESS) {
-			qmckl_free_host(context, prim_factor);
-			prim_factor = NULL;
+			qmckl_free_host(context, prim_factor_h);
+			qmckl_free_device(context, prim_factor_d);
+			prim_factor_h = NULL;
+			prim_factor_d = NULL;
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 								  "trexio_read_basis_prim_factor",
 								  trexio_string_of_error(rcio));
 		}
 
 		/* Read data */
-		rc = qmckl_set_ao_basis_prim_factor_device(context, prim_factor,
+		qmckl_memcpy_H2D(context, prim_factor_d, prim_factor_h, mem_info.size);
+		rc = qmckl_set_ao_basis_prim_factor_device(context, prim_factor_d,
 													   prim_num);
 
-		qmckl_free_host((qmckl_context)context, prim_factor);
-		prim_factor = NULL;
+		qmckl_free_host(context, prim_factor_h);
+		qmckl_free_device(context, prim_factor_d);
+		prim_factor_h = NULL;
+		prim_factor_d = NULL;
 
 		if (rc != QMCKL_SUCCESS)
 			return rc;
@@ -2792,34 +2860,42 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		/* Allocate array for data */
 		mem_info.size = ao_num * sizeof(double);
 
-		double *ao_normalization =
+		double *ao_normalization_h =
 			(double *)qmckl_malloc_host(context, mem_info);
+		double *ao_normalization_d =
+			(double *)qmckl_malloc_device(context, mem_info);
 
-		if (ao_normalization == NULL) {
+
+		if (ao_normalization_h == NULL || ao_normalization_d == NULL) {
 			return qmckl_failwith(
 				(qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 				"qmckl_trexio_read_ao_normalization_X_device", NULL);
 		}
 
-		assert(ao_normalization != NULL);
+		assert(ao_normalization_h != NULL && ao_normalization_d != NULL);
 
 		/* Read data */
-		rcio = trexio_read_safe_ao_normalization_64(file, ao_normalization,
+		rcio = trexio_read_safe_ao_normalization_64(file, ao_normalization_h,
 													ao_num);
 		if (rcio != TREXIO_SUCCESS) {
-			qmckl_free_host(context, ao_normalization);
-			ao_normalization = NULL;
+			qmckl_free_host(context, ao_normalization_h);
+			qmckl_free_device(context, ao_normalization_d);
+			ao_normalization_h = NULL;
+			ao_normalization_d = NULL;
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 								  "trexio_read_ao_normalization",
 								  trexio_string_of_error(rcio));
 		}
 
 		/* Store data */
-		rc = qmckl_set_ao_basis_ao_factor_device(context, ao_normalization,
+		qmckl_memcpy_H2D(context, ao_normalization_d, ao_normalization_h, mem_info.size);
+		rc = qmckl_set_ao_basis_ao_factor_device(context, ao_normalization_d,
 													 ao_num);
 
-		qmckl_free_host(context, ao_normalization);
-		ao_normalization = NULL;
+		qmckl_free_host(context, ao_normalization_h);
+		qmckl_free_device(context, ao_normalization_d);
+		ao_normalization_h = NULL;
+		ao_normalization_d = NULL;
 
 		if (rc != QMCKL_SUCCESS)
 			return rc;
@@ -2860,27 +2936,31 @@ qmckl_exit_code qmckl_trexio_read_mo_X_device(qmckl_context_device context,
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 		mem_info.size = ao_num * mo_num * sizeof(double);
 
-		double *mo_coef = (double *)qmckl_malloc_host(context, mem_info);
+		double *mo_coef_h = (double *)qmckl_malloc_host(context, mem_info);
+		double *mo_coef_d = (double *)qmckl_malloc_device(context, mem_info);
 
-		if (mo_coef == NULL) {
+		if (mo_coef_h == NULL || mo_coef_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
 								  QMCKL_ALLOCATION_FAILED,
 								  "qmckl_trexio_read_mo_X_device", NULL);
 		}
 
-		assert(mo_coef != NULL);
+		assert(mo_coef_h != NULL && mo_coef_d != NULL);
 
-		rcio = trexio_read_mo_coefficient_64(file, mo_coef);
+		rcio = trexio_read_mo_coefficient_64(file, mo_coef_h);
 		if (rcio != TREXIO_SUCCESS) {
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 								  "trexio_read_mo_coefficient",
 								  trexio_string_of_error(rcio));
 		}
 
-		rc = qmckl_set_mo_basis_coefficient_device(context, mo_coef);
+		qmckl_memcpy_H2D(context, mo_coef_d, mo_coef_h, mem_info.size);
+		rc = qmckl_set_mo_basis_coefficient_device(context, mo_coef_d);
 
-		qmckl_free_host(context, mo_coef);
-		mo_coef = NULL;
+		qmckl_free_host(context, mo_coef_h);
+		qmckl_free_device(context, mo_coef_d);
+		mo_coef_h = NULL;
+		mo_coef_d = NULL;
 
 		if (rc != QMCKL_SUCCESS)
 			return rc;
