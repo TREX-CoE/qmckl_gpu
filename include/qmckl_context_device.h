@@ -19,14 +19,12 @@
 #include "qmckl_context_private_type.h"
 #include "qmckl_memory_private_func.h"
 
-
 typedef int64_t qmckl_context_device;
 
 typedef struct {
 	size_t device_id;
 	qmckl_memory_struct memory;
 } qmckl_context_device_struct;
-
 
 qmckl_exit_code
 qmckl_context_destroy_omp_device(const qmckl_context_device context);

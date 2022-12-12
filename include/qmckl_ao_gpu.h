@@ -41,7 +41,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 qmckl_exit_code
 qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context);
 
-qmckl_exit_code
-qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
-									 double *const ao_vgl,
-									 const int64_t size_max);
+qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
+												 double *const ao_vgl,
+												 const int64_t size_max);

@@ -1,7 +1,8 @@
 #include "../include/qmckl_memory_device.h"
 
-// This file contains functions to allocate host memory in a qmckl_context_device
-// (we will likely use these functions in exceptional cases only)
+// This file contains functions to allocate host memory in a
+// qmckl_context_device (we will likely use these functions in exceptional cases
+// only)
 
 //**********
 // HOST MEMORY

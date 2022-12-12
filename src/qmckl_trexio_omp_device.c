@@ -10,11 +10,10 @@
 // ELECTRON/POINT GETTERS/SETTERS
 //**********
 
-
 qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
-										   const char transp, const int64_t num,
-										   const double *coord,
-										   const int64_t size_max) {
+									   const char transp, const int64_t num,
+									   const double *coord,
+									   const int64_t size_max) {
 
 	const size_t device_id = qmckl_get_device_id(context);
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
@@ -49,8 +48,7 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 			assert(rc == QMCKL_SUCCESS);
 		}
 
-		ctx->point.coord =
-			qmckl_matrix_alloc_device(context, num, 3);
+		ctx->point.coord = qmckl_matrix_alloc_device(context, num, 3);
 		if (ctx->point.coord.data == NULL) {
 			return qmckl_failwith((qmckl_context)context,
 								  QMCKL_ALLOCATION_FAILED, "qmckl_set_point",
@@ -88,10 +86,10 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_set_electron_coord_device(qmckl_context context,
-													const char transp,
-													const int64_t walk_num,
-													const double *coord,
-													const int64_t size_max) {
+												const char transp,
+												const int64_t walk_num,
+												const double *coord,
+												const int64_t size_max) {
 
 	const size_t device_id = qmckl_get_device_id(context);
 	int32_t mask = 0; // coord can be changed
@@ -143,7 +141,7 @@ qmckl_exit_code qmckl_set_electron_coord_device(qmckl_context context,
 
 	qmckl_exit_code rc;
 	rc = qmckl_set_point_device(context, transp, walk_num * elec_num, coord,
-									size_max);
+								size_max);
 	if (rc != QMCKL_SUCCESS)
 		return rc;
 
@@ -158,11 +156,9 @@ qmckl_exit_code qmckl_set_electron_coord_device(qmckl_context context,
 // NUCLEUS GETTERS/SETTERS
 //**********
 
-
-qmckl_exit_code
-qmckl_set_nucleus_charge_device(qmckl_context_device context,
-									const double *charge,
-									const int64_t size_max) {
+qmckl_exit_code qmckl_set_nucleus_charge_device(qmckl_context_device context,
+												const double *charge,
+												const int64_t size_max) {
 
 	int32_t mask = 1 << 1;
 
@@ -192,10 +188,9 @@ qmckl_set_nucleus_charge_device(qmckl_context_device context,
 							  "Array too small");
 	}
 
-	ctx->nucleus.charge =
-		qmckl_vector_alloc_device(context, num);
+	ctx->nucleus.charge = qmckl_vector_alloc_device(context, num);
 	rc = qmckl_vector_of_double_device(context, charge, num,
-										   &(ctx->nucleus.charge));
+									   &(ctx->nucleus.charge));
 
 	if (rc != QMCKL_SUCCESS) {
 		return qmckl_failwith(context, QMCKL_FAILURE,
@@ -210,9 +205,9 @@ qmckl_set_nucleus_charge_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_set_nucleus_coord_device(qmckl_context_device context,
-												   const char transp,
-												   const double *coord,
-												   const int64_t size_max) {
+											   const char transp,
+											   const double *coord,
+											   const int64_t size_max) {
 	int32_t mask = 1 << 2;
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
@@ -231,8 +226,7 @@ qmckl_exit_code qmckl_set_nucleus_coord_device(qmckl_context_device context,
 			return rc;
 	}
 
-	ctx->nucleus.coord =
-		qmckl_matrix_alloc_device(context, nucl_num, 3);
+	ctx->nucleus.coord = qmckl_matrix_alloc_device(context, nucl_num, 3);
 
 #pragma use_device_ptr(ctx->nucleus.coord.data)
 	{
@@ -252,14 +246,13 @@ qmckl_exit_code qmckl_set_nucleus_coord_device(qmckl_context_device context,
 	if (transp == 'N') {
 		qmckl_matrix At;
 		At = qmckl_matrix_alloc_device(context, 3, nucl_num);
-		rc = qmckl_matrix_of_double_device(context, coord, 3 * nucl_num,
-											   &At);
+		rc = qmckl_matrix_of_double_device(context, coord, 3 * nucl_num, &At);
 		if (rc != QMCKL_SUCCESS)
 			return rc;
 		rc = qmckl_transpose_device(context, At, ctx->nucleus.coord);
 	} else {
-		rc = qmckl_matrix_of_double_device(
-			context, coord, nucl_num * 3, &(ctx->nucleus.coord));
+		rc = qmckl_matrix_of_double_device(context, coord, nucl_num * 3,
+										   &(ctx->nucleus.coord));
 	}
 	if (rc != QMCKL_SUCCESS)
 		return rc;
@@ -1085,7 +1078,7 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 }
 
 qmckl_exit_code qmckl_set_ao_basis_type_device(qmckl_context_device context,
-												   const char basis_type) {
+											   const char basis_type) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_type_device", NULL);
@@ -1105,8 +1098,7 @@ qmckl_exit_code qmckl_set_ao_basis_type_device(qmckl_context_device context,
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1114,8 +1106,9 @@ qmckl_exit_code qmckl_set_ao_basis_type_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_set_ao_basis_shell_num_device(
-	qmckl_context_device context, const int64_t shell_num) {
+qmckl_exit_code
+qmckl_set_ao_basis_shell_num_device(qmckl_context_device context,
+									const int64_t shell_num) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_shell_num_device", NULL);
@@ -1143,8 +1136,7 @@ qmckl_exit_code qmckl_set_ao_basis_shell_num_device(
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1152,9 +1144,8 @@ qmckl_exit_code qmckl_set_ao_basis_shell_num_device(
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_set_ao_basis_prim_num_device(qmckl_context_device context,
-									   const int64_t prim_num) {
+qmckl_exit_code qmckl_set_ao_basis_prim_num_device(qmckl_context_device context,
+												   const int64_t prim_num) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
@@ -1189,8 +1180,7 @@ qmckl_set_ao_basis_prim_num_device(qmckl_context_device context,
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1198,9 +1188,8 @@ qmckl_set_ao_basis_prim_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_set_ao_basis_ao_num_device(qmckl_context_device context,
-									 const int64_t ao_num) {
+qmckl_exit_code qmckl_set_ao_basis_ao_num_device(qmckl_context_device context,
+												 const int64_t ao_num) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_ao_num_device", NULL);
@@ -1233,8 +1222,7 @@ qmckl_set_ao_basis_ao_num_device(qmckl_context_device context,
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1242,13 +1230,13 @@ qmckl_set_ao_basis_ao_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_set_ao_basis_nucleus_index_device(
-	qmckl_context_device context, const int64_t *nucleus_index,
-	const int64_t size_max) {
+qmckl_exit_code
+qmckl_set_ao_basis_nucleus_index_device(qmckl_context_device context,
+										const int64_t *nucleus_index,
+										const int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
-							  "qmckl_set_ao_basis_nucleus_index_device",
-							  NULL);
+							  "qmckl_set_ao_basis_nucleus_index_device", NULL);
 	}
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
@@ -1271,8 +1259,8 @@ qmckl_exit_code qmckl_set_ao_basis_nucleus_index_device(
 	}
 
 	if (ctx->ao_basis.nucleus_index != NULL) {
-		qmckl_exit_code rc = qmckl_free_device(
-			context, ctx->ao_basis.nucleus_index);
+		qmckl_exit_code rc =
+			qmckl_free_device(context, ctx->ao_basis.nucleus_index);
 		if (rc != QMCKL_SUCCESS) {
 			return qmckl_failwith((qmckl_context)context, rc,
 								  "qmckl_set_ao_basis_nucleus_index_device",
@@ -1282,13 +1270,11 @@ qmckl_exit_code qmckl_set_ao_basis_nucleus_index_device(
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = nucl_num * sizeof(int64_t);
-	int64_t *new_array =
-		(int64_t *)qmckl_malloc_device(context, mem_info);
+	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, mem_info);
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
-							  "qmckl_set_ao_basis_nucleus_index_device",
-							  NULL);
+							  "qmckl_set_ao_basis_nucleus_index_device", NULL);
 	}
 
 	omp_target_memcpy(new_array, nucleus_index, mem_info.size, 0, 0, device_id,
@@ -1299,8 +1285,7 @@ qmckl_exit_code qmckl_set_ao_basis_nucleus_index_device(
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1308,9 +1293,10 @@ qmckl_exit_code qmckl_set_ao_basis_nucleus_index_device(
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_set_ao_basis_nucleus_shell_num_device(
-	qmckl_context_device context, const int64_t *nucleus_shell_num,
-	const int64_t size_max) {
+qmckl_exit_code
+qmckl_set_ao_basis_nucleus_shell_num_device(qmckl_context_device context,
+											const int64_t *nucleus_shell_num,
+											const int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
@@ -1338,19 +1324,18 @@ qmckl_exit_code qmckl_set_ao_basis_nucleus_shell_num_device(
 	}
 
 	if (ctx->ao_basis.nucleus_shell_num != NULL) {
-		qmckl_exit_code rc = qmckl_free_device(
-			context, ctx->ao_basis.nucleus_shell_num);
+		qmckl_exit_code rc =
+			qmckl_free_device(context, ctx->ao_basis.nucleus_shell_num);
 		if (rc != QMCKL_SUCCESS) {
-			return qmckl_failwith(
-				context, rc, "qmckl_set_ao_basis_nucleus_shell_num_device",
-				NULL);
+			return qmckl_failwith(context, rc,
+								  "qmckl_set_ao_basis_nucleus_shell_num_device",
+								  NULL);
 		}
 	}
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = nucl_num * sizeof(int64_t);
-	int64_t *new_array =
-		(int64_t *)qmckl_malloc_device(context, mem_info);
+	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, mem_info);
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
@@ -1366,8 +1351,7 @@ qmckl_exit_code qmckl_set_ao_basis_nucleus_shell_num_device(
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1375,14 +1359,14 @@ qmckl_exit_code qmckl_set_ao_basis_nucleus_shell_num_device(
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_set_ao_basis_shell_ang_mom_device(
-	qmckl_context_device context, const int32_t *shell_ang_mom,
-	const int64_t size_max) {
+qmckl_exit_code
+qmckl_set_ao_basis_shell_ang_mom_device(qmckl_context_device context,
+										const int32_t *shell_ang_mom,
+										const int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
-							  "qmckl_set_ao_basis_shell_ang_mom_device",
-							  NULL);
+							  "qmckl_set_ao_basis_shell_ang_mom_device", NULL);
 	}
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
@@ -1405,8 +1389,8 @@ qmckl_exit_code qmckl_set_ao_basis_shell_ang_mom_device(
 	}
 
 	if (ctx->ao_basis.shell_ang_mom != NULL) {
-		qmckl_exit_code rc = qmckl_free_device(
-			context, ctx->ao_basis.shell_ang_mom);
+		qmckl_exit_code rc =
+			qmckl_free_device(context, ctx->ao_basis.shell_ang_mom);
 		if (rc != QMCKL_SUCCESS) {
 			return qmckl_failwith((qmckl_context)context, rc,
 								  "qmckl_set_ao_basis_shell_ang_mom_device",
@@ -1416,13 +1400,11 @@ qmckl_exit_code qmckl_set_ao_basis_shell_ang_mom_device(
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = shell_num * sizeof(int32_t);
-	int32_t *new_array =
-		(int32_t *)qmckl_malloc_device(context, mem_info);
+	int32_t *new_array = (int32_t *)qmckl_malloc_device(context, mem_info);
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
-							  "qmckl_set_ao_basis_shell_ang_mom_device",
-							  NULL);
+							  "qmckl_set_ao_basis_shell_ang_mom_device", NULL);
 	}
 
 	omp_target_memcpy(new_array, shell_ang_mom, mem_info.size, 0, 0, device_id,
@@ -1433,8 +1415,7 @@ qmckl_exit_code qmckl_set_ao_basis_shell_ang_mom_device(
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1442,9 +1423,10 @@ qmckl_exit_code qmckl_set_ao_basis_shell_ang_mom_device(
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_set_ao_basis_shell_prim_num_device(
-	qmckl_context_device context, const int64_t *shell_prim_num,
-	const int64_t size_max) {
+qmckl_exit_code
+qmckl_set_ao_basis_shell_prim_num_device(qmckl_context_device context,
+										 const int64_t *shell_prim_num,
+										 const int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(
@@ -1472,24 +1454,22 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_num_device(
 	}
 
 	if (ctx->ao_basis.shell_prim_num != NULL) {
-		qmckl_exit_code rc = qmckl_free_device(
-			context, ctx->ao_basis.shell_prim_num);
+		qmckl_exit_code rc =
+			qmckl_free_device(context, ctx->ao_basis.shell_prim_num);
 		if (rc != QMCKL_SUCCESS) {
-			return qmckl_failwith(
-				(qmckl_context)context, rc,
-				"qmckl_set_ao_basis_shell_prim_num_device", NULL);
+			return qmckl_failwith((qmckl_context)context, rc,
+								  "qmckl_set_ao_basis_shell_prim_num_device",
+								  NULL);
 		}
 	}
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = shell_num * sizeof(int64_t);
-	int64_t *new_array =
-		(int64_t *)qmckl_malloc_device(context, mem_info);
+	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, mem_info);
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
-							  "qmckl_set_ao_basis_shell_prim_num_device",
-							  NULL);
+							  "qmckl_set_ao_basis_shell_prim_num_device", NULL);
 	}
 
 	omp_target_memcpy(new_array, shell_prim_num, mem_info.size, 0, 0, device_id,
@@ -1500,8 +1480,7 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_num_device(
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1509,9 +1488,10 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_num_device(
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_set_ao_basis_shell_prim_index_device(
-	qmckl_context_device context, const int64_t *shell_prim_index,
-	const int64_t size_max) {
+qmckl_exit_code
+qmckl_set_ao_basis_shell_prim_index_device(qmckl_context_device context,
+										   const int64_t *shell_prim_index,
+										   const int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
@@ -1539,19 +1519,18 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_index_device(
 	}
 
 	if (ctx->ao_basis.shell_prim_index != NULL) {
-		qmckl_exit_code rc = qmckl_free_device(
-			context, ctx->ao_basis.shell_prim_index);
+		qmckl_exit_code rc =
+			qmckl_free_device(context, ctx->ao_basis.shell_prim_index);
 		if (rc != QMCKL_SUCCESS) {
-			return qmckl_failwith(
-				(qmckl_context)context, rc,
-				"qmckl_set_ao_basis_shell_prim_index_device", NULL);
+			return qmckl_failwith((qmckl_context)context, rc,
+								  "qmckl_set_ao_basis_shell_prim_index_device",
+								  NULL);
 		}
 	}
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = shell_num * sizeof(int64_t);
-	int64_t *new_array =
-		(int64_t *)qmckl_malloc_device(context, mem_info);
+	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, mem_info);
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
@@ -1567,8 +1546,7 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_index_device(
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1576,14 +1554,14 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_index_device(
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_set_ao_basis_shell_factor_device(
-	qmckl_context_device context, const double *shell_factor,
-	const int64_t size_max) {
+qmckl_exit_code
+qmckl_set_ao_basis_shell_factor_device(qmckl_context_device context,
+									   const double *shell_factor,
+									   const int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
-							  "qmckl_set_ao_basis_shell_factor_device",
-							  NULL);
+							  "qmckl_set_ao_basis_shell_factor_device", NULL);
 	}
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
@@ -1606,8 +1584,8 @@ qmckl_exit_code qmckl_set_ao_basis_shell_factor_device(
 	}
 
 	if (ctx->ao_basis.shell_factor != NULL) {
-		qmckl_exit_code rc = qmckl_free_device(
-			context, ctx->ao_basis.shell_factor);
+		qmckl_exit_code rc =
+			qmckl_free_device(context, ctx->ao_basis.shell_factor);
 		if (rc != QMCKL_SUCCESS) {
 			return qmckl_failwith((qmckl_context)context, rc,
 								  "qmckl_set_ao_basis_shell_factor_device",
@@ -1617,13 +1595,11 @@ qmckl_exit_code qmckl_set_ao_basis_shell_factor_device(
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = shell_num * sizeof(double);
-	double *new_array =
-		(double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
-							  "qmckl_set_ao_basis_shell_factor_device",
-							  NULL);
+							  "qmckl_set_ao_basis_shell_factor_device", NULL);
 	}
 
 	omp_target_memcpy(new_array, shell_factor, mem_info.size, 0, 0, device_id,
@@ -1634,8 +1610,7 @@ qmckl_exit_code qmckl_set_ao_basis_shell_factor_device(
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1643,10 +1618,9 @@ qmckl_exit_code qmckl_set_ao_basis_shell_factor_device(
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
-									   const double *exponent,
-									   const int64_t size_max) {
+qmckl_exit_code qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
+												   const double *exponent,
+												   const int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_exponent_device", NULL);
@@ -1672,19 +1646,16 @@ qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
 	}
 
 	if (ctx->ao_basis.exponent != NULL) {
-		qmckl_exit_code rc =
-			qmckl_free_device(context, ctx->ao_basis.exponent);
+		qmckl_exit_code rc = qmckl_free_device(context, ctx->ao_basis.exponent);
 		if (rc != QMCKL_SUCCESS) {
 			return qmckl_failwith((qmckl_context)context, rc,
-								  "qmckl_set_ao_basis_exponent_device",
-								  NULL);
+								  "qmckl_set_ao_basis_exponent_device", NULL);
 		}
 	}
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = prim_num * sizeof(double);
-	double *new_array =
-		(double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
 
 	if (new_array == NULL) {
 		return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -1699,8 +1670,7 @@ qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1708,13 +1678,13 @@ qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_set_ao_basis_coefficient_device(
-	qmckl_context_device context, const double *coefficient,
-	const int64_t size_max) {
+qmckl_exit_code
+qmckl_set_ao_basis_coefficient_device(qmckl_context_device context,
+									  const double *coefficient,
+									  const int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
-							  "qmckl_set_ao_basis_coefficient_device",
-							  NULL);
+							  "qmckl_set_ao_basis_coefficient_device", NULL);
 	}
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
@@ -1737,8 +1707,8 @@ qmckl_exit_code qmckl_set_ao_basis_coefficient_device(
 	}
 
 	if (ctx->ao_basis.coefficient != NULL) {
-		qmckl_exit_code rc = qmckl_free_device(
-			context, ctx->ao_basis.coefficient);
+		qmckl_exit_code rc =
+			qmckl_free_device(context, ctx->ao_basis.coefficient);
 		if (rc != QMCKL_SUCCESS) {
 			return qmckl_failwith((qmckl_context)context, rc,
 								  "qmckl_set_ao_basis_coefficient_device",
@@ -1748,13 +1718,11 @@ qmckl_exit_code qmckl_set_ao_basis_coefficient_device(
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = prim_num * sizeof(double);
-	double *new_array =
-		(double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
-							  "qmckl_set_ao_basis_coefficient_device",
-							  NULL);
+							  "qmckl_set_ao_basis_coefficient_device", NULL);
 	}
 
 	omp_target_memcpy(new_array, coefficient, mem_info.size, 0, 0, device_id,
@@ -1765,8 +1733,7 @@ qmckl_exit_code qmckl_set_ao_basis_coefficient_device(
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1774,12 +1741,12 @@ qmckl_exit_code qmckl_set_ao_basis_coefficient_device(
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_set_ao_basis_prim_factor_device(
-	qmckl_context context, const double *prim_factor, const int64_t size_max) {
+qmckl_exit_code qmckl_set_ao_basis_prim_factor_device(qmckl_context context,
+													  const double *prim_factor,
+													  const int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
-							  "qmckl_set_ao_basis_prim_factor_device",
-							  NULL);
+							  "qmckl_set_ao_basis_prim_factor_device", NULL);
 	}
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
@@ -1804,8 +1771,8 @@ qmckl_exit_code qmckl_set_ao_basis_prim_factor_device(
 	}
 
 	if (ctx->ao_basis.prim_factor != NULL) {
-		qmckl_exit_code rc = qmckl_free_device(
-			context, ctx->ao_basis.prim_factor);
+		qmckl_exit_code rc =
+			qmckl_free_device(context, ctx->ao_basis.prim_factor);
 		if (rc != QMCKL_SUCCESS) {
 			return qmckl_failwith((qmckl_context)context, rc,
 								  "qmckl_set_ao_basis_prim_factor_device",
@@ -1815,13 +1782,11 @@ qmckl_exit_code qmckl_set_ao_basis_prim_factor_device(
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = prim_num * sizeof(double);
-	double *new_array =
-		(double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
-							  "qmckl_set_ao_basis_prim_factor_device",
-							  NULL);
+							  "qmckl_set_ao_basis_prim_factor_device", NULL);
 	}
 
 	omp_target_memcpy(new_array, prim_factor, mem_info.size, 0, 0, device_id,
@@ -1832,8 +1797,7 @@ qmckl_exit_code qmckl_set_ao_basis_prim_factor_device(
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1843,13 +1807,12 @@ qmckl_exit_code qmckl_set_ao_basis_prim_factor_device(
 
 qmckl_exit_code
 qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
-										const double *ao_factor,
-										const int64_t size_max) {
+									const double *ao_factor,
+									const int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
-							  "qmckl_set_ao_basis_prim_factor_device",
-							  NULL);
+							  "qmckl_set_ao_basis_prim_factor_device", NULL);
 	}
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
@@ -1876,15 +1839,13 @@ qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
 			qmckl_free_device(context, ctx->ao_basis.ao_factor);
 		if (rc != QMCKL_SUCCESS) {
 			return qmckl_failwith((qmckl_context)context, rc,
-								  "qmckl_set_ao_basis_ao_factor_device",
-								  NULL);
+								  "qmckl_set_ao_basis_ao_factor_device", NULL);
 		}
 	}
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = ao_num * sizeof(double);
-	double *new_array =
-		(double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
@@ -1899,8 +1860,7 @@ qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
 	ctx->ao_basis.uninitialized &= ~mask;
 	ctx->ao_basis.provided = (ctx->ao_basis.uninitialized == 0);
 	if (ctx->ao_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_ao_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_ao_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -1925,8 +1885,7 @@ qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context_device context) {
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size =
 		ctx->ao_basis.ao_num * ctx->mo_basis.mo_num * sizeof(double);
-	double *new_array =
-		(double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 							  "qmckl_finalize_mo_basis_device", NULL);
@@ -1935,8 +1894,8 @@ qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context_device context) {
 	assert(ctx->mo_basis.coefficient != NULL);
 
 	if (ctx->mo_basis.coefficient_t != NULL) {
-		qmckl_exit_code rc = qmckl_free_device(
-			context, ctx->mo_basis.coefficient_t);
+		qmckl_exit_code rc =
+			qmckl_free_device(context, ctx->mo_basis.coefficient_t);
 		if (rc != QMCKL_SUCCESS) {
 			return qmckl_failwith((qmckl_context)context, rc,
 								  "qmckl_finalize_mo_basis_device", NULL);
@@ -1963,9 +1922,8 @@ qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context_device context) {
 	return rc;
 }
 
-qmckl_exit_code
-qmckl_set_mo_basis_mo_num_device(qmckl_context_device context,
-									 const int64_t mo_num) {
+qmckl_exit_code qmckl_set_mo_basis_mo_num_device(qmckl_context_device context,
+												 const int64_t mo_num) {
 
 	int32_t mask = 1;
 
@@ -1991,8 +1949,7 @@ qmckl_set_mo_basis_mo_num_device(qmckl_context_device context,
 	ctx->mo_basis.uninitialized &= ~mask;
 	ctx->mo_basis.provided = (ctx->mo_basis.uninitialized == 0);
 	if (ctx->mo_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_mo_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_mo_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -2000,8 +1957,9 @@ qmckl_set_mo_basis_mo_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_set_mo_basis_coefficient_device(
-	qmckl_context context, const double *coefficient) {
+qmckl_exit_code
+qmckl_set_mo_basis_coefficient_device(qmckl_context context,
+									  const double *coefficient) {
 
 	int32_t mask = 1 << 1;
 
@@ -2015,13 +1973,12 @@ qmckl_exit_code qmckl_set_mo_basis_coefficient_device(
 
 	if (mask != 0 && !(ctx->mo_basis.uninitialized & mask)) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALREADY_SET,
-							  "qmckl_set_mo_basis_coefficient_device",
-							  NULL);
+							  "qmckl_set_mo_basis_coefficient_device", NULL);
 	}
 
 	if (ctx->mo_basis.coefficient != NULL) {
-		qmckl_exit_code rc = qmckl_free_device(
-			context, ctx->mo_basis.coefficient);
+		qmckl_exit_code rc =
+			qmckl_free_device(context, ctx->mo_basis.coefficient);
 		if (rc != QMCKL_SUCCESS) {
 			return qmckl_failwith((qmckl_context)context, rc,
 								  "qmckl_set_mo_basis_coefficient_device",
@@ -2032,12 +1989,10 @@ qmckl_exit_code qmckl_set_mo_basis_coefficient_device(
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size =
 		ctx->ao_basis.ao_num * ctx->mo_basis.mo_num * sizeof(double);
-	double *new_array =
-		(double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
-							  "qmckl_set_mo_basis_coefficient_device",
-							  NULL);
+							  "qmckl_set_mo_basis_coefficient_device", NULL);
 	}
 
 	omp_target_memcpy(new_array, coefficient, mem_info.size, 0, 0, device_id,
@@ -2048,8 +2003,7 @@ qmckl_exit_code qmckl_set_mo_basis_coefficient_device(
 	ctx->mo_basis.uninitialized &= ~mask;
 	ctx->mo_basis.provided = (ctx->mo_basis.uninitialized == 0);
 	if (ctx->mo_basis.provided) {
-		qmckl_exit_code rc_ =
-			qmckl_finalize_mo_basis_device(context);
+		qmckl_exit_code rc_ = qmckl_finalize_mo_basis_device(context);
 		if (rc_ != QMCKL_SUCCESS)
 			return rc_;
 	}
@@ -2063,8 +2017,9 @@ qmckl_exit_code qmckl_set_mo_basis_coefficient_device(
 
 qmckl_exit_code
 qmckl_trexio_read_electron_X_device(qmckl_context_device context,
-										trexio_t *const file) {
+									trexio_t *const file) {
 
+	printf("[qmckl_trexio_read_electron_X_device] In\n");
 	assert(context != (qmckl_context_device)0);
 	assert(file != NULL);
 
@@ -2093,12 +2048,13 @@ qmckl_trexio_read_electron_X_device(qmckl_context_device context,
 
 	qmckl_exit_code rc;
 	rc = qmckl_set_electron_num_device(context, up_num, dn_num);
+	printf("[qmckl_trexio_read_electron_X_device] Out\n");
 	return rc;
 }
 
-qmckl_exit_code
-qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
-									   trexio_t *const file) {
+qmckl_exit_code qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
+												   trexio_t *const file) {
+	printf("[qmckl_trexio_read_nucleus_X_device] In\n");
 	assert(context != (qmckl_context)0);
 	assert(file != NULL);
 
@@ -2125,18 +2081,19 @@ qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
 		mem_info.size = nucleus_num * sizeof(double);
 
 		double *nucl_charge_h = (double *)qmckl_malloc_host(context, mem_info);
-		double *nucl_charge_d = (double *)qmckl_malloc_device(context, mem_info);
+		double *nucl_charge_d =
+			(double *)qmckl_malloc_device(context, mem_info);
 
 		if (nucl_charge_h == NULL || nucl_charge_d == NULL) {
-			return qmckl_failwith(
-				(qmckl_context)context, QMCKL_ALLOCATION_FAILED,
-				"qmckl_trexio_read_nucleus_X_device", NULL);
+			return qmckl_failwith((qmckl_context)context,
+								  QMCKL_ALLOCATION_FAILED,
+								  "qmckl_trexio_read_nucleus_X_device", NULL);
 		}
 
 		assert(nucl_charge_h != NULL && nucl_charge_d != NULL);
 
-		rcio =
-			trexio_read_safe_nucleus_charge_64(file, nucl_charge_h, nucleus_num);
+		rcio = trexio_read_safe_nucleus_charge_64(file, nucl_charge_h,
+												  nucleus_num);
 		if (rcio != TREXIO_SUCCESS) {
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 								  "trexio_read_nucleus_charge",
@@ -2145,7 +2102,7 @@ qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
 
 		qmckl_memcpy_H2D(context, nucl_charge_d, nucl_charge_h, mem_info.size);
 		rc = qmckl_set_nucleus_charge_device(context, nucl_charge_d,
-												 nucleus_num);
+											 nucleus_num);
 
 		qmckl_free_host(context, nucl_charge_h);
 		qmckl_free_device(context, nucl_charge_d);
@@ -2169,7 +2126,8 @@ qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
 
 	assert(nucl_coord_h != NULL && nucl_coord_d != NULL);
 
-	rcio = trexio_read_safe_nucleus_coord_64(file, nucl_coord_h, 3 * nucleus_num);
+	rcio =
+		trexio_read_safe_nucleus_coord_64(file, nucl_coord_h, 3 * nucleus_num);
 	if (rcio != TREXIO_SUCCESS) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 							  "trexio_read_nucleus_charge",
@@ -2177,8 +2135,8 @@ qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
 	}
 
 	qmckl_memcpy_H2D(context, nucl_coord_d, nucl_coord_h, mem_info.size);
-	rc = qmckl_set_nucleus_coord_device(
-		(qmckl_context)context, 'N', nucl_coord_d, 3 * nucleus_num);
+	rc = qmckl_set_nucleus_coord_device((qmckl_context)context, 'N',
+										nucl_coord_d, 3 * nucleus_num);
 
 	qmckl_free_host(context, nucl_coord_h);
 	qmckl_free_device(context, nucl_coord_d);
@@ -2189,11 +2147,13 @@ qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
 		return rc;
 	}
 
+	printf("[qmckl_trexio_read_nucleus_X_device] Out\n");
 	return QMCKL_SUCCESS;
 }
 
 qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
-												  trexio_t *const file) {
+											  trexio_t *const file) {
+	printf("[qmckl_trexio_read_ao_X_device] In\n");
 	assert(context != (qmckl_context)0);
 	assert(file != NULL);
 
@@ -2208,6 +2168,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 #define MAX_STR_LEN 1024
 	char basis_type[MAX_STR_LEN];
 
+	printf("[qmckl_trexio_read_ao_X_device] 0\n");
 	rcio = trexio_read_basis_type(file, basis_type, MAX_STR_LEN);
 	if (rcio != TREXIO_SUCCESS) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -2227,6 +2188,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 
 	int64_t shell_num = 0L;
 
+	printf("[qmckl_trexio_read_ao_X_device] 1\n");
 	rcio = trexio_read_basis_shell_num_64(file, &shell_num);
 	if (rcio != TREXIO_SUCCESS) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -2257,6 +2219,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 
 	int64_t ao_num = 0LL;
 
+	printf("[qmckl_trexio_read_ao_X_device] 2\n");
 	rcio = trexio_read_ao_num_64(file, &ao_num);
 	if (rcio != TREXIO_SUCCESS) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -2270,16 +2233,17 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 	if (rc != QMCKL_SUCCESS)
 		return rc;
 
+	printf("[qmckl_trexio_read_ao_X_device] 3\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
 		/* Allocate array for data */
 		mem_info.size = nucleus_num * sizeof(int64_t);
+		size_t size_backup = mem_info.size;
 		int64_t *nucleus_index_h =
 			(int64_t *)qmckl_malloc_host(context, mem_info);
 		int64_t *nucleus_index_d =
 			(int64_t *)qmckl_malloc_device(context, mem_info);
-
 
 		if (nucleus_index_h == NULL || nucleus_index_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -2325,9 +2289,8 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		}
 
 		/* Reformat data */
-		qmckl_memcpy_H2D(context, nucleus_index_d, nucleus_index_h, mem_info.size);
-		rc = qmckl_set_ao_basis_nucleus_index_device(
-			context, nucleus_index_d, nucleus_num);
+		rc = qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index_d,
+													 nucleus_num);
 		if (rc != QMCKL_SUCCESS) {
 			qmckl_free_host(context, nucleus_index_h);
 			qmckl_free_device(context, nucleus_index_d);
@@ -2352,12 +2315,15 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			nucleus_index_h[k] = i;
 		}
 
+		qmckl_memcpy_H2D(context, nucleus_index_d, nucleus_index_h,
+						 size_backup);
+
 		qmckl_free_host(context, tmp_array);
 		tmp_array = NULL;
 
 		/* Store data */
 		rc = qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index_d,
-														 shell_num);
+													 shell_num);
 
 		qmckl_free_host(context, nucleus_index_h);
 		qmckl_free_device(context, nucleus_index_d);
@@ -2368,11 +2334,14 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
+	printf("[qmckl_trexio_read_ao_X_device] 4\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
 		/* Allocate array for data */
 		mem_info.size = nucleus_num * sizeof(int64_t);
+		size_t size_backup = mem_info.size;
+
 		int64_t *nucleus_shell_num_h =
 			(int64_t *)qmckl_malloc_host(context, mem_info);
 		int64_t *nucleus_shell_num_d =
@@ -2443,7 +2412,8 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		tmp_array = NULL;
 
 		/* Store data */
-		qmckl_memcpy_H2D(context, nucleus_shell_num_d, nucleus_shell_num_h, mem_info.size);
+		qmckl_memcpy_H2D(context, nucleus_shell_num_d, nucleus_shell_num_h,
+						 size_backup);
 		rc = qmckl_set_ao_basis_nucleus_shell_num_device(
 			context, nucleus_shell_num_d, shell_num);
 
@@ -2456,6 +2426,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
+	printf("[qmckl_trexio_read_ao_X_device] 5\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2466,7 +2437,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			(int32_t *)qmckl_malloc_host(context, mem_info);
 		int32_t *shell_ang_mom_d =
 			(int32_t *)qmckl_malloc_device(context, mem_info);
-
 
 		if (shell_ang_mom_h == NULL || shell_ang_mom_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -2492,9 +2462,10 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		}
 
 		/* Store data */
-		qmckl_memcpy_H2D(context, shell_ang_mom_d, shell_ang_mom_h, mem_info.size);
+		qmckl_memcpy_H2D(context, shell_ang_mom_d, shell_ang_mom_h,
+						 mem_info.size);
 		rc = qmckl_set_ao_basis_shell_ang_mom_device(context, shell_ang_mom_d,
-														 shell_num);
+													 shell_num);
 
 		qmckl_free_host(context, shell_ang_mom_h);
 		qmckl_free_device(context, shell_ang_mom_d);
@@ -2505,17 +2476,18 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
+	printf("[qmckl_trexio_read_ao_X_device] 6\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
 		/* Allocate array for data */
 		mem_info.size = shell_num * sizeof(int64_t);
+		size_t size_backup = mem_info.size;
 
 		int64_t *shell_prim_num_h =
 			(int64_t *)qmckl_malloc_host(context, mem_info);
 		int64_t *shell_prim_num_d =
 			(int64_t *)qmckl_malloc_device(context, mem_info);
-
 
 		if (shell_prim_num_h == NULL || shell_prim_num_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -2582,9 +2554,10 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		tmp_array = NULL;
 
 		/* Store data */
-		qmckl_memcpy_H2D(context, shell_prim_num_d, shell_prim_num_h, mem_info.size);
-		rc = qmckl_set_ao_basis_shell_prim_num_device(
-			context, shell_prim_num_d, shell_num);
+		qmckl_memcpy_H2D(context, shell_prim_num_d, shell_prim_num_h,
+						 size_backup);
+		rc = qmckl_set_ao_basis_shell_prim_num_device(context, shell_prim_num_d,
+													  shell_num);
 
 		qmckl_free_host(context, shell_prim_num_h);
 		qmckl_free_device(context, shell_prim_num_d);
@@ -2595,17 +2568,18 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
+	printf("[qmckl_trexio_read_ao_X_device] 7\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
 		/* Allocate array for data */
 		mem_info.size = shell_num * sizeof(int64_t);
+		size_t size_backup = mem_info.size;
 
 		int64_t *shell_prim_index_h =
 			(int64_t *)qmckl_malloc_host(context, mem_info);
 		int64_t *shell_prim_index_d =
 			(int64_t *)qmckl_malloc_device(context, mem_info);
-
 
 		if (shell_prim_index_h == NULL || shell_prim_index_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -2667,7 +2641,8 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		tmp_array = NULL;
 
 		/* Store data */
-		qmckl_memcpy_H2D(context, shell_prim_index_d, shell_prim_index_h, mem_info.size);
+		qmckl_memcpy_H2D(context, shell_prim_index_d, shell_prim_index_h,
+						 size_backup);
 		rc = qmckl_set_ao_basis_shell_prim_index_device(
 			context, shell_prim_index_d, shell_num);
 
@@ -2680,6 +2655,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
+	printf("[qmckl_trexio_read_ao_X_device] 8\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2687,7 +2663,8 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		mem_info.size = shell_num * sizeof(double);
 
 		double *shell_factor_h = (double *)qmckl_malloc_host(context, mem_info);
-		double *shell_factor_d = (double *)qmckl_malloc_device(context, mem_info);
+		double *shell_factor_d =
+			(double *)qmckl_malloc_device(context, mem_info);
 
 		if (shell_factor_h == NULL || shell_factor_d == NULL) {
 			return qmckl_failwith(
@@ -2711,9 +2688,10 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		}
 
 		/* Store data */
-		qmckl_memcpy_H2D(context, shell_factor_d, shell_factor_h, mem_info.size);
+		qmckl_memcpy_H2D(context, shell_factor_d, shell_factor_h,
+						 mem_info.size);
 		rc = qmckl_set_ao_basis_shell_factor_device(context, shell_factor_d,
-														shell_num);
+													shell_num);
 
 		qmckl_free_host(context, shell_factor_h);
 		qmckl_free_device(context, shell_factor_d);
@@ -2724,6 +2702,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
+	printf("[qmckl_trexio_read_ao_X_device] 9\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2766,6 +2745,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
+	printf("[qmckl_trexio_read_ao_X_device] 10\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2773,7 +2753,8 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		mem_info.size = prim_num * sizeof(double);
 
 		double *coefficient_h = (double *)qmckl_malloc_host(context, mem_info);
-		double *coefficient_d = (double *)qmckl_malloc_device(context, mem_info);
+		double *coefficient_d =
+			(double *)qmckl_malloc_device(context, mem_info);
 
 		if (coefficient_h == NULL || coefficient_d == NULL) {
 			return qmckl_failwith(
@@ -2784,8 +2765,8 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		assert(coefficient_h != NULL && coefficient_d != NULL);
 
 		/* Read data */
-		rcio =
-			trexio_read_safe_basis_coefficient_64(file, coefficient_h, prim_num);
+		rcio = trexio_read_safe_basis_coefficient_64(file, coefficient_h,
+													 prim_num);
 		if (rcio != TREXIO_SUCCESS) {
 			qmckl_free_host(context, coefficient_h);
 			qmckl_free_device(context, coefficient_d);
@@ -2799,7 +2780,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		/* Store data */
 		qmckl_memcpy_H2D(context, coefficient_d, coefficient_h, mem_info.size);
 		rc = qmckl_set_ao_basis_coefficient_device(context, coefficient_d,
-													   prim_num);
+												   prim_num);
 
 		qmckl_free_host(context, coefficient_h);
 		qmckl_free_device(context, coefficient_d);
@@ -2810,6 +2791,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
+	printf("[qmckl_trexio_read_ao_X_device] 11\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2817,7 +2799,8 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		mem_info.size = prim_num * sizeof(double);
 
 		double *prim_factor_h = (double *)qmckl_malloc_host(context, mem_info);
-		double *prim_factor_d = (double *)qmckl_malloc_device(context, mem_info);
+		double *prim_factor_d =
+			(double *)qmckl_malloc_device(context, mem_info);
 
 		if (prim_factor_h == NULL || prim_factor_d == NULL) {
 			return qmckl_failwith(
@@ -2828,8 +2811,8 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		assert(prim_factor_h != NULL && prim_factor_d != NULL);
 
 		/* Read data */
-		rcio =
-			trexio_read_safe_basis_prim_factor_64(file, prim_factor_h, prim_num);
+		rcio = trexio_read_safe_basis_prim_factor_64(file, prim_factor_h,
+													 prim_num);
 		if (rcio != TREXIO_SUCCESS) {
 			qmckl_free_host(context, prim_factor_h);
 			qmckl_free_device(context, prim_factor_d);
@@ -2843,7 +2826,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		/* Read data */
 		qmckl_memcpy_H2D(context, prim_factor_d, prim_factor_h, mem_info.size);
 		rc = qmckl_set_ao_basis_prim_factor_device(context, prim_factor_d,
-													   prim_num);
+												   prim_num);
 
 		qmckl_free_host(context, prim_factor_h);
 		qmckl_free_device(context, prim_factor_d);
@@ -2854,6 +2837,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
+	printf("[qmckl_trexio_read_ao_X_device] 12\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2864,7 +2848,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			(double *)qmckl_malloc_host(context, mem_info);
 		double *ao_normalization_d =
 			(double *)qmckl_malloc_device(context, mem_info);
-
 
 		if (ao_normalization_h == NULL || ao_normalization_d == NULL) {
 			return qmckl_failwith(
@@ -2888,9 +2871,10 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		}
 
 		/* Store data */
-		qmckl_memcpy_H2D(context, ao_normalization_d, ao_normalization_h, mem_info.size);
+		qmckl_memcpy_H2D(context, ao_normalization_d, ao_normalization_h,
+						 mem_info.size);
 		rc = qmckl_set_ao_basis_ao_factor_device(context, ao_normalization_d,
-													 ao_num);
+												 ao_num);
 
 		qmckl_free_host(context, ao_normalization_h);
 		qmckl_free_device(context, ao_normalization_d);
@@ -2901,11 +2885,13 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
+	printf("[qmckl_trexio_ao_X_device] Out\n");
 	return QMCKL_SUCCESS;
 }
 
 qmckl_exit_code qmckl_trexio_read_mo_X_device(qmckl_context_device context,
-												  trexio_t *const file) {
+											  trexio_t *const file) {
+	printf("[qmckl_trexio_mo_X_device] In\n");
 	assert(context != (qmckl_context_device)0);
 	assert(file != NULL);
 
@@ -2966,12 +2952,14 @@ qmckl_exit_code qmckl_trexio_read_mo_X_device(qmckl_context_device context,
 			return rc;
 	}
 
+	printf("[qmckl_trexio_mo_X_device] Out\n");
 	return QMCKL_SUCCESS;
 }
 
 qmckl_exit_code qmckl_trexio_read_device(const qmckl_context_device context,
-											 const char *file_name,
-											 const int64_t size_max) {
+										 const char *file_name,
+										 const int64_t size_max) {
+	printf("[qmckl_trexio_read_device] In\n");
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return false;
 	}
@@ -3011,8 +2999,7 @@ qmckl_exit_code qmckl_trexio_read_device(const qmckl_context_device context,
 	if (rc != QMCKL_SUCCESS) {
 		trexio_close(file);
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
-							  "qmckl_trexio_read_device",
-							  "Error reading AOs");
+							  "qmckl_trexio_read_device", "Error reading AOs");
 	}
 
 	rc = qmckl_trexio_read_mo_X_device(context, file);
@@ -3024,5 +3011,6 @@ qmckl_exit_code qmckl_trexio_read_device(const qmckl_context_device context,
 
 	trexio_close(file);
 	file = NULL;
+	printf("[qmckl_trexio_read_device] Out\n");
 	return rc;
 }

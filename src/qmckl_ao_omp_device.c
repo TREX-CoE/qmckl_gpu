@@ -123,7 +123,7 @@ qmckl_exit_code qmckl_ao_polynomial_transp_vgl_hpc_device(
 }
 #pragma omp end declare target
 
-qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_device(
+qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	const qmckl_context_device context, const int64_t ao_num,
 	const int64_t shell_num, const int32_t *restrict prim_num_per_nucleus,
 	const int64_t point_num, const int64_t nucl_num,
@@ -135,11 +135,9 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device_device(
 	const qmckl_matrix expo_per_nucleus, const qmckl_tensor coef_per_nucleus,
 	double *restrict const ao_vgl) {
 
-
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 	int device_id = qmckl_get_device_id(context);
-
 
 	int32_t *lstart_h = omp_target_alloc(32 * sizeof(int32_t), device_id);
 
@@ -598,8 +596,7 @@ qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context) {
 			qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 			mem_info.size =
 				ctx->ao_basis.ao_num * 5 * ctx->point.num * sizeof(double);
-			double *ao_vgl =
-				(double *)qmckl_malloc_device(context, mem_info);
+			double *ao_vgl = (double *)qmckl_malloc_device(context, mem_info);
 
 			if (ao_vgl == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -609,7 +606,7 @@ qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context) {
 		}
 
 		if (ctx->ao_basis.type == 'G') {
-			rc = qmckl_compute_ao_vgl_gaussian_device_device(
+			rc = qmckl_compute_ao_vgl_gaussian_device(
 				context, ctx->ao_basis.ao_num, ctx->ao_basis.shell_num,
 				ctx->ao_basis.prim_num_per_nucleus, ctx->point.num,
 				ctx->nucleus.num, ctx->point.coord.data,
@@ -638,10 +635,9 @@ qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context) {
 // GET
 //**********
 
-qmckl_exit_code
-qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
-									 double *const ao_vgl,
-									 const int64_t size_max) {
+qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
+												 double *const ao_vgl,
+												 const int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,

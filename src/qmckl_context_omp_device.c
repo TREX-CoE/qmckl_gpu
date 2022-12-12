@@ -2,7 +2,6 @@
 
 // This file contains qmckl_context_device related functions
 
-
 //**********
 // CONTEXT DESTROY
 //**********

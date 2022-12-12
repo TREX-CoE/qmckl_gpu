@@ -1,15 +1,16 @@
 #include "../include/qmckl_blas_device.h"
 #include <omp.h>
 
-// This file provides OpenMP implementations of BLAS functions (mostly initialization and
-// manipulation of vector, matrix, ... types). All functions accept device pointers.
+// This file provides OpenMP implementations of BLAS functions (mostly
+// initialization and manipulation of vector, matrix, ... types). All functions
+// accept device pointers.
 
 //**********
 // VECTOR
 //**********
 
 qmckl_vector qmckl_vector_alloc_device(qmckl_context_device context,
-										   const int64_t size) {
+									   const int64_t size) {
 	/* Should always be true by contruction */
 	assert(size > (int64_t)0);
 
@@ -28,7 +29,7 @@ qmckl_vector qmckl_vector_alloc_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_vector_free_device(qmckl_context_device context,
-											 qmckl_vector *vector) {
+										 qmckl_vector *vector) {
 	/* Always true */
 	assert(vector->data != NULL);
 
@@ -46,8 +47,8 @@ qmckl_exit_code qmckl_vector_free_device(qmckl_context_device context,
 
 qmckl_exit_code
 qmckl_vector_of_double_device(const qmckl_context_device context,
-								  const double *target, const int64_t size_max,
-								  qmckl_vector *vector_out) {
+							  const double *target, const int64_t size_max,
+							  qmckl_vector *vector_out) {
 
 	int device_id = qmckl_get_device_id(context);
 
@@ -78,8 +79,8 @@ qmckl_vector_of_double_device(const qmckl_context_device context,
 //**********
 
 qmckl_matrix qmckl_matrix_alloc_device(qmckl_context_device context,
-										   const int64_t size1,
-										   const int64_t size2) {
+									   const int64_t size1,
+									   const int64_t size2) {
 	/* Should always be true by contruction */
 	assert(size1 * size2 > (int64_t)0);
 
@@ -90,8 +91,7 @@ qmckl_matrix qmckl_matrix_alloc_device(qmckl_context_device context,
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = size1 * size2 * sizeof(double);
-	result.data =
-		(double *)qmckl_malloc_device(context, mem_info);
+	result.data = (double *)qmckl_malloc_device(context, mem_info);
 
 	if (result.data == NULL) {
 		result.size[0] = (int64_t)0;
@@ -102,7 +102,7 @@ qmckl_matrix qmckl_matrix_alloc_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_matrix_free_device(qmckl_context_device context,
-											 qmckl_matrix *matrix) {
+										 qmckl_matrix *matrix) {
 	/* Always true */
 	assert(matrix->data != NULL);
 
@@ -135,8 +135,8 @@ qmckl_matrix qmckl_matrix_set_device(qmckl_matrix matrix, double value) {
 
 qmckl_exit_code
 qmckl_matrix_of_double_device(const qmckl_context_device context,
-								  const double *target, const int64_t size_max,
-								  qmckl_matrix *matrix_out) {
+							  const double *target, const int64_t size_max,
+							  qmckl_matrix *matrix_out) {
 
 	// (assuming the matrix is already allocated)
 
@@ -166,16 +166,14 @@ qmckl_matrix_of_double_device(const qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_transpose_device(qmckl_context_device context,
-										   const qmckl_matrix A,
-										   qmckl_matrix At) {
+									   const qmckl_matrix A, qmckl_matrix At) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return QMCKL_INVALID_CONTEXT;
 	}
 
 	if (A.size[0] < 1) {
 		return qmckl_failwith(context, QMCKL_INVALID_ARG_2,
-							  "qmckl_transpose_device",
-							  "Invalid size for A");
+							  "qmckl_transpose_device", "Invalid size for A");
 	}
 
 	if (At.data == NULL) {
@@ -186,8 +184,7 @@ qmckl_exit_code qmckl_transpose_device(qmckl_context_device context,
 
 	if (At.size[0] != A.size[1] || At.size[1] != A.size[0]) {
 		return qmckl_failwith(context, QMCKL_INVALID_ARG_3,
-							  "qmckl_transpose_device",
-							  "Invalid size for At");
+							  "qmckl_transpose_device", "Invalid size for At");
 	}
 
 	double *A_data = A.data;
@@ -213,8 +210,8 @@ qmckl_exit_code qmckl_transpose_device(qmckl_context_device context,
 //**********
 
 qmckl_tensor qmckl_tensor_alloc_device(qmckl_context context,
-										   const int64_t order,
-										   const int64_t *size) {
+									   const int64_t order,
+									   const int64_t *size) {
 	/* Should always be true by construction */
 	assert(order > 0);
 	assert(order <= QMCKL_TENSOR_ORDER_MAX);
@@ -233,8 +230,7 @@ qmckl_tensor qmckl_tensor_alloc_device(qmckl_context context,
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 	mem_info.size = prod_size * sizeof(double);
 
-	result.data =
-		(double *)qmckl_malloc_device(context, mem_info);
+	result.data = (double *)qmckl_malloc_device(context, mem_info);
 
 	if (result.data == NULL) {
 		memset(&result, 0, sizeof(qmckl_tensor));
@@ -244,7 +240,7 @@ qmckl_tensor qmckl_tensor_alloc_device(qmckl_context context,
 }
 
 qmckl_exit_code qmckl_tensor_free_device(qmckl_context_device context,
-											 qmckl_tensor *tensor) {
+										 qmckl_tensor *tensor) {
 	/* Always true */
 	assert(tensor->data != NULL);
 
