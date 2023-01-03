@@ -18,17 +18,16 @@ qmckl_exit_code qmckl_context_touch_device(const qmckl_context_device context) {
 // OpenMP/OpenACC dependent
 
 qmckl_context_device qmckl_context_create_device(int device_id) {
-	qmckl_context_device context =
-		(qmckl_context_device)qmckl_context_create();
+	qmckl_context_device context = (qmckl_context_device)qmckl_context_create();
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
-
-	qmckl_context_device_struct *const ds =
-		(qmckl_context_device_struct *)ctx->qmckl_extra;
 
 	/* Allocate the qmckl_context_device_struct */
 	ctx->qmckl_extra = malloc(sizeof(qmckl_context_device_struct));
 
-	/* Allocate qmckl_memory_struct */
+	qmckl_context_device_struct *const ds =
+		(qmckl_context_device_struct *)ctx->qmckl_extra;
+
+	/* Allocate the device qmckl_memory_struct */
 	const size_t size = 128L;
 	qmckl_memory_info_struct *new_array =
 		calloc(size, sizeof(qmckl_memory_info_struct));

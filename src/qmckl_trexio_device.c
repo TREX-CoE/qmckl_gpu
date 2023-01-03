@@ -1,7 +1,7 @@
 #include "../include/qmckl_trexio_device.h"
 
 // This file provides wrappers to standard QMCkl functions accessible with the
-// _device suffix
+// _device suffix. Only includes functions independent of OpenMP/OpenACC syntax.
 
 //**********
 // ELECTRON/POINT GETTERS/SETTERS
