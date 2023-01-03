@@ -152,7 +152,7 @@ qmckl_matrix_of_double_device(const qmckl_context_device context,
 							  "Matrix not allocated");
 	}
 
-	if (matrix.size[0] * matrix.size[1] != size_max) {
+	if (matrix.size[0] * matrix.size[1] > size_max) {
 		return qmckl_failwith(context, QMCKL_INVALID_ARG_4,
 							  "qmckl_matrix_of_double_device",
 							  "Wrong vector size");

@@ -209,7 +209,6 @@ qmckl_exit_code qmckl_set_nucleus_coord_device(qmckl_context_device context,
 											   const double *coord,
 											   const int64_t size_max) {
 	int32_t mask = 1 << 2;
-
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_NULL_CONTEXT,
 							  "qmckl_set_nucleus_coord_device", NULL);
@@ -227,10 +226,11 @@ qmckl_exit_code qmckl_set_nucleus_coord_device(qmckl_context_device context,
 	}
 
 	ctx->nucleus.coord = qmckl_matrix_alloc_device(context, nucl_num, 3);
+	double *nucleus_coord_data = ctx->nucleus.coord.data;
 
-#pragma use_device_ptr(ctx->nucleus.coord.data)
+#pragma use_device_ptr(nuleus_coord_data)
 	{
-		if (ctx->nucleus.coord.data == NULL) {
+		if (nucleus_coord_data == NULL) {
 			return qmckl_failwith((qmckl_context)context,
 								  QMCKL_ALLOCATION_FAILED,
 								  "qmckl_set_nucleus_coord_device", NULL);
@@ -250,6 +250,7 @@ qmckl_exit_code qmckl_set_nucleus_coord_device(qmckl_context_device context,
 		if (rc != QMCKL_SUCCESS)
 			return rc;
 		rc = qmckl_transpose_device(context, At, ctx->nucleus.coord);
+		qmckl_matrix_free_device(context, &At);
 	} else {
 		rc = qmckl_matrix_of_double_device(context, coord, nucl_num * 3,
 										   &(ctx->nucleus.coord));
@@ -2019,7 +2020,6 @@ qmckl_exit_code
 qmckl_trexio_read_electron_X_device(qmckl_context_device context,
 									trexio_t *const file) {
 
-	printf("[qmckl_trexio_read_electron_X_device] In\n");
 	assert(context != (qmckl_context_device)0);
 	assert(file != NULL);
 
@@ -2048,13 +2048,11 @@ qmckl_trexio_read_electron_X_device(qmckl_context_device context,
 
 	qmckl_exit_code rc;
 	rc = qmckl_set_electron_num_device(context, up_num, dn_num);
-	printf("[qmckl_trexio_read_electron_X_device] Out\n");
 	return rc;
 }
 
 qmckl_exit_code qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
 												   trexio_t *const file) {
-	printf("[qmckl_trexio_read_nucleus_X_device] In\n");
 	assert(context != (qmckl_context)0);
 	assert(file != NULL);
 
@@ -2135,8 +2133,8 @@ qmckl_exit_code qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
 	}
 
 	qmckl_memcpy_H2D(context, nucl_coord_d, nucl_coord_h, mem_info.size);
-	rc = qmckl_set_nucleus_coord_device((qmckl_context)context, 'N',
-										nucl_coord_d, 3 * nucleus_num);
+	rc = qmckl_set_nucleus_coord_device(context, 'N', nucl_coord_d,
+										3 * nucleus_num);
 
 	qmckl_free_host(context, nucl_coord_h);
 	qmckl_free_device(context, nucl_coord_d);
@@ -2147,13 +2145,11 @@ qmckl_exit_code qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
 		return rc;
 	}
 
-	printf("[qmckl_trexio_read_nucleus_X_device] Out\n");
 	return QMCKL_SUCCESS;
 }
 
 qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 											  trexio_t *const file) {
-	printf("[qmckl_trexio_read_ao_X_device] In\n");
 	assert(context != (qmckl_context)0);
 	assert(file != NULL);
 
@@ -2168,7 +2164,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 #define MAX_STR_LEN 1024
 	char basis_type[MAX_STR_LEN];
 
-	printf("[qmckl_trexio_read_ao_X_device] 0\n");
 	rcio = trexio_read_basis_type(file, basis_type, MAX_STR_LEN);
 	if (rcio != TREXIO_SUCCESS) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -2188,7 +2183,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 
 	int64_t shell_num = 0L;
 
-	printf("[qmckl_trexio_read_ao_X_device] 1\n");
 	rcio = trexio_read_basis_shell_num_64(file, &shell_num);
 	if (rcio != TREXIO_SUCCESS) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -2219,7 +2213,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 
 	int64_t ao_num = 0LL;
 
-	printf("[qmckl_trexio_read_ao_X_device] 2\n");
 	rcio = trexio_read_ao_num_64(file, &ao_num);
 	if (rcio != TREXIO_SUCCESS) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -2233,7 +2226,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 	if (rc != QMCKL_SUCCESS)
 		return rc;
 
-	printf("[qmckl_trexio_read_ao_X_device] 3\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2334,7 +2326,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
-	printf("[qmckl_trexio_read_ao_X_device] 4\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2426,7 +2417,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
-	printf("[qmckl_trexio_read_ao_X_device] 5\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2476,7 +2466,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
-	printf("[qmckl_trexio_read_ao_X_device] 6\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2568,7 +2557,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
-	printf("[qmckl_trexio_read_ao_X_device] 7\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2655,7 +2643,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
-	printf("[qmckl_trexio_read_ao_X_device] 8\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2702,7 +2689,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
-	printf("[qmckl_trexio_read_ao_X_device] 9\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2745,7 +2731,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
-	printf("[qmckl_trexio_read_ao_X_device] 10\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2791,7 +2776,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
-	printf("[qmckl_trexio_read_ao_X_device] 11\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2837,7 +2821,6 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
-	printf("[qmckl_trexio_read_ao_X_device] 12\n");
 	{
 		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
@@ -2885,13 +2868,11 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 			return rc;
 	}
 
-	printf("[qmckl_trexio_ao_X_device] Out\n");
 	return QMCKL_SUCCESS;
 }
 
 qmckl_exit_code qmckl_trexio_read_mo_X_device(qmckl_context_device context,
 											  trexio_t *const file) {
-	printf("[qmckl_trexio_mo_X_device] In\n");
 	assert(context != (qmckl_context_device)0);
 	assert(file != NULL);
 
@@ -2952,14 +2933,12 @@ qmckl_exit_code qmckl_trexio_read_mo_X_device(qmckl_context_device context,
 			return rc;
 	}
 
-	printf("[qmckl_trexio_mo_X_device] Out\n");
 	return QMCKL_SUCCESS;
 }
 
 qmckl_exit_code qmckl_trexio_read_device(const qmckl_context_device context,
 										 const char *file_name,
 										 const int64_t size_max) {
-	printf("[qmckl_trexio_read_device] In\n");
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return false;
 	}
@@ -3011,6 +2990,5 @@ qmckl_exit_code qmckl_trexio_read_device(const qmckl_context_device context,
 
 	trexio_close(file);
 	file = NULL;
-	printf("[qmckl_trexio_read_device] Out\n");
 	return rc;
 }
