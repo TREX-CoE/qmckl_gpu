@@ -137,15 +137,22 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	int lmax, c;
 
 	int device_id = qmckl_get_device_id(context);
+	qmckl_memory_info_struct info;
 
-	lstart = omp_target_alloc(sizeof(int64_t) * 21, device_id);
+	info.size = sizeof(int64_t) * 21;
+	lstart = qmckl_malloc_device(context, info);
 
-	e_coord = omp_target_alloc(sizeof(double) * 8, device_id);
-	n_coord = omp_target_alloc(sizeof(double) * 8, device_id);
+	info.size = sizeof(double) * 8;
+	e_coord = qmckl_malloc_device(context, info);
+	info.size = sizeof(double) * 8;
+	n_coord = qmckl_malloc_device(context, info);
 
-	poly_vgl = omp_target_alloc(sizeof(double) * 5 * ao_num, device_id);
-	powers = omp_target_alloc(sizeof(int64_t) * 3 * ao_num, device_id);
-	ao_index = omp_target_alloc(sizeof(int64_t) * ao_num, device_id);
+	info.size = sizeof(double) * 5 * ao_num;
+	poly_vgl = qmckl_malloc_device(context, info);
+	info.size = sizeof(int64_t) * 3 * ao_num;
+	powers = qmckl_malloc_device(context, info);
+	info.size = sizeof(int64_t) * ao_num;
+	ao_index = qmckl_malloc_device(context, info);
 
 	// Specific calling function
 	lmax = -1;
@@ -160,7 +167,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			}
 		}
 	}
-	double *pows = omp_target_alloc(3 * (lmax + 2) * sizeof(double), device_id);
+	info.size = 3 * (lmax + 2) * sizeof(double);
+	double *pows = qmckl_malloc_device(context, info);
 
 #pragma omp target is_device_ptr(lstart)
 	{
@@ -411,14 +419,14 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 		}
 	}
 
-	omp_target_free(lstart, device_id);
-	omp_target_free(e_coord, device_id);
-	omp_target_free(n_coord, device_id);
-	omp_target_free(poly_vgl, device_id);
-	omp_target_free(powers, device_id);
-	omp_target_free(ao_index, device_id);
+	qmckl_free_device(context, lstart);
+	qmckl_free_device(context, e_coord);
+	qmckl_free_device(context, n_coord);
+	qmckl_free_device(context, poly_vgl);
+	qmckl_free_device(context, powers);
+	qmckl_free_device(context, ao_index);
 
-	omp_target_free(pows, device_id);
+	qmckl_free_device(context, pows);
 
 	return QMCKL_SUCCESS;
 }
@@ -668,8 +676,7 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
 							  "input array too small");
 	}
 
-	omp_target_memcpy(ao_vgl, ctx->ao_basis.ao_vgl,
-					  (size_t)sze * sizeof(double), 0, 0, device_id, device_id);
+	qmckl_memcpy_D2D(context, ao_vgl, ctx->ao_basis.ao_vgl, (size_t)sze * sizeof(double));
 
 	return QMCKL_SUCCESS;
 }

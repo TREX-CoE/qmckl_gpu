@@ -330,15 +330,20 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 	// To avoid offloading structures, expo is split in two arrays :
 	// struct combined expo[prim_max];
 	// ... gets replaced by :
-	double *expo_expo = omp_target_alloc(prim_max * sizeof(double), device_id);
+	mem_info.size = prim_max * sizeof(double);
+	double *expo_expo = qmckl_malloc_device(context, mem_info);
+	mem_info.size = prim_max * sizeof(double);
 	int64_t *expo_index =
-		omp_target_alloc(prim_max * sizeof(double), device_id);
+		qmckl_malloc_device(context, mem_info);
 
+	mem_info.size = shell_max * prim_max * sizeof(double);
 	double *coef =
-		omp_target_alloc(shell_max * prim_max * sizeof(double), device_id);
-	double *newcoef = omp_target_alloc(prim_max * sizeof(double), device_id);
+		qmckl_malloc_device(context, mem_info);
+	mem_info.size = prim_max * sizeof(double);
+	double *newcoef = qmckl_malloc_device(context, mem_info);
 
-	int64_t *newidx = omp_target_alloc(prim_max * sizeof(int64_t), device_id);
+	mem_info.size = prim_max * sizeof(int64_t);
+	int64_t *newidx = qmckl_malloc_device(context, mem_info);
 
 	int64_t *shell_prim_index = ctx->ao_basis.shell_prim_index;
 	double *exponent = ctx->ao_basis.exponent;
@@ -477,11 +482,11 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 	}
 	// End of target region
 
-	omp_target_free(expo_expo, device_id);
-	omp_target_free(expo_index, device_id);
-	omp_target_free(coef, device_id);
-	omp_target_free(newcoef, device_id);
-	omp_target_free(newidx, device_id);
+	qmckl_free_device(context, expo_expo);
+	qmckl_free_device(context, expo_index);
+	qmckl_free_device(context, coef);
+	qmckl_free_device(context, newcoef);
+	qmckl_free_device(context, newidx);
 
 	return QMCKL_SUCCESS;
 }
@@ -740,15 +745,20 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 	// To avoid offloading structures, expo is split in two arrays :
 	// struct combined expo[prim_max];
 	// ... gets replaced by :
-	double *expo_expo = omp_target_alloc(prim_max * sizeof(double), device_id);
+	mem_info.size = prim_max * sizeof(double);
+	double *expo_expo = qmckl_malloc_device(context, mem_info);
+	mem_info.size = prim_max * sizeof(double);
 	int64_t *expo_index =
-		omp_target_alloc(prim_max * sizeof(double), device_id);
+		qmckl_malloc_device(context, mem_info);
 
+	mem_info.size = shell_max * prim_max * sizeof(double);
 	double *coef =
-		omp_target_alloc(shell_max * prim_max * sizeof(double), device_id);
-	double *newcoef = omp_target_alloc(prim_max * sizeof(double), device_id);
+		qmckl_malloc_device(context, mem_info);
+	mem_info.size = prim_max * sizeof(double);
+	double *newcoef = qmckl_malloc_device(context, mem_info);
 
-	int64_t *newidx = omp_target_alloc(prim_max * sizeof(int64_t), device_id);
+	mem_info.size = prim_max * sizeof(int64_t);
+	int64_t *newidx = qmckl_malloc_device(context, mem_info);
 
 	int64_t *shell_prim_index = ctx->ao_basis.shell_prim_index;
 	double *exponent = ctx->ao_basis.exponent;
@@ -887,11 +897,11 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 	}
 	// End of target region
 
-	omp_target_free(expo_expo, device_id);
-	omp_target_free(expo_index, device_id);
-	omp_target_free(coef, device_id);
-	omp_target_free(newcoef, device_id);
-	omp_target_free(newidx, device_id);
+	qmckl_free_device(context, expo_expo);
+	qmckl_free_device(context, expo_index);
+	qmckl_free_device(context, coef);
+	qmckl_free_device(context, newcoef);
+	qmckl_free_device(context, newidx);
 
 	return QMCKL_SUCCESS;
 }
@@ -1278,8 +1288,7 @@ qmckl_set_ao_basis_nucleus_index_device(qmckl_context_device context,
 							  "qmckl_set_ao_basis_nucleus_index_device", NULL);
 	}
 
-	omp_target_memcpy(new_array, nucleus_index, mem_info.size, 0, 0, device_id,
-					  device_id);
+	qmckl_memcpy_D2D(context, new_array, nucleus_index, mem_info.size);
 
 	ctx->ao_basis.nucleus_index = new_array;
 
@@ -1344,8 +1353,7 @@ qmckl_set_ao_basis_nucleus_shell_num_device(qmckl_context_device context,
 							  NULL);
 	}
 
-	omp_target_memcpy(new_array, nucleus_shell_num, mem_info.size, 0, 0,
-					  device_id, device_id);
+	qmckl_memcpy_D2D(context, new_array, nucleus_shell_num, mem_info.size);
 
 	ctx->ao_basis.nucleus_shell_num = new_array;
 
@@ -1408,8 +1416,7 @@ qmckl_set_ao_basis_shell_ang_mom_device(qmckl_context_device context,
 							  "qmckl_set_ao_basis_shell_ang_mom_device", NULL);
 	}
 
-	omp_target_memcpy(new_array, shell_ang_mom, mem_info.size, 0, 0, device_id,
-					  device_id);
+	qmckl_memcpy_D2D(context, new_array, shell_ang_mom, mem_info.size);
 
 	ctx->ao_basis.shell_ang_mom = new_array;
 
@@ -1473,8 +1480,7 @@ qmckl_set_ao_basis_shell_prim_num_device(qmckl_context_device context,
 							  "qmckl_set_ao_basis_shell_prim_num_device", NULL);
 	}
 
-	omp_target_memcpy(new_array, shell_prim_num, mem_info.size, 0, 0, device_id,
-					  device_id);
+	qmckl_memcpy_D2D(context, new_array, shell_prim_num, mem_info.size);
 
 	ctx->ao_basis.shell_prim_num = new_array;
 
@@ -1539,8 +1545,7 @@ qmckl_set_ao_basis_shell_prim_index_device(qmckl_context_device context,
 							  NULL);
 	}
 
-	omp_target_memcpy(new_array, shell_prim_index, mem_info.size, 0, 0,
-					  device_id, device_id);
+	qmckl_memcpy_D2D(context, new_array, shell_prim_index, mem_info.size);
 
 	ctx->ao_basis.shell_prim_index = new_array;
 
@@ -1603,8 +1608,7 @@ qmckl_set_ao_basis_shell_factor_device(qmckl_context_device context,
 							  "qmckl_set_ao_basis_shell_factor_device", NULL);
 	}
 
-	omp_target_memcpy(new_array, shell_factor, mem_info.size, 0, 0, device_id,
-					  device_id);
+	qmckl_memcpy_D2D(context, new_array, shell_factor, mem_info.size);
 
 	ctx->ao_basis.shell_factor = new_array;
 
@@ -1663,8 +1667,7 @@ qmckl_exit_code qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
 							  "qmckl_set_ao_basis_exponent_device", NULL);
 	}
 
-	omp_target_memcpy(new_array, exponent, mem_info.size, 0, 0, device_id,
-					  device_id);
+	qmckl_memcpy_D2D(context, new_array, exponent, mem_info.size);
 
 	ctx->ao_basis.exponent = new_array;
 
@@ -1726,8 +1729,7 @@ qmckl_set_ao_basis_coefficient_device(qmckl_context_device context,
 							  "qmckl_set_ao_basis_coefficient_device", NULL);
 	}
 
-	omp_target_memcpy(new_array, coefficient, mem_info.size, 0, 0, device_id,
-					  device_id);
+	qmckl_memcpy_D2D(context, new_array, coefficient, mem_info.size);
 
 	ctx->ao_basis.coefficient = new_array;
 
@@ -1790,8 +1792,7 @@ qmckl_exit_code qmckl_set_ao_basis_prim_factor_device(qmckl_context context,
 							  "qmckl_set_ao_basis_prim_factor_device", NULL);
 	}
 
-	omp_target_memcpy(new_array, prim_factor, mem_info.size, 0, 0, device_id,
-					  device_id);
+	qmckl_memcpy_D2D(context, new_array, prim_factor, mem_info.size);
 
 	ctx->ao_basis.prim_factor = new_array;
 
@@ -1853,8 +1854,7 @@ qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
 							  "qmckl_set_ao_basis_ao_factor_device", NULL);
 	}
 
-	omp_target_memcpy(new_array, ao_factor, mem_info.size, 0, 0, device_id,
-					  device_id);
+	qmckl_memcpy_D2D(context, new_array, ao_factor, mem_info.size);
 
 	ctx->ao_basis.ao_factor = new_array;
 
@@ -1996,8 +1996,7 @@ qmckl_set_mo_basis_coefficient_device(qmckl_context context,
 							  "qmckl_set_mo_basis_coefficient_device", NULL);
 	}
 
-	omp_target_memcpy(new_array, coefficient, mem_info.size, 0, 0, device_id,
-					  device_id);
+	qmckl_memcpy_D2D(context, new_array, coefficient, mem_info.size);
 
 	ctx->mo_basis.coefficient = new_array;
 
