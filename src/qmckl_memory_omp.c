@@ -1,8 +1,9 @@
-#include "../include/qmckl_memory_device.h"
+#include "../include/qmckl_memory.h"
 
 // This file contains functions prototypes for context memory management
 // functions (on device only, we expect most if not all of the context
 // memory to be allocated on device in most cases)
+// (OpenMP implementations)
 
 //**********
 // ALLOCS / FREES
@@ -161,12 +162,12 @@ qmckl_exit_code qmckl_memcpy_D2H(qmckl_context_device context, void *const dest,
 
 	if (dest == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_2,
-							  "qmckl_memcpu_D2H", "NULL dest pointer");
+							  "qmckl_memcpy_D2H", "NULL dest pointer");
 	}
 
 	if (src == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_3,
-							  "qmckl_memcpu_D2H", "NULL src pointer");
+							  "qmckl_memcpy_D2H", "NULL src pointer");
 	}
 
 	int device_id = qmckl_get_device_id(context);
@@ -196,12 +197,12 @@ qmckl_exit_code qmckl_memcpy_D2D(qmckl_context_device context, void *const dest,
 
 	if (dest == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_2,
-							  "qmckl_memcpu_D2D", "NULL dest pointer");
+							  "qmckl_memcpy_D2D", "NULL dest pointer");
 	}
 
 	if (src == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_3,
-							  "qmckl_memcpu_D2D", "NULL src pointer");
+							  "qmckl_memcpy_D2D", "NULL src pointer");
 	}
 
 	int device_id = qmckl_get_device_id(context);

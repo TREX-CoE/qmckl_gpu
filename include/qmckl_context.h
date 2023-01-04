@@ -21,6 +21,9 @@
 
 typedef int64_t qmckl_context_device;
 
+#include "qmckl_memory.h"
+
+
 typedef struct {
 	size_t device_id;
 	qmckl_memory_struct memory;

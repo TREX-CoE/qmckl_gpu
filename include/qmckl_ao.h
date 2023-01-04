@@ -18,8 +18,8 @@
 #include "qmckl_memory_private_func.h"
 #include "qmckl_memory_private_type.h"
 
-#include "qmckl_context_device.h"
-#include "qmckl_memory_device.h"
+#include "qmckl_context.h"
+#include "qmckl_memory.h"
 
 qmckl_exit_code qmckl_ao_polynomial_transp_vgl_hpc_device(
 	const qmckl_context_device context, const double *restrict X,

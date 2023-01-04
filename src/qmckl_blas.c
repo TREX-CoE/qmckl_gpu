@@ -1,9 +1,9 @@
-#include "../include/qmckl_blas_device.h"
-#include <omp.h>
+#include "../include/qmckl_blas.h"
 
 // This file provides OpenMP implementations of BLAS functions (mostly
 // initialization and manipulation of vector, matrix, ... types). All functions
 // accept device pointers.
+// (OpenMP/OpenACC independent functions only)
 
 //**********
 // VECTOR
@@ -119,20 +119,6 @@ qmckl_exit_code qmckl_matrix_free_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_matrix qmckl_matrix_set_device(qmckl_matrix matrix, double value) {
-	// Recompute array size
-	int prod_size = matrix.size[0] * matrix.size[1];
-
-	double *data = matrix.data;
-#pragma omp target is_device_ptr(data)
-	{
-		for (int i = 0; i < prod_size; i++) {
-			data[i] = value;
-		}
-	}
-	return matrix;
-}
-
 qmckl_exit_code
 qmckl_matrix_of_double_device(const qmckl_context_device context,
 							  const double *target, const int64_t size_max,
@@ -162,46 +148,6 @@ qmckl_matrix_of_double_device(const qmckl_context_device context,
 					  device_id, device_id);
 
 	*matrix_out = matrix;
-	return QMCKL_SUCCESS;
-}
-
-qmckl_exit_code qmckl_transpose_device(qmckl_context_device context,
-									   const qmckl_matrix A, qmckl_matrix At) {
-	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
-		return QMCKL_INVALID_CONTEXT;
-	}
-
-	if (A.size[0] < 1) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_2,
-							  "qmckl_transpose_device", "Invalid size for A");
-	}
-
-	if (At.data == NULL) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_3,
-							  "qmckl_transpose_device",
-							  "Output matrix not allocated");
-	}
-
-	if (At.size[0] != A.size[1] || At.size[1] != A.size[0]) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_3,
-							  "qmckl_transpose_device", "Invalid size for At");
-	}
-
-	double *A_data = A.data;
-	int A_s0 = A.size[0];
-
-	double *At_data = At.data;
-	int At_s0 = At.size[0];
-	int At_s1 = At.size[1];
-
-#pragma omp target is_device_ptr(A_data, At_data)
-	{
-#pragma omp parallel for collapse(2)
-		for (int64_t j = 0; j < At_s1; ++j)
-			for (int64_t i = 0; i < At_s0; ++i)
-				At_data[i + j * At_s0] = A_data[j + i * A_s0];
-	}
-
 	return QMCKL_SUCCESS;
 }
 
@@ -255,22 +201,4 @@ qmckl_exit_code qmckl_tensor_free_device(qmckl_context_device context,
 	// memset(tensor, 0, sizeof(qmckl_tensor));
 
 	return QMCKL_SUCCESS;
-}
-
-qmckl_tensor qmckl_tensor_set_device(qmckl_tensor tensor, double value) {
-	// Recompute array size
-	int prod_size = 1;
-
-	for (int i = 0; i < tensor.order; i++) {
-		prod_size *= tensor.size[i];
-	}
-
-	double *data = tensor.data;
-#pragma omp target is_device_ptr(data)
-	{
-		for (int i = 0; i < prod_size; i++) {
-			data[i] = value;
-		}
-	}
-	return tensor;
 }

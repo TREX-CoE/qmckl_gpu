@@ -19,8 +19,8 @@
 #include "qmckl_blas_private_func.h"
 #include "qmckl_memory_private_func.h"
 
-#include "qmckl_context_device.h"
-#include "qmckl_memory_device.h"
+#include "qmckl_context.h"
+#include "qmckl_memory.h"
 
 qmckl_vector qmckl_vector_alloc_device(qmckl_context_device context,
 									   const int64_t size);

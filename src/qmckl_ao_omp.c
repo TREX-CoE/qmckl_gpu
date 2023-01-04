@@ -1,4 +1,4 @@
-#include "include/qmckl_ao_gpu.h"
+#include "include/qmckl_ao.h"
 
 //**********
 // COMPUTE

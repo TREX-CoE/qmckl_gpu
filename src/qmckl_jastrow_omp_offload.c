@@ -1,4 +1,4 @@
-#include "include/qmckl_jastrow_gpu.h"
+#include "include/qmckl_jastrow.h"
 
 //**********
 // COMPUTE

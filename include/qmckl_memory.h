@@ -15,7 +15,7 @@
 #include "qmckl_memory_private_func.h"
 #include "qmckl_memory_private_type.h"
 
-#include "qmckl_context_device.h"
+#include "qmckl_context.h"
 
 /* Allocs & frees */
 

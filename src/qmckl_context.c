@@ -1,6 +1,48 @@
-#include "../include/qmckl_context_device.h"
-
 // This file contains qmckl_context_device related functions
+
+#include "../include/qmckl_context.h"
+
+//**********
+// MISC FUNCTIONS
+//**********
+
+qmckl_exit_code qmckl_context_touch_device(const qmckl_context_device context) {
+	return qmckl_context_touch((qmckl_context)context);
+}
+
+//**********
+// CONTEXT CREATE
+//**********
+
+qmckl_context_device qmckl_context_create_device(int device_id) {
+	qmckl_context_device context = (qmckl_context_device)qmckl_context_create();
+	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+
+	/* Allocate the qmckl_context_device_struct */
+	ctx->qmckl_extra = malloc(sizeof(qmckl_context_device_struct));
+
+	qmckl_context_device_struct *const ds =
+		(qmckl_context_device_struct *)ctx->qmckl_extra;
+
+	/* Allocate the device qmckl_memory_struct */
+	const size_t size = 128L;
+	qmckl_memory_info_struct *new_array =
+		calloc(size, sizeof(qmckl_memory_info_struct));
+	if (new_array == NULL) {
+		free(ctx);
+		return QMCKL_NULL_CONTEXT;
+	}
+	memset(&(new_array[0]), 0, size * sizeof(qmckl_memory_info_struct));
+
+	ds->memory.element = new_array;
+	ds->memory.array_size = size;
+	ds->memory.n_allocated = (size_t)0;
+
+	/* Set the device_id */
+	ds->device_id = device_id;
+
+	return context;
+}
 
 //**********
 // CONTEXT DESTROY
@@ -28,10 +70,7 @@ qmckl_context_destroy_device(const qmckl_context_device context) {
 		/* Memory: Remove all allocated data */
 		for (size_t pos = (size_t)0; pos < ctx->memory.array_size; ++pos) {
 			if (ctx->memory.element[pos].pointer != NULL) {
-				omp_target_free(ctx->memory.element[pos].pointer, device_id);
-				memset(&(ctx->memory.element[pos]), 0,
-					   sizeof(qmckl_memory_info_struct));
-				ctx->memory.n_allocated -= 1;
+				qmckl_free(context, ctx->memory.element[pos].pointer);
 			}
 		}
 		assert(ctx->memory.n_allocated == (size_t)0);
@@ -42,10 +81,7 @@ qmckl_context_destroy_device(const qmckl_context_device context) {
 		/* Device memory: Remove all allocated data */
 		for (size_t pos = (size_t)0; pos < ds->memory.array_size; ++pos) {
 			if (ds->memory.element[pos].pointer != NULL) {
-				omp_target_free(ds->memory.element[pos].pointer, device_id);
-				memset(&(ds->memory.element[pos]), 0,
-					   sizeof(qmckl_memory_info_struct));
-				ds->memory.n_allocated -= 1;
+				qmckl_free_device(context, ds->memory.element[pos].pointer);
 			}
 		}
 		assert(ds->memory.n_allocated == (size_t)0);

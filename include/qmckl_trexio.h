@@ -18,9 +18,9 @@
 #include "qmckl_memory_private_type.h"
 #include "qmckl_memory_private_func.h"
 
-#include "qmckl_context_device.h"
-#include "qmckl_memory_device.h"
-#include "qmckl_blas_device.h"
+#include "qmckl_context.h"
+#include "qmckl_memory.h"
+#include "qmckl_blas.h"
 
 // Prototype for standard QMCkl function
 trexio_t *qmckl_trexio_open_X(const char *file_name, qmckl_exit_code *rc);
