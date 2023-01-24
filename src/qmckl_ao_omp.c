@@ -104,6 +104,8 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 			}
 		}
 	}
+
+	return info;
 }
 
 /* ao_vgl_gaussian */
@@ -216,7 +218,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 				r2 = x * x + y * y + z * z;
 
-				/* Beginning of ao_polynomial computation (now inlined)*/
+				// Beginning of ao_polynomial computation (now inlined)
 				double Y1, Y2, Y3;
 				double xy, yz, xz;
 				int c;
@@ -240,13 +242,16 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 					n_poly = 0;
 
-				} else if (nucleus_max_ang_mom[inucl] > 0) {
+				}
+
+				else if (nucleus_max_ang_mom[inucl] > 0) {
 					for (int i = 0; i < 3; i++) {
 						for (int j = 0; j < 3; j++) {
 							pows[i * (nucleus_max_ang_mom[inucl] + 2) + j] = 1;
 						}
 					}
 
+					/**/
 					for (int i = 3; i < nucleus_max_ang_mom[inucl] + 2; i++) {
 						pows[0 * (nucleus_max_ang_mom[inucl] + 2) + i] =
 							pows[0 * (nucleus_max_ang_mom[inucl] + 2) +
@@ -261,6 +266,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 								 (i - 1)] *
 							Y3;
 					}
+					/**/
 
 					for (int i = 0; i < 5; i++) {
 						for (int j = 0; j < 4; j++) {
@@ -346,8 +352,9 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 					}
 					dd = dd + 1;
 				}
-				/* End of ao_polynomial computation (now inlined)*/
+				// End of ao_polynomial computation (now inlined)
 
+				// Start of debug comment 2
 				ishell_start = nucleus_index[inucl] + 1;
 				ishell_end = nucleus_index[inucl] + nucleus_shell_num[inucl];
 
@@ -418,7 +425,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			}
 		}
 	}
-
 	qmckl_free_device(context, lstart);
 	qmckl_free_device(context, e_coord);
 	qmckl_free_device(context, n_coord);
@@ -488,6 +494,7 @@ qmckl_provide_ao_basis_shell_vgl_device(qmckl_context_device context) {
 								  "Not yet implemented for basis type != 'G'");
 		}
 		if (rc != QMCKL_SUCCESS) {
+
 			return rc;
 		}
 
@@ -538,54 +545,11 @@ qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context) {
 		/* Checking for shell_vgl */
 		if (ctx->ao_basis.shell_vgl == NULL ||
 			ctx->point.date > ctx->ao_basis.shell_vgl_date) {
-
-			/* Free if not NULL */
-			if (ctx->ao_basis.shell_vgl != NULL) {
-				qmckl_free_device(context, ctx->ao_basis.shell_vgl);
-			}
-
-			/* (Re) Alloc */
-			qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-			mem_info.size =
-				ctx->ao_basis.shell_num * 5 * ctx->point.num * sizeof(double);
-			double *shell_vgl =
-				(double *)qmckl_malloc_device(context, mem_info);
-
-			if (shell_vgl == NULL) {
-				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
-									  "qmckl_ao_basis_shell_vgl", NULL);
-			}
-
-			ctx->ao_basis.shell_vgl = shell_vgl;
-
-			/* Compute*/
-			if (ctx->ao_basis.type == 'G') {
-				rc = qmckl_compute_ao_basis_shell_gaussian_vgl_device(
-					context, ctx->ao_basis.prim_num, ctx->ao_basis.shell_num,
-					ctx->point.num, ctx->nucleus.num,
-					ctx->ao_basis.nucleus_shell_num,
-					ctx->ao_basis.nucleus_index, ctx->ao_basis.nucleus_range,
-					ctx->ao_basis.shell_prim_index,
-					ctx->ao_basis.shell_prim_num, ctx->point.coord.data,
-					ctx->nucleus.coord.data, ctx->ao_basis.exponent,
-					ctx->ao_basis.coefficient_normalized,
-					ctx->ao_basis.shell_vgl);
-			} else {
-				return qmckl_failwith(context, QMCKL_FAILURE,
-									  "compute_ao_basis_shell_vgl",
-									  "Not yet implemented");
-			}
-			if (rc != QMCKL_SUCCESS) {
-				return rc;
-			}
-
-			ctx->ao_basis.shell_vgl_date = ctx->date;
-
-			ctx->ao_basis.shell_vgl = shell_vgl;
+			qmckl_provide_ao_basis_shell_vgl_device(context);
 		}
 
+		/* Compute ao_vgl_gaussian itself */
 		if (ctx->ao_basis.type == 'G') {
-#pragma omp is_device_ptr(coord_device)
 			rc = qmckl_compute_ao_vgl_gaussian_device(
 				context, ctx->ao_basis.ao_num, ctx->ao_basis.shell_num,
 				ctx->ao_basis.prim_num_per_nucleus, ctx->point.num,
@@ -676,7 +640,8 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
 							  "input array too small");
 	}
 
-	qmckl_memcpy_D2D(context, ao_vgl, ctx->ao_basis.ao_vgl, (size_t)sze * sizeof(double));
+	qmckl_memcpy_D2D(context, ao_vgl, ctx->ao_basis.ao_vgl,
+					 (size_t)sze * sizeof(double));
 
 	return QMCKL_SUCCESS;
 }

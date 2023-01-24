@@ -1,5 +1,4 @@
 #include "qmckl.h"
-#include "assert.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -9,467 +8,534 @@
 #include <string.h>
 
 #include "chbrclf.h"
-#include "qmckl_ao_private_func.h"
+//#include "../qmckl/src/qmckl_ao_private_func.h"
+#include "../include/qmckl_gpu.h"
+
+#define AO_VGL_ID(x, y, z) 5 * ao_num *x + ao_num *y + z
 
 int main() {
-    qmckl_context context;
-    context = qmckl_context_create();
+	qmckl_context context;
+	// TODO Get device ID according to OpenMP/ACC
+	context = qmckl_context_create_device(0);
 
-const int64_t   nucl_num      = chbrclf_nucl_num;
-const double*   nucl_charge   = chbrclf_charge;
-const double*   nucl_coord    = &(chbrclf_nucl_coord[0][0]);
+	const int64_t nucl_num = chbrclf_nucl_num;
 
-qmckl_exit_code rc;
-rc = qmckl_set_nucleus_num (context, nucl_num);
-assert(rc == QMCKL_SUCCESS);
+	// Put nucleus stuff in CPU arrays
+	const double *nucl_charge = chbrclf_charge;
+	const double *nucl_coord = &(chbrclf_nucl_coord[0][0]);
 
-rc = qmckl_set_nucleus_coord (context, 'T', &(nucl_coord[0]), 3*nucl_num);
-assert(rc == QMCKL_SUCCESS);
+	// Put nucleus stuff in GPU arrays
+	const double *nucl_charge_d =
+		qmckl_malloc_device(context, nucl_num * sizeof(double));
+	const double *nucl_coord_d =
+		qmckl_malloc_device(context, 3 * nucl_num * sizeof(double));
 
-rc = qmckl_set_nucleus_charge(context, nucl_charge, nucl_num);
-assert(rc == QMCKL_SUCCESS);
+	qmckl_memcpy_H2D(context, nucl_charge_d, nucl_charge,
+					 nucl_num * sizeof(double));
+	qmckl_memcpy_H2D(context, nucl_coord_d, nucl_coord,
+					 3 * nucl_num * sizeof(double));
 
-assert(qmckl_nucleus_provided(context));
+	// Set nucleus stuff in context
+	qmckl_exit_code rc;
+	rc = qmckl_set_nucleus_num_device(context, nucl_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
+	rc = qmckl_set_nucleus_coord_device(context, 'T', nucl_coord_d,
+										3 * nucl_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-const int64_t    shell_num         =  chbrclf_shell_num;
-const int64_t    prim_num          =  chbrclf_prim_num;
-const int64_t    ao_num            =  chbrclf_ao_num;
-const int64_t *  nucleus_index     =  &(chbrclf_basis_nucleus_index[0]);
-const int64_t *  nucleus_shell_num =  &(chbrclf_basis_nucleus_shell_num[0]);
-const int32_t *  shell_ang_mom     =  &(chbrclf_basis_shell_ang_mom[0]);
-const int64_t *  shell_prim_num    =  &(chbrclf_basis_shell_prim_num[0]);
-const int64_t *  shell_prim_index  =  &(chbrclf_basis_shell_prim_index[0]);
-const double  *  shell_factor      =  &(chbrclf_basis_shell_factor[0]);
-const double  *  exponent          =  &(chbrclf_basis_exponent[0]);
-const double  *  coefficient       =  &(chbrclf_basis_coefficient[0]);
-const double  *  prim_factor       =  &(chbrclf_basis_prim_factor[0]);
-const double  *  ao_factor         =  &(chbrclf_basis_ao_factor[0]);
+	rc = qmckl_set_nucleus_charge_device(context, nucl_charge_d, nucl_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-const char typ = 'G';
+	if (!qmckl_nucleus_provided(context))
+		return 1;
 
-assert(!qmckl_ao_basis_provided(context));
+	const int64_t shell_num = chbrclf_shell_num;
+	const int64_t prim_num = chbrclf_prim_num;
+	const int64_t ao_num = chbrclf_ao_num;
 
-rc = qmckl_set_ao_basis_type (context, typ);
-assert(rc == QMCKL_SUCCESS);
-assert(!qmckl_ao_basis_provided(context));
+	// Put other stuff in CPU arrays
+	const int64_t *nucleus_index = &(chbrclf_basis_nucleus_index[0]);
+	const int64_t *nucleus_shell_num = &(chbrclf_basis_nucleus_shell_num[0]);
+	const int32_t *shell_ang_mom = &(chbrclf_basis_shell_ang_mom[0]);
+	const int64_t *shell_prim_num = &(chbrclf_basis_shell_prim_num[0]);
+	const int64_t *shell_prim_index = &(chbrclf_basis_shell_prim_index[0]);
+	const double *shell_factor = &(chbrclf_basis_shell_factor[0]);
+	const double *exponent = &(chbrclf_basis_exponent[0]);
+	const double *coefficient = &(chbrclf_basis_coefficient[0]);
+	const double *prim_factor = &(chbrclf_basis_prim_factor[0]);
+	const double *ao_factor = &(chbrclf_basis_ao_factor[0]);
 
-rc = qmckl_set_ao_basis_shell_num (context, shell_num);
-assert(rc == QMCKL_SUCCESS);
-assert(!qmckl_ao_basis_provided(context));
+	// Put other stuff in GPU arrays
+	const int64_t *nucleus_index_d =
+		qmckl_malloc_device(context, nucl_num * sizeof(int64_t));
+	const int64_t *nucleus_shell_num_d =
+		qmckl_malloc_device(context, nucl_num * sizeof(int64_t));
+	const int32_t *shell_ang_mom_d =
+		qmckl_malloc_device(context, shell_num * sizeof(int32_t));
+	const int64_t *shell_prim_num_d =
+		qmckl_malloc_device(context, shell_num * sizeof(int64_t));
+	const int64_t *shell_prim_index_d =
+		qmckl_malloc_device(context, shell_num * sizeof(int64_t));
+	const double *shell_factor_d =
+		qmckl_malloc_device(context, shell_num * sizeof(double));
+	const double *exponent_d =
+		qmckl_malloc_device(context, prim_num * sizeof(double));
+	const double *coefficient_d =
+		qmckl_malloc_device(context, prim_num * sizeof(double));
+	const double *prim_factor_d =
+		qmckl_malloc_device(context, prim_num * sizeof(double));
+	const double *ao_factor_d =
+		qmckl_malloc_device(context, ao_num * sizeof(double));
 
-rc = qmckl_set_ao_basis_prim_num (context, prim_num);
-assert(rc == QMCKL_SUCCESS);
-assert(!qmckl_ao_basis_provided(context));
+	qmckl_memcpy_H2D(context, nucleus_index_d, nucleus_index,
+					 nucl_num * sizeof(int64_t));
+	qmckl_memcpy_H2D(context, nucleus_shell_num_d, nucleus_shell_num,
+					 nucl_num * sizeof(int64_t));
+	qmckl_memcpy_H2D(context, shell_ang_mom_d, shell_ang_mom,
+					 shell_num * sizeof(int32_t));
+	qmckl_memcpy_H2D(context, shell_prim_num_d, shell_prim_num,
+					 shell_num * sizeof(int64_t));
+	qmckl_memcpy_H2D(context, shell_prim_index_d, shell_prim_index,
+					 shell_num * sizeof(int64_t));
+	qmckl_memcpy_H2D(context, shell_factor_d, shell_factor,
+					 shell_num * sizeof(double));
+	qmckl_memcpy_H2D(context, exponent_d, exponent, prim_num * sizeof(double));
+	qmckl_memcpy_H2D(context, coefficient_d, coefficient,
+					 prim_num * sizeof(double));
+	qmckl_memcpy_H2D(context, prim_factor_d, prim_factor,
+					 prim_num * sizeof(double));
+	qmckl_memcpy_H2D(context, ao_factor_d, ao_factor, ao_num * sizeof(double));
 
-rc = qmckl_set_ao_basis_nucleus_index (context, nucleus_index, nucl_num);
-assert(rc == QMCKL_SUCCESS);
-assert(!qmckl_ao_basis_provided(context));
+	const char typ = 'G';
 
-rc = qmckl_set_ao_basis_nucleus_index (context, nucleus_index, nucl_num);
-assert(rc == QMCKL_ALREADY_SET);
+	rc = qmckl_set_ao_basis_type_device(context, typ);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-rc = qmckl_set_ao_basis_nucleus_shell_num (context, nucleus_shell_num, nucl_num);
-assert(rc == QMCKL_SUCCESS);
-assert(!qmckl_ao_basis_provided(context));
+	rc = qmckl_set_ao_basis_shell_num_device(context, shell_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-rc = qmckl_set_ao_basis_shell_ang_mom (context, shell_ang_mom, shell_num);
-assert(rc == QMCKL_SUCCESS);
-assert(!qmckl_ao_basis_provided(context));
+	rc = qmckl_set_ao_basis_prim_num_device(context, prim_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-rc = qmckl_set_ao_basis_shell_factor  (context, shell_factor, shell_num);
-assert(rc == QMCKL_SUCCESS);
-assert(!qmckl_ao_basis_provided(context));
+	rc = qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index_d,
+												 nucl_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-rc = qmckl_set_ao_basis_shell_prim_num (context, shell_prim_num, shell_num);
-assert(rc == QMCKL_SUCCESS);
-assert(!qmckl_ao_basis_provided(context));
+	rc = qmckl_set_ao_basis_nucleus_shell_num_device(
+		context, nucleus_shell_num_d, nucl_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-rc = qmckl_set_ao_basis_shell_prim_index (context, shell_prim_index, shell_num);
-assert(rc == QMCKL_SUCCESS);
-assert(!qmckl_ao_basis_provided(context));
+	rc = qmckl_set_ao_basis_shell_ang_mom_device(context, shell_ang_mom_d,
+												 shell_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-rc = qmckl_set_ao_basis_exponent      (context, exponent, prim_num);
-assert(rc == QMCKL_SUCCESS);
-assert(!qmckl_ao_basis_provided(context));
+	rc = qmckl_set_ao_basis_shell_factor_device(context, shell_factor_d,
+												shell_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-rc = qmckl_set_ao_basis_coefficient   (context, coefficient, prim_num);
-assert(rc == QMCKL_SUCCESS);
-assert(!qmckl_ao_basis_provided(context));
+	rc = qmckl_set_ao_basis_shell_prim_num_device(context, shell_prim_num_d,
+												  shell_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-rc = qmckl_set_ao_basis_prim_factor (context, prim_factor, prim_num);
-assert(rc == QMCKL_SUCCESS);
+	rc = qmckl_set_ao_basis_shell_prim_index_device(context, shell_prim_index_d,
+													shell_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-rc = qmckl_set_ao_basis_ao_num(context, ao_num);
-assert(rc == QMCKL_SUCCESS);
+	rc = qmckl_set_ao_basis_exponent_device(context, exponent_d, prim_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-rc = qmckl_set_ao_basis_ao_factor (context, ao_factor, ao_num);
-assert(rc == QMCKL_SUCCESS);
+	rc =
+		qmckl_set_ao_basis_coefficient_device(context, coefficient_d, prim_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-assert(qmckl_ao_basis_provided(context));
+	rc =
+		qmckl_set_ao_basis_prim_factor_device(context, prim_factor_d, prim_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-int64_t    shell_num_test        ;
-int64_t    prim_num_test         ;
-int64_t    ao_num_test           ;
-int64_t *  nucleus_index_test    ;
-int64_t *  nucleus_shell_num_test;
-int32_t *  shell_ang_mom_test    ;
-int64_t *  shell_prim_num_test   ;
-int64_t *  shell_prim_index_test ;
-double  *  shell_factor_test     ;
-double  *  exponent_test         ;
-double  *  coefficient_test      ;
-double  *  prim_factor_test      ;
-double  *  ao_factor_test        ;
-char    typ_test ;
+	rc = qmckl_set_ao_basis_ao_num_device(context, ao_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
+	rc = qmckl_set_ao_basis_ao_factor_device(context, ao_factor_d, ao_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-rc = qmckl_get_ao_basis_type (context, &typ_test);
-assert (rc == QMCKL_SUCCESS);
-assert(typ == typ_test);
+	if (!qmckl_ao_basis_provided(context))
+		return 1;
 
-rc = qmckl_get_ao_basis_shell_num (context, &shell_num_test);
-assert (rc == QMCKL_SUCCESS);
-assert(shell_num == shell_num_test);
+	// Checking arrays after context set and get
 
-rc = qmckl_get_ao_basis_prim_num (context, &prim_num_test);
-assert (rc == QMCKL_SUCCESS);
-assert(prim_num == prim_num_test);
+	int64_t shell_num_test;
+	int64_t prim_num_test;
+	int64_t ao_num_test;
+	int64_t *nucleus_index_test;
+	int64_t *nucleus_shell_num_test;
+	int32_t *shell_ang_mom_test;
+	int64_t *shell_prim_num_test;
+	int64_t *shell_prim_index_test;
+	double *shell_factor_test;
+	double *exponent_test;
+	double *coefficient_test;
+	double *prim_factor_test;
+	double *ao_factor_test;
+	char typ_test;
 
-nucleus_index_test = (int64_t*) malloc (nucl_num * sizeof(int64_t));
-rc = qmckl_get_ao_basis_nucleus_index (context, nucleus_index_test, nucl_num);
-assert (rc == QMCKL_SUCCESS);
-for (int64_t i=0 ; i < nucl_num ; ++i) {
-  assert(nucleus_index_test[i] == nucleus_index[i]);
- }
-free(nucleus_index_test);
+	rc = qmckl_get_ao_basis_type_device(context, &typ_test);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
+	if (typ != typ_test)
+		return 1;
 
-nucleus_shell_num_test = (int64_t*) malloc ( nucl_num * sizeof(int64_t));
-rc = qmckl_get_ao_basis_nucleus_shell_num (context, nucleus_shell_num_test, nucl_num);
-assert (rc == QMCKL_SUCCESS);
+	rc = qmckl_get_ao_basis_shell_num_device(context, &shell_num_test);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
+	if (shell_num != shell_num_test)
+		return 1;
 
-for (int64_t i=0 ; i < nucl_num ; ++i) {
-  assert(nucleus_shell_num_test[i] == nucleus_shell_num[i]);
- }
-free(nucleus_shell_num_test);
+	rc = qmckl_get_ao_basis_prim_num_device(context, &prim_num_test);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
+	if (prim_num != prim_num_test)
+		return 1;
 
-shell_ang_mom_test = (int32_t*) malloc ( shell_num * sizeof(int32_t));
-rc = qmckl_get_ao_basis_shell_ang_mom (context, shell_ang_mom_test, shell_num);
-assert (rc == QMCKL_SUCCESS);
+	nucleus_index_test =
+		(int64_t *)qmckl_malloc_device(context, nucl_num * sizeof(int64_t));
+	rc = qmckl_get_ao_basis_nucleus_index_device(context, nucleus_index_test,
+												 nucl_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-for (int64_t i=0 ; i < shell_num ; ++i) {
-  assert(shell_ang_mom_test[i] == shell_ang_mom[i]);
- }
-free(shell_ang_mom_test);
+	bool wrong_val = false;
 
-shell_factor_test = (double*) malloc ( shell_num * sizeof(double));
-rc = qmckl_get_ao_basis_shell_factor  (context, shell_factor_test, shell_num);
-assert (rc == QMCKL_SUCCESS);
+#pragma omp target parallel for is_device_ptr(nucleus_index_d,                 \
+											  nucleus_index_test)
+	for (int64_t i = 0; i < nucl_num; ++i) {
+		if (nucleus_index_test[i] != nucleus_index_d[i])
+			wrong_val = true;
+	}
+	qmckl_free_device(context, nucleus_index_test);
+	if (wrong_val)
+		return 1;
 
-for (int64_t i=0 ; i < shell_num ; ++i) {
-  assert(shell_factor_test[i] == shell_factor[i]);
-}
-free(shell_factor_test);
+	nucleus_shell_num_test =
+		(int64_t *)qmckl_malloc_device(context, nucl_num * sizeof(int64_t));
+	rc = qmckl_get_ao_basis_nucleus_shell_num_device(
+		context, nucleus_shell_num_test, nucl_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-shell_prim_num_test = (int64_t*) malloc ( shell_num * sizeof(int64_t));
-rc = qmckl_get_ao_basis_shell_prim_num (context, shell_prim_num_test, shell_num);
-assert (rc == QMCKL_SUCCESS);
+#pragma omp target parallel for is_device_ptr(nucleus_shell_num_d,             \
+											  nucleus_shell_num_test)
+	for (int64_t i = 0; i < nucl_num; ++i) {
+		if (nucleus_shell_num_test[i] != nucleus_shell_num_d[i])
+			wrong_val = true;
+	}
+	qmckl_free_device(context, nucleus_shell_num_test);
+	if (wrong_val)
+		return 1;
 
-for (int64_t i=0 ; i < shell_num ; ++i) {
-  assert(shell_prim_num_test[i] == shell_prim_num[i]);
-}
-free(shell_prim_num_test);
+	shell_ang_mom_test =
+		(int32_t *)qmckl_malloc_device(context, shell_num * sizeof(int32_t));
+	rc = qmckl_get_ao_basis_shell_ang_mom_device(context, shell_ang_mom_test,
+												 shell_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-shell_prim_index_test = (int64_t*) malloc ( shell_num * sizeof(int64_t));
-rc = qmckl_get_ao_basis_shell_prim_index (context, shell_prim_index_test, shell_num);
-assert (rc == QMCKL_SUCCESS);
+#pragma omp target parallel for is_device_ptr(shell_ang_mom_d,                 \
+											  shell_ang_mom_test)
+	for (int64_t i = 0; i < shell_num; ++i) {
+		if (shell_ang_mom_test[i] != shell_ang_mom_d[i])
+			wrong_val = true;
+	}
+	qmckl_free_device(context, shell_ang_mom_test);
+	if (wrong_val)
+		return 1;
 
-for (int64_t i=0 ; i < shell_num ; ++i) {
-  assert(shell_prim_index_test[i] == shell_prim_index[i]);
-}
-free(shell_prim_index_test);
+	shell_factor_test =
+		(double *)qmckl_malloc_device(context, shell_num * sizeof(double));
+	rc = qmckl_get_ao_basis_shell_factor_device(context, shell_factor_test,
+												shell_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-exponent_test = (double*) malloc ( prim_num * sizeof(double));
-rc = qmckl_get_ao_basis_exponent(context, exponent_test, prim_num);
-assert (rc == QMCKL_SUCCESS);
+#pragma omp target parallel for is_device_ptr(shell_factor_d, shell_factor_test)
+	for (int64_t i = 0; i < shell_num; ++i) {
+		if (shell_factor_test[i] != shell_factor_d[i])
+			wrong_val = true;
+	}
+	qmckl_free_device(context, shell_factor_test);
+	if (wrong_val)
+		return 1;
 
-for (int64_t i=0 ; i < prim_num ; ++i) {
-  assert(exponent_test[i] == exponent[i]);
-}
-free(exponent_test);
+	shell_prim_num_test =
+		(int64_t *)qmckl_malloc_device(context, shell_num * sizeof(int64_t));
+	rc = qmckl_get_ao_basis_shell_prim_num_device(context, shell_prim_num_test,
+												  shell_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-coefficient_test = (double*) malloc ( prim_num * sizeof(double));
-rc = qmckl_get_ao_basis_coefficient(context, coefficient_test, prim_num);
-assert (rc == QMCKL_SUCCESS);
+	shell_prim_index_test =
+		(int64_t *)qmckl_malloc_device(context, shell_num * sizeof(int64_t));
+	rc = qmckl_get_ao_basis_shell_prim_index_device(
+		context, shell_prim_index_test, shell_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-for (int64_t i=0 ; i < prim_num ; ++i) {
-  assert(coefficient_test[i] == coefficient[i]);
-}
-free(coefficient_test);
+#pragma omp target parallel for is_device_ptr(shell_prim_index_d,              \
+											  shell_prim_index_test)
+	for (int64_t i = 0; i < shell_num; ++i) {
+		if (shell_prim_index_test[i] != shell_prim_index_d[i])
+			wrong_val = true;
+	}
+	qmckl_free_device(context, shell_prim_index_test);
+	if (wrong_val)
+		return 1;
 
-prim_factor_test = (double*) malloc ( prim_num * sizeof(double));
-rc = qmckl_get_ao_basis_prim_factor (context, prim_factor_test, prim_num);
-assert (rc == QMCKL_SUCCESS);
+	exponent_test =
+		(double *)qmckl_malloc_device(context, prim_num * sizeof(double));
+	rc = qmckl_get_ao_basis_exponent_device(context, exponent_test, prim_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-for (int64_t i=0 ; i < prim_num ; ++i) {
-  assert(prim_factor_test[i] == prim_factor[i]);
-}
-free(prim_factor_test);
+#pragma omp target parallel for is_device_ptr(exponent_d, exponent_test)
+	for (int64_t i = 0; i < prim_num; ++i) {
+		if (exponent_test[i] != exponent_d[i])
+			wrong_val = true;
+		;
+	}
+	qmckl_free_device(context, exponent_test);
+	if (wrong_val)
+		return 1;
 
-rc = qmckl_get_ao_basis_ao_num(context, &ao_num_test);
-assert(ao_num == ao_num_test);
+	coefficient_test =
+		(double *)qmckl_malloc_device(context, prim_num * sizeof(double));
+	rc = qmckl_get_ao_basis_coefficient_device(context, coefficient_test,
+											   prim_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-ao_factor_test = (double*) malloc ( ao_num * sizeof(double));
-rc = qmckl_get_ao_basis_ao_factor (context, ao_factor_test, ao_num);
-assert (rc == QMCKL_SUCCESS);
+#pragma omp target parallel for is_device_ptr(coefficient_d, coefficient_test)
+	for (int64_t i = 0; i < prim_num; ++i) {
+		if (coefficient_test[i] != coefficient_d[i])
+			wrong_val = true;
+	}
+	qmckl_free_device(context, coefficient_test);
+	if (wrong_val)
+		return 1;
 
-for (int64_t i=0 ; i < ao_num ; ++i) {
-  assert(ao_factor_test[i] == ao_factor[i]);
-}
-free(ao_factor_test);
+	prim_factor_test =
+		(double *)qmckl_malloc_device(context, prim_num * sizeof(double));
+	rc = qmckl_get_ao_basis_prim_factor_device(context, prim_factor_test,
+											   prim_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-int test_qmckl_ao_gaussian_vgl(qmckl_context context);
-assert(0 == test_qmckl_ao_gaussian_vgl(context));
+#pragma omp target parallel for is_device_ptr(prim_factor_d, prim_factor_test)
+	for (int64_t i = 0; i < prim_num; ++i) {
+		if (prim_factor_test[i] != prim_factor_d[i])
+			wrong_val = true;
+	}
+	qmckl_free_device(context, prim_factor_test);
+	if (wrong_val)
+		return 1;
 
-{
-#define walk_num 1 // chbrclf_walk_num
+	rc = qmckl_get_ao_basis_ao_num_device(context, &ao_num_test);
+	if (ao_num != ao_num_test)
+		return 1;
+
+	ao_factor_test =
+		(double *)qmckl_malloc_device(context, ao_num * sizeof(double));
+	rc = qmckl_get_ao_basis_ao_factor_device(context, ao_factor_test, ao_num);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
+
+#pragma omp target parallel for is_device_ptr(ao_factor_d, ao_factor_test)
+	for (int64_t i = 0; i < ao_num; ++i) {
+		if (ao_factor_test[i] != ao_factor_d[i])
+			wrong_val = true;
+		;
+	}
+	qmckl_free_device(context, ao_factor_test);
+	if (wrong_val)
+		return 1;
+
+		// Test ao_vgl  values
+#define shell_num chbrclf_shell_num
+#define ao_num chbrclf_ao_num
 #define elec_num chbrclf_elec_num
-#define prim_num chbrclf_prim_num
 
-  int64_t elec_up_num   = chbrclf_elec_up_num;
-  int64_t elec_dn_num   = chbrclf_elec_dn_num;
-  double* elec_coord    = &(chbrclf_elec_coord[0][0][0]);
+	double *elec_coord = &(chbrclf_elec_coord[0][0][0]);
+	const int64_t point_num = elec_num;
+	const double *elec_coord_d =
+		qmckl_malloc_device(context, 3 * point_num * sizeof(double));
 
-  rc = qmckl_set_electron_num (context, elec_up_num, elec_dn_num);
-  assert (rc == QMCKL_SUCCESS);
+	qmckl_memcpy_H2D(context, elec_coord_d, elec_coord,
+					 3 * point_num * sizeof(double));
 
-  assert(qmckl_electron_provided(context));
+	// if (!qmckl_electron_provided(context))
+	//	return 1;
 
-  const int64_t point_num = elec_num;
+	rc = qmckl_set_point_device(context, 'N', point_num, elec_coord_d,
+								point_num * 3);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-  rc = qmckl_set_point(context, 'N', point_num, elec_coord, point_num*3);
-  assert(rc == QMCKL_SUCCESS);
+	double *ao_vgl_d =
+		qmckl_malloc_device(context, point_num * 5 * ao_num * sizeof(double));
+	double *ao_vgl =
+		qmckl_malloc_host(context, point_num * 5 * ao_num * sizeof(double));
 
+	rc = qmckl_get_ao_basis_ao_vgl_device(context, ao_vgl_d,
+										  (int64_t)5 * point_num * ao_num);
 
+	qmckl_memcpy_D2H(context, ao_vgl, ao_vgl_d,
+					 point_num * 5 * ao_num * sizeof(double));
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-  double prim_vgl[point_num][5][prim_num];
+	printf("\n");
+	printf(" ao_vgl ao_vgl[26][0][219] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 0, 219)]);
+	printf(" ao_vgl ao_vgl[26][1][219] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 1, 219)]);
+	printf(" ao_vgl ao_vgl[26][2][219] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 2, 219)]);
+	printf(" ao_vgl ao_vgl[26][3][219] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 3, 219)]);
+	printf(" ao_vgl ao_vgl[26][4][219] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 4, 219)]);
+	printf(" ao_vgl ao_vgl[26][0][220] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 0, 220)]);
+	printf(" ao_vgl ao_vgl[26][1][220] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 1, 220)]);
+	printf(" ao_vgl ao_vgl[26][2][220] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 2, 220)]);
+	printf(" ao_vgl ao_vgl[26][3][220] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 3, 220)]);
+	printf(" ao_vgl ao_vgl[26][4][220] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 4, 220)]);
+	printf(" ao_vgl ao_vgl[26][0][221] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 0, 221)]);
+	printf(" ao_vgl ao_vgl[26][1][221] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 1, 221)]);
+	printf(" ao_vgl ao_vgl[26][2][221] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 2, 221)]);
+	printf(" ao_vgl ao_vgl[26][3][221] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 3, 221)]);
+	printf(" ao_vgl ao_vgl[26][4][221] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 4, 221)]);
+	printf(" ao_vgl ao_vgl[26][0][222] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 0, 222)]);
+	printf(" ao_vgl ao_vgl[26][1][222] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 1, 222)]);
+	printf(" ao_vgl ao_vgl[26][2][222] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 2, 222)]);
+	printf(" ao_vgl ao_vgl[26][3][222] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 3, 222)]);
+	printf(" ao_vgl ao_vgl[26][4][222] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 4, 222)]);
+	printf(" ao_vgl ao_vgl[26][0][223] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 0, 223)]);
+	printf(" ao_vgl ao_vgl[26][1][223] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 1, 223)]);
+	printf(" ao_vgl ao_vgl[26][2][223] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 2, 223)]);
+	printf(" ao_vgl ao_vgl[26][3][223] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 3, 223)]);
+	printf(" ao_vgl ao_vgl[26][4][223] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 4, 223)]);
+	printf(" ao_vgl ao_vgl[26][0][224] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 0, 224)]);
+	printf(" ao_vgl ao_vgl[26][1][224] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 1, 224)]);
+	printf(" ao_vgl ao_vgl[26][2][224] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 2, 224)]);
+	printf(" ao_vgl ao_vgl[26][3][224] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 3, 224)]);
+	printf(" ao_vgl ao_vgl[26][4][224] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 4, 224)]);
+	printf("\n");
 
-  rc = qmckl_get_ao_basis_primitive_vgl(context, &(prim_vgl[0][0][0]),
-          (int64_t) 5*point_num*prim_num );
-  assert (rc == QMCKL_SUCCESS);
+	if (fabs(ao_vgl[AO_VGL_ID(26, 0, 219)] - (1.020298798341620e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 1, 219)] - (-4.928035238010602e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 2, 219)] - (-4.691009312035986e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 219)] - (1.449504046436699e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 219)] - (4.296442111843973e-07)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 0, 220)] - (1.516643537739178e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 1, 220)] - (-7.725221462603871e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 2, 220)] - (-6.507140835104833e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 220)] - (2.154644255710413e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 220)] - (6.365449359656352e-07)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 0, 221)] - (-4.686370882518819e-09)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 1, 221)] - (2.387064067626827e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 2, 221)] - (2.154644255710412e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 221)] - (-1.998731863512374e-09)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 221)] - (-1.966899656441993e-07)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 0, 222)] - (7.514816980753531e-09)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 1, 222)] - (-4.025889138635182e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 2, 222)] - (-2.993372555126361e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 222)] - (1.067604670272904e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 222)] - (3.168199650002648e-07)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 0, 223)] - (-4.021908374204471e-09)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 1, 223)] - (2.154644255710413e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 2, 223)] - (1.725594944732276e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 223)] - (-1.715339357718333e-09)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 223)] - (-1.688020516893476e-07)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 0, 224)] - (7.175045873560788e-10)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 1, 224)] - (-3.843864637762753e-09)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 2, 224)] - (-3.298857850451910e-09)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 224)] - (-4.073047518790881e-10)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 224)] - (3.153244195820293e-08)) > 1.e-14)
+		return 1;
 
-  printf("prim_vgl[26][0][7] = %e\n",prim_vgl[26][0][7]);
-  assert( fabs(prim_vgl[26][0][7] - ( 1.0501570432064878E-003)) < 1.e-14 );
-  printf("prim_vgl[26][1][7] = %e\n",prim_vgl[26][1][7]);
-  assert( fabs(prim_vgl[26][1][7] - (-7.5014974095310560E-004)) < 1.e-14 );
-  printf("prim_vgl[26][2][7] = %e\n",prim_vgl[26][2][7]);
-  assert( fabs(prim_vgl[26][2][7] - (-3.8250692897610380E-003)) < 1.e-14 );
-  printf("prim_vgl[26][3][7] = %e\n",prim_vgl[26][3][7]);
-  assert( fabs(prim_vgl[26][3][7] - ( 3.4950559194080275E-003)) < 1.e-14 );
-  printf("prim_vgl[26][4][7] = %e\n",prim_vgl[26][4][7]);
-  assert( fabs(prim_vgl[26][4][7] - ( 2.0392163767356572E-002)) < 1.e-14 );
+	rc = qmckl_context_destroy_device(context);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
-}
-
-{
-#define shell_num chbrclf_shell_num
-
-  double* elec_coord    = &(chbrclf_elec_coord[0][0][0]);
-
-  assert(qmckl_electron_provided(context));
-
-  const int64_t point_num = elec_num;
-  rc = qmckl_set_point(context, 'N', point_num, elec_coord, point_num*3);
-  assert(rc == QMCKL_SUCCESS);
-
-
-  double shell_vgl[point_num][5][shell_num];
-
-  rc = qmckl_get_ao_basis_shell_vgl(context, &(shell_vgl[0][0][0]),
-        (int64_t) 5*point_num*shell_num);
-  assert (rc == QMCKL_SUCCESS);
-
-  printf(" shell_vgl[26][0][1]  %25.15e\n", shell_vgl[26][0][1]);
-  printf(" shell_vgl[26][1][1]  %25.15e\n", shell_vgl[26][1][1]);
-  printf(" shell_vgl[26][2][1]  %25.15e\n", shell_vgl[26][2][1]);
-  printf(" shell_vgl[26][3][1]  %25.15e\n", shell_vgl[26][3][1]);
-  printf(" shell_vgl[26][4][1]  %25.15e\n", shell_vgl[26][4][1]);
-
-  assert( fabs(shell_vgl[26][0][1] - ( 3.564393437193868e-02)) < 1.e-14 );
-  assert( fabs(shell_vgl[26][1][1] - (-6.030177987072189e-03)) < 1.e-14 );
-  assert( fabs(shell_vgl[26][2][1] - (-3.074832579537582e-02)) < 1.e-14 );
-  assert( fabs(shell_vgl[26][3][1] - ( 2.809546963519935e-02)) < 1.e-14 );
-  assert( fabs(shell_vgl[26][4][1] - ( 1.896046117183968e-02)) < 1.e-14 );
-
-}
-
-int  test_qmckl_ao_power(qmckl_context context);
-assert(0 == test_qmckl_ao_power(context));
-
-int  test_qmckl_ao_polynomial_vgl(qmckl_context context);
-assert(0 == test_qmckl_ao_polynomial_vgl(context));
-
-double X[3] = { 1.1, 2.2, 3.3 };
-double R[3] = { 0.2, 1.1, 3.0 };
-int32_t ldv[8] = {1, 4, 10, 20, 35, 56, 84, 120};
-for (int32_t ldl=3 ; ldl<=5 ; ++ldl) {
-    int64_t n;
-    int32_t L0[200][ldl];
-    int32_t L1[200][ldl];
-    printf("ldl=%d\n", ldl);
-    for (int32_t lmax=0 ; lmax<=7 ; lmax++) {
-      double VGL0[5][ldv[lmax]];
-      double VGL1[5][ldv[lmax]];
-      memset(&L0[0][0], 0, sizeof(L0));
-      memset(&L1[0][0], 0, sizeof(L1));
-      memset(&VGL0[0][0], 0, sizeof(VGL0));
-      memset(&VGL1[0][0], 0, sizeof(VGL1));
-      rc = qmckl_ao_polynomial_transp_vgl_doc (context, X, R, lmax, &n, &(L0[0][0]), ldl, &(VGL0[0][0]), ldv[lmax]);
-      assert (rc == QMCKL_SUCCESS);
-      rc = qmckl_ao_polynomial_transp_vgl_hpc (context, X, R, lmax, &n, &(L1[0][0]), ldl, &(VGL1[0][0]), ldv[lmax]);
-      assert (rc == QMCKL_SUCCESS);
-      printf("lmax=%d\n", lmax);
-      for (int32_t l=0 ; l<n ; ++l) {
-        for (int32_t k=0 ; k<3 ; ++k) {
-          printf("L[%d][%d] = %d   %d\n", l, k, L0[l][k], L1[l][k]);
-          assert( L0[l][k] == L1[l][k] );
-        }
-      }
-
-      for (int32_t k=0 ; k<5 ; ++k) {
-        for (int32_t l=0 ; l<n ; ++l) {
-          printf("VGL[%d][%d] = %e   %e  %e\n", k, l, VGL0[k][l], VGL1[k][l], VGL0[k][l]-VGL1[k][l]);
-          assert( fabs(1.-(VGL0[k][l]+1.e-100)/(VGL1[k][l]+1.e-100)) < 1.e-15 );
-        }
-      }
-    }
-}
-
-{
-#define shell_num chbrclf_shell_num
-#define ao_num chbrclf_ao_num
-
-double* elec_coord    = &(chbrclf_elec_coord[0][0][0]);
-
-assert(qmckl_electron_provided(context));
-
-const int64_t point_num = elec_num;
-rc = qmckl_set_point(context, 'N', point_num, elec_coord, point_num*3);
-assert(rc == QMCKL_SUCCESS);
-
-
-double ao_value[point_num][ao_num];
-
-rc = qmckl_get_ao_basis_ao_value(context, &(ao_value[0][0]),
-         (int64_t) point_num*ao_num);
-assert (rc == QMCKL_SUCCESS);
-
-printf("\n");
-printf(" ao_value ao_value[26][219] %25.15e\n", ao_value[26][219]);
-printf(" ao_value ao_value[26][220] %25.15e\n", ao_value[26][220]);
-printf(" ao_value ao_value[26][221] %25.15e\n", ao_value[26][221]);
-printf(" ao_value ao_value[26][222] %25.15e\n", ao_value[26][222]);
-printf(" ao_value ao_value[26][223] %25.15e\n", ao_value[26][223]);
-printf(" ao_value ao_value[26][224] %25.15e\n", ao_value[26][224]);
-printf("\n");
-
-printf("%e %e\n", ao_value[26][219], 1.020298798341620e-08);
-assert( fabs(ao_value[26][219] - (  1.020298798341620e-08)) < 1.e-14 );
-assert( fabs(ao_value[26][220] - (  1.516643537739178e-08)) < 1.e-14 );
-assert( fabs(ao_value[26][221] - ( -4.686370882518819e-09)) < 1.e-14 );
-assert( fabs(ao_value[26][222] - (  7.514816980753531e-09)) < 1.e-14 );
-assert( fabs(ao_value[26][223] - ( -4.021908374204471e-09)) < 1.e-14 );
-assert( fabs(ao_value[26][224] - (  7.175045873560788e-10)) < 1.e-14 );
-
-}
-
-{
-#define shell_num chbrclf_shell_num
-#define ao_num chbrclf_ao_num
-
-double* elec_coord    = &(chbrclf_elec_coord[0][0][0]);
-
-assert(qmckl_electron_provided(context));
-
-const int64_t point_num = elec_num;
-rc = qmckl_set_point(context, 'N', point_num, elec_coord, point_num*3);
-assert(rc == QMCKL_SUCCESS);
-
-
-double ao_vgl[point_num][5][ao_num];
-
-rc = qmckl_get_ao_basis_ao_vgl(context, &(ao_vgl[0][0][0]),
-         (int64_t) 5*point_num*ao_num);
-assert (rc == QMCKL_SUCCESS);
-
-printf("\n");
-printf(" ao_vgl ao_vgl[26][0][219] %25.15e\n", ao_vgl[26][0][219]);
-printf(" ao_vgl ao_vgl[26][1][219] %25.15e\n", ao_vgl[26][1][219]);
-printf(" ao_vgl ao_vgl[26][2][219] %25.15e\n", ao_vgl[26][2][219]);
-printf(" ao_vgl ao_vgl[26][3][219] %25.15e\n", ao_vgl[26][3][219]);
-printf(" ao_vgl ao_vgl[26][4][219] %25.15e\n", ao_vgl[26][4][219]);
-printf(" ao_vgl ao_vgl[26][0][220] %25.15e\n", ao_vgl[26][0][220]);
-printf(" ao_vgl ao_vgl[26][1][220] %25.15e\n", ao_vgl[26][1][220]);
-printf(" ao_vgl ao_vgl[26][2][220] %25.15e\n", ao_vgl[26][2][220]);
-printf(" ao_vgl ao_vgl[26][3][220] %25.15e\n", ao_vgl[26][3][220]);
-printf(" ao_vgl ao_vgl[26][4][220] %25.15e\n", ao_vgl[26][4][220]);
-printf(" ao_vgl ao_vgl[26][0][221] %25.15e\n", ao_vgl[26][0][221]);
-printf(" ao_vgl ao_vgl[26][1][221] %25.15e\n", ao_vgl[26][1][221]);
-printf(" ao_vgl ao_vgl[26][2][221] %25.15e\n", ao_vgl[26][2][221]);
-printf(" ao_vgl ao_vgl[26][3][221] %25.15e\n", ao_vgl[26][3][221]);
-printf(" ao_vgl ao_vgl[26][4][221] %25.15e\n", ao_vgl[26][4][221]);
-printf(" ao_vgl ao_vgl[26][0][222] %25.15e\n", ao_vgl[26][0][222]);
-printf(" ao_vgl ao_vgl[26][1][222] %25.15e\n", ao_vgl[26][1][222]);
-printf(" ao_vgl ao_vgl[26][2][222] %25.15e\n", ao_vgl[26][2][222]);
-printf(" ao_vgl ao_vgl[26][3][222] %25.15e\n", ao_vgl[26][3][222]);
-printf(" ao_vgl ao_vgl[26][4][222] %25.15e\n", ao_vgl[26][4][222]);
-printf(" ao_vgl ao_vgl[26][0][223] %25.15e\n", ao_vgl[26][0][223]);
-printf(" ao_vgl ao_vgl[26][1][223] %25.15e\n", ao_vgl[26][1][223]);
-printf(" ao_vgl ao_vgl[26][2][223] %25.15e\n", ao_vgl[26][2][223]);
-printf(" ao_vgl ao_vgl[26][3][223] %25.15e\n", ao_vgl[26][3][223]);
-printf(" ao_vgl ao_vgl[26][4][223] %25.15e\n", ao_vgl[26][4][223]);
-printf(" ao_vgl ao_vgl[26][0][224] %25.15e\n", ao_vgl[26][0][224]);
-printf(" ao_vgl ao_vgl[26][1][224] %25.15e\n", ao_vgl[26][1][224]);
-printf(" ao_vgl ao_vgl[26][2][224] %25.15e\n", ao_vgl[26][2][224]);
-printf(" ao_vgl ao_vgl[26][3][224] %25.15e\n", ao_vgl[26][3][224]);
-printf(" ao_vgl ao_vgl[26][4][224] %25.15e\n", ao_vgl[26][4][224]);
-printf("\n");
-
-assert( fabs(ao_vgl[26][0][219] - (  1.020298798341620e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][1][219] - ( -4.928035238010602e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][2][219] - ( -4.691009312035986e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][3][219] - (  1.449504046436699e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][4][219] - (  4.296442111843973e-07)) < 1.e-14 );
-assert( fabs(ao_vgl[26][0][220] - (  1.516643537739178e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][1][220] - ( -7.725221462603871e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][2][220] - ( -6.507140835104833e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][3][220] - (  2.154644255710413e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][4][220] - (  6.365449359656352e-07)) < 1.e-14 );
-assert( fabs(ao_vgl[26][0][221] - ( -4.686370882518819e-09)) < 1.e-14 );
-assert( fabs(ao_vgl[26][1][221] - (  2.387064067626827e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][2][221] - (  2.154644255710412e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][3][221] - ( -1.998731863512374e-09)) < 1.e-14 );
-assert( fabs(ao_vgl[26][4][221] - ( -1.966899656441993e-07)) < 1.e-14 );
-assert( fabs(ao_vgl[26][0][222] - (  7.514816980753531e-09)) < 1.e-14 );
-assert( fabs(ao_vgl[26][1][222] - ( -4.025889138635182e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][2][222] - ( -2.993372555126361e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][3][222] - (  1.067604670272904e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][4][222] - (  3.168199650002648e-07)) < 1.e-14 );
-assert( fabs(ao_vgl[26][0][223] - ( -4.021908374204471e-09)) < 1.e-14 );
-assert( fabs(ao_vgl[26][1][223] - (  2.154644255710413e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][2][223] - (  1.725594944732276e-08)) < 1.e-14 );
-assert( fabs(ao_vgl[26][3][223] - ( -1.715339357718333e-09)) < 1.e-14 );
-assert( fabs(ao_vgl[26][4][223] - ( -1.688020516893476e-07)) < 1.e-14 );
-assert( fabs(ao_vgl[26][0][224] - (  7.175045873560788e-10)) < 1.e-14 );
-assert( fabs(ao_vgl[26][1][224] - ( -3.843864637762753e-09)) < 1.e-14 );
-assert( fabs(ao_vgl[26][2][224] - ( -3.298857850451910e-09)) < 1.e-14 );
-assert( fabs(ao_vgl[26][3][224] - ( -4.073047518790881e-10)) < 1.e-14 );
-assert( fabs(ao_vgl[26][4][224] - (  3.153244195820293e-08)) < 1.e-14 );
-
-}
-
-rc = qmckl_context_destroy(context);
-    assert (rc == QMCKL_SUCCESS);
-
-    return 0;
+	return 0;
 }

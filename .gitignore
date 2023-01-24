@@ -32,3 +32,4 @@ missing
 src/.deps
 src/.libs
 qmckl
+tests/*.o

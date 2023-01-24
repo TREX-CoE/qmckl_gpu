@@ -17,6 +17,7 @@
 #include <qmckl.h>
 #include "qmckl_memory_private_type.h"
 #include "qmckl_memory_private_func.h"
+#include "qmckl_context_private_type.h"
 
 #include "qmckl_context.h"
 #include "qmckl_memory.h"
@@ -149,6 +150,69 @@ qmckl_exit_code
 qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
 									const double *ao_factor,
 									const int64_t size_max);
+
+qmckl_exit_code
+qmckl_get_ao_basis_ao_num_device(const qmckl_context_device context,
+								 int64_t *const ao_num);
+
+qmckl_exit_code
+qmckl_get_ao_basis_shell_num_device(const qmckl_context_device context,
+									int64_t *const ao_num);
+
+qmckl_exit_code
+qmckl_get_ao_basis_prim_num_device(const qmckl_context_device context,
+								   int64_t *const prim_num);
+
+qmckl_exit_code
+qmckl_get_ao_basis_type_device(const qmckl_context_device context,
+							   char *const type);
+
+qmckl_exit_code
+qmckl_get_ao_basis_nucleus_shell_num_device(const qmckl_context_device context,
+											int64_t *const nucleus_shell_num,
+											int64_t nucl_num);
+qmckl_exit_code
+qmckl_get_ao_basis_nucleus_index_device(const qmckl_context_device context,
+										int64_t *const nucleus_index,
+										int64_t nucl_num);
+
+qmckl_exit_code
+qmckl_get_ao_basis_shell_ang_mom_device(const qmckl_context_device context,
+										double *const shell_ang_mom,
+										int64_t shell_num);
+
+qmckl_exit_code
+qmckl_get_ao_basis_shell_factor_device(const qmckl_context_device context,
+									   int32_t *const shell_factor,
+									   int64_t shell_num);
+
+qmckl_exit_code
+qmckl_get_ao_basis_shell_prim_num_device(const qmckl_context_device context,
+										 double *const shell_prim_num,
+										 int64_t shell_num);
+
+qmckl_exit_code
+qmckl_get_ao_basis_shell_prim_index_device(const qmckl_context_device context,
+										   int64_t *const nucleus_shell_num,
+										   int64_t shell_num);
+
+qmckl_exit_code
+qmckl_get_ao_basis_exponent_device(const qmckl_context_device context,
+								   double *const exponent, int64_t prim_num);
+
+qmckl_exit_code
+qmckl_get_ao_basis_coefficient_device(const qmckl_context_device context,
+									  double *const coefficient,
+									  int64_t prim_num);
+
+qmckl_exit_code
+qmckl_get_ao_basis_prim_factor_device(const qmckl_context_device context,
+									  double *const prim_factor,
+									  int64_t prim_num);
+
+qmckl_exit_code
+qmckl_get_ao_basis_ao_factor_device(const qmckl_context_device context,
+									double *const ao_factor, int64_t ao_num);
 
 //**********
 // MO GETTERS/SETTERS

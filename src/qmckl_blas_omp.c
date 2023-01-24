@@ -6,7 +6,6 @@
 // accept device pointers.
 // (funtions requiring OpenMP pragmas only)
 
-
 //**********
 // MATRIX
 //**********

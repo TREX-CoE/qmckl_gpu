@@ -185,6 +185,14 @@ AM_CONDITIONAL([HAVE_ACC_OFFLOAD], [test "x$have_acc_offload" = "xyes"])
 AM_CONDITIONAL([HAVE_OMP_DEVICE],  [test "x$have_omp"  = "xyes"])
 AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc"  = "xyes"])
 
+####
+# List other Makefiles to generate
+####
+
+AC_CONFIG_FILES([
+                 tests/Makefile
+				])
+
 
 ####
 # Print configure status
@@ -209,8 +217,6 @@ OpenACC ...........: ${have_acc}
 Now type 'make @<:@<target>@:>@'
 where the optional <target> is:
   all           - build ${PACKAGE_NAME}
-  TODO check    - run tests
+  check         - run tests
   install       - install
 --------------------------------------------------"
-
-# TODO Write tests?

@@ -33,3 +33,4 @@ fi
 # Apply formatting
 clang-format -style="{UseTab: Always, IndentWidth: 4, TabWidth: 4, SortIncludes: false}" -i $qmckl_gpu_path/src/*.c
 clang-format -style="{UseTab: Always, IndentWidth: 4, TabWidth: 4, SortIncludes: false}" -i $qmckl_gpu_path/include/*.h
+clang-format -style="{UseTab: Always, IndentWidth: 4, TabWidth: 4, SortIncludes: false}" -i $qmckl_gpu_path/tests/*.c
