@@ -251,22 +251,17 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 						}
 					}
 
-					/**/
-					for (int i = 3; i < nucleus_max_ang_mom[inucl] + 2; i++) {
-						pows[0 * (nucleus_max_ang_mom[inucl] + 2) + i] =
-							pows[0 * (nucleus_max_ang_mom[inucl] + 2) +
-								 (i - 1)] *
-							Y1;
-						pows[1 * (nucleus_max_ang_mom[inucl] + 2) + i] =
-							pows[1 * (nucleus_max_ang_mom[inucl] + 2) +
-								 (i - 1)] *
-							Y2;
-						pows[2 * (nucleus_max_ang_mom[inucl] + 2) + i] =
-							pows[2 * (nucleus_max_ang_mom[inucl] + 2) +
-								 (i - 1)] *
-							Y3;
+					for (int32_t i = 0; i < 3; ++i) {
+						pows[0 * size_max + i] = 1.0;
+						pows[1 * size_max + i] = 1.0;
+						pows[2 * size_max + i] = 1.0;
 					}
-					/**/
+
+					for (int32_t i = 3; i <= lmax + 2; ++i) {
+						pows[0 * size_max + i] = pows[0 * size_max + i - 1] * Y1;
+						pows[1 * size_max + i] = pows[1 * size_max + i - 1] * Y2;
+						pows[2 * size_max + i] = pows[2 * size_max + i - 1] * Y3;
+					}
 
 					for (int i = 0; i < 5; i++) {
 						for (int j = 0; j < 4; j++) {
