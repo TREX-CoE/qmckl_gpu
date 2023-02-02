@@ -74,7 +74,7 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 			for (int64_t i = 0; i < num; ++i) {
 				a[i] = coord[3 * i];
 				a[i + size_0] = coord[3 * i + 1];
-				a[i + 2 * size_0] = coord[3 * i + 1];
+				a[i + 2 * size_0] = coord[3 * i + 2];
 			}
 		}
 	}

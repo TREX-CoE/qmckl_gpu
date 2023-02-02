@@ -173,7 +173,7 @@ qmckl_exit_code qmckl_memcpy_D2H(qmckl_context_device context, void *const dest,
 
 	qmckl_lock((qmckl_context)context);
 	{
-		int ret = acc_memcpy_to_host(dest, src, size);
+		int ret = acc_memcpy_from_device(dest, src, size);
 		if (ret) {
 			return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
 								  "qmckl_memcpy_D2H",

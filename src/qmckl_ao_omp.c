@@ -48,7 +48,8 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 				ishell_end =
 					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
 
-				for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
+				for (int ishell = ishell_start; ishell <= ishell_end;
+					 ishell++) {
 
 					shell_vgl[ishell + 0 * shell_num + ipoint * shell_num * 5] =
 						0;
@@ -74,7 +75,6 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 
 						v = coef_normalized[iprim] * exp(-ar2);
 						two_a = -2 * expo[iprim] * v;
-
 
 						shell_vgl[ishell + 0 * shell_num +
 								  ipoint * shell_num * 5] =
@@ -183,21 +183,22 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	}
 
 	k = 1;
-#pragma omp target is_device_ptr(nucleus_index, nucleus_shell_num, shell_ang_mom,     \
-						  ao_index, lstart)
+#pragma omp target is_device_ptr(nucleus_index, nucleus_shell_num,             \
+								 shell_ang_mom, ao_index, lstart)
 	{
 #pragma omp target update to(k)
-	{
-		for (inucl = 0; inucl < nucl_num; inucl++) {
-			ishell_start = nucleus_index[inucl];
-			ishell_end = nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
-			for (ishell = ishell_start; ishell <= ishell_end; ishell++) {
-				l = shell_ang_mom[ishell];
-				ao_index[ishell] = k;
-				k = k + lstart[l + 1] - lstart[l];
+		{
+			for (inucl = 0; inucl < nucl_num; inucl++) {
+				ishell_start = nucleus_index[inucl];
+				ishell_end =
+					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+				for (ishell = ishell_start; ishell <= ishell_end; ishell++) {
+					l = shell_ang_mom[ishell];
+					ao_index[ishell] = k;
+					k = k + lstart[l + 1] - lstart[l];
+				}
 			}
 		}
-	}
 	}
 
 #pragma omp target is_device_ptr(                                              \
@@ -249,30 +250,30 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 					int n = 0;
 				} else if (llmax > 0) {
 					// Reset pows to 0 for safety. Then we will write over the
-					// top left submatrix of size (llmax+3)x3. We will compute indices
-					// with llmax and not lmax, so we will use the (llmax+3)*3 first
-					// elements of the array
-					for(int i=0; i<3*(lmax+3); i++) {
+					// top left submatrix of size (llmax+3)x3. We will compute
+					// indices with llmax and not lmax, so we will use the
+					// (llmax+3)*3 first elements of the array
+					for (int i = 0; i < 3 * (lmax + 3); i++) {
 						pows[i] = 0.;
 					}
 
-					for(int i=0; i<3; i++) {
-						for(int j=0; j<3; j++) {
-							pows[i + (llmax+3) * j] = 1.;
+					for (int i = 0; i < 3; i++) {
+						for (int j = 0; j < 3; j++) {
+							pows[i + (llmax + 3) * j] = 1.;
 						}
 					}
 
-					for (int i = 3; i < llmax+3; i++) {
-						pows[i] = pows[(i-1)] * Y1;
-						pows[i + (llmax+3)] = pows[(i-1) + (llmax+3)] * Y2;
-						pows[i + 2*(llmax+3)] = pows[(i-1) + 2*(llmax+3)] * Y3;
+					for (int i = 3; i < llmax + 3; i++) {
+						pows[i] = pows[(i - 1)] * Y1;
+						pows[i + (llmax + 3)] =
+							pows[(i - 1) + (llmax + 3)] * Y2;
+						pows[i + 2 * (llmax + 3)] =
+							pows[(i - 1) + 2 * (llmax + 3)] * Y3;
 					}
 
-
-
-					for(int i=0; i<5; i++) {
-						for(int j=0; j<4; j++) {
-							poly_vgl[i + 5*j] = 0.;
+					for (int i = 0; i < 5; i++) {
+						for (int j = 0; j < 4; j++) {
+							poly_vgl[i + 5 * j] = 0.;
 						}
 					}
 
@@ -281,10 +282,10 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 					poly_vgl[5] = pows[3];
 					poly_vgl[6] = 1.;
 
-					poly_vgl[10] = pows[3 + (llmax+3)];
+					poly_vgl[10] = pows[3 + (llmax + 3)];
 					poly_vgl[12] = 1.;
 
-					poly_vgl[15] = pows[3 + 2*(llmax+3)];
+					poly_vgl[15] = pows[3 + 2 * (llmax + 3)];
 					poly_vgl[18] = 1.;
 
 					n = 3;
@@ -304,23 +305,29 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 							dc = dd - da - db;
 							n = n + 1;
 
-							xy = pows[(a+2)] * pows[(b+2) + (llmax+3)];
-							yz = pows[(b+2) + (llmax+3)] * pows[(c+2) + 2*(llmax+3)];
-							xz = pows[(a+2)] * pows[(c+2) + 2*(llmax+3)];
+							xy = pows[(a + 2)] * pows[(b + 2) + (llmax + 3)];
+							yz = pows[(b + 2) + (llmax + 3)] *
+								 pows[(c + 2) + 2 * (llmax + 3)];
+							xz =
+								pows[(a + 2)] * pows[(c + 2) + 2 * (llmax + 3)];
 
-							poly_vgl[5*(n)] = xy * pows[c+2 + 2*(llmax+3)];
+							poly_vgl[5 * (n)] =
+								xy * pows[c + 2 + 2 * (llmax + 3)];
 
 							xy = dc * xy;
 							xz = db * xz;
 							yz = da * yz;
 
-							poly_vgl[1 + 5*n] = pows[a + 1] * yz;
-							poly_vgl[2 + 5*n] = pows[b + 1 + (llmax+3)] * xz;
-							poly_vgl[3 + 5*n] = pows[c + 1 + 2*(llmax+3)] * xy;
+							poly_vgl[1 + 5 * n] = pows[a + 1] * yz;
+							poly_vgl[2 + 5 * n] =
+								pows[b + 1 + (llmax + 3)] * xz;
+							poly_vgl[3 + 5 * n] =
+								pows[c + 1 + 2 * (llmax + 3)] * xy;
 
-							poly_vgl[4 + 5*n] = (da - 1.) * pows[a] * yz +
-											 (db - 1.) * pows[b + (llmax+3)] * xz +
-											 (dc - 1.) * pows[c + 2*(llmax+3)] * xy;
+							poly_vgl[4 + 5 * n] =
+								(da - 1.) * pows[a] * yz +
+								(db - 1.) * pows[b + (llmax + 3)] * xz +
+								(dc - 1.) * pows[c + 2 * (llmax + 3)] * xy;
 
 							db -= 1.;
 						}
@@ -331,7 +338,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 				// End of ao_polynomial computation (now inlined)
 				// poly_vgl is now set from here
 
-
 				ishell_start = nucleus_index[inucl];
 				ishell_end =
 					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
@@ -341,40 +347,63 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 					k = ao_index[ishell] - 1;
 					l = shell_ang_mom[ishell];
 
-					for (il = lstart[l]-1; il <= lstart[l + 1] - 2; il++) {
+					for (il = lstart[l] - 1; il <= lstart[l + 1] - 2; il++) {
 
 						// value
-						ao_vgl[k + 0*ao_num + ipoint*5*ao_num] =
-							poly_vgl[il * 5 + 0] * shell_vgl[ishell + 0*shell_num + ipoint*shell_num*5]
-							* ao_factor[k];
+						ao_vgl[k + 0 * ao_num + ipoint * 5 * ao_num] =
+							poly_vgl[il * 5 + 0] *
+							shell_vgl[ishell + 0 * shell_num +
+									  ipoint * shell_num * 5] *
+							ao_factor[k];
 
 						// Grad x
-						ao_vgl[k + 1*ao_num + ipoint*5*ao_num] = (
-							poly_vgl[il * 5 + 1] * shell_vgl[ishell + 0*shell_num + ipoint*shell_num*5] +
-							poly_vgl[il * 5 + 0] * shell_vgl[ishell + 1*shell_num + ipoint*shell_num*5]
-						) * ao_factor[k];
+						ao_vgl[k + 1 * ao_num + ipoint * 5 * ao_num] =
+							(poly_vgl[il * 5 + 1] *
+								 shell_vgl[ishell + 0 * shell_num +
+										   ipoint * shell_num * 5] +
+							 poly_vgl[il * 5 + 0] *
+								 shell_vgl[ishell + 1 * shell_num +
+										   ipoint * shell_num * 5]) *
+							ao_factor[k];
 
 						// grad y
-						ao_vgl[k + 2*ao_num + ipoint*5*ao_num] =(
-							poly_vgl[il * 5 + 2] * shell_vgl[ishell + 0*shell_num + ipoint*shell_num*5] +
-							poly_vgl[il * 5 + 0] * shell_vgl[ishell + 2*shell_num + ipoint*shell_num*5]
-						) * ao_factor[k];
+						ao_vgl[k + 2 * ao_num + ipoint * 5 * ao_num] =
+							(poly_vgl[il * 5 + 2] *
+								 shell_vgl[ishell + 0 * shell_num +
+										   ipoint * shell_num * 5] +
+							 poly_vgl[il * 5 + 0] *
+								 shell_vgl[ishell + 2 * shell_num +
+										   ipoint * shell_num * 5]) *
+							ao_factor[k];
 
 						// grad z
-						ao_vgl[k + 3*ao_num + ipoint*5*ao_num] = (
-							poly_vgl[il * 5 + 3] * shell_vgl[ishell + 0*shell_num + ipoint*shell_num*5] +
-							poly_vgl[il * 5 + 0] * shell_vgl[ishell + 3*shell_num + ipoint*shell_num*5]
-						) * ao_factor[k];
+						ao_vgl[k + 3 * ao_num + ipoint * 5 * ao_num] =
+							(poly_vgl[il * 5 + 3] *
+								 shell_vgl[ishell + 0 * shell_num +
+										   ipoint * shell_num * 5] +
+							 poly_vgl[il * 5 + 0] *
+								 shell_vgl[ishell + 3 * shell_num +
+										   ipoint * shell_num * 5]) *
+							ao_factor[k];
 
 						// Lapl_z
-						ao_vgl[k + 4*ao_num + ipoint*5*ao_num] = (
-							poly_vgl[il * 5 + 4] * shell_vgl[ishell + 0*shell_num + ipoint*shell_num*5] +
-							poly_vgl[il * 5 + 0] * shell_vgl[ishell + 4*shell_num + ipoint*shell_num*5] +
-							2.0 * (
-							poly_vgl[il * 5 + 1] * shell_vgl[ishell + 1*shell_num + ipoint*shell_num*5] +
-							poly_vgl[il * 5 + 2] * shell_vgl[ishell + 2*shell_num + ipoint*shell_num*5] +
-							poly_vgl[il * 5 + 3] * shell_vgl[ishell + 3*shell_num + ipoint*shell_num*5]
-							)) * ao_factor[k];
+						ao_vgl[k + 4 * ao_num + ipoint * 5 * ao_num] =
+							(poly_vgl[il * 5 + 4] *
+								 shell_vgl[ishell + 0 * shell_num +
+										   ipoint * shell_num * 5] +
+							 poly_vgl[il * 5 + 0] *
+								 shell_vgl[ishell + 4 * shell_num +
+										   ipoint * shell_num * 5] +
+							 2.0 * (poly_vgl[il * 5 + 1] *
+										shell_vgl[ishell + 1 * shell_num +
+												  ipoint * shell_num * 5] +
+									poly_vgl[il * 5 + 2] *
+										shell_vgl[ishell + 2 * shell_num +
+												  ipoint * shell_num * 5] +
+									poly_vgl[il * 5 + 3] *
+										shell_vgl[ishell + 3 * shell_num +
+												  ipoint * shell_num * 5])) *
+							ao_factor[k];
 						k = k + 1;
 					}
 				}
@@ -388,214 +417,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	qmckl_free_device(context, ao_index);
 
 	qmckl_free_device(context, pows);
-
-	return QMCKL_SUCCESS;
-}
-
-//**********
-// PROVIDE
-//**********
-
-/* shell_vgl */
-
-qmckl_exit_code
-qmckl_provide_ao_basis_shell_vgl_device(qmckl_context_device context) {
-
-	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
-		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
-							  "qmckl_provide_ao_basis_ao_vgl_device", NULL);
-	}
-
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
-	assert(ctx != NULL);
-
-	if (!ctx->ao_basis.provided) {
-		return qmckl_failwith(context, QMCKL_NOT_PROVIDED,
-							  "qmckl_provide_ao_basis_shell_vgl_device", NULL);
-	}
-
-	/* Compute if necessary */
-	if (ctx->point.date > ctx->ao_basis.shell_vgl_date) {
-
-		/* Allocate array */
-		if (ctx->ao_basis.shell_vgl == NULL) {
-
-			qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-			mem_info.size =
-				ctx->ao_basis.shell_num * 5 * ctx->point.num * sizeof(double);
-			double *shell_vgl =
-				(double *)qmckl_malloc_device(context, mem_info);
-
-			if (shell_vgl == NULL) {
-				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
-									  "qmckl_ao_basis_shell_vgl_device", NULL);
-			}
-			ctx->ao_basis.shell_vgl = shell_vgl;
-		}
-
-		qmckl_exit_code rc;
-		if (ctx->ao_basis.type == 'G') {
-			rc = qmckl_compute_ao_basis_shell_gaussian_vgl_device(
-				context, ctx->ao_basis.prim_num, ctx->ao_basis.shell_num,
-				ctx->point.num, ctx->nucleus.num,
-				ctx->ao_basis.nucleus_shell_num, ctx->ao_basis.nucleus_index,
-				ctx->ao_basis.nucleus_range, ctx->ao_basis.shell_prim_index,
-				ctx->ao_basis.shell_prim_num, ctx->point.coord.data,
-				ctx->nucleus.coord.data, ctx->ao_basis.exponent,
-				ctx->ao_basis.coefficient_normalized, ctx->ao_basis.shell_vgl);
-		} else {
-			return qmckl_failwith(context, QMCKL_FAILURE,
-								  "compute_ao_basis_shell_vgl",
-								  "Not yet implemented for basis type != 'G'");
-		}
-		if (rc != QMCKL_SUCCESS) {
-
-			return rc;
-		}
-
-		ctx->ao_basis.shell_vgl_date = ctx->date;
-	}
-
-	return QMCKL_SUCCESS;
-}
-
-/* ao_vgl_gaussian */
-
-qmckl_exit_code
-qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context) {
-
-	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
-		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
-							  "qmckl_provide_ao_basis_ao_vgl_device", NULL);
-	}
-
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
-	assert(ctx != NULL);
-
-	if (!ctx->ao_basis.provided) {
-		return qmckl_failwith((qmckl_context)context, QMCKL_NOT_PROVIDED,
-							  "qmckl_ao_basis_ao_vgl_device", NULL);
-	}
-
-	/* Compute if necessary */
-	if (ctx->point.date > ctx->ao_basis.ao_vgl_date) {
-
-		qmckl_exit_code rc;
-
-		/* Allocate array */
-		if (ctx->ao_basis.ao_vgl == NULL) {
-
-			qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-			mem_info.size =
-				ctx->ao_basis.ao_num * 5 * ctx->point.num * sizeof(double);
-			double *ao_vgl = (double *)qmckl_malloc_device(context, mem_info);
-
-			if (ao_vgl == NULL) {
-				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
-									  "qmckl_ao_basis_ao_vgl", NULL);
-			}
-			ctx->ao_basis.ao_vgl = ao_vgl;
-		}
-
-		/* Checking for shell_vgl */
-		if (ctx->ao_basis.shell_vgl == NULL ||
-			ctx->point.date > ctx->ao_basis.shell_vgl_date) {
-			qmckl_provide_ao_basis_shell_vgl_device(context);
-		}
-
-		/* Compute ao_vgl_gaussian itself */
-		if (ctx->ao_basis.type == 'G') {
-			rc = qmckl_compute_ao_vgl_gaussian_device(
-				context, ctx->ao_basis.ao_num, ctx->ao_basis.shell_num,
-				ctx->point.num, ctx->nucleus.num, ctx->point.coord.data,
-				ctx->nucleus.coord.data, ctx->ao_basis.nucleus_index,
-				ctx->ao_basis.nucleus_shell_num, ctx->ao_basis.nucleus_range,
-				ctx->ao_basis.nucleus_max_ang_mom, ctx->ao_basis.shell_ang_mom,
-				ctx->ao_basis.ao_factor, ctx->ao_basis.shell_vgl,
-				ctx->ao_basis.ao_vgl);
-		} else {
-			printf("Device pointers version of ao_vgl only "
-				   "supports 'G' as its "
-				   "ao_basis.type for now\n ");
-		}
-
-		if (rc != QMCKL_SUCCESS) {
-			return rc;
-		}
-
-		ctx->ao_basis.ao_vgl_date = ctx->date;
-	}
-
-	return QMCKL_SUCCESS;
-}
-
-//**********
-// GET
-//**********
-
-/* shell_vgl */
-
-qmckl_exit_code
-qmckl_get_ao_basis_shell_vgl_device(qmckl_context_device context,
-									double *const shell_vgl,
-									const int64_t size_max) {
-	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
-		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
-							  "qmckl_get_ao_basis_shell_vgl_device", NULL);
-	}
-
-	qmckl_exit_code rc;
-
-	rc = qmckl_provide_ao_basis_shell_vgl_device(context);
-	if (rc != QMCKL_SUCCESS)
-		return rc;
-
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
-	assert(ctx != NULL);
-	// int device_id = qmckl_get_device_id(context);
-
-	int64_t sze = ctx->ao_basis.shell_num * 5 * ctx->point.num;
-	if (size_max < sze) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_3,
-							  "qmckl_get_ao_basis_shell_vgl",
-							  "input array too small");
-	}
-	qmckl_memcpy_D2D(context, shell_vgl, ctx->ao_basis.shell_vgl,
-					 (size_t)sze * sizeof(double));
-
-	return QMCKL_SUCCESS;
-}
-
-/* ao_vgl_gaussian */
-
-qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
-												 double *const ao_vgl,
-												 const int64_t size_max) {
-
-	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
-		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
-							  "qmckl_get_ao_basis_ao_vgl_device", NULL);
-	}
-
-	qmckl_exit_code rc;
-
-	rc = qmckl_provide_ao_basis_ao_vgl_device(context);
-	if (rc != QMCKL_SUCCESS)
-		return rc;
-
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
-	assert(ctx != NULL);
-	int device_id = qmckl_get_device_id(context);
-
-	int64_t sze = ctx->ao_basis.ao_num * 5 * ctx->point.num;
-	if (size_max < sze) {
-		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_3,
-							  "qmckl_get_ao_basis_ao_vgl_device",
-							  "input array too small");
-	}
-
-	qmckl_memcpy_D2D(context, ao_vgl, ctx->ao_basis.ao_vgl,
-					 (size_t)sze * sizeof(double));
 
 	return QMCKL_SUCCESS;
 }

@@ -223,11 +223,12 @@ int main() {
 
 	bool wrong_val = false;
 
-#pragma omp target parallel for is_device_ptr(nucleus_index_d,                 \
-											  nucleus_index_test)
-	for (int64_t i = 0; i < nucl_num; ++i) {
-		if (nucleus_index_test[i] != nucleus_index_d[i])
-			wrong_val = true;
+#pragma acc data deviceptr(nucleus_index_d, nucleus_index_test)
+	{
+		for (int64_t i = 0; i < nucl_num; ++i) {
+			if (nucleus_index_test[i] != nucleus_index_d[i])
+				wrong_val = true;
+		}
 	}
 	qmckl_free_device(context, nucleus_index_test);
 	if (wrong_val)
@@ -240,11 +241,12 @@ int main() {
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-#pragma omp target parallel for is_device_ptr(nucleus_shell_num_d,             \
-											  nucleus_shell_num_test)
-	for (int64_t i = 0; i < nucl_num; ++i) {
-		if (nucleus_shell_num_test[i] != nucleus_shell_num_d[i])
-			wrong_val = true;
+#pragma acc data deviceptr(nucleus_shell_num_d, nucleus_shell_num_test)
+	{
+		for (int64_t i = 0; i < nucl_num; ++i) {
+			if (nucleus_shell_num_test[i] != nucleus_shell_num_d[i])
+				wrong_val = true;
+		}
 	}
 	qmckl_free_device(context, nucleus_shell_num_test);
 	if (wrong_val)
@@ -257,11 +259,12 @@ int main() {
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-#pragma omp target parallel for is_device_ptr(shell_ang_mom_d,                 \
-											  shell_ang_mom_test)
-	for (int64_t i = 0; i < shell_num; ++i) {
-		if (shell_ang_mom_test[i] != shell_ang_mom_d[i])
-			wrong_val = true;
+#pragma acc data deviceptr(shell_ang_mom_d, shell_ang_mom_test)
+	{
+		for (int64_t i = 0; i < shell_num; ++i) {
+			if (shell_ang_mom_test[i] != shell_ang_mom_d[i])
+				wrong_val = true;
+		}
 	}
 	qmckl_free_device(context, shell_ang_mom_test);
 	if (wrong_val)
@@ -274,10 +277,12 @@ int main() {
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-#pragma omp target parallel for is_device_ptr(shell_factor_d, shell_factor_test)
-	for (int64_t i = 0; i < shell_num; ++i) {
-		if (shell_factor_test[i] != shell_factor_d[i])
-			wrong_val = true;
+#pragma acc data deviceptr(shell_factor_d, shell_factor_test)
+	{
+		for (int64_t i = 0; i < shell_num; ++i) {
+			if (shell_factor_test[i] != shell_factor_d[i])
+				wrong_val = true;
+		}
 	}
 	qmckl_free_device(context, shell_factor_test);
 	if (wrong_val)
@@ -297,11 +302,12 @@ int main() {
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-#pragma omp target parallel for is_device_ptr(shell_prim_index_d,              \
-											  shell_prim_index_test)
-	for (int64_t i = 0; i < shell_num; ++i) {
-		if (shell_prim_index_test[i] != shell_prim_index_d[i])
-			wrong_val = true;
+#pragma acc data deviceptr(shell_prim_index_d, shell_prim_index_test)
+	{
+		for (int64_t i = 0; i < shell_num; ++i) {
+			if (shell_prim_index_test[i] != shell_prim_index_d[i])
+				wrong_val = true;
+		}
 	}
 	qmckl_free_device(context, shell_prim_index_test);
 	if (wrong_val)
@@ -313,11 +319,12 @@ int main() {
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-#pragma omp target parallel for is_device_ptr(exponent_d, exponent_test)
-	for (int64_t i = 0; i < prim_num; ++i) {
-		if (exponent_test[i] != exponent_d[i])
-			wrong_val = true;
-		;
+#pragma acc data deviceptr(exponent_d, exponent_test)
+	{
+		for (int64_t i = 0; i < prim_num; ++i) {
+			if (exponent_test[i] != exponent_d[i])
+				wrong_val = true;
+		}
 	}
 	qmckl_free_device(context, exponent_test);
 	if (wrong_val)
@@ -330,10 +337,12 @@ int main() {
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-#pragma omp target parallel for is_device_ptr(coefficient_d, coefficient_test)
-	for (int64_t i = 0; i < prim_num; ++i) {
-		if (coefficient_test[i] != coefficient_d[i])
-			wrong_val = true;
+#pragma acc data deviceptr(coefficient_d, coefficient_test)
+	{
+		for (int64_t i = 0; i < prim_num; ++i) {
+			if (coefficient_test[i] != coefficient_d[i])
+				wrong_val = true;
+		}
 	}
 	qmckl_free_device(context, coefficient_test);
 	if (wrong_val)
@@ -346,10 +355,12 @@ int main() {
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-#pragma omp target parallel for is_device_ptr(prim_factor_d, prim_factor_test)
-	for (int64_t i = 0; i < prim_num; ++i) {
-		if (prim_factor_test[i] != prim_factor_d[i])
-			wrong_val = true;
+#pragma acc data deviceptr(prim_factor_d, prim_factor_test)
+	{
+		for (int64_t i = 0; i < prim_num; ++i) {
+			if (prim_factor_test[i] != prim_factor_d[i])
+				wrong_val = true;
+		}
 	}
 	qmckl_free_device(context, prim_factor_test);
 	if (wrong_val)
@@ -365,11 +376,12 @@ int main() {
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-#pragma omp target parallel for is_device_ptr(ao_factor_d, ao_factor_test)
-	for (int64_t i = 0; i < ao_num; ++i) {
-		if (ao_factor_test[i] != ao_factor_d[i])
-			wrong_val = true;
-		;
+#pragma acc data deviceptr(ao_factor_d, ao_factor_test)
+	{
+		for (int64_t i = 0; i < ao_num; ++i) {
+			if (ao_factor_test[i] != ao_factor_d[i])
+				wrong_val = true;
+		}
 	}
 	qmckl_free_device(context, ao_factor_test);
 	if (wrong_val)
