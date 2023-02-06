@@ -126,41 +126,30 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	const int32_t *restrict shell_ang_mom, const double *restrict ao_factor,
 	double *shell_vgl, double *restrict const ao_vgl) {
 
-	double *e_coord, *n_coord;
 	int64_t n_poly;
-	int64_t l, il, k;
-	int64_t ipoint, inucl, ishell;
-	int64_t ishell_start, ishell_end;
 	int64_t *lstart;
-	double x, y, z, r2;
 	double cutoff = 27.631021115928547;
-	int64_t qmckl_ao_polynomial_vgl_doc_f;
-	int64_t size_max = 0;
 
-	double *poly_vgl;
+	double *poly_vgl_shared;
 	int64_t *powers;
 	int64_t *ao_index;
 
 	qmckl_exit_code rc;
-	int lmax, c;
 
 	qmckl_memory_info_struct info;
 
 	info.size = sizeof(int64_t) * 21;
 	lstart = qmckl_malloc_device(context, info);
 
-	info.size = sizeof(double) * 8;
-	e_coord = qmckl_malloc_device(context, info);
-	info.size = sizeof(double) * 8;
-	n_coord = qmckl_malloc_device(context, info);
 
-	info.size = sizeof(double) * 5 * ao_num;
-	poly_vgl = qmckl_malloc_device(context, info);
+	// Multiply "normal" size by point_num to affect subarrays to each thread
+	info.size = sizeof(double) * 5 * ao_num * point_num;
+	poly_vgl_shared = qmckl_malloc_device(context, info);
 	info.size = sizeof(int64_t) * ao_num;
 	ao_index = qmckl_malloc_device(context, info);
 
 	// Specific calling function
-	lmax = -1;
+	int lmax = -1;
 #pragma omp target is_device_ptr(nucleus_max_ang_mom)
 	{
 #pragma omp target update to(lmax)
@@ -172,28 +161,29 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			}
 		}
 	}
-	info.size = sizeof(double) * (lmax + 3) * 3;
-	double *pows = qmckl_malloc_device(context, info);
+	// Multiply "normal" size by point_num to affect subarrays to each thread
+	info.size = sizeof(double) * (lmax + 3) * 3 * point_num;
+	double *pows_shared = qmckl_malloc_device(context, info);
 
 #pragma omp target is_device_ptr(lstart)
 	{
-		for (l = 0; l < 21; l++) {
+		for (int l = 0; l < 21; l++) {
 			lstart[l] = l * (l + 1) * (l + 2) / 6 + 1;
 		}
 	}
 
-	k = 1;
+	int k = 1;
 #pragma omp target is_device_ptr(nucleus_index, nucleus_shell_num,             \
 								 shell_ang_mom, ao_index, lstart)
 	{
 #pragma omp target update to(k)
 		{
-			for (inucl = 0; inucl < nucl_num; inucl++) {
-				ishell_start = nucleus_index[inucl];
-				ishell_end =
+			for (int inucl = 0; inucl < nucl_num; inucl++) {
+				int ishell_start = nucleus_index[inucl];
+				int ishell_end =
 					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
-				for (ishell = ishell_start; ishell <= ishell_end; ishell++) {
-					l = shell_ang_mom[ishell];
+				for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
+					int l = shell_ang_mom[ishell];
 					ao_index[ishell] = k;
 					k = k + lstart[l + 1] - lstart[l];
 				}
@@ -202,28 +192,56 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	}
 
 #pragma omp target is_device_ptr(                                              \
-	ao_vgl, lstart, e_coord, n_coord, ao_index, ao_factor, coord,              \
+	ao_vgl, lstart, ao_index, ao_factor, coord,              \
 	nucleus_max_ang_mom, nucleus_index, nucleus_shell_num, shell_vgl,          \
-	poly_vgl, nucl_coord, pows, shell_ang_mom, nucleus_range)
+	poly_vgl_shared, nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 	{
-		//#pragma omp teams distribute parallel for
-		for (ipoint = 0; ipoint < point_num; ipoint++) {
+		#pragma omp teams distribute parallel for
+		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
-			e_coord[0] = coord[0 * point_num + ipoint];
-			e_coord[1] = coord[1 * point_num + ipoint];
-			e_coord[2] = coord[2 * point_num + ipoint];
+		/*
+		BUG For some reason, the (Nvidia ?) offload compiler seems to discard entire
+		blocks of code inside this parallel loop, if not the entire loop body.
 
-			for (inucl = 0; inucl < nucl_num; inucl++) {
+		- Commenting the teams statement above to run the loop sequentially always work
+		- a printf forces the execution of a code block, including specific loop
+		  iterations. For instance, "if(ipoint == 26) { printf("something\n"); }"
+		  inside  a basic block forces the execution of it and its parent blocks
+		  only when ipoint == 26 from the outer loop.
+		- This might be because the offload compiler considers the code as "useless",
+		  while it shouldnt because we touch device pointers used elsewhere in
+		  the code (basically an unwanted optimization pass)
+		- Observed on GCC 12.1 + Nvidia target (spack package)
 
-				n_coord[0] = nucl_coord[0 * nucl_num + inucl];
-				n_coord[1] = nucl_coord[1 * nucl_num + inucl];
-				n_coord[2] = nucl_coord[2 * nucl_num + inucl];
+		A workaround to this behaviour is to wrap then entire loop body
+		into an OMP task, which somehow forces it to be entirely executed
+		(prevents "useless" code elimination ?)
+		*/
 
-				x = e_coord[0] - n_coord[0];
-				y = e_coord[1] - n_coord[1];
-				z = e_coord[2] - n_coord[2];
+		#pragma omp task
+		{
 
-				r2 = x * x + y * y + z * z;
+			// Compute addresses of subarrays from ipoint
+			// This way, each thread can write to its own poly_vgl and pows
+			// without any race condition
+			double * poly_vgl = poly_vgl_shared + ipoint * 5 * ao_num;
+			double * pows = pows_shared + ipoint * (lmax+3) * 3;
+
+			double e_coord_0 = coord[0 * point_num + ipoint];
+			double e_coord_1 = coord[1 * point_num + ipoint];
+			double e_coord_2 = coord[2 * point_num + ipoint];
+
+			for (int inucl = 0; inucl < nucl_num; inucl++) {
+
+				double n_coord_0 = nucl_coord[0 * nucl_num + inucl];
+				double n_coord_1 = nucl_coord[1 * nucl_num + inucl];
+				double n_coord_2 = nucl_coord[2 * nucl_num + inucl];
+
+				double x = e_coord_0 - n_coord_0;
+				double y = e_coord_1 - n_coord_1;
+				double z = e_coord_2 - n_coord_2;
+
+				double r2 = x * x + y * y + z * z;
 
 				if (r2 > cutoff * nucleus_range[inucl]) {
 					continue;
@@ -235,9 +253,10 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 				int c, n;
 				double da, db, dc, dd;
 
-				Y1 = e_coord[0] - n_coord[0];
-				Y2 = e_coord[1] - n_coord[1];
-				Y3 = e_coord[2] - n_coord[2];
+				// Already computed outsite of the ao_polynomial part
+				Y1 = x;
+				Y2 = y;
+				Y3 = z;
 
 				int llmax = nucleus_max_ang_mom[inucl];
 				if (llmax == 0) {
@@ -338,16 +357,16 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 				// End of ao_polynomial computation (now inlined)
 				// poly_vgl is now set from here
 
-				ishell_start = nucleus_index[inucl];
-				ishell_end =
+				int ishell_start = nucleus_index[inucl];
+				int ishell_end =
 					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
 
 				// Loop over shells
-				for (ishell = ishell_start; ishell <= ishell_end; ishell++) {
-					k = ao_index[ishell] - 1;
-					l = shell_ang_mom[ishell];
+				for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
+					int k = ao_index[ishell] - 1;
+					int l = shell_ang_mom[ishell];
 
-					for (il = lstart[l] - 1; il <= lstart[l + 1] - 2; il++) {
+					for (int il = lstart[l] - 1; il <= lstart[l + 1] - 2; il++) {
 
 						// value
 						ao_vgl[k + 0 * ao_num + ipoint * 5 * ao_num] =
@@ -409,14 +428,15 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 				}
 			}
 		}
+		}
+		// End of outer compute loop
 	}
+	// End of target data region
 	qmckl_free_device(context, lstart);
-	qmckl_free_device(context, e_coord);
-	qmckl_free_device(context, n_coord);
-	qmckl_free_device(context, poly_vgl);
+	qmckl_free_device(context, poly_vgl_shared);
 	qmckl_free_device(context, ao_index);
 
-	qmckl_free_device(context, pows);
+	qmckl_free_device(context, pows_shared);
 
 	return QMCKL_SUCCESS;
 }
