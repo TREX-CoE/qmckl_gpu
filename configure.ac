@@ -156,7 +156,7 @@ AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc" = "xyes"], [
 	case $CC in
 		*gcc*)
 			CFLAGS="$CFLAGS -fopenacc -foffload=-lm"
-			LDFLAGS="$LDFLAGS -lm"
+			LDFLAGS="$LDFLAGS -lm -fopenacc"
 			;;
 		*nvc*)
 			CFLAGS="$CFLAGS -acc=gpu -ta=nvidia:nordc"

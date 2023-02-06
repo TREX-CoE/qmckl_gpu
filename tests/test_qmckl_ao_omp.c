@@ -14,7 +14,7 @@
 #define AO_VGL_ID(x, y, z) 5 * ao_num *x + ao_num *y + z
 
 int main() {
-	qmckl_context context;
+	qmckl_context_device context;
 	// TODO Get device ID according to OpenMP/ACC
 	context = qmckl_context_create_device(0);
 

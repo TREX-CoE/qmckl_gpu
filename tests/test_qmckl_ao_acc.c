@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <openacc.h>
 
 #include "chbrclf.h"
 //#include "../qmckl/src/qmckl_ao_private_func.h"
@@ -14,8 +15,10 @@
 #define AO_VGL_ID(x, y, z) 5 * ao_num *x + ao_num *y + z
 
 int main() {
+
+	acc_set_device_num( 0, acc_device_nvidia );
+
 	qmckl_context context;
-	// TODO Get device ID according to OpenMP/ACC
 	context = qmckl_context_create_device(0);
 
 	const int64_t nucl_num = chbrclf_nucl_num;
@@ -52,6 +55,7 @@ int main() {
 
 	if (!qmckl_nucleus_provided(context))
 		return 1;
+
 
 	const int64_t shell_num = chbrclf_shell_num;
 	const int64_t prim_num = chbrclf_prim_num;
