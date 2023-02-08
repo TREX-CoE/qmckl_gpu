@@ -74,3 +74,25 @@ The next sections provides more advanced explanations on how this library should
 The library works on a variant of the `qmckl_context` type: `qmckl_context_device`. It has the same structure as the default context, but contains a few additional and GPU-related informations, such as the OpenMP/OpenACC ID of the device you are allocating memory on and doing your offload to. This type comes with its own variants of the classic QMCkl functions. These functions work directly and (almost) exclusively on the GPU memory, referenced by "device pointers". As a rule of thumb, you should always pass such device pointers as arguments of these functions. This way, memory transfers are greatly reduced compared to a "naive" approach where memory is transferred back and forth everytime we need to perform a computation on GPU. Typically the entry data set would need to be allocated/transferred once from CPU to GPU at the beginning of a QMC simulation, and the results would be transferred on demand only when they are needed elsewhere. The main dowside is that **this will likely require the user to perform a few GPU allocations themself**, which requires a bit more care than using the CPU library.
 
 **TODO** More detailed explanations on device pointer functions use, dedicated .md documentation files ?
+
+
+## Troubleshooting
+
+During the development and testing of the library, we encountered some compiler related issues. This section contains the fixes we used in case you run into the same errors : 
+
+### Link error with nvc
+
+When building an executable with an `nvc` built QMCkl GPU (when doing a `make check` for instance), you might run into this issue, or similar : 
+
+```
+/usr/bin/ld: /opt/nvidia/hpc_sdk/Linux_x86_64/22.11/compilers/lib/libgomp.so.1: undefined reference to `__pgi_nvomp_error_cuda_noversion'
+```
+
+It seems that by itself, nvc doesn't link correctly all of its libraries, resulting in missing symbols errors. We have been able to solve the issue by manually specifying the flags needed to link those libraries  : 
+
+```
+./configure CC="nvc" LDFLAGS="-L/[path]/[to]/nvidia/hpc_sdk/Linux_x86_64/[version]/compilers/lib -lpgc -lnvf"
+```
+
+... should solve the issue when building the tests. You can do something similar when building your own app.
+
