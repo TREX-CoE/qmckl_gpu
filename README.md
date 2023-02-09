@@ -78,9 +78,9 @@ The library works on a variant of the `qmckl_context` type: `qmckl_context_devic
 
 ## Troubleshooting
 
-During the development and testing of the library, we encountered some compiler related issues. This section contains the fixes we used in case you run into the same errors : 
+During the development and testing of the library, we encountered some compiler related issues. This section contains the issues we ran into and the fixes we used (if any) in case you encounter them too : 
 
-### Link error with nvc
+### [nvc] pgi undefined reference when building executable
 
 When building an executable with an `nvc` built QMCkl GPU (when doing a `make check` for instance), you might run into this issue, or similar : 
 
@@ -96,3 +96,13 @@ It seems that by itself, nvc doesn't link correctly all of its libraries, result
 
 ... should solve the issue when building the tests. You can do something similar when building your own app.
 
+
+### [nvc] [OpenACC] libgomp: TODO
+
+On some systems, building the lib with nvc + OpenACC can result in the following runtime error : 
+
+```
+libgomp: TODO
+```
+
+Apparently ( https://stackoverflow.com/questions/73640854/use-nvc-to-run-c-program-with-openacc-error-shows-libgomp-todo ), this would be due to the use of the OpenACC runtime library and to the fact that nvc's linker uses GCC's implementation instead of its own. No fix has been found at the moment, but using another compiler as gcc should avoid the error.
