@@ -97,12 +97,18 @@ It seems that by itself, nvc doesn't link correctly all of its libraries, result
 ... should solve the issue when building the tests. You can do something similar when building your own app.
 
 
-### [nvc] [OpenACC] libgomp: TODO
+### [nvc] libgomp: TODO
 
-On some systems, building the lib with nvc + OpenACC can result in the following runtime error : 
+On some systems, building the lib with nvc can result in the following runtime error (this has been observed with both OpenMP and OpenACC on different systems) : 
 
 ```
 libgomp: TODO
 ```
 
-Apparently ( https://stackoverflow.com/questions/73640854/use-nvc-to-run-c-program-with-openacc-error-shows-libgomp-todo ), this would be due to the use of the OpenACC runtime library and to the fact that nvc's linker uses GCC's implementation instead of its own. No fix has been found at the moment, but using another compiler as gcc should avoid the error.
+Apparently, this is due to nvc linking executables with GCC's libgomp instead of its own. One way to fix this is to put the Nvidia libgomp path in `LD_LIBRARY_PATH` : 
+
+```
+export LD_LIBRARY_PATH=/[path]/[to]/nvidia/hpc_sdk/Linux_x86_64/[version]/compilers/lib:$LD_LIBRARY_PATH
+```
+
+As this affects the libraries' search path at runtime only, you should not need to recompile anything.
