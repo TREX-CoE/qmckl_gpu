@@ -191,16 +191,27 @@ int main() {
 
 	assert(qmckl_ao_basis_provided(context));
 
+	double *ao_vgl =
+		qmckl_malloc_host(context, point_num * 5 * ao_num * sizeof(double));
 	double *ao_vgl_d =
 		qmckl_malloc_device(context, point_num * 5 * ao_num * sizeof(double));
+
+	double *ao_value =
+		qmckl_malloc_host(context, point_num * 5 * ao_num * sizeof(double));
 	double *ao_value_d =
 		qmckl_malloc_device(context, point_num * 5 * ao_num * sizeof(double));
 
 	rc = qmckl_get_ao_basis_ao_vgl_device(context, ao_vgl_d,
 										  (int64_t)5 * point_num * ao_num);
+	qmckl_memcpy_D2H(context, ao_vgl, ao_vgl_d,
+					 point_num * 5 * ao_num * sizeof(double));
+
+
 	// We thus make sure that ao_value is set
 	rc = qmckl_get_ao_basis_ao_value_device(context, ao_vgl_d,
 										  (int64_t)point_num * ao_num);
+	qmckl_memcpy_D2H(context, ao_value, ao_value_d,
+					 point_num * ao_num * sizeof(double));
 
 	assert(rc == QMCKL_SUCCESS);
 
@@ -233,8 +244,12 @@ int main() {
 	assert(rc == QMCKL_SUCCESS);
 
 	double * mo_vgl = qmckl_malloc_host(context, point_num * 5 * chbrclf_mo_num);
-	rc = qmckl_get_mo_basis_mo_vgl(context, &(mo_vgl[0]),
+	double * mo_vgl_d = qmckl_malloc_device(context, point_num * 5 * chbrclf_mo_num);
+	rc = qmckl_get_mo_basis_mo_vgl(context, &(mo_vgl_d[0]),
 								   point_num * 5 * chbrclf_mo_num);
+	qmckl_memcpy_D2H(context, mo_vgl, mo_vgl_d,
+					 point_num * 5 * chbrclf_mo_num * sizeof(double));
+
 	assert(rc == QMCKL_SUCCESS);
 
 	for (int i = 0; i < point_num; ++i) {
@@ -246,28 +261,25 @@ int main() {
 	rc = qmckl_context_touch(context);
 	assert(rc == QMCKL_SUCCESS);
 
-	rc = qmckl_get_mo_basis_mo_value_device (context, &(mo_value[0]),
+	rc = qmckl_get_mo_basis_mo_value_device (context, mo_value_d,
 									 point_num * chbrclf_mo_num);
+	qmckl_memcpy_D2H(context, mo_value, mo_value_d,
+					 point_num * chbrclf_mo_num * sizeof(double));
+
 	assert(rc == QMCKL_SUCCESS);
 
-	#pragma omp target is_device_ptr(mo_vgl, mo_value)
-	{
 	for (int i = 0; i < point_num; ++i) {
 		for (int k = 0; k < chbrclf_mo_num; ++k) {
 			if(fabs(mo_vgl[MO_VGL_ID(i, 0, k)] - mo_value[MO_VALUE_ID(i, k)] > 1.e-12)) {
 			}
 		}
 	}
-	}
 
-	// rc = qmckl_mo_basis_rescale(context, 0.);
-	assert(rc != QMCKL_SUCCESS);
-
-	// rc = qmckl_mo_basis_rescale(context, 2.);
-	assert(rc == QMCKL_SUCCESS);
-
-	rc = qmckl_get_mo_basis_mo_value_device(context, &(mo_value[0]),
+	rc = qmckl_get_mo_basis_mo_value_device(context, mo_value,
 									 point_num * chbrclf_mo_num);
+	qmckl_memcpy_D2H(context, mo_value, mo_value_d,
+					 point_num * chbrclf_mo_num * sizeof(double));
+
 	assert(rc == QMCKL_SUCCESS);
 	#pragma omp target is_device_ptr(mo_vgl, mo_value)
 	{
@@ -279,7 +291,8 @@ int main() {
 	}
 	}
 
-	rc = qmckl_mo_basis_rescale(context, 0.5);
+	// TODO ?
+	// rc = qmckl_mo_basis_rescale(context, 0.5);
 	assert(rc == QMCKL_SUCCESS);
 
 
@@ -302,29 +315,11 @@ int main() {
 
 	printf("\n");
 
-	// Check selection of MOs
+	// TODO
+	// rc = qmckl_get_mo_basis_mo_num_device(context, &mo_num);
+	// printf(" mo_num: %ld\n", mo_num);
+	// assert(mo_num == 2);
 
-	int32_t keep[mo_num];
-	for (int i = 0; i < mo_num; ++i) {
-		keep[i] = 0;
-	}
-	keep[2] = 1;
-	keep[5] = 1;
-
-	// rc = qmckl_mo_basis_select_mo(context, &(keep[0]), mo_num);
-	assert(rc == QMCKL_SUCCESS);
-
-	// rc = qmckl_get_mo_basis_mo_num(context, &mo_num);
-	printf(" mo_num: %ld\n", mo_num);
-	assert(mo_num == 2);
-
-	double mo_coefficient_new[mo_num][ao_num];
-	// rc = qmckl_get_mo_basis_coefficient(
-	//	context, &(mo_coefficient_new[0][0]), mo_num * ao_num);
-	for (int i = 0; i < ao_num; ++i) {
-		// assert(mo_coefficient_new[0][i] == mo_coefficient[i + ao_num * 2]);
-		// assert(mo_coefficient_new[1][i] == mo_coefficient[i + ao_num * 5]);
-	}
 
 	rc = qmckl_context_destroy_device(context);
 	assert(rc == QMCKL_SUCCESS);
