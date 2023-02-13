@@ -8,15 +8,18 @@
 #include <string.h>
 
 #include "chbrclf.h"
-//#include "../qmckl/src/qmckl_ao_private_func.h"
 #include "../include/qmckl_gpu.h"
 
 #define AO_VGL_ID(x, y, z) 5 * ao_num *x + ao_num *y + z
 
 int main() {
 	qmckl_context_device context;
-	// TODO Get device ID according to OpenMP/ACC
-	context = qmckl_context_create_device(0);
+
+	if (omp_get_num_devices() <= 0) {
+		printf("Error : no device found. Aborting execution\n");
+		exit(1);
+	}
+	context = qmckl_context_create_device(omp_get_default_device());
 
 	const int64_t nucl_num = chbrclf_nucl_num;
 

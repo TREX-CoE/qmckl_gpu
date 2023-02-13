@@ -137,6 +137,7 @@ qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context) {
 	return QMCKL_SUCCESS;
 }
 
+
 //**********
 // GET
 //**********
@@ -203,6 +204,40 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
 	}
 
 	qmckl_memcpy_D2D(context, ao_vgl, ctx->ao_basis.ao_vgl,
+					 (size_t)sze * sizeof(double));
+
+	return QMCKL_SUCCESS;
+}
+
+/* ao_value */
+
+qmckl_exit_code qmckl_get_ao_basis_ao_value_device(qmckl_context_device context,
+												   double *const ao_value,
+												   const int64_t size_max) {
+
+	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
+							  "qmckl_get_ao_basis_ao_value_device", NULL);
+	}
+
+	qmckl_exit_code rc;
+
+	rc = qmckl_provide_ao_basis_ao_value_device(context);
+	if (rc != QMCKL_SUCCESS)
+		return rc;
+
+	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	assert(ctx != NULL);
+	int device_id = qmckl_get_device_id(context);
+
+	int64_t sze = ctx->ao_basis.ao_num * ctx->point.num;
+	if (size_max < sze) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_3,
+							  "qmckl_get_ao_basis_ao_value_device",
+							  "input array too small");
+	}
+
+	qmckl_memcpy_D2D(context, ao_value, ctx->ao_basis.ao_value,
 					 (size_t)sze * sizeof(double));
 
 	return QMCKL_SUCCESS;

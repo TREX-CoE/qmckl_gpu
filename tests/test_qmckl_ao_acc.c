@@ -16,7 +16,7 @@
 
 int main() {
 
-	acc_set_device_num( 0, acc_device_nvidia );
+	acc_set_device_num(0, acc_device_nvidia);
 
 	qmckl_context context;
 	context = qmckl_context_create_device(0);
@@ -55,7 +55,6 @@ int main() {
 
 	if (!qmckl_nucleus_provided(context))
 		return 1;
-
 
 	const int64_t shell_num = chbrclf_shell_num;
 	const int64_t prim_num = chbrclf_prim_num;

@@ -136,9 +136,7 @@ qmckl_exit_code qmckl_memcpy_H2D(qmckl_context_device context, void *const dest,
 	}
 
 	qmckl_lock((qmckl_context)context);
-	{
-		int ret = acc_memcpy_to_device(dest, src, size);
-	}
+	{ int ret = acc_memcpy_to_device(dest, src, size); }
 	qmckl_unlock((qmckl_context)context);
 
 	return QMCKL_SUCCESS;
@@ -163,9 +161,7 @@ qmckl_exit_code qmckl_memcpy_D2H(qmckl_context_device context, void *const dest,
 	}
 
 	qmckl_lock((qmckl_context)context);
-	{
-		int ret = acc_memcpy_from_device(dest, src, size);
-	}
+	{ int ret = acc_memcpy_from_device(dest, src, size); }
 	qmckl_unlock((qmckl_context)context);
 
 	return QMCKL_SUCCESS;
@@ -190,9 +186,7 @@ qmckl_exit_code qmckl_memcpy_D2D(qmckl_context_device context, void *const dest,
 	}
 
 	qmckl_lock((qmckl_context)context);
-	{
-		int ret = acc_memcpy_to_device(dest, src, size);
-	}
+	{ int ret = acc_memcpy_to_device(dest, src, size); }
 	qmckl_unlock((qmckl_context)context);
 
 	return QMCKL_SUCCESS;

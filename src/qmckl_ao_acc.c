@@ -141,7 +141,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	info.size = sizeof(int64_t) * 21;
 	lstart = qmckl_malloc_device(context, info);
 
-
 	// Multiply "normal" size by point_num to affect subarrays to each thread
 	info.size = sizeof(double) * 5 * ao_num * point_num;
 	poly_vgl_shared = qmckl_malloc_device(context, info);
@@ -171,34 +170,35 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	}
 
 	int k = 1;
-#pragma acc data deviceptr(nucleus_index, nucleus_shell_num,             \
-								 shell_ang_mom, ao_index, lstart)
+#pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
+						   ao_index, lstart)
 	{
-			for (int inucl = 0; inucl < nucl_num; inucl++) {
-				int ishell_start = nucleus_index[inucl];
-				int ishell_end =
-					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
-				for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
-					int l = shell_ang_mom[ishell];
-					ao_index[ishell] = k;
-					k = k + lstart[l + 1] - lstart[l];
-				}
+		for (int inucl = 0; inucl < nucl_num; inucl++) {
+			int ishell_start = nucleus_index[inucl];
+			int ishell_end =
+				nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+			for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
+				int l = shell_ang_mom[ishell];
+				ao_index[ishell] = k;
+				k = k + lstart[l + 1] - lstart[l];
 			}
+		}
 #pragma acc update host(k)
 	}
 
-#pragma acc data deviceptr(ao_vgl, lstart, ao_index, ao_factor, coord,              \
-	nucleus_max_ang_mom, nucleus_index, nucleus_shell_num, shell_vgl,          \
-	poly_vgl_shared, nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
+#pragma acc data deviceptr(                                                    \
+	ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,           \
+	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
+	pows_shared, shell_ang_mom, nucleus_range)
 	{
-		#pragma acc parallel loop gang worker vector
+#pragma acc parallel loop gang worker vector
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
 			// Compute addresses of subarrays from ipoint
 			// This way, each thread can write to its own poly_vgl and pows
 			// without any race condition
-			double * poly_vgl = poly_vgl_shared + ipoint * 5 * ao_num;
-			double * pows = pows_shared + ipoint * (lmax+3) * 3;
+			double *poly_vgl = poly_vgl_shared + ipoint * 5 * ao_num;
+			double *pows = pows_shared + ipoint * (lmax + 3) * 3;
 
 			double e_coord_0 = coord[0 * point_num + ipoint];
 			double e_coord_1 = coord[1 * point_num + ipoint];
@@ -335,11 +335,13 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
 
 				// Loop over shells
-				for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
+				for (int ishell = ishell_start; ishell <= ishell_end;
+					 ishell++) {
 					int k = ao_index[ishell] - 1;
 					int l = shell_ang_mom[ishell];
 
-					for (int il = lstart[l] - 1; il <= lstart[l + 1] - 2; il++) {
+					for (int il = lstart[l] - 1; il <= lstart[l + 1] - 2;
+						 il++) {
 
 						// value
 						ao_vgl[k + 0 * ao_num + ipoint * 5 * ao_num] =
