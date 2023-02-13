@@ -11,7 +11,6 @@ libqmckl_gpu_la_SOURCES = ""
 # (Legacy) Enable OpenMP offload
 if HAVE_OMP_OFFLOAD
   libqmckl_gpu_la_SOURCES += src/qmckl_ao_omp_offload.c
-                             # src/qmckl_jastrow_omp_offload.c
 endif
 
 # (Legacy) Enable OpenACC offload
@@ -21,20 +20,21 @@ endif
 
 
 # Base library files (needed for both OpenMP and OpenACC)
-libqmckl_gpu_la_SOURCES += src/qmckl_context.c src/qmckl_memory.c src/qmckl_blas.c src/qmckl_trexio.c src/qmckl_ao.c
+libqmckl_gpu_la_SOURCES += src/qmckl_context.c src/qmckl_memory.c src/qmckl_blas.c \
+src/qmckl_trexio.c src/qmckl_ao.c src/qmckl_mo.c
 
 # Enable OpenMP-specific device functions
 if HAVE_OMP_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_memory_omp.c \
   src/qmckl_blas_omp.c src/qmckl_trexio_omp.c \
-  src/qmckl_ao_omp.c src/qmckl_jastrow_omp.c
+  src/qmckl_ao_omp.c src/qmckl_mo_omp.c
 endif
 
 # Enable OpenACC-specific device functions
 if HAVE_ACC_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_memory_acc.c \
   src/qmckl_blas_omp.c src/qmckl_trexio_acc.c \
-  src/qmckl_ao_acc.c src/qmckl_jastrow_acc.c
+  src/qmckl_ao_acc.c src/qmckl_mo_acc.c
 endif
 
 
