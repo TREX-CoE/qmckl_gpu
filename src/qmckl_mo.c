@@ -1,4 +1,5 @@
 #include "include/qmckl_ao.h"
+#include "include/qmckl_mo.h"
 
 //**********
 // PROVIDE

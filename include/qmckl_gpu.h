@@ -15,11 +15,8 @@ typedef int64_t qmckl_memory_info_struct;
 
 qmckl_context_device
 qmckl_context_touch_device(const qmckl_context_device context);
-qmckl_context_device
-qmckl_context_touch_device(const qmckl_context_device context);
 
 qmckl_context_device qmckl_context_create_device(int device_id);
-qmckl_context_device qmckl_context_create_device();
 
 qmckl_exit_code
 qmckl_context_destroy_device(const qmckl_context_device context);
@@ -217,6 +214,12 @@ qmckl_get_ao_basis_prim_factor_device(const qmckl_context_device context,
 qmckl_exit_code
 qmckl_get_ao_basis_ao_factor_device(const qmckl_context_device context,
 									double *const ao_factor, int64_t ao_num);
+
+qmckl_exit_code
+qmckl_get_ao_basis_nucleus_index_device(const qmckl_context_device context,
+										int64_t *const nucleus_index,
+										int64_t nucl_num);
+
 
 //**********
 // AO

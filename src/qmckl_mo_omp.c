@@ -7,9 +7,9 @@
 /* mo_vgl */
 
 qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
-	const qmckl_context context, const int64_t ao_num, const int64_t mo_num,
-	const int64_t point_num, const double *restrict coefficient_t,
-	const double *restrict ao_vgl, double *restrict const mo_vgl) {
+	qmckl_context context, int64_t ao_num, int64_t mo_num,
+	int64_t point_num, double *restrict coefficient_t,
+	double *restrict ao_vgl, double *restrict mo_vgl) {
 	assert(context != QMCKL_NULL_CONTEXT);
 
 #pragma omp target is_device_ptr(coefficient_t, ao_vgl, mo_vgl)
@@ -57,9 +57,9 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 /* mo_value */
 
 qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
-	const qmckl_context context, const int64_t ao_num, const int64_t mo_num,
-	const int64_t point_num, const double *restrict coefficient_t,
-	const double *restrict ao_value, double *restrict const mo_value) {
+	qmckl_context context, int64_t ao_num, int64_t mo_num,
+	int64_t point_num, double *restrict coefficient_t,
+	double *restrict ao_value, double *restrict mo_value) {
 	assert(context != QMCKL_NULL_CONTEXT);
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
@@ -99,18 +99,18 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 			int64_t n = 0;
 
 			for (n = 0; n < nidx - 4; n += 4) {
-				const double *restrict ck1 = coefficient_t + idx[n] * mo_num;
-				const double *restrict ck2 =
+				double *restrict ck1 = coefficient_t + idx[n] * mo_num;
+				double *restrict ck2 =
 					coefficient_t + idx[n + 1] * mo_num;
-				const double *restrict ck3 =
+				double *restrict ck3 =
 					coefficient_t + idx[n + 2] * mo_num;
-				const double *restrict ck4 =
+				double *restrict ck4 =
 					coefficient_t + idx[n + 3] * mo_num;
 
-				const double a11 = av1[n];
-				const double a21 = av1[n + 1];
-				const double a31 = av1[n + 2];
-				const double a41 = av1[n + 3];
+				double a11 = av1[n];
+				double a21 = av1[n + 1];
+				double a31 = av1[n + 2];
+				double a41 = av1[n + 3];
 
 #pragma omp simd
 				for (int64_t i = 0; i < mo_num; ++i) {
@@ -120,8 +120,8 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 			}
 
 			for (int64_t m = n; m < nidx; m += 1) {
-				const double *restrict ck = coefficient_t + idx[m] * mo_num;
-				const double a1 = av1[m];
+				double *restrict ck = coefficient_t + idx[m] * mo_num;
+				double a1 = av1[m];
 
 #pragma omp simd
 				for (int64_t i = 0; i < mo_num; ++i) {

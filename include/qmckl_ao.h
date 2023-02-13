@@ -21,10 +21,12 @@
 #include "qmckl_context.h"
 #include "qmckl_memory.h"
 
-qmckl_exit_code qmckl_ao_polynomial_transp_vgl_hpc_device(
-	const qmckl_context_device context, const double *restrict X,
-	const double *restrict R, const int32_t lmax, int64_t *restrict n,
-	const int64_t ldl, double *restrict const VGL, const int64_t ldv);
+qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
+	qmckl_context_device context, int prim_num, int shell_num, int point_num,
+	int nucl_num, int64_t *nucleus_shell_num, int64_t *nucleus_index,
+	double *nucleus_range, int64_t *shell_prim_index, int64_t *shell_prim_num,
+	double *coord, double *nucl_coord, double *expo, double *coef_normalized,
+	double *shell_vgl);
 
 qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	const qmckl_context context, const int64_t ao_num, const int64_t shell_num,

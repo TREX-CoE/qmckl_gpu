@@ -9,6 +9,7 @@
 
 #include "chbrclf.h"
 #include "../include/qmckl_gpu.h"
+#include <omp.h>
 
 #define AO_VGL_ID(x, y, z) 5 * ao_num *x + ao_num *y + z
 
@@ -21,16 +22,16 @@ int main() {
 	}
 	context = qmckl_context_create_device(omp_get_default_device());
 
-	const int64_t nucl_num = chbrclf_nucl_num;
+	int64_t nucl_num = chbrclf_nucl_num;
 
 	// Put nucleus stuff in CPU arrays
-	const double *nucl_charge = chbrclf_charge;
-	const double *nucl_coord = &(chbrclf_nucl_coord[0][0]);
+	double *nucl_charge = chbrclf_charge;
+	double *nucl_coord = &(chbrclf_nucl_coord[0][0]);
 
 	// Put nucleus stuff in GPU arrays
-	const double *nucl_charge_d =
+	double *nucl_charge_d =
 		qmckl_malloc_device(context, nucl_num * sizeof(double));
-	const double *nucl_coord_d =
+	double *nucl_coord_d =
 		qmckl_malloc_device(context, 3 * nucl_num * sizeof(double));
 
 	qmckl_memcpy_H2D(context, nucl_charge_d, nucl_charge,
@@ -56,42 +57,42 @@ int main() {
 	if (!qmckl_nucleus_provided(context))
 		return 1;
 
-	const int64_t shell_num = chbrclf_shell_num;
-	const int64_t prim_num = chbrclf_prim_num;
-	const int64_t ao_num = chbrclf_ao_num;
+	int64_t shell_num = chbrclf_shell_num;
+	int64_t prim_num = chbrclf_prim_num;
+	int64_t ao_num = chbrclf_ao_num;
 
 	// Put other stuff in CPU arrays
-	const int64_t *nucleus_index = &(chbrclf_basis_nucleus_index[0]);
-	const int64_t *nucleus_shell_num = &(chbrclf_basis_nucleus_shell_num[0]);
-	const int32_t *shell_ang_mom = &(chbrclf_basis_shell_ang_mom[0]);
-	const int64_t *shell_prim_num = &(chbrclf_basis_shell_prim_num[0]);
-	const int64_t *shell_prim_index = &(chbrclf_basis_shell_prim_index[0]);
-	const double *shell_factor = &(chbrclf_basis_shell_factor[0]);
-	const double *exponent = &(chbrclf_basis_exponent[0]);
-	const double *coefficient = &(chbrclf_basis_coefficient[0]);
-	const double *prim_factor = &(chbrclf_basis_prim_factor[0]);
-	const double *ao_factor = &(chbrclf_basis_ao_factor[0]);
+	int64_t *nucleus_index = &(chbrclf_basis_nucleus_index[0]);
+	int64_t *nucleus_shell_num = &(chbrclf_basis_nucleus_shell_num[0]);
+	int32_t *shell_ang_mom = &(chbrclf_basis_shell_ang_mom[0]);
+	int64_t *shell_prim_num = &(chbrclf_basis_shell_prim_num[0]);
+	int64_t *shell_prim_index = &(chbrclf_basis_shell_prim_index[0]);
+	double *shell_factor = &(chbrclf_basis_shell_factor[0]);
+	double *exponent = &(chbrclf_basis_exponent[0]);
+	double *coefficient = &(chbrclf_basis_coefficient[0]);
+	double *prim_factor = &(chbrclf_basis_prim_factor[0]);
+	double *ao_factor = &(chbrclf_basis_ao_factor[0]);
 
 	// Put other stuff in GPU arrays
-	const int64_t *nucleus_index_d =
+	int64_t *nucleus_index_d =
 		qmckl_malloc_device(context, nucl_num * sizeof(int64_t));
-	const int64_t *nucleus_shell_num_d =
+	int64_t *nucleus_shell_num_d =
 		qmckl_malloc_device(context, nucl_num * sizeof(int64_t));
-	const int32_t *shell_ang_mom_d =
+	int32_t *shell_ang_mom_d =
 		qmckl_malloc_device(context, shell_num * sizeof(int32_t));
-	const int64_t *shell_prim_num_d =
+	int64_t *shell_prim_num_d =
 		qmckl_malloc_device(context, shell_num * sizeof(int64_t));
-	const int64_t *shell_prim_index_d =
+	int64_t *shell_prim_index_d =
 		qmckl_malloc_device(context, shell_num * sizeof(int64_t));
-	const double *shell_factor_d =
+	double *shell_factor_d =
 		qmckl_malloc_device(context, shell_num * sizeof(double));
-	const double *exponent_d =
+	double *exponent_d =
 		qmckl_malloc_device(context, prim_num * sizeof(double));
-	const double *coefficient_d =
+	double *coefficient_d =
 		qmckl_malloc_device(context, prim_num * sizeof(double));
-	const double *prim_factor_d =
+	double *prim_factor_d =
 		qmckl_malloc_device(context, prim_num * sizeof(double));
-	const double *ao_factor_d =
+	double *ao_factor_d =
 		qmckl_malloc_device(context, ao_num * sizeof(double));
 
 	qmckl_memcpy_H2D(context, nucleus_index_d, nucleus_index,
@@ -113,7 +114,7 @@ int main() {
 					 prim_num * sizeof(double));
 	qmckl_memcpy_H2D(context, ao_factor_d, ao_factor, ao_num * sizeof(double));
 
-	const char typ = 'G';
+	char typ = 'G';
 
 	rc = qmckl_set_ao_basis_type_device(context, typ);
 	if (rc != QMCKL_SUCCESS)
@@ -384,8 +385,8 @@ int main() {
 #define elec_num chbrclf_elec_num
 
 	double *elec_coord = &(chbrclf_elec_coord[0][0][0]);
-	const int64_t point_num = elec_num;
-	const double *elec_coord_d =
+	int64_t point_num = elec_num;
+	double *elec_coord_d =
 		qmckl_malloc_device(context, 3 * point_num * sizeof(double));
 
 	qmckl_memcpy_H2D(context, elec_coord_d, elec_coord,
