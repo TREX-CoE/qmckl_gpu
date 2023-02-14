@@ -23,9 +23,10 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	// TODO : Use numerical precision here
 	cutoff = 27.631021115928547; //-dlog(1.d-12)
 
-#pragma omp target is_device_ptr(                                              \
-	nucleus_shell_num, nucleus_index, nucleus_range, shell_prim_index,         \
-	shell_prim_num, coord, nucl_coord, expo, coef_normalized, shell_vgl)
+#pragma omp target is_device_ptr(nucleus_shell_num, nucleus_index,             \
+									 nucleus_range, shell_prim_index,          \
+									 shell_prim_num, coord, nucl_coord, expo,  \
+									 coef_normalized, shell_vgl)
 	{
 
 #pragma omp teams distribute parallel for simd collapse(2)
@@ -170,8 +171,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 	int k = 1;
 #pragma omp target is_device_ptr(nucleus_index, nucleus_shell_num,             \
-								 shell_ang_mom, ao_index, lstart) map(tofrom   \
-																	  : k)
+									 shell_ang_mom, ao_index, lstart)          \
+	map(tofrom : k)
 	{
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
 			int ishell_start = nucleus_index[inucl];
@@ -186,11 +187,11 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	}
 
 #pragma omp target is_device_ptr(                                              \
-	ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,           \
-	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
-	pows_shared, shell_ang_mom, nucleus_range)
+		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
+			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
+			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 	{
-		//#pragma omp teams distribute parallel for
+		// #pragma omp teams distribute parallel for
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
 			/*
@@ -215,7 +216,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			(prevents "useless" code elimination ?)
 			*/
 
-			//#pragma omp task
+			// #pragma omp task
 			{
 
 				// Compute addresses of subarrays from ipoint
@@ -498,8 +499,8 @@ qmckl_exit_code qmckl_compute_ao_value_device(
 
 	int k = 1;
 #pragma omp target is_device_ptr(nucleus_index, nucleus_shell_num,             \
-								 shell_ang_mom, ao_index, lstart) map(tofrom   \
-																	  : k)
+									 shell_ang_mom, ao_index, lstart)          \
+	map(tofrom : k)
 	{
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
 			int ishell_start = nucleus_index[inucl];
@@ -514,11 +515,11 @@ qmckl_exit_code qmckl_compute_ao_value_device(
 	}
 
 #pragma omp target is_device_ptr(                                              \
-	ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,           \
-	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
-	pows_shared, shell_ang_mom, nucleus_range)
+		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
+			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
+			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 	{
-		//#pragma omp teams distribute parallel for
+		// #pragma omp teams distribute parallel for
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
 			/*
@@ -543,7 +544,7 @@ qmckl_exit_code qmckl_compute_ao_value_device(
 			(prevents "useless" code elimination ?)
 			*/
 
-			//#pragma omp task
+			// #pragma omp task
 			{
 
 				// Compute addresses of subarrays from ipoint
@@ -721,7 +722,6 @@ qmckl_exit_code qmckl_compute_ao_value_device(
 	return QMCKL_SUCCESS;
 }
 
-
 //**********
 // COMPUTE
 //**********
@@ -772,15 +772,15 @@ qmckl_exit_code qmckl_provide_ao_basis_ao_value_device(qmckl_context context) {
 			int point_num = ctx->point.num;
 			int ao_num = ctx->ao_basis.ao_num;
 
-			#pragma omp target is_device_ptr(v, vgl)
+#pragma omp target is_device_ptr(v, vgl)
 			{
-			for (int i = 0; i < point_num; ++i) {
-				for (int k = 0; k < ao_num; ++k) {
-					v[k] = vgl[k];
+				for (int i = 0; i < point_num; ++i) {
+					for (int k = 0; k < ao_num; ++k) {
+						v[k] = vgl[k];
+					}
+					v += ao_num;
+					vgl += ao_num * 5;
 				}
-				v += ao_num;
-				vgl += ao_num * 5;
-			}
 			}
 
 		} else {

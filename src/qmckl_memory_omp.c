@@ -187,8 +187,8 @@ qmckl_exit_code qmckl_memcpy_D2H(qmckl_context_device context, void *const dest,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_memcpy_D2D(qmckl_context_device context, void *const dest,
-								 void *const src, size_t size) {
+qmckl_exit_code qmckl_memcpy_D2D(qmckl_context_device context, void *dest,
+								 void *src, size_t size) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,

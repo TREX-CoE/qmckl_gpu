@@ -24,8 +24,8 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	cutoff = 27.631021115928547; //-dlog(1.d-12)
 
 #pragma acc data deviceptr(nucleus_shell_num, nucleus_index, nucleus_range,    \
-						   shell_prim_index, shell_prim_num, coord,            \
-						   nucl_coord, expo, coef_normalized, shell_vgl)
+							   shell_prim_index, shell_prim_num, coord,        \
+							   nucl_coord, expo, coef_normalized, shell_vgl)
 	{
 
 #pragma acc parallel loop gang worker vector collapse(2)
@@ -171,7 +171,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 	int k = 1;
 #pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
-						   ao_index, lstart)
+							   ao_index, lstart)
 	{
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
 			int ishell_start = nucleus_index[inucl];
@@ -187,9 +187,9 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	}
 
 #pragma acc data deviceptr(                                                    \
-	ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,           \
-	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
-	pows_shared, shell_ang_mom, nucleus_range)
+		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
+			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
+			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 	{
 #pragma acc parallel loop gang worker vector
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {

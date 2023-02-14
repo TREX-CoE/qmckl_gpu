@@ -7,42 +7,48 @@
 /* mo_vgl */
 
 qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
-	qmckl_context context, int64_t ao_num, int64_t mo_num,
-	int64_t point_num, double *restrict coefficient_t,
-	double *restrict ao_vgl, double *restrict mo_vgl) {
+	qmckl_context context, int64_t ao_num, int64_t mo_num, int64_t point_num,
+	double *restrict coefficient_t, double *restrict ao_vgl,
+	double *restrict mo_vgl) {
+
 	assert(context != QMCKL_NULL_CONTEXT);
 
 #pragma omp target is_device_ptr(coefficient_t, ao_vgl, mo_vgl)
 	{
-		#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for simd
 		for (int64_t j = 0; j < point_num; ++j) {
 
 			// Set j subarray to 0
-			for(int k=0; k<5; ++k) {
-				for(int l=0; l<mo_num; l++) {
-					mo_vgl[l + mo_num*k + mo_num*5*j] = 0.;
+			for (int k = 0; k < 5; ++k) {
+				for (int l = 0; l < mo_num; l++) {
+					mo_vgl[l + mo_num * k + mo_num * 5 * j] = 0.;
 				}
 			}
 
-			for(int64_t k=0; k<ao_num; k++) {
-				if(ao_vgl[k + ao_num*5*j] != 0.) {
-					double c1 = ao_vgl[k + ao_num*0 + ao_num*5*j];
-					double c2 = ao_vgl[k + ao_num*1 + ao_num*5*j];
-					double c3 = ao_vgl[k + ao_num*2 + ao_num*5*j];
-					double c4 = ao_vgl[k + ao_num*3 + ao_num*5*j];
-					double c5 = ao_vgl[k + ao_num*4 + ao_num*5*j];
+			for (int64_t k = 0; k < ao_num; k++) {
+				if (ao_vgl[k + ao_num * 5 * j] != 0.) {
+					double c1 = ao_vgl[k + ao_num * 0 + ao_num * 5 * j];
+					double c2 = ao_vgl[k + ao_num * 1 + ao_num * 5 * j];
+					double c3 = ao_vgl[k + ao_num * 2 + ao_num * 5 * j];
+					double c4 = ao_vgl[k + ao_num * 3 + ao_num * 5 * j];
+					double c5 = ao_vgl[k + ao_num * 4 + ao_num * 5 * j];
 
-					for(int i=0; i<mo_num; i++) {
-						mo_vgl[i + mo_num*0 + mo_num*5*j] =
-							mo_vgl[i + mo_num*0 + mo_num*5*j] + coefficient_t[i + mo_num*k] * c1;
-						mo_vgl[i + mo_num*1 + mo_num*5*j] =
-							mo_vgl[i + mo_num*1 + mo_num*5*j] + coefficient_t[i + mo_num*k] * c2;
-						mo_vgl[i + mo_num*2 + mo_num*5*j] =
-							mo_vgl[i + mo_num*2 + mo_num*5*j] + coefficient_t[i + mo_num*k] * c3;
-						mo_vgl[i + mo_num*3 + mo_num*5*j] =
-							mo_vgl[i + mo_num*3 + mo_num*5*j] + coefficient_t[i + mo_num*k] * c4;
-						mo_vgl[i + mo_num*4 + mo_num*5*j] =
-							mo_vgl[i + mo_num*4 + mo_num*5*j] + coefficient_t[i + mo_num*k] * c5;
+					for (int i = 0; i < mo_num; i++) {
+						mo_vgl[i + mo_num * 0 + mo_num * 5 * j] =
+							mo_vgl[i + mo_num * 0 + mo_num * 5 * j] +
+							coefficient_t[i + mo_num * k] * c1;
+						mo_vgl[i + mo_num * 1 + mo_num * 5 * j] =
+							mo_vgl[i + mo_num * 1 + mo_num * 5 * j] +
+							coefficient_t[i + mo_num * k] * c2;
+						mo_vgl[i + mo_num * 2 + mo_num * 5 * j] =
+							mo_vgl[i + mo_num * 2 + mo_num * 5 * j] +
+							coefficient_t[i + mo_num * k] * c3;
+						mo_vgl[i + mo_num * 3 + mo_num * 5 * j] =
+							mo_vgl[i + mo_num * 3 + mo_num * 5 * j] +
+							coefficient_t[i + mo_num * k] * c4;
+						mo_vgl[i + mo_num * 4 + mo_num * 5 * j] =
+							mo_vgl[i + mo_num * 4 + mo_num * 5 * j] +
+							coefficient_t[i + mo_num * k] * c5;
 					}
 				}
 			}
@@ -53,13 +59,12 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 	return QMCKL_SUCCESS;
 }
 
-
 /* mo_value */
 
 qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
-	qmckl_context context, int64_t ao_num, int64_t mo_num,
-	int64_t point_num, double *restrict coefficient_t,
-	double *restrict ao_value, double *restrict mo_value) {
+	qmckl_context context, int64_t ao_num, int64_t mo_num, int64_t point_num,
+	double *restrict coefficient_t, double *restrict ao_value,
+	double *restrict mo_value) {
 	assert(context != QMCKL_NULL_CONTEXT);
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
@@ -71,9 +76,9 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 	int64_t *idx_shared = qmckl_malloc_device(context, mem_info);
 
 #pragma omp target is_device_ptr(coefficient_t, ao_value, mo_value,            \
-								 idx_shared, av1_shared)
+									 idx_shared, av1_shared)
 	{
-		#pragma omp teams distribute parallel for
+#pragma omp teams distribute parallel for
 		for (int64_t ipoint = 0; ipoint < point_num; ++ipoint) {
 
 			double *av1 = av1_shared + ipoint * ao_num;
@@ -81,7 +86,6 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 
 			double *vgl1 = mo_value + ipoint * mo_num;
 			double *avgl1 = ao_value + ipoint * ao_num;
-
 
 			for (int64_t i = 0; i < mo_num; ++i) {
 				vgl1[i] = 0.;
@@ -100,12 +104,9 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 
 			for (n = 0; n < nidx - 4; n += 4) {
 				double *restrict ck1 = coefficient_t + idx[n] * mo_num;
-				double *restrict ck2 =
-					coefficient_t + idx[n + 1] * mo_num;
-				double *restrict ck3 =
-					coefficient_t + idx[n + 2] * mo_num;
-				double *restrict ck4 =
-					coefficient_t + idx[n + 3] * mo_num;
+				double *restrict ck2 = coefficient_t + idx[n + 1] * mo_num;
+				double *restrict ck3 = coefficient_t + idx[n + 2] * mo_num;
+				double *restrict ck4 = coefficient_t + idx[n + 3] * mo_num;
 
 				double a11 = av1[n];
 				double a21 = av1[n + 1];

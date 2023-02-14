@@ -9,7 +9,7 @@
 #include <openacc.h>
 
 #include "chbrclf.h"
-//#include "../qmckl/src/qmckl_ao_private_func.h"
+// #include "../qmckl/src/qmckl_ao_private_func.h"
 #include "../include/qmckl_gpu.h"
 
 #define AO_VGL_ID(x, y, z) 5 * ao_num *x + ao_num *y + z

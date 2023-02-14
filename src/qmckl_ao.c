@@ -137,7 +137,6 @@ qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context) {
 	return QMCKL_SUCCESS;
 }
 
-
 //**********
 // GET
 //**********

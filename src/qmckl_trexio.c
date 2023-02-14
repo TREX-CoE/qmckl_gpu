@@ -14,8 +14,7 @@ qmckl_exit_code qmckl_set_electron_num_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_set_electron_coord_device(qmckl_context context,
-												char transp,
-												int64_t walk_num,
+												char transp, int64_t walk_num,
 												double *coord,
 												int64_t size_max) {
 
@@ -276,10 +275,8 @@ qmckl_exit_code qmckl_set_ao_basis_ao_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_set_ao_basis_nucleus_index_device(qmckl_context_device context,
-										int64_t *nucleus_index,
-										int64_t size_max) {
+qmckl_exit_code qmckl_set_ao_basis_nucleus_index_device(
+	qmckl_context_device context, int64_t *nucleus_index, int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_nucleus_index_device", NULL);
@@ -403,10 +400,8 @@ qmckl_set_ao_basis_nucleus_shell_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_set_ao_basis_shell_ang_mom_device(qmckl_context_device context,
-										int32_t *shell_ang_mom,
-										int64_t size_max) {
+qmckl_exit_code qmckl_set_ao_basis_shell_ang_mom_device(
+	qmckl_context_device context, int32_t *shell_ang_mom, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
@@ -466,10 +461,8 @@ qmckl_set_ao_basis_shell_ang_mom_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_set_ao_basis_shell_prim_num_device(qmckl_context_device context,
-										 int64_t *shell_prim_num,
-										 int64_t size_max) {
+qmckl_exit_code qmckl_set_ao_basis_shell_prim_num_device(
+	qmckl_context_device context, int64_t *shell_prim_num, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(
@@ -530,10 +523,8 @@ qmckl_set_ao_basis_shell_prim_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_set_ao_basis_shell_prim_index_device(qmckl_context_device context,
-										   int64_t *shell_prim_index,
-										   int64_t size_max) {
+qmckl_exit_code qmckl_set_ao_basis_shell_prim_index_device(
+	qmckl_context_device context, int64_t *shell_prim_index, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
@@ -597,8 +588,7 @@ qmckl_set_ao_basis_shell_prim_index_device(qmckl_context_device context,
 
 qmckl_exit_code
 qmckl_set_ao_basis_shell_factor_device(qmckl_context_device context,
-									   double *shell_factor,
-									   int64_t size_max) {
+									   double *shell_factor, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
@@ -719,8 +709,7 @@ qmckl_exit_code qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
 
 qmckl_exit_code
 qmckl_set_ao_basis_coefficient_device(qmckl_context_device context,
-									  double *coefficient,
-									  int64_t size_max) {
+									  double *coefficient, int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_coefficient_device", NULL);
@@ -844,8 +833,7 @@ qmckl_exit_code qmckl_set_ao_basis_prim_factor_device(qmckl_context context,
 
 qmckl_exit_code
 qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
-									double *ao_factor,
-									int64_t size_max) {
+									double *ao_factor, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
@@ -904,9 +892,8 @@ qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_ao_num_device(qmckl_context_device context,
-								 int64_t *ao_num) {
+qmckl_exit_code qmckl_get_ao_basis_ao_num_device(qmckl_context_device context,
+												 int64_t *ao_num) {
 	return qmckl_get_ao_basis_ao_num((qmckl_context)context, ao_num);
 }
 
@@ -916,15 +903,13 @@ qmckl_get_ao_basis_shell_num_device(qmckl_context_device context,
 	return qmckl_get_ao_basis_shell_num((qmckl_context)context, ao_num);
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_prim_num_device(qmckl_context_device context,
-								   int64_t *prim_num) {
+qmckl_exit_code qmckl_get_ao_basis_prim_num_device(qmckl_context_device context,
+												   int64_t *prim_num) {
 	return qmckl_get_ao_basis_prim_num((qmckl_context)context, prim_num);
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_type_device(qmckl_context_device context,
-							   char *type) {
+qmckl_exit_code qmckl_get_ao_basis_type_device(qmckl_context_device context,
+											   char *type) {
 	return qmckl_get_ao_basis_type((qmckl_context)context, type);
 }
 
@@ -969,10 +954,8 @@ qmckl_get_ao_basis_nucleus_shell_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_nucleus_index_device(qmckl_context_device context,
-										int64_t *nucleus_index,
-										int64_t size_max) {
+qmckl_exit_code qmckl_get_ao_basis_nucleus_index_device(
+	qmckl_context_device context, int64_t *nucleus_index, int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_get_ao_basis_nucleus_index", NULL);
@@ -1006,10 +989,8 @@ qmckl_get_ao_basis_nucleus_index_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_shell_ang_mom_device(qmckl_context_device context,
-										int32_t *shell_ang_mom,
-										int64_t size_max) {
+qmckl_exit_code qmckl_get_ao_basis_shell_ang_mom_device(
+	qmckl_context_device context, int32_t *shell_ang_mom, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
@@ -1046,8 +1027,7 @@ qmckl_get_ao_basis_shell_ang_mom_device(qmckl_context_device context,
 
 qmckl_exit_code
 qmckl_get_ao_basis_shell_factor_device(qmckl_context_device context,
-									   double *shell_factor,
-									   int64_t size_max) {
+									   double *shell_factor, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
@@ -1082,10 +1062,8 @@ qmckl_get_ao_basis_shell_factor_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_shell_prim_num_device(qmckl_context_device context,
-										 double *shell_prim_num,
-										 int64_t size_max) {
+qmckl_exit_code qmckl_get_ao_basis_shell_prim_num_device(
+	qmckl_context_device context, double *shell_prim_num, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
@@ -1120,10 +1098,8 @@ qmckl_get_ao_basis_shell_prim_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_shell_prim_index_device(qmckl_context_device context,
-										   int64_t *shell_prim_index,
-										   int64_t size_max) {
+qmckl_exit_code qmckl_get_ao_basis_shell_prim_index_device(
+	qmckl_context_device context, int64_t *shell_prim_index, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
@@ -1160,9 +1136,9 @@ qmckl_get_ao_basis_shell_prim_index_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_exponent_device(qmckl_context_device context,
-								   double *exponent, int64_t size_max) {
+qmckl_exit_code qmckl_get_ao_basis_exponent_device(qmckl_context_device context,
+												   double *exponent,
+												   int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_get_ao_basis_exponent_device", NULL);
@@ -1198,8 +1174,7 @@ qmckl_get_ao_basis_exponent_device(qmckl_context_device context,
 
 qmckl_exit_code
 qmckl_get_ao_basis_coefficient_device(qmckl_context_device context,
-									  double *coefficient,
-									  int64_t size_max) {
+									  double *coefficient, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
@@ -1235,8 +1210,7 @@ qmckl_get_ao_basis_coefficient_device(qmckl_context_device context,
 
 qmckl_exit_code
 qmckl_get_ao_basis_prim_factor_device(qmckl_context_device context,
-									  double *prim_factor,
-									  int64_t size_max) {
+									  double *prim_factor, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
@@ -1346,9 +1320,8 @@ qmckl_exit_code qmckl_set_mo_basis_mo_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_set_mo_basis_coefficient_device(qmckl_context context,
-									  double *coefficient) {
+qmckl_exit_code qmckl_set_mo_basis_coefficient_device(qmckl_context context,
+													  double *coefficient) {
 
 	int32_t mask = 1 << 1;
 
@@ -2324,8 +2297,7 @@ qmckl_exit_code qmckl_trexio_read_mo_X_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_trexio_read_device(qmckl_context_device context,
-										 char *file_name,
-										 int64_t size_max) {
+										 char *file_name, int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return false;
 	}
