@@ -8,50 +8,26 @@
 //**********
 
 qmckl_exit_code qmckl_set_electron_num_device(qmckl_context_device context,
-											  const int64_t up_num,
-											  const int64_t down_num) {
+											  int64_t up_num,
+											  int64_t down_num) {
 	return qmckl_set_electron_num((qmckl_context)context, up_num, down_num);
 }
 
 qmckl_exit_code qmckl_set_electron_coord_device(qmckl_context context,
-												const char transp,
-												const int64_t walk_num,
-												const double *coord,
-												const int64_t size_max) {
+												char transp, int64_t walk_num,
+												double *coord,
+												int64_t size_max) {
 
-	const size_t device_id = qmckl_get_device_id(context);
+	size_t device_id = qmckl_get_device_id(context);
 	int32_t mask = 0; // coord can be changed
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return QMCKL_NULL_CONTEXT;
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
-	if (mask != 0 && !(ctx->electron.uninitialized & mask)) {
-		return qmckl_failwith(context, QMCKL_ALREADY_SET,
-							  "qmckl_set_electron_*", NULL);
-	}
-
-	if (transp != 'N' && transp != 'T') {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_2,
-							  "qmckl_set_electron_coord_device",
-							  "transp should be 'N' or 'T'");
-	}
-
-	if (walk_num <= 0) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_3,
-							  "qmckl_set_electron_coord_device",
-							  "walk_num <= 0");
-	}
-
-	if (coord == NULL) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_3,
-							  "qmckl_set_electron_coord_device",
-							  "coord is a null pointer");
-	}
-
-	const int64_t elec_num = ctx->electron.num;
+	int64_t elec_num = ctx->electron.num;
 
 	if (elec_num == 0L) {
 		return qmckl_failwith(context, QMCKL_FAILURE,
@@ -85,18 +61,18 @@ qmckl_exit_code qmckl_set_electron_coord_device(qmckl_context context,
 //**********
 
 qmckl_exit_code qmckl_set_nucleus_num_device(qmckl_context_device context,
-											 const int64_t num) {
+											 int64_t num) {
 	return qmckl_set_nucleus_num((qmckl_context)context, num);
 }
 
-qmckl_exit_code qmckl_get_nucleus_num_device(const qmckl_context_device context,
-											 int64_t *const num) {
+qmckl_exit_code qmckl_get_nucleus_num_device(qmckl_context_device context,
+											 int64_t *num) {
 	return qmckl_get_nucleus_num((qmckl_context)context, num);
 }
 
 qmckl_exit_code qmckl_set_nucleus_charge_device(qmckl_context_device context,
-												const double *charge,
-												const int64_t size_max) {
+												double *charge,
+												int64_t size_max) {
 
 	int32_t mask = 1 << 1;
 
@@ -105,7 +81,7 @@ qmckl_exit_code qmckl_set_nucleus_charge_device(qmckl_context_device context,
 							  "qmckl_set_nucleus_charge_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	if (charge == NULL) {
 		return qmckl_failwith(context, QMCKL_INVALID_ARG_2,
@@ -147,13 +123,13 @@ qmckl_exit_code qmckl_set_nucleus_charge_device(qmckl_context_device context,
 //**********
 
 qmckl_exit_code qmckl_set_ao_basis_type_device(qmckl_context_device context,
-											   const char basis_type) {
+											   char basis_type) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_type_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	if (basis_type != 'G' && basis_type != 'S') {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_2,
@@ -177,12 +153,12 @@ qmckl_exit_code qmckl_set_ao_basis_type_device(qmckl_context_device context,
 
 qmckl_exit_code
 qmckl_set_ao_basis_shell_num_device(qmckl_context_device context,
-									const int64_t shell_num) {
+									int64_t shell_num) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_shell_num_device", NULL);
 	}
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	if (shell_num <= 0) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_2,
@@ -190,7 +166,7 @@ qmckl_set_ao_basis_shell_num_device(qmckl_context_device context,
 							  "shell_num <= 0");
 	}
 
-	const int64_t prim_num = ctx->ao_basis.prim_num;
+	int64_t prim_num = ctx->ao_basis.prim_num;
 
 	if (0L < prim_num && prim_num < shell_num) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_2,
@@ -214,13 +190,13 @@ qmckl_set_ao_basis_shell_num_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_set_ao_basis_prim_num_device(qmckl_context_device context,
-												   const int64_t prim_num) {
+												   int64_t prim_num) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_prim_num_device", NULL);
 	}
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	if (prim_num <= 0) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_2,
@@ -228,7 +204,7 @@ qmckl_exit_code qmckl_set_ao_basis_prim_num_device(qmckl_context_device context,
 							  "prim_num must be positive");
 	}
 
-	const int64_t shell_num = ctx->ao_basis.shell_num;
+	int64_t shell_num = ctx->ao_basis.shell_num;
 
 	if (shell_num <= 0L) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -258,12 +234,12 @@ qmckl_exit_code qmckl_set_ao_basis_prim_num_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_set_ao_basis_ao_num_device(qmckl_context_device context,
-												 const int64_t ao_num) {
+												 int64_t ao_num) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_ao_num_device", NULL);
 	}
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	if (ao_num <= 0) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_2,
@@ -271,7 +247,7 @@ qmckl_exit_code qmckl_set_ao_basis_ao_num_device(qmckl_context_device context,
 							  "ao_num must be positive");
 	}
 
-	const int64_t shell_num = ctx->ao_basis.shell_num;
+	int64_t shell_num = ctx->ao_basis.shell_num;
 	if (shell_num <= 0L) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_2,
 							  "qmckl_set_ao_basis_shell_num_device",
@@ -299,21 +275,19 @@ qmckl_exit_code qmckl_set_ao_basis_ao_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_set_ao_basis_nucleus_index_device(qmckl_context_device context,
-										const int64_t *nucleus_index,
-										const int64_t size_max) {
+qmckl_exit_code qmckl_set_ao_basis_nucleus_index_device(
+	qmckl_context_device context, int64_t *nucleus_index, int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_nucleus_index_device", NULL);
 	}
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
 
 	int32_t mask = 1 << 4;
 
-	const int64_t nucl_num = ctx->nucleus.num;
+	int64_t nucl_num = ctx->nucleus.num;
 
 	if (nucl_num <= 0L) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -363,21 +337,21 @@ qmckl_set_ao_basis_nucleus_index_device(qmckl_context_device context,
 
 qmckl_exit_code
 qmckl_set_ao_basis_nucleus_shell_num_device(qmckl_context_device context,
-											const int64_t *nucleus_shell_num,
-											const int64_t size_max) {
+											int64_t *nucleus_shell_num,
+											int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_nucleus_shell_num_device",
 							  NULL);
 	}
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
 
 	int32_t mask = 1 << 3;
 
-	const int64_t nucl_num = ctx->nucleus.num;
+	int64_t nucl_num = ctx->nucleus.num;
 
 	if (nucl_num <= 0L) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -426,22 +400,20 @@ qmckl_set_ao_basis_nucleus_shell_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_set_ao_basis_shell_ang_mom_device(qmckl_context_device context,
-										const int32_t *shell_ang_mom,
-										const int64_t size_max) {
+qmckl_exit_code qmckl_set_ao_basis_shell_ang_mom_device(
+	qmckl_context_device context, int32_t *shell_ang_mom, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_shell_ang_mom_device", NULL);
 	}
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
 
 	int32_t mask = 1 << 5;
 
-	const int64_t shell_num = ctx->ao_basis.shell_num;
+	int64_t shell_num = ctx->ao_basis.shell_num;
 
 	if (shell_num == 0L) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -489,23 +461,21 @@ qmckl_set_ao_basis_shell_ang_mom_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_set_ao_basis_shell_prim_num_device(qmckl_context_device context,
-										 const int64_t *shell_prim_num,
-										 const int64_t size_max) {
+qmckl_exit_code qmckl_set_ao_basis_shell_prim_num_device(
+	qmckl_context_device context, int64_t *shell_prim_num, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(
 			(qmckl_context)context, QMCKL_INVALID_CONTEXT,
 			"qmckl_set_ao_basis_nucleus_shell_prim_num_device", NULL);
 	}
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
 
 	int32_t mask = 1 << 6;
 
-	const int64_t shell_num = ctx->ao_basis.shell_num;
+	int64_t shell_num = ctx->ao_basis.shell_num;
 
 	if (shell_num <= 0L) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -553,23 +523,21 @@ qmckl_set_ao_basis_shell_prim_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_set_ao_basis_shell_prim_index_device(qmckl_context_device context,
-										   const int64_t *shell_prim_index,
-										   const int64_t size_max) {
+qmckl_exit_code qmckl_set_ao_basis_shell_prim_index_device(
+	qmckl_context_device context, int64_t *shell_prim_index, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_shell_prim_index_device",
 							  NULL);
 	}
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
 
 	int32_t mask = 1 << 7;
 
-	const int64_t shell_num = ctx->ao_basis.shell_num;
+	int64_t shell_num = ctx->ao_basis.shell_num;
 
 	if (shell_num <= 0L) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -620,20 +588,19 @@ qmckl_set_ao_basis_shell_prim_index_device(qmckl_context_device context,
 
 qmckl_exit_code
 qmckl_set_ao_basis_shell_factor_device(qmckl_context_device context,
-									   const double *shell_factor,
-									   const int64_t size_max) {
+									   double *shell_factor, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_shell_factor_device", NULL);
 	}
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
 
 	int32_t mask = 1 << 8;
 
-	const int64_t shell_num = ctx->ao_basis.shell_num;
+	int64_t shell_num = ctx->ao_basis.shell_num;
 
 	if (shell_num <= 0L) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -682,19 +649,19 @@ qmckl_set_ao_basis_shell_factor_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
-												   const double *exponent,
-												   const int64_t size_max) {
+												   double *exponent,
+												   int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_exponent_device", NULL);
 	}
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
 
 	int32_t mask = 1 << 9;
 
-	const int64_t prim_num = ctx->ao_basis.prim_num;
+	int64_t prim_num = ctx->ao_basis.prim_num;
 
 	if (prim_num <= 0L) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -742,19 +709,18 @@ qmckl_exit_code qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
 
 qmckl_exit_code
 qmckl_set_ao_basis_coefficient_device(qmckl_context_device context,
-									  const double *coefficient,
-									  const int64_t size_max) {
+									  double *coefficient, int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_coefficient_device", NULL);
 	}
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
 
 	int32_t mask = 1 << 10;
 
-	const int64_t prim_num = ctx->ao_basis.prim_num;
+	int64_t prim_num = ctx->ao_basis.prim_num;
 
 	if (prim_num <= 0L) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -803,13 +769,13 @@ qmckl_set_ao_basis_coefficient_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_set_ao_basis_prim_factor_device(qmckl_context context,
-													  const double *prim_factor,
-													  const int64_t size_max) {
+													  double *prim_factor,
+													  int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_prim_factor_device", NULL);
 	}
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
 
@@ -817,7 +783,7 @@ qmckl_exit_code qmckl_set_ao_basis_prim_factor_device(qmckl_context context,
 
 	int32_t mask = 1 << 11;
 
-	const int64_t prim_num = ctx->ao_basis.prim_num;
+	int64_t prim_num = ctx->ao_basis.prim_num;
 
 	if (prim_num <= 0L) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -867,20 +833,19 @@ qmckl_exit_code qmckl_set_ao_basis_prim_factor_device(qmckl_context context,
 
 qmckl_exit_code
 qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
-									const double *ao_factor,
-									const int64_t size_max) {
+									double *ao_factor, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_set_ao_basis_prim_factor_device", NULL);
 	}
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
 
 	int32_t mask = 1 << 13;
 
-	const int64_t ao_num = ctx->ao_basis.ao_num;
+	int64_t ao_num = ctx->ao_basis.ao_num;
 
 	if (ao_num <= 0L) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_FAILURE,
@@ -927,33 +892,30 @@ qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_ao_num_device(const qmckl_context_device context,
-								 int64_t *const ao_num) {
+qmckl_exit_code qmckl_get_ao_basis_ao_num_device(qmckl_context_device context,
+												 int64_t *ao_num) {
 	return qmckl_get_ao_basis_ao_num((qmckl_context)context, ao_num);
 }
 
 qmckl_exit_code
-qmckl_get_ao_basis_shell_num_device(const qmckl_context_device context,
-									int64_t *const ao_num) {
+qmckl_get_ao_basis_shell_num_device(qmckl_context_device context,
+									int64_t *ao_num) {
 	return qmckl_get_ao_basis_shell_num((qmckl_context)context, ao_num);
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_prim_num_device(const qmckl_context_device context,
-								   int64_t *const prim_num) {
+qmckl_exit_code qmckl_get_ao_basis_prim_num_device(qmckl_context_device context,
+												   int64_t *prim_num) {
 	return qmckl_get_ao_basis_prim_num((qmckl_context)context, prim_num);
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_type_device(const qmckl_context_device context,
-							   char *const type) {
+qmckl_exit_code qmckl_get_ao_basis_type_device(qmckl_context_device context,
+											   char *type) {
 	return qmckl_get_ao_basis_type((qmckl_context)context, type);
 }
 
 qmckl_exit_code
-qmckl_get_ao_basis_nucleus_shell_num_device(const qmckl_context_device context,
-											int64_t *const nucleus_shell_num,
+qmckl_get_ao_basis_nucleus_shell_num_device(qmckl_context_device context,
+											int64_t *nucleus_shell_num,
 											int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
@@ -962,7 +924,7 @@ qmckl_get_ao_basis_nucleus_shell_num_device(const qmckl_context_device context,
 							  NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	int32_t mask = 1 << 3;
@@ -992,16 +954,14 @@ qmckl_get_ao_basis_nucleus_shell_num_device(const qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_nucleus_index_device(const qmckl_context_device context,
-										int64_t *const nucleus_index,
-										int64_t size_max) {
+qmckl_exit_code qmckl_get_ao_basis_nucleus_index_device(
+	qmckl_context_device context, int64_t *nucleus_index, int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_get_ao_basis_nucleus_index", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	int32_t mask = 1 << 4;
@@ -1029,17 +989,15 @@ qmckl_get_ao_basis_nucleus_index_device(const qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_shell_ang_mom_device(const qmckl_context_device context,
-										double *const shell_ang_mom,
-										int64_t size_max) {
+qmckl_exit_code qmckl_get_ao_basis_shell_ang_mom_device(
+	qmckl_context_device context, int32_t *shell_ang_mom, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_get_ao_basis_shell_ang_mom_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	int32_t mask = 1 << 5;
@@ -1068,16 +1026,15 @@ qmckl_get_ao_basis_shell_ang_mom_device(const qmckl_context_device context,
 }
 
 qmckl_exit_code
-qmckl_get_ao_basis_shell_factor_device(const qmckl_context_device context,
-									   int32_t *const shell_factor,
-									   int64_t size_max) {
+qmckl_get_ao_basis_shell_factor_device(qmckl_context_device context,
+									   double *shell_factor, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_get_ao_basis_shell_factor_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	int32_t mask = 1 << 8;
@@ -1105,17 +1062,15 @@ qmckl_get_ao_basis_shell_factor_device(const qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_shell_prim_num_device(const qmckl_context_device context,
-										 double *const shell_prim_num,
-										 int64_t size_max) {
+qmckl_exit_code qmckl_get_ao_basis_shell_prim_num_device(
+	qmckl_context_device context, double *shell_prim_num, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_get_ao_basis_shell_prim_num_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	int32_t mask = 1 << 6;
@@ -1143,10 +1098,8 @@ qmckl_get_ao_basis_shell_prim_num_device(const qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_shell_prim_index_device(const qmckl_context_device context,
-										   int64_t *const shell_prim_index,
-										   int64_t size_max) {
+qmckl_exit_code qmckl_get_ao_basis_shell_prim_index_device(
+	qmckl_context_device context, int64_t *shell_prim_index, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
@@ -1154,7 +1107,7 @@ qmckl_get_ao_basis_shell_prim_index_device(const qmckl_context_device context,
 							  NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	int32_t mask = 1 << 7;
@@ -1183,15 +1136,15 @@ qmckl_get_ao_basis_shell_prim_index_device(const qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_get_ao_basis_exponent_device(const qmckl_context_device context,
-								   double *const exponent, int64_t size_max) {
+qmckl_exit_code qmckl_get_ao_basis_exponent_device(qmckl_context_device context,
+												   double *exponent,
+												   int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_get_ao_basis_exponent_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	int32_t mask = 1 << 9;
@@ -1220,16 +1173,15 @@ qmckl_get_ao_basis_exponent_device(const qmckl_context_device context,
 }
 
 qmckl_exit_code
-qmckl_get_ao_basis_coefficient_device(const qmckl_context_device context,
-									  double *const coefficient,
-									  int64_t size_max) {
+qmckl_get_ao_basis_coefficient_device(qmckl_context_device context,
+									  double *coefficient, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_get_ao_basis_coefficient_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	int32_t mask = 1 << 10;
@@ -1257,16 +1209,15 @@ qmckl_get_ao_basis_coefficient_device(const qmckl_context_device context,
 }
 
 qmckl_exit_code
-qmckl_get_ao_basis_prim_factor_device(const qmckl_context_device context,
-									  double *const prim_factor,
-									  int64_t size_max) {
+qmckl_get_ao_basis_prim_factor_device(qmckl_context_device context,
+									  double *prim_factor, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_get_ao_basis_prim_factor_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	int32_t mask = 1 << 11;
@@ -1295,14 +1246,14 @@ qmckl_get_ao_basis_prim_factor_device(const qmckl_context_device context,
 }
 
 qmckl_exit_code
-qmckl_get_ao_basis_ao_factor_device(const qmckl_context_device context,
-									double *const ao_factor, int64_t size_max) {
+qmckl_get_ao_basis_ao_factor_device(qmckl_context_device context,
+									double *ao_factor, int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_get_ao_basis_ao_factor_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	int32_t mask = 1 << 13;
@@ -1335,7 +1286,7 @@ qmckl_get_ao_basis_ao_factor_device(const qmckl_context_device context,
 //**********
 
 qmckl_exit_code qmckl_set_mo_basis_mo_num_device(qmckl_context_device context,
-												 const int64_t mo_num) {
+												 int64_t mo_num) {
 
 	int32_t mask = 1;
 
@@ -1343,7 +1294,7 @@ qmckl_exit_code qmckl_set_mo_basis_mo_num_device(qmckl_context_device context,
 		return QMCKL_NULL_CONTEXT;
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	if (mask != 0 && !(ctx->mo_basis.uninitialized & mask)) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALREADY_SET,
@@ -1369,9 +1320,8 @@ qmckl_exit_code qmckl_set_mo_basis_mo_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code
-qmckl_set_mo_basis_coefficient_device(qmckl_context context,
-									  const double *coefficient) {
+qmckl_exit_code qmckl_set_mo_basis_coefficient_device(qmckl_context context,
+													  double *coefficient) {
 
 	int32_t mask = 1 << 1;
 
@@ -1379,7 +1329,7 @@ qmckl_set_mo_basis_coefficient_device(qmckl_context context,
 		return QMCKL_NULL_CONTEXT;
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
 
@@ -1428,7 +1378,7 @@ qmckl_set_mo_basis_coefficient_device(qmckl_context context,
 
 qmckl_exit_code
 qmckl_trexio_read_electron_X_device(qmckl_context_device context,
-									trexio_t *const file) {
+									trexio_t *file) {
 
 	assert(context != (qmckl_context_device)0);
 	assert(file != NULL);
@@ -1462,7 +1412,7 @@ qmckl_trexio_read_electron_X_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
-												   trexio_t *const file) {
+												   trexio_t *file) {
 	assert(context != (qmckl_context)0);
 	assert(file != NULL);
 
@@ -1559,7 +1509,7 @@ qmckl_exit_code qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
-											  trexio_t *const file) {
+											  trexio_t *file) {
 	assert(context != (qmckl_context)0);
 	assert(file != NULL);
 
@@ -1702,7 +1652,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		}
 
 		for (int i = shell_num - 1; i >= 0; --i) {
-			const int k = tmp_array[i];
+			int k = tmp_array[i];
 			if (k < 0 || k >= nucleus_num) {
 				qmckl_free_host(context, tmp_array);
 				tmp_array = NULL;
@@ -1795,7 +1745,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		}
 
 		for (int i = 0; i < shell_num; ++i) {
-			const int k = tmp_array[i];
+			int k = tmp_array[i];
 			if (k < 0 || k >= nucleus_num) {
 				qmckl_free_host(context, tmp_array);
 				tmp_array = NULL;
@@ -1937,7 +1887,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		}
 
 		for (int i = 0; i < prim_num; ++i) {
-			const int k = tmp_array[i];
+			int k = tmp_array[i];
 			if (k < 0 || k >= shell_num) {
 				qmckl_free_host(context, tmp_array);
 				qmckl_free_host(context, shell_prim_num_h);
@@ -2020,7 +1970,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 
 		/* Reformat data */
 		for (int i = prim_num - 1; i >= 0; --i) {
-			const int k = tmp_array[i];
+			int k = tmp_array[i];
 			if (k < 0 || k >= shell_num) {
 				qmckl_free_host(context, tmp_array);
 				tmp_array = NULL;
@@ -2282,7 +2232,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 }
 
 qmckl_exit_code qmckl_trexio_read_mo_X_device(qmckl_context_device context,
-											  trexio_t *const file) {
+											  trexio_t *file) {
 	assert(context != (qmckl_context_device)0);
 	assert(file != NULL);
 
@@ -2346,9 +2296,8 @@ qmckl_exit_code qmckl_trexio_read_mo_X_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
-qmckl_exit_code qmckl_trexio_read_device(const qmckl_context_device context,
-										 const char *file_name,
-										 const int64_t size_max) {
+qmckl_exit_code qmckl_trexio_read_device(qmckl_context_device context,
+										 char *file_name, int64_t size_max) {
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return false;
 	}

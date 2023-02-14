@@ -3,11 +3,14 @@
 ###
 
 
-check_PROGRAMS = test_qmckl_ao #test_qmckl_mo
+check_PROGRAMS = test_qmckl_ao test_qmckl_mo
 
 if HAVE_OMP_DEVICE
   test_qmckl_ao_SOURCES = test_qmckl_ao_omp.c chbrclf.h
   test_qmckl_ao_LDFLAGS = -lm
+
+  test_qmckl_mo_SOURCES = test_qmckl_mo_omp.c chbrclf.h
+  test_qmckl_mo_LDFLAGS = -lm
 endif
 
 if HAVE_ACC_DEVICE
@@ -24,7 +27,7 @@ endif
 ###
 
 test_qmckl_ao_LDADD = ../qmckl/src/libqmckl.la ../libqmckl_gpu.la
-#test_qmckl_mo_LDADD = ../qmckl/src/libqmckl.la ../libqmckl_gpu.la
+test_qmckl_mo_LDADD = ../qmckl/src/libqmckl.la ../libqmckl_gpu.la
 
 ###
 # Run test programs

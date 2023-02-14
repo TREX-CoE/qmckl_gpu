@@ -146,6 +146,10 @@ AS_IF([test "x$have_omp_offload" = "xyes" -o "x$have_omp" = "xyes"], [
 		*nvc*)
 			CFLAGS="$CFLAGS -mp=gpu"
 			;;
+		*clang*)
+			CFLAGS="$CFLAGS -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda"
+			;;
+
 
 		*)
 			echo "Warning : compiler not recognized for OpenMP. Make sure to add necessary offload flags manually."

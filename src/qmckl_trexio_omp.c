@@ -12,11 +12,10 @@
 //**********
 
 qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
-									   const char transp, const int64_t num,
-									   const double *coord,
-									   const int64_t size_max) {
+									   char transp, int64_t num, double *coord,
+									   int64_t size_max) {
 
-	const size_t device_id = qmckl_get_device_id(context);
+	size_t device_id = qmckl_get_device_id(context);
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return QMCKL_NULL_CONTEXT;
 	}
@@ -38,7 +37,7 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 							  "coord is a NULL pointer");
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	qmckl_exit_code rc;
@@ -91,19 +90,18 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 //**********
 
 qmckl_exit_code qmckl_set_nucleus_coord_device(qmckl_context_device context,
-											   const char transp,
-											   const double *coord,
-											   const int64_t size_max) {
+											   char transp, double *coord,
+											   int64_t size_max) {
 	int32_t mask = 1 << 2;
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_NULL_CONTEXT,
 							  "qmckl_set_nucleus_coord_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	qmckl_exit_code rc;
 
-	const int64_t nucl_num = (int64_t)ctx->nucleus.num;
+	int64_t nucl_num = (int64_t)ctx->nucleus.num;
 
 	if (ctx->nucleus.coord.data != NULL) {
 		rc = qmckl_matrix_free_device(context, &(ctx->nucleus.coord));
@@ -153,7 +151,7 @@ qmckl_exit_code qmckl_set_nucleus_coord_device(qmckl_context_device context,
 qmckl_exit_code
 qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
 	int device_id = qmckl_get_device_id(context);
@@ -177,11 +175,9 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 	int64_t *shell_max_ptr = &shell_max;
 	int64_t *prim_max_ptr = &prim_max;
 
-#pragma omp target map(tofrom                                                  \
-					   : shell_max_ptr[:1], prim_max_ptr                       \
-					   [:1])                                                   \
+#pragma omp target map(tofrom : shell_max_ptr[ : 1], prim_max_ptr[ : 1])       \
 	is_device_ptr(nucleus_shell_num, nucleus_index, shell_prim_num,            \
-				  prim_num_per_nucleus)
+					  prim_num_per_nucleus)
 	{
 
 		for (int inucl = 0; inucl < nucl_num; ++inucl) {
@@ -190,8 +186,8 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 								   : shell_max_ptr[0];
 
 			int64_t prim_num = 0;
-			const int64_t ishell_start = nucleus_index[inucl];
-			const int64_t ishell_end =
+			int64_t ishell_start = nucleus_index[inucl];
+			int64_t ishell_end =
 				nucleus_index[inucl] + nucleus_shell_num[inucl];
 			for (int64_t ishell = ishell_start; ishell < ishell_end; ++ishell) {
 				prim_num += shell_prim_num[ishell];
@@ -241,10 +237,10 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 	int coef_per_nucleus_s1 = ctx->ao_basis.coef_per_nucleus.size[1];
 
 #pragma omp target is_device_ptr(                                              \
-	expo_expo, expo_index, coef, newcoef, nucleus_index, shell_prim_index,     \
-	nucleus_shell_num, exponent, coefficient_normalized, shell_prim_num,       \
-	expo_per_nucleus_data, coef_per_nucleus_data, prim_num_per_nucleus,        \
-	newidx)
+		expo_expo, expo_index, coef, newcoef, nucleus_index, shell_prim_index, \
+			nucleus_shell_num, exponent, coefficient_normalized,               \
+			shell_prim_num, expo_per_nucleus_data, coef_per_nucleus_data,      \
+			prim_num_per_nucleus, newidx)
 	{
 
 		for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
@@ -257,14 +253,14 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 			}
 
 			int64_t idx = 0;
-			const int64_t ishell_start = nucleus_index[inucl];
-			const int64_t ishell_end =
+			int64_t ishell_start = nucleus_index[inucl];
+			int64_t ishell_end =
 				nucleus_index[inucl] + nucleus_shell_num[inucl];
 
 			for (int64_t ishell = ishell_start; ishell < ishell_end; ++ishell) {
 
-				const int64_t iprim_start = shell_prim_index[ishell];
-				const int64_t iprim_end =
+				int64_t iprim_start = shell_prim_index[ishell];
+				int64_t iprim_end =
 					shell_prim_index[ishell] + shell_prim_num[ishell];
 				for (int64_t iprim = iprim_start; iprim < iprim_end; ++iprim) {
 					expo_expo[idx] = exponent[iprim];
@@ -301,8 +297,8 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 				for (int i = 0; i < prim_max; i++) {
 					newcoef[i] = 0;
 				}
-				const int64_t iprim_start = shell_prim_index[ishell];
-				const int64_t iprim_end =
+				int64_t iprim_start = shell_prim_index[ishell];
+				int64_t iprim_end =
 					shell_prim_index[ishell] + shell_prim_num[ishell];
 
 				for (int64_t iprim = iprim_start; iprim < iprim_end; ++iprim) {
@@ -383,7 +379,7 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 							  "qmckl_finalize_nucleus_basis_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 	int device_id = qmckl_get_device_id(context);
 
@@ -414,7 +410,7 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 		int prim_num = ctx->ao_basis.prim_num;
 
 #pragma omp target is_device_ptr(nucleus_index, nucleus_prim_index,            \
-								 shell_prim_index)
+									 shell_prim_index)
 		{
 #pragma omp parallel for
 			for (int64_t i = 0; i < nucl_num; ++i) {
@@ -451,8 +447,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 		int shell_num = ctx->ao_basis.shell_num;
 
 #pragma omp target is_device_ptr(shell_prim_index, shell_prim_num,             \
-								 coefficient_normalized, coefficient,          \
-								 prim_factor, shell_factor)
+									 coefficient_normalized, coefficient,      \
+									 prim_factor, shell_factor)
 		{
 			for (int64_t ishell = 0; ishell < shell_num; ++ishell) {
 				for (int64_t iprim = shell_prim_index[ishell];
@@ -487,7 +483,7 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 		int32_t *shell_ang_mom = ctx->ao_basis.shell_ang_mom;
 
 #pragma omp target is_device_ptr(nucleus_max_ang_mom, nucleus_index,           \
-								 nucleus_shell_num, shell_ang_mom)
+									 nucleus_shell_num, shell_ang_mom)
 		{
 #pragma omp parallel for
 			for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
@@ -530,8 +526,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 			int nucleus_num = ctx->nucleus.num;
 
 #pragma omp target is_device_ptr(nucleus_range, nucleus_index,                 \
-								 nucleus_shell_num, shell_prim_index,          \
-								 shell_prim_num, exponent)
+									 nucleus_shell_num, shell_prim_index,      \
+									 shell_prim_num, exponent)
 			{
 				for (int64_t inucl = 0; inucl < nucleus_num; ++inucl) {
 					nucleus_range[inucl] = 0.;
@@ -566,7 +562,7 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 qmckl_exit_code
 qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
 	int device_id = qmckl_get_device_id(context);
@@ -590,11 +586,9 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 	int64_t *shell_max_ptr = &shell_max;
 	int64_t *prim_max_ptr = &prim_max;
 
-#pragma omp target map(tofrom                                                  \
-					   : shell_max_ptr[:1], prim_max_ptr                       \
-					   [:1])                                                   \
+#pragma omp target map(tofrom : shell_max_ptr[ : 1], prim_max_ptr[ : 1])       \
 	is_device_ptr(nucleus_shell_num, nucleus_index, shell_prim_num,            \
-				  prim_num_per_nucleus)
+					  prim_num_per_nucleus)
 	{
 
 		for (int inucl = 0; inucl < nucl_num; ++inucl) {
@@ -603,8 +597,8 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 								   : shell_max_ptr[0];
 
 			int64_t prim_num = 0;
-			const int64_t ishell_start = nucleus_index[inucl];
-			const int64_t ishell_end =
+			int64_t ishell_start = nucleus_index[inucl];
+			int64_t ishell_end =
 				nucleus_index[inucl] + nucleus_shell_num[inucl];
 			for (int64_t ishell = ishell_start; ishell < ishell_end; ++ishell) {
 				prim_num += shell_prim_num[ishell];
@@ -654,10 +648,10 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 	int coef_per_nucleus_s1 = ctx->ao_basis.coef_per_nucleus.size[1];
 
 #pragma omp target is_device_ptr(                                              \
-	expo_expo, expo_index, coef, newcoef, nucleus_index, shell_prim_index,     \
-	nucleus_shell_num, exponent, coefficient_normalized, shell_prim_num,       \
-	expo_per_nucleus_data, coef_per_nucleus_data, prim_num_per_nucleus,        \
-	newidx)
+		expo_expo, expo_index, coef, newcoef, nucleus_index, shell_prim_index, \
+			nucleus_shell_num, exponent, coefficient_normalized,               \
+			shell_prim_num, expo_per_nucleus_data, coef_per_nucleus_data,      \
+			prim_num_per_nucleus, newidx)
 	{
 
 		for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
@@ -670,14 +664,14 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 			}
 
 			int64_t idx = 0;
-			const int64_t ishell_start = nucleus_index[inucl];
-			const int64_t ishell_end =
+			int64_t ishell_start = nucleus_index[inucl];
+			int64_t ishell_end =
 				nucleus_index[inucl] + nucleus_shell_num[inucl];
 
 			for (int64_t ishell = ishell_start; ishell < ishell_end; ++ishell) {
 
-				const int64_t iprim_start = shell_prim_index[ishell];
-				const int64_t iprim_end =
+				int64_t iprim_start = shell_prim_index[ishell];
+				int64_t iprim_end =
 					shell_prim_index[ishell] + shell_prim_num[ishell];
 				for (int64_t iprim = iprim_start; iprim < iprim_end; ++iprim) {
 					expo_expo[idx] = exponent[iprim];
@@ -714,8 +708,8 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 				for (int i = 0; i < prim_max; i++) {
 					newcoef[i] = 0;
 				}
-				const int64_t iprim_start = shell_prim_index[ishell];
-				const int64_t iprim_end =
+				int64_t iprim_start = shell_prim_index[ishell];
+				int64_t iprim_end =
 					shell_prim_index[ishell] + shell_prim_num[ishell];
 
 				for (int64_t iprim = iprim_start; iprim < iprim_end; ++iprim) {
@@ -795,7 +789,7 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 							  "qmckl_finalize_ao_basis_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	int64_t nucl_num = 0;
@@ -823,9 +817,8 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 		int64_t *shell_prim_index = ctx->ao_basis.shell_prim_index;
 
 		int prim_num = ctx->ao_basis.prim_num;
-
 #pragma omp target is_device_ptr(nucleus_index, nucleus_prim_index,            \
-								 shell_prim_index)
+									 shell_prim_index)
 		{
 #pragma omp parallel for
 			for (int64_t i = 0; i < nucl_num; ++i) {
@@ -862,8 +855,8 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 		int shell_num = ctx->ao_basis.shell_num;
 
 #pragma omp target is_device_ptr(shell_prim_index, shell_prim_num,             \
-								 coefficient_normalized, coefficient,          \
-								 prim_factor, shell_factor)
+									 coefficient_normalized, coefficient,      \
+									 prim_factor, shell_factor)
 		{
 			for (int64_t ishell = 0; ishell < shell_num; ++ishell) {
 				for (int64_t iprim = shell_prim_index[ishell];
@@ -898,7 +891,7 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 		int32_t *shell_ang_mom = ctx->ao_basis.shell_ang_mom;
 
 #pragma omp target is_device_ptr(nucleus_max_ang_mom, nucleus_index,           \
-								 nucleus_shell_num, shell_ang_mom)
+									 nucleus_shell_num, shell_ang_mom)
 		{
 #pragma omp parallel for
 			for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
@@ -941,8 +934,8 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 			int nucleus_num = ctx->nucleus.num;
 
 #pragma omp target is_device_ptr(nucleus_range, nucleus_index,                 \
-								 nucleus_shell_num, shell_prim_index,          \
-								 shell_prim_num, exponent)
+									 nucleus_shell_num, shell_prim_index,      \
+									 shell_prim_num, exponent)
 			{
 				for (int64_t inucl = 0; inucl < nucleus_num; ++inucl) {
 					nucleus_range[inucl] = 0.;
@@ -981,7 +974,7 @@ qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context_device context) {
 							  "qmckl_finalize_mo_basis_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
