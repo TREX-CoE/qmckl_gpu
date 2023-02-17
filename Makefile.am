@@ -33,7 +33,7 @@ endif
 # Enable OpenACC-specific device functions
 if HAVE_ACC_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_memory_acc.c \
-  src/qmckl_blas_omp.c src/qmckl_trexio_acc.c \
+  src/qmckl_blas_acc.c src/qmckl_trexio_acc.c \
   src/qmckl_ao_acc.c src/qmckl_mo_acc.c
 endif
 

@@ -1,5 +1,5 @@
 #include "../include/qmckl_blas.h"
-#include <acc.h>
+#include <openacc.h>
 
 // This file provides OpenMP implementations of BLAS functions (mostly
 // initialization and manipulation of vector, matrix, ... types). All functions
@@ -55,7 +55,7 @@ qmckl_exit_code qmckl_transpose_device(qmckl_context_device context,
 
 #pragma acc data deviceptr(A_data, At_data)
 	{
-#pragma acc parallel loop collapse(2)
+#pragma acc parallel loop collapse(2)
 		for (int64_t j = 0; j < At_s1; ++j)
 			for (int64_t i = 0; i < At_s0; ++i)
 				At_data[i + j * At_s0] = A_data[j + i * A_s0];

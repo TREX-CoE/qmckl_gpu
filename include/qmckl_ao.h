@@ -46,7 +46,7 @@ qmckl_exit_code qmckl_compute_ao_value_device(
 	const int64_t *restrict nucleus_shell_num, const double *nucleus_range,
 	const int32_t *restrict nucleus_max_ang_mom,
 	const int32_t *restrict shell_ang_mom, const double *restrict ao_factor,
-	double *shell_vgl, double *restrict const ao_vgl);
+	double *shell_vgl, double *restrict const ao_value);
 
 qmckl_exit_code
 qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context);

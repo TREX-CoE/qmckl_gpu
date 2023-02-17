@@ -67,13 +67,8 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 	double *restrict mo_value) {
 	assert(context != QMCKL_NULL_CONTEXT);
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-
-	mem_info.size = point_num * ao_num * sizeof(double);
-	double *av1_shared = qmckl_malloc_device(context, mem_info);
-
-	mem_info.size = point_num * ao_num * sizeof(int64_t);
-	int64_t *idx_shared = qmckl_malloc_device(context, mem_info);
+	double *av1_shared = qmckl_malloc_device(context, point_num * ao_num * sizeof(double));
+	int64_t *idx_shared = qmckl_malloc_device(context, point_num * ao_num * sizeof(int64_t));
 
 #pragma omp target is_device_ptr(coefficient_t, ao_value, mo_value,            \
 									 idx_shared, av1_shared)

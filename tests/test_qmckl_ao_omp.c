@@ -403,7 +403,7 @@ int main() {
 	double *ao_vgl_d =
 		qmckl_malloc_device(context, point_num * 5 * ao_num * sizeof(double));
 	double *ao_vgl =
-		qmckl_malloc_host(context, point_num * 5 * ao_num * sizeof(double));
+		malloc(point_num * 5 * ao_num * sizeof(double));
 
 	rc = qmckl_get_ao_basis_ao_vgl_device(context, ao_vgl_d,
 										  (int64_t)5 * point_num * ao_num);
@@ -537,6 +537,7 @@ int main() {
 	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 224)] - (3.153244195820293e-08)) > 1.e-14)
 		return 1;
 
+	printf("About to return\n");
 	// TODO Fix this
 	// rc = qmckl_context_destroy_device(context);
 	// if (rc != QMCKL_SUCCESS)

@@ -311,16 +311,14 @@ qmckl_exit_code qmckl_set_ao_basis_nucleus_index_device(
 		}
 	}
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-	mem_info.size = nucl_num * sizeof(int64_t);
-	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, mem_info);
+	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, nucl_num * sizeof(int64_t));
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 							  "qmckl_set_ao_basis_nucleus_index_device", NULL);
 	}
 
-	qmckl_memcpy_D2D(context, new_array, nucleus_index, mem_info.size);
+	qmckl_memcpy_D2D(context, new_array, nucleus_index, nucl_num * sizeof(int64_t));
 
 	ctx->ao_basis.nucleus_index = new_array;
 
@@ -375,9 +373,7 @@ qmckl_set_ao_basis_nucleus_shell_num_device(qmckl_context_device context,
 		}
 	}
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-	mem_info.size = nucl_num * sizeof(int64_t);
-	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, mem_info);
+	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, nucl_num * sizeof(int64_t));
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
@@ -385,7 +381,7 @@ qmckl_set_ao_basis_nucleus_shell_num_device(qmckl_context_device context,
 							  NULL);
 	}
 
-	qmckl_memcpy_D2D(context, new_array, nucleus_shell_num, mem_info.size);
+	qmckl_memcpy_D2D(context, new_array, nucleus_shell_num, nucl_num * sizeof(int64_t));
 
 	ctx->ao_basis.nucleus_shell_num = new_array;
 
@@ -437,16 +433,14 @@ qmckl_exit_code qmckl_set_ao_basis_shell_ang_mom_device(
 		}
 	}
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-	mem_info.size = shell_num * sizeof(int32_t);
-	int32_t *new_array = (int32_t *)qmckl_malloc_device(context, mem_info);
+	int32_t *new_array = (int32_t *)qmckl_malloc_device(context, shell_num * sizeof(int32_t));
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 							  "qmckl_set_ao_basis_shell_ang_mom_device", NULL);
 	}
 
-	qmckl_memcpy_D2D(context, new_array, shell_ang_mom, mem_info.size);
+	qmckl_memcpy_D2D(context, new_array, shell_ang_mom, shell_num * sizeof(int32_t));
 
 	ctx->ao_basis.shell_ang_mom = new_array;
 
@@ -499,16 +493,14 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_num_device(
 		}
 	}
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-	mem_info.size = shell_num * sizeof(int64_t);
-	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, mem_info);
+	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, shell_num * sizeof(int64_t));
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 							  "qmckl_set_ao_basis_shell_prim_num_device", NULL);
 	}
 
-	qmckl_memcpy_D2D(context, new_array, shell_prim_num, mem_info.size);
+	qmckl_memcpy_D2D(context, new_array, shell_prim_num, shell_num * sizeof(int64_t));
 
 	ctx->ao_basis.shell_prim_num = new_array;
 
@@ -561,9 +553,7 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_index_device(
 		}
 	}
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-	mem_info.size = shell_num * sizeof(int64_t);
-	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, mem_info);
+	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, shell_num * sizeof(int64_t));
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
@@ -571,7 +561,7 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_index_device(
 							  NULL);
 	}
 
-	qmckl_memcpy_D2D(context, new_array, shell_prim_index, mem_info.size);
+	qmckl_memcpy_D2D(context, new_array, shell_prim_index, shell_num * sizeof(int64_t));
 
 	ctx->ao_basis.shell_prim_index = new_array;
 
@@ -624,16 +614,14 @@ qmckl_set_ao_basis_shell_factor_device(qmckl_context_device context,
 		}
 	}
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-	mem_info.size = shell_num * sizeof(double);
-	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, shell_num * sizeof(double));
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 							  "qmckl_set_ao_basis_shell_factor_device", NULL);
 	}
 
-	qmckl_memcpy_D2D(context, new_array, shell_factor, mem_info.size);
+	qmckl_memcpy_D2D(context, new_array, shell_factor, shell_num * sizeof(double));
 
 	ctx->ao_basis.shell_factor = new_array;
 
@@ -683,16 +671,14 @@ qmckl_exit_code qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
 		}
 	}
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-	mem_info.size = prim_num * sizeof(double);
-	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, prim_num * sizeof(double));
 
 	if (new_array == NULL) {
 		return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
 							  "qmckl_set_ao_basis_exponent_device", NULL);
 	}
 
-	qmckl_memcpy_D2D(context, new_array, exponent, mem_info.size);
+	qmckl_memcpy_D2D(context, new_array, exponent, prim_num * sizeof(double));
 
 	ctx->ao_basis.exponent = new_array;
 
@@ -744,16 +730,14 @@ qmckl_set_ao_basis_coefficient_device(qmckl_context_device context,
 		}
 	}
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-	mem_info.size = prim_num * sizeof(double);
-	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, prim_num * sizeof(double));
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 							  "qmckl_set_ao_basis_coefficient_device", NULL);
 	}
 
-	qmckl_memcpy_D2D(context, new_array, coefficient, mem_info.size);
+	qmckl_memcpy_D2D(context, new_array, coefficient, prim_num * sizeof(double));
 
 	ctx->ao_basis.coefficient = new_array;
 
@@ -807,16 +791,14 @@ qmckl_exit_code qmckl_set_ao_basis_prim_factor_device(qmckl_context context,
 		}
 	}
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-	mem_info.size = prim_num * sizeof(double);
-	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, prim_num * sizeof(double));
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 							  "qmckl_set_ao_basis_prim_factor_device", NULL);
 	}
 
-	qmckl_memcpy_D2D(context, new_array, prim_factor, mem_info.size);
+	qmckl_memcpy_D2D(context, new_array, prim_factor, prim_num * sizeof(double));
 
 	ctx->ao_basis.prim_factor = new_array;
 
@@ -868,16 +850,14 @@ qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
 		}
 	}
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-	mem_info.size = ao_num * sizeof(double);
-	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, ao_num * sizeof(double));
 
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 							  "qmckl_set_ao_basis_ao_factor_device", NULL);
 	}
 
-	qmckl_memcpy_D2D(context, new_array, ao_factor, mem_info.size);
+	qmckl_memcpy_D2D(context, new_array, ao_factor, ao_num * sizeof(double));
 
 	ctx->ao_basis.ao_factor = new_array;
 
@@ -1348,16 +1328,13 @@ qmckl_exit_code qmckl_set_mo_basis_coefficient_device(qmckl_context context,
 		}
 	}
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-	mem_info.size =
-		ctx->ao_basis.ao_num * ctx->mo_basis.mo_num * sizeof(double);
-	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, ctx->ao_basis.ao_num * ctx->mo_basis.mo_num * sizeof(double));
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 							  "qmckl_set_mo_basis_coefficient_device", NULL);
 	}
 
-	qmckl_memcpy_D2D(context, new_array, coefficient, mem_info.size);
+	qmckl_memcpy_D2D(context, new_array, coefficient, ctx->ao_basis.ao_num * ctx->mo_basis.mo_num * sizeof(double));
 
 	ctx->mo_basis.coefficient = new_array;
 
@@ -1440,7 +1417,7 @@ qmckl_exit_code qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
 
 		double *nucl_charge_h = (double *)qmckl_malloc_host(context, mem_info);
 		double *nucl_charge_d =
-			(double *)qmckl_malloc_device(context, mem_info);
+			(double *)qmckl_malloc_device(context, nucleus_num * sizeof(double));
 
 		if (nucl_charge_h == NULL || nucl_charge_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -1475,7 +1452,7 @@ qmckl_exit_code qmckl_trexio_read_nucleus_X_device(qmckl_context_device context,
 	mem_info.size = nucleus_num * 3 * sizeof(double);
 
 	double *nucl_coord_h = (double *)qmckl_malloc_host(context, mem_info);
-	double *nucl_coord_d = (double *)qmckl_malloc_device(context, mem_info);
+	double *nucl_coord_d = (double *)qmckl_malloc_device(context, nucleus_num * 3 * sizeof(double));
 
 	if (nucl_coord_h == NULL || nucl_coord_d == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
@@ -1595,7 +1572,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		int64_t *nucleus_index_h =
 			(int64_t *)qmckl_malloc_host(context, mem_info);
 		int64_t *nucleus_index_d =
-			(int64_t *)qmckl_malloc_device(context, mem_info);
+			(int64_t *)qmckl_malloc_device(context, nucleus_num * sizeof(int64_t));
 
 		if (nucleus_index_h == NULL || nucleus_index_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -1696,7 +1673,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		int64_t *nucleus_shell_num_h =
 			(int64_t *)qmckl_malloc_host(context, mem_info);
 		int64_t *nucleus_shell_num_d =
-			(int64_t *)qmckl_malloc_device(context, mem_info);
+			(int64_t *)qmckl_malloc_device(context, nucleus_num * sizeof(int64_t));
 
 		if (nucleus_shell_num_h == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -1786,7 +1763,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		int32_t *shell_ang_mom_h =
 			(int32_t *)qmckl_malloc_host(context, mem_info);
 		int32_t *shell_ang_mom_d =
-			(int32_t *)qmckl_malloc_device(context, mem_info);
+			(int32_t *)qmckl_malloc_device(context, shell_num * sizeof(int32_t));
 
 		if (shell_ang_mom_h == NULL || shell_ang_mom_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -1836,7 +1813,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		int64_t *shell_prim_num_h =
 			(int64_t *)qmckl_malloc_host(context, mem_info);
 		int64_t *shell_prim_num_d =
-			(int64_t *)qmckl_malloc_device(context, mem_info);
+			(int64_t *)qmckl_malloc_device(context, shell_num * sizeof(int64_t));
 
 		if (shell_prim_num_h == NULL || shell_prim_num_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -1927,7 +1904,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		int64_t *shell_prim_index_h =
 			(int64_t *)qmckl_malloc_host(context, mem_info);
 		int64_t *shell_prim_index_d =
-			(int64_t *)qmckl_malloc_device(context, mem_info);
+			(int64_t *)qmckl_malloc_device(context, shell_num * sizeof(int64_t));
 
 		if (shell_prim_index_h == NULL || shell_prim_index_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -2011,7 +1988,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 
 		double *shell_factor_h = (double *)qmckl_malloc_host(context, mem_info);
 		double *shell_factor_d =
-			(double *)qmckl_malloc_device(context, mem_info);
+			(double *)qmckl_malloc_device(context, shell_num * sizeof(double));
 
 		if (shell_factor_h == NULL || shell_factor_d == NULL) {
 			return qmckl_failwith(
@@ -2056,7 +2033,9 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		mem_info.size = prim_num * sizeof(double);
 
 		double *exponent_h = (double *)qmckl_malloc_host(context, mem_info);
-		double *exponent_d = (double *)qmckl_malloc_device(context, mem_info);
+		double *exponent_d = (double *)qmckl_malloc_device(context, prim_num * sizeof(double));
+
+
 
 		if (exponent_h == NULL || exponent_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -2099,7 +2078,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 
 		double *coefficient_h = (double *)qmckl_malloc_host(context, mem_info);
 		double *coefficient_d =
-			(double *)qmckl_malloc_device(context, mem_info);
+			(double *)qmckl_malloc_device(context, prim_num * sizeof(double));
 
 		if (coefficient_h == NULL || coefficient_d == NULL) {
 			return qmckl_failwith(
@@ -2144,7 +2123,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 
 		double *prim_factor_h = (double *)qmckl_malloc_host(context, mem_info);
 		double *prim_factor_d =
-			(double *)qmckl_malloc_device(context, mem_info);
+			(double *)qmckl_malloc_device(context, prim_num * sizeof(double));
 
 		if (prim_factor_h == NULL || prim_factor_d == NULL) {
 			return qmckl_failwith(
@@ -2190,7 +2169,7 @@ qmckl_exit_code qmckl_trexio_read_ao_X_device(qmckl_context context,
 		double *ao_normalization_h =
 			(double *)qmckl_malloc_host(context, mem_info);
 		double *ao_normalization_d =
-			(double *)qmckl_malloc_device(context, mem_info);
+			(double *)qmckl_malloc_device(context, ao_num * sizeof(double));
 
 		if (ao_normalization_h == NULL || ao_normalization_d == NULL) {
 			return qmckl_failwith(
@@ -2264,7 +2243,7 @@ qmckl_exit_code qmckl_trexio_read_mo_X_device(qmckl_context_device context,
 		mem_info.size = ao_num * mo_num * sizeof(double);
 
 		double *mo_coef_h = (double *)qmckl_malloc_host(context, mem_info);
-		double *mo_coef_d = (double *)qmckl_malloc_device(context, mem_info);
+		double *mo_coef_d = (double *)qmckl_malloc_device(context, ao_num * mo_num * sizeof(double));
 
 		if (mo_coef_h == NULL || mo_coef_d == NULL) {
 			return qmckl_failwith((qmckl_context)context,

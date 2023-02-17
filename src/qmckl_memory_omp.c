@@ -10,7 +10,7 @@
 //**********
 
 void *qmckl_malloc_device(qmckl_context_device context,
-						  const qmckl_memory_info_struct info) {
+						  size_t size) {
 
 	assert(qmckl_context_check((qmckl_context)context) != QMCKL_NULL_CONTEXT);
 
@@ -20,7 +20,7 @@ void *qmckl_malloc_device(qmckl_context_device context,
 	int device_id = qmckl_get_device_id(context);
 
 	/* Allocate memory and zero it */
-	void *pointer = omp_target_alloc(info.size, device_id);
+	void *pointer = omp_target_alloc(size, device_id);
 	if (pointer == NULL) {
 		return NULL;
 	}
@@ -59,7 +59,7 @@ void *qmckl_malloc_device(qmckl_context_device context,
 		assert(ds->memory.element[pos].size == (size_t)0);
 
 		/* Copy info at the new location */
-		ds->memory.element[pos].size = info.size;
+		ds->memory.element[pos].size = size;
 		ds->memory.element[pos].pointer = pointer;
 		ds->memory.n_allocated += (size_t)1;
 	}

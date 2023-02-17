@@ -2,6 +2,22 @@
 
 During the development and testing of the library, we encountered some compiler related issues. This section contains a list of known issues and fixes if any. 
 
+
+## Shared libraries 
+
+The use of shared libraries can cause multiple runtime issues. On LLVM in particular, shared libaries are not supported at all. Running an executable linked against an LLVM-built QMCkl GPU would result in a runtime issue similar to this one : 
+
+```
+Libomptarget error: Host ptr 0x00007fedd3aa7380 does not have a matching target pointer.
+Libomptarget error: Consult https://openmp.llvm.org/design/Runtimes.html for debugging options.
+qmckl_trexio_omp.c:827:1: Libomptarget fatal error 1: failure of target construct while offloading is mandatory
+```
+
+While getting shared libaries to work is possible with other compilers, it has been a common cause of runtime issues that you should be aware of. The best workaround is simply to link executables against the static version of the library. 
+
+Generation of the shared library can be disabled at configure time using the `--disable-shared` option. Also, generation of the static library can be forced (even though this should be the default behaviour) with the `--enable-static` option.
+
+
 ## [nvc] pgi undefined reference when building executable
 
 When building an executable with an `nvc` built QMCkl GPU (when doing a `make check` for instance), you might run into this issue, or similar : 
@@ -35,16 +51,25 @@ export LD_LIBRARY_PATH=/[path]/[to]/nvidia/hpc_sdk/Linux_x86_64/[version]/compil
 
 As this affects the libraries' search path at runtime only, you should not need to recompile anything.
 
-## Shared libraries 
 
-The use of shared libraries can cause multiple runtime issues. On LLVM in particular, shared libaries are not supported at all. Running an executable linked against an LLVM-built QMCkl GPU would result in a runtime issue similar to this one : 
+## [gcc] [OpenACC] lto1: internal compiler error: Segmentation fault
+
+This error has been observed at link time with gcc (Spack GCC) 12.1.0 and OpenACC. This is apparently related to link time optimization (LTO) : 
 
 ```
-Libomptarget error: Host ptr 0x00007fedd3aa7380 does not have a matching target pointer.
-Libomptarget error: Consult https://openmp.llvm.org/design/Runtimes.html for debugging options.
-qmckl_trexio_omp.c:827:1: Libomptarget fatal error 1: failure of target construct while offloading is mandatory
+lto1: internal compiler error: Segmentation fault
+0xa4f83f crash_signal
+	../../gcc/toplev.cc:322
+0xd2b109 nvptx_record_offload_symbol
+	../../gcc/config/nvptx/nvptx.cc:5911
+0xd2b109 nvptx_record_offload_symbol
+	../../gcc/config/nvptx/nvptx.cc:5891
+0x93c54e omp_finish_file()
+	../../gcc/omp-offload.cc:452
 ```
 
-While getting shared libaries to work is possible with other compilers, it has been a common cause of runtime issues that you should be aware of. The best fix is simply to link executables against the static version of the library. 
+This issue has been fixed by explicitely enabling LTO in the build configuration : 
 
-Generation of the shared library can be disabled at configure time using the `--disable-shared` option. Also, generation of the static library can be forced (even though this should be the default behaviour) with the `--enable-static` option.
+```
+./configure CC="gcc -flto"
+```

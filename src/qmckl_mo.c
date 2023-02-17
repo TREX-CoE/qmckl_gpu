@@ -27,14 +27,10 @@ qmckl_exit_code qmckl_provide_mo_basis_mo_vgl_device(qmckl_context context) {
 	/* Compute if necessary */
 	if (ctx->point.date > ctx->mo_basis.mo_vgl_date) {
 
-		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-		mem_info.size =
-			5 * ctx->mo_basis.mo_num * ctx->point.num * sizeof(double);
-
 		/* Allocate array */
 		if (ctx->mo_basis.mo_vgl == NULL) {
 
-			double *mo_vgl = (double *)qmckl_malloc_device(context, mem_info);
+			double *mo_vgl = (double *)qmckl_malloc_device(context, 5 * ctx->mo_basis.mo_num * ctx->point.num * sizeof(double));
 
 			if (mo_vgl == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -90,11 +86,8 @@ qmckl_exit_code qmckl_provide_mo_basis_mo_value_device(qmckl_context context) {
 
 		/* Allocate array */
 		if (ctx->mo_basis.mo_value == NULL) {
-			qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-			mem_info.size =
-				ctx->mo_basis.mo_num * ctx->point.num * sizeof(double);
 
-			double *mo_value = (double *)qmckl_malloc_device(context, mem_info);
+			double *mo_value = (double *)qmckl_malloc_device(context, ctx->mo_basis.mo_num * ctx->point.num * sizeof(double));
 
 			if (mo_value == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,

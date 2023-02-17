@@ -37,3 +37,5 @@ tests/*.trs
 tests/Makefile
 tests/Makefile.in
 tests/*.log
+qmckl
+.gitmodules

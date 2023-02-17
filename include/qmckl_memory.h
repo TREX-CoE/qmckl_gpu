@@ -25,7 +25,7 @@ void *qmckl_malloc_host(qmckl_context_device context,
 qmckl_exit_code qmckl_free_host(qmckl_context_device context, void *const ptr);
 
 void *qmckl_malloc_device(qmckl_context_device context,
-						  const qmckl_memory_info_struct info);
+						  size_t size);
 
 qmckl_exit_code qmckl_free_device(qmckl_context_device context,
 								  void *const ptr);

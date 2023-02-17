@@ -137,16 +137,12 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 	qmckl_exit_code rc;
 
-	qmckl_memory_info_struct info;
-
-	info.size = sizeof(int64_t) * 21;
-	lstart = qmckl_malloc_device(context, info);
+	lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Multiply "normal" size by point_num to affect subarrays to each thread
-	info.size = sizeof(double) * 5 * ao_num * point_num;
-	poly_vgl_shared = qmckl_malloc_device(context, info);
-	info.size = sizeof(int64_t) * ao_num;
-	ao_index = qmckl_malloc_device(context, info);
+	poly_vgl_shared = qmckl_malloc_device(context, sizeof(double) * 5 * ao_num * point_num);
+
+	ao_index = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
 
 	// Specific calling function
 	int lmax = -1;
@@ -159,8 +155,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 		}
 	}
 	// Multiply "normal" size by point_num to affect subarrays to each thread
-	info.size = sizeof(double) * (lmax + 3) * 3 * point_num;
-	double *pows_shared = qmckl_malloc_device(context, info);
+	double *pows_shared = qmckl_malloc_device(context, sizeof(double) * (lmax + 3) * 3 * point_num);
+
 
 #pragma omp target is_device_ptr(lstart)
 	{
@@ -453,7 +449,7 @@ qmckl_exit_code qmckl_compute_ao_value_device(
 	const int64_t *restrict nucleus_shell_num, const double *nucleus_range,
 	const int32_t *restrict nucleus_max_ang_mom,
 	const int32_t *restrict shell_ang_mom, const double *restrict ao_factor,
-	double *shell_vgl, double *restrict const ao_vgl) {
+	double *shell_vgl, double *restrict const ao_value) {
 
 	int64_t n_poly;
 	int64_t *lstart;
@@ -467,14 +463,11 @@ qmckl_exit_code qmckl_compute_ao_value_device(
 
 	qmckl_memory_info_struct info;
 
-	info.size = sizeof(int64_t) * 21;
-	lstart = qmckl_malloc_device(context, info);
+	lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Multiply "normal" size by point_num to affect subarrays to each thread
-	info.size = sizeof(double) * 5 * ao_num * point_num;
-	poly_vgl_shared = qmckl_malloc_device(context, info);
-	info.size = sizeof(int64_t) * ao_num;
-	ao_index = qmckl_malloc_device(context, info);
+	poly_vgl_shared = qmckl_malloc_device(context, sizeof(double) * 5 * ao_num * point_num);
+	ao_index = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
 
 	// Specific calling function
 	int lmax = -1;
@@ -487,8 +480,7 @@ qmckl_exit_code qmckl_compute_ao_value_device(
 		}
 	}
 	// Multiply "normal" size by point_num to affect subarrays to each thread
-	info.size = sizeof(double) * (lmax + 3) * 3 * point_num;
-	double *pows_shared = qmckl_malloc_device(context, info);
+	double *pows_shared = qmckl_malloc_device(context, sizeof(double) * (lmax + 3) * 3 * point_num);
 
 #pragma omp target is_device_ptr(lstart)
 	{
@@ -515,7 +507,7 @@ qmckl_exit_code qmckl_compute_ao_value_device(
 	}
 
 #pragma omp target is_device_ptr(                                              \
-		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
+		ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
 			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 	{
@@ -698,7 +690,7 @@ qmckl_exit_code qmckl_compute_ao_value_device(
 							 il++) {
 
 							// value
-							ao_vgl[k + ipoint * ao_num] =
+							ao_value[k + ipoint * ao_num] =
 								poly_vgl[il * 5 + 0] *
 								shell_vgl[ishell + 0 * shell_num +
 										  ipoint * shell_num * 5] *
@@ -723,7 +715,7 @@ qmckl_exit_code qmckl_compute_ao_value_device(
 }
 
 //**********
-// COMPUTE
+// PROVIDE
 //**********
 
 /* ao_value */
@@ -748,13 +740,10 @@ qmckl_exit_code qmckl_provide_ao_basis_ao_value_device(qmckl_context context) {
 	/* Compute if necessary */
 	if (ctx->point.date > ctx->ao_basis.ao_value_date) {
 
-		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-		mem_info.size = ctx->ao_basis.ao_num * ctx->point.num * sizeof(double);
-
 		/* Allocate array */
 		if (ctx->ao_basis.ao_value == NULL) {
 
-			double *ao_value = (double *)qmckl_malloc_device(context, mem_info);
+			double *ao_value = (double *)qmckl_malloc_device(context, ctx->ao_basis.ao_num * ctx->point.num * sizeof(double));
 
 			if (ao_value == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -763,12 +752,12 @@ qmckl_exit_code qmckl_provide_ao_basis_ao_value_device(qmckl_context context) {
 			ctx->ao_basis.ao_value = ao_value;
 		}
 
-		if (ctx->ao_basis.ao_vgl_date == ctx->point.date) {
+		if (ctx->ao_basis.ao_value_date == ctx->point.date) {
 
-			// ao_vgl has been computed at this step: Just copy the data.
+			// ao_value has been computed at this step: Just copy the data.
 
 			double *v = &(ctx->ao_basis.ao_value[0]);
-			double *vgl = &(ctx->ao_basis.ao_vgl[0]);
+			double *vgl = &(ctx->ao_basis.ao_value[0]);
 			int point_num = ctx->point.num;
 			int ao_num = ctx->ao_basis.ao_num;
 
@@ -785,7 +774,7 @@ qmckl_exit_code qmckl_provide_ao_basis_ao_value_device(qmckl_context context) {
 
 		} else {
 
-			// We don't have ao_vgl, so we will compute the values only
+			// We don't have ao_value, so we will compute the values only
 			if (ctx->ao_basis.type == 'G') {
 				rc = qmckl_compute_ao_value_device(
 					context, ctx->ao_basis.ao_num, ctx->ao_basis.shell_num,

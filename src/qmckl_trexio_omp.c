@@ -154,11 +154,8 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
-	int device_id = qmckl_get_device_id(context);
-
-	mem_info.size = ctx->nucleus.num * sizeof(int32_t);
 	ctx->ao_basis.prim_num_per_nucleus =
-		(int32_t *)qmckl_malloc_device(context, mem_info);
+		(int32_t *)qmckl_malloc_device(context, ctx->nucleus.num * sizeof(int32_t));
 
 	/* Find max number of primitives per nucleus */
 
@@ -212,18 +209,13 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 	// To avoid offloading structures, expo is split in two arrays :
 	// struct combined expo[prim_max];
 	// ... gets replaced by :
-	mem_info.size = prim_max * sizeof(double);
-	double *expo_expo = qmckl_malloc_device(context, mem_info);
-	mem_info.size = prim_max * sizeof(double);
-	int64_t *expo_index = qmckl_malloc_device(context, mem_info);
+	double *expo_expo = qmckl_malloc_device(context, prim_max * sizeof(double));
+	int64_t *expo_index = qmckl_malloc_device(context, prim_max * sizeof(double));
 
-	mem_info.size = shell_max * prim_max * sizeof(double);
-	double *coef = qmckl_malloc_device(context, mem_info);
-	mem_info.size = prim_max * sizeof(double);
-	double *newcoef = qmckl_malloc_device(context, mem_info);
+	double *coef = qmckl_malloc_device(context, shell_max * prim_max * sizeof(double));
+	double *newcoef = qmckl_malloc_device(context, prim_max * sizeof(double));
 
-	mem_info.size = prim_max * sizeof(int64_t);
-	int64_t *newidx = qmckl_malloc_device(context, mem_info);
+	int64_t *newidx = qmckl_malloc_device(context, prim_max * sizeof(int64_t));
 
 	int64_t *shell_prim_index = ctx->ao_basis.shell_prim_index;
 	double *exponent = ctx->ao_basis.exponent;
@@ -391,11 +383,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 
 	/* nucleus_prim_index */
 	{
-		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-		mem_info.size = (ctx->nucleus.num + (int64_t)1) * sizeof(int64_t);
-
 		ctx->ao_basis.nucleus_prim_index =
-			(int64_t *)qmckl_malloc_device(context, mem_info);
+			(int64_t *)qmckl_malloc_device(context, (ctx->nucleus.num + (int64_t)1) * sizeof(int64_t));
 
 		if (ctx->ao_basis.nucleus_prim_index == NULL) {
 			return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -424,11 +413,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 
 	/* Normalize coefficients */
 	{
-		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-		mem_info.size = ctx->ao_basis.prim_num * sizeof(double);
-
 		ctx->ao_basis.coefficient_normalized =
-			(double *)qmckl_malloc_device(context, mem_info);
+			(double *)qmckl_malloc_device(context, ctx->ao_basis.prim_num * sizeof(double));
 
 		if (ctx->ao_basis.coefficient_normalized == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -464,11 +450,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 
 	/* Find max angular momentum on each nucleus */
 	{
-		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-		mem_info.size = ctx->nucleus.num * sizeof(int32_t);
-
 		ctx->ao_basis.nucleus_max_ang_mom =
-			(int32_t *)qmckl_malloc_device(context, mem_info);
+			(int32_t *)qmckl_malloc_device(context, ctx->nucleus.num * sizeof(int32_t));
 
 		if (ctx->ao_basis.nucleus_max_ang_mom == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -504,11 +487,9 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 	   The distance is obtained by sqrt(log(cutoff)*range) */
 	{
 		if (ctx->ao_basis.type == 'G') {
-			qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-			mem_info.size = ctx->nucleus.num * sizeof(double);
-
 			ctx->ao_basis.nucleus_range =
-				(double *)qmckl_malloc_device(context, mem_info);
+				(double *)qmckl_malloc_device(context, ctx->nucleus.num * sizeof(double));
+
 
 			if (ctx->ao_basis.nucleus_range == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -567,9 +548,8 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 
 	int device_id = qmckl_get_device_id(context);
 
-	mem_info.size = ctx->nucleus.num * sizeof(int32_t);
 	ctx->ao_basis.prim_num_per_nucleus =
-		(int32_t *)qmckl_malloc_device(context, mem_info);
+		(int32_t *)qmckl_malloc_device(context, ctx->nucleus.num * sizeof(int32_t));
 
 	/* Find max number of primitives per nucleus */
 
@@ -623,18 +603,13 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 	// To avoid offloading structures, expo is split in two arrays :
 	// struct combined expo[prim_max];
 	// ... gets replaced by :
-	mem_info.size = prim_max * sizeof(double);
-	double *expo_expo = qmckl_malloc_device(context, mem_info);
-	mem_info.size = prim_max * sizeof(double);
-	int64_t *expo_index = qmckl_malloc_device(context, mem_info);
+	double *expo_expo = qmckl_malloc_device(context, prim_max * sizeof(double));
+	int64_t *expo_index = qmckl_malloc_device(context, prim_max * sizeof(double));
 
-	mem_info.size = shell_max * prim_max * sizeof(double);
-	double *coef = qmckl_malloc_device(context, mem_info);
-	mem_info.size = prim_max * sizeof(double);
-	double *newcoef = qmckl_malloc_device(context, mem_info);
+	double *coef = qmckl_malloc_device(context, shell_max * prim_max * sizeof(double));
+	double *newcoef = qmckl_malloc_device(context, prim_max * sizeof(double));
 
-	mem_info.size = prim_max * sizeof(int64_t);
-	int64_t *newidx = qmckl_malloc_device(context, mem_info);
+	int64_t *newidx = qmckl_malloc_device(context, prim_max * sizeof(int64_t));
 
 	int64_t *shell_prim_index = ctx->ao_basis.shell_prim_index;
 	double *exponent = ctx->ao_basis.exponent;
@@ -800,11 +775,9 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 
 	/* nucleus_prim_index */
 	{
-		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-		mem_info.size = (ctx->nucleus.num + (int64_t)1) * sizeof(int64_t);
 
 		ctx->ao_basis.nucleus_prim_index =
-			(int64_t *)qmckl_malloc_device(context, mem_info);
+			(int64_t *)qmckl_malloc_device(context, (ctx->nucleus.num + (int64_t)1) * sizeof(int64_t));
 
 		if (ctx->ao_basis.nucleus_prim_index == NULL) {
 			return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -832,11 +805,9 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 
 	/* Normalize coefficients */
 	{
-		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-		mem_info.size = ctx->ao_basis.prim_num * sizeof(double);
 
 		ctx->ao_basis.coefficient_normalized =
-			(double *)qmckl_malloc_device(context, mem_info);
+			(double *)qmckl_malloc_device(context, ctx->ao_basis.prim_num * sizeof(double));
 
 		if (ctx->ao_basis.coefficient_normalized == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -872,11 +843,9 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 
 	/* Find max angular momentum on each nucleus */
 	{
-		qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-		mem_info.size = ctx->nucleus.num * sizeof(int32_t);
 
 		ctx->ao_basis.nucleus_max_ang_mom =
-			(int32_t *)qmckl_malloc_device(context, mem_info);
+			(int32_t *)qmckl_malloc_device(context, ctx->nucleus.num * sizeof(int32_t));
 
 		if (ctx->ao_basis.nucleus_max_ang_mom == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -912,11 +881,9 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 	   The distance is obtained by sqrt(log(cutoff)*range) */
 	{
 		if (ctx->ao_basis.type == 'G') {
-			qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-			mem_info.size = ctx->nucleus.num * sizeof(double);
 
 			ctx->ao_basis.nucleus_range =
-				(double *)qmckl_malloc_device(context, mem_info);
+				(double *)qmckl_malloc_device(context, ctx->nucleus.num * sizeof(double));
 
 			if (ctx->ao_basis.nucleus_range == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -977,10 +944,7 @@ qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context_device context) {
 	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
-	mem_info.size =
-		ctx->ao_basis.ao_num * ctx->mo_basis.mo_num * sizeof(double);
-	double *new_array = (double *)qmckl_malloc_device(context, mem_info);
+	double *new_array = (double *)qmckl_malloc_device(context, ctx->ao_basis.ao_num * ctx->mo_basis.mo_num * sizeof(double));
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 							  "qmckl_finalize_mo_basis_device", NULL);
