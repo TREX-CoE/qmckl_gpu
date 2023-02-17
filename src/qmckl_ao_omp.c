@@ -513,193 +513,166 @@ qmckl_exit_code qmckl_compute_ao_value_device(
 	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
 	pows_shared, shell_ang_mom, nucleus_range)
 	{
-		// #pragma omp teams distribute parallel for
+#pragma omp teams distribute parallel for
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
-			/*
-			BUG For some reason, the (Nvidia ?) offload compiler seems to
-			discard entire blocks of code inside this parallel loop, if not the
-			entire loop body.
+			// Compute addresses of subarrays from ipoint
+			// This way, each thread can write to its own poly_vgl and pows
+			// without any race condition
+			double *poly_vgl = poly_vgl_shared + ipoint * 5 * ao_num;
+			double *pows = pows_shared + ipoint * (lmax + 3) * 3;
 
-			- Commenting the teams statement above to run the loop sequentially
-			always work
-			- a printf forces the execution of a code block, including specific
-			loop iterations. For instance, "if(ipoint == 26) {
-			printf("something\n"); }" inside  a basic block forces the execution
-			of it and its parent blocks only when ipoint == 26 from the outer
-			loop.
-			- This might be because the offload compiler considers the code as
-			"useless", while it shouldnt because we touch device pointers used
-			elsewhere in the code (basically an unwanted optimization pass)
-			- Observed on GCC 12.1 + Nvidia target (spack package)
+			double e_coord_0 = coord[0 * point_num + ipoint];
+			double e_coord_1 = coord[1 * point_num + ipoint];
+			double e_coord_2 = coord[2 * point_num + ipoint];
 
-			A workaround to this behaviour is to wrap then entire loop body
-			into an OMP task, which somehow forces it to be entirely executed
-			(prevents "useless" code elimination ?)
-			*/
+			for (int inucl = 0; inucl < nucl_num; inucl++) {
 
-			// #pragma omp task
-			{
+				double n_coord_0 = nucl_coord[0 * nucl_num + inucl];
+				double n_coord_1 = nucl_coord[1 * nucl_num + inucl];
+				double n_coord_2 = nucl_coord[2 * nucl_num + inucl];
 
-				// Compute addresses of subarrays from ipoint
-				// This way, each thread can write to its own poly_vgl and pows
-				// without any race condition
-				double *poly_vgl = poly_vgl_shared + ipoint * 5 * ao_num;
-				double *pows = pows_shared + ipoint * (lmax + 3) * 3;
+				double x = e_coord_0 - n_coord_0;
+				double y = e_coord_1 - n_coord_1;
+				double z = e_coord_2 - n_coord_2;
 
-				double e_coord_0 = coord[0 * point_num + ipoint];
-				double e_coord_1 = coord[1 * point_num + ipoint];
-				double e_coord_2 = coord[2 * point_num + ipoint];
+				double r2 = x * x + y * y + z * z;
 
-				for (int inucl = 0; inucl < nucl_num; inucl++) {
+				if (r2 > cutoff * nucleus_range[inucl]) {
+					continue;
+				}
 
-					double n_coord_0 = nucl_coord[0 * nucl_num + inucl];
-					double n_coord_1 = nucl_coord[1 * nucl_num + inucl];
-					double n_coord_2 = nucl_coord[2 * nucl_num + inucl];
+				// Beginning of ao_polynomial computation (now inlined)
+				double Y1, Y2, Y3;
+				double xy, yz, xz;
+				int c, n;
+				double da, db, dc, dd;
 
-					double x = e_coord_0 - n_coord_0;
-					double y = e_coord_1 - n_coord_1;
-					double z = e_coord_2 - n_coord_2;
+				// Already computed outsite of the ao_polynomial part
+				Y1 = x;
+				Y2 = y;
+				Y3 = z;
 
-					double r2 = x * x + y * y + z * z;
+				int llmax = nucleus_max_ang_mom[inucl];
+				if (llmax == 0) {
+					poly_vgl[0] = 1.;
+					poly_vgl[1] = 0.;
+					poly_vgl[2] = 0.;
+					poly_vgl[3] = 0.;
+					poly_vgl[4] = 0.;
 
-					if (r2 > cutoff * nucleus_range[inucl]) {
-						continue;
+					int n = 0;
+				} else if (llmax > 0) {
+					// Reset pows to 0 for safety. Then we will write over
+					// the top left submatrix of size (llmax+3)x3. We will
+					// compute indices with llmax and not lmax, so we will
+					// use the (llmax+3)*3 first elements of the array
+					for (int i = 0; i < 3 * (lmax + 3); i++) {
+						pows[i] = 0.;
 					}
 
-					// Beginning of ao_polynomial computation (now inlined)
-					double Y1, Y2, Y3;
-					double xy, yz, xz;
-					int c, n;
-					double da, db, dc, dd;
-
-					// Already computed outsite of the ao_polynomial part
-					Y1 = x;
-					Y2 = y;
-					Y3 = z;
-
-					int llmax = nucleus_max_ang_mom[inucl];
-					if (llmax == 0) {
-						poly_vgl[0] = 1.;
-						poly_vgl[1] = 0.;
-						poly_vgl[2] = 0.;
-						poly_vgl[3] = 0.;
-						poly_vgl[4] = 0.;
-
-						int n = 0;
-					} else if (llmax > 0) {
-						// Reset pows to 0 for safety. Then we will write over
-						// the top left submatrix of size (llmax+3)x3. We will
-						// compute indices with llmax and not lmax, so we will
-						// use the (llmax+3)*3 first elements of the array
-						for (int i = 0; i < 3 * (lmax + 3); i++) {
-							pows[i] = 0.;
+					for (int i = 0; i < 3; i++) {
+						for (int j = 0; j < 3; j++) {
+							pows[i + (llmax + 3) * j] = 1.;
 						}
-
-						for (int i = 0; i < 3; i++) {
-							for (int j = 0; j < 3; j++) {
-								pows[i + (llmax + 3) * j] = 1.;
-							}
-						}
-
-						for (int i = 3; i < llmax + 3; i++) {
-							pows[i] = pows[(i - 1)] * Y1;
-							pows[i + (llmax + 3)] =
-								pows[(i - 1) + (llmax + 3)] * Y2;
-							pows[i + 2 * (llmax + 3)] =
-								pows[(i - 1) + 2 * (llmax + 3)] * Y3;
-						}
-
-						for (int i = 0; i < 5; i++) {
-							for (int j = 0; j < 4; j++) {
-								poly_vgl[i + 5 * j] = 0.;
-							}
-						}
-
-						poly_vgl[0] = 1.;
-
-						poly_vgl[5] = pows[3];
-						poly_vgl[6] = 1.;
-
-						poly_vgl[10] = pows[3 + (llmax + 3)];
-						poly_vgl[12] = 1.;
-
-						poly_vgl[15] = pows[3 + 2 * (llmax + 3)];
-						poly_vgl[18] = 1.;
-
-						n = 3;
 					}
 
-					// l>=2
-					dd = 2.;
-					for (int d = 2; d <= llmax; d++) {
-
-						da = dd;
-						for (int a = d; a >= 0; a--) {
-
-							db = dd - da;
-							for (int b = d - a; b >= 0; b--) {
-
-								int c = d - a - b;
-								dc = dd - da - db;
-								n = n + 1;
-
-								xy =
-									pows[(a + 2)] * pows[(b + 2) + (llmax + 3)];
-								yz = pows[(b + 2) + (llmax + 3)] *
-									 pows[(c + 2) + 2 * (llmax + 3)];
-								xz = pows[(a + 2)] *
-									 pows[(c + 2) + 2 * (llmax + 3)];
-
-								poly_vgl[5 * (n)] =
-									xy * pows[c + 2 + 2 * (llmax + 3)];
-
-								xy = dc * xy;
-								xz = db * xz;
-								yz = da * yz;
-
-								poly_vgl[1 + 5 * n] = pows[a + 1] * yz;
-								poly_vgl[2 + 5 * n] =
-									pows[b + 1 + (llmax + 3)] * xz;
-								poly_vgl[3 + 5 * n] =
-									pows[c + 1 + 2 * (llmax + 3)] * xy;
-
-								poly_vgl[4 + 5 * n] =
-									(da - 1.) * pows[a] * yz +
-									(db - 1.) * pows[b + (llmax + 3)] * xz +
-									(dc - 1.) * pows[c + 2 * (llmax + 3)] * xy;
-
-								db -= 1.;
-							}
-							da -= 1.;
-						}
-						dd += 1.;
+					for (int i = 3; i < llmax + 3; i++) {
+						pows[i] = pows[(i - 1)] * Y1;
+						pows[i + (llmax + 3)] =
+							pows[(i - 1) + (llmax + 3)] * Y2;
+						pows[i + 2 * (llmax + 3)] =
+							pows[(i - 1) + 2 * (llmax + 3)] * Y3;
 					}
-					// End of ao_polynomial computation (now inlined)
-					// poly_vgl is now set from here
 
-					int ishell_start = nucleus_index[inucl];
-					int ishell_end =
-						nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
-
-					// Loop over shells
-					for (int ishell = ishell_start; ishell <= ishell_end;
-						 ishell++) {
-						int k = ao_index[ishell] - 1;
-						int l = shell_ang_mom[ishell];
-
-						for (int il = lstart[l] - 1; il <= lstart[l + 1] - 2;
-							 il++) {
-
-							// value
-							ao_value[k + ipoint * ao_num] =
-								poly_vgl[il * 5 + 0] *
-								shell_vgl[ishell + 0 * shell_num +
-										  ipoint * shell_num * 5] *
-								ao_factor[k];
-
-							k = k + 1;
+					for (int i = 0; i < 5; i++) {
+						for (int j = 0; j < 4; j++) {
+							poly_vgl[i + 5 * j] = 0.;
 						}
+					}
+
+					poly_vgl[0] = 1.;
+
+					poly_vgl[5] = pows[3];
+					poly_vgl[6] = 1.;
+
+					poly_vgl[10] = pows[3 + (llmax + 3)];
+					poly_vgl[12] = 1.;
+
+					poly_vgl[15] = pows[3 + 2 * (llmax + 3)];
+					poly_vgl[18] = 1.;
+
+					n = 3;
+				}
+
+				// l>=2
+				dd = 2.;
+				for (int d = 2; d <= llmax; d++) {
+
+					da = dd;
+					for (int a = d; a >= 0; a--) {
+
+						db = dd - da;
+						for (int b = d - a; b >= 0; b--) {
+
+							int c = d - a - b;
+							dc = dd - da - db;
+							n = n + 1;
+
+							xy = pows[(a + 2)] * pows[(b + 2) + (llmax + 3)];
+							yz = pows[(b + 2) + (llmax + 3)] *
+								 pows[(c + 2) + 2 * (llmax + 3)];
+							xz =
+								pows[(a + 2)] * pows[(c + 2) + 2 * (llmax + 3)];
+
+							poly_vgl[5 * (n)] =
+								xy * pows[c + 2 + 2 * (llmax + 3)];
+
+							xy = dc * xy;
+							xz = db * xz;
+							yz = da * yz;
+
+							poly_vgl[1 + 5 * n] = pows[a + 1] * yz;
+							poly_vgl[2 + 5 * n] =
+								pows[b + 1 + (llmax + 3)] * xz;
+							poly_vgl[3 + 5 * n] =
+								pows[c + 1 + 2 * (llmax + 3)] * xy;
+
+							poly_vgl[4 + 5 * n] =
+								(da - 1.) * pows[a] * yz +
+								(db - 1.) * pows[b + (llmax + 3)] * xz +
+								(dc - 1.) * pows[c + 2 * (llmax + 3)] * xy;
+
+							db -= 1.;
+						}
+						da -= 1.;
+					}
+					dd += 1.;
+				}
+				// End of ao_polynomial computation (now inlined)
+				// poly_vgl is now set from here
+
+				int ishell_start = nucleus_index[inucl];
+				int ishell_end =
+					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+
+				// Loop over shells
+				for (int ishell = ishell_start; ishell <= ishell_end;
+					 ishell++) {
+					int k = ao_index[ishell] - 1;
+					int l = shell_ang_mom[ishell];
+
+					for (int il = lstart[l] - 1; il <= lstart[l + 1] - 2;
+						 il++) {
+
+						// value
+						ao_value[k + ipoint * ao_num] =
+							poly_vgl[il * 5 + 0] *
+							shell_vgl[ishell + 0 * shell_num +
+									  ipoint * shell_num * 5] *
+							ao_factor[k];
+
+						k = k + 1;
 					}
 				}
 			}
