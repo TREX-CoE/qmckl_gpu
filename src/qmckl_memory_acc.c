@@ -10,8 +10,7 @@
 // ALLOCS / FREES
 //**********
 
-void *qmckl_malloc_device(qmckl_context_device context,
-						  size_t size) {
+void *qmckl_malloc_device(qmckl_context_device context, size_t size) {
 
 	printf("[qmckl_malloc_device] In\n");
 	assert(qmckl_context_check((qmckl_context)context) != QMCKL_NULL_CONTEXT);
@@ -69,8 +68,7 @@ void *qmckl_malloc_device(qmckl_context_device context,
 	return pointer;
 }
 
-qmckl_exit_code qmckl_free_device(qmckl_context_device context,
-								  void *ptr) {
+qmckl_exit_code qmckl_free_device(qmckl_context_device context, void *ptr) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,

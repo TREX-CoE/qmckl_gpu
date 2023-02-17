@@ -11,7 +11,7 @@
 void *qmckl_malloc_host(qmckl_context_device context,
 						const qmckl_memory_info_struct info) {
 	qmckl_context context_base = (qmckl_context)context;
-	void* ptr = qmckl_malloc(context_base, info);
+	void *ptr = qmckl_malloc(context_base, info);
 	return ptr;
 }
 

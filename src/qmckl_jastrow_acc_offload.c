@@ -46,8 +46,8 @@ qmckl_exit_code qmckl_compute_tmp_c_acc_offload(
 	const int64_t size_e = walk_num * (cord_num + 1) * elec_num * elec_num;
 	const int64_t size_n = walk_num * (cord_num + 1) * nucl_num * elec_num;
 
-#pragma acc parallel copyout(tmp_c[0 : size_tmp_c])                            \
-	copyin(een_rescaled_e[0 : size_e], een_rescaled_n[0 : size_n])
+#pragma acc parallel copyout(tmp_c [0:size_tmp_c])                             \
+	copyin(een_rescaled_e [0:size_e], een_rescaled_n [0:size_n])
 	{
 #pragma acc loop independent gang worker vector collapse(4)
 		for (int nw = 0; nw < walk_num; ++nw) {
@@ -123,8 +123,8 @@ qmckl_exit_code qmckl_compute_dtmp_c_acc_offload(
 	const int64_t size_n = walk_num * (cord_num + 1) * nucl_num * elec_num;
 	const int64_t size_e = walk_num * (cord_num + 1) * elec_num * 4 * elec_num;
 
-#pragma acc parallel copyout(dtmp_c[0 : size_dtmp_c])                          \
-	copyin(een_rescaled_e_deriv_e[0 : size_e], een_rescaled_n[0 : size_n])
+#pragma acc parallel copyout(dtmp_c [0:size_dtmp_c])                           \
+	copyin(een_rescaled_e_deriv_e [0:size_e], een_rescaled_n [0:size_n])
 	{
 #pragma acc loop independent gang worker vector collapse(4)
 		for (int nw = 0; nw < walk_num; nw++) {

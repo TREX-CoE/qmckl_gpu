@@ -67,11 +67,13 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 	double *restrict mo_value) {
 	assert(context != QMCKL_NULL_CONTEXT);
 
-	double *av1_shared = qmckl_malloc_device(context, point_num * ao_num * sizeof(double));
-	int64_t *idx_shared = qmckl_malloc_device(context, point_num * ao_num * sizeof(int64_t));
+	double *av1_shared =
+		qmckl_malloc_device(context, point_num * ao_num * sizeof(double));
+	int64_t *idx_shared =
+		qmckl_malloc_device(context, point_num * ao_num * sizeof(int64_t));
 
 #pragma omp target is_device_ptr(coefficient_t, ao_value, mo_value,            \
-									 idx_shared, av1_shared)
+								 idx_shared, av1_shared)
 	{
 #pragma omp teams distribute parallel for
 		for (int64_t ipoint = 0; ipoint < point_num; ++ipoint) {

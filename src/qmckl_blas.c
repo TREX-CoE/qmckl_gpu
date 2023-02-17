@@ -88,7 +88,8 @@ qmckl_matrix qmckl_matrix_alloc_device(qmckl_context_device context,
 	result.size[0] = size1;
 	result.size[1] = size2;
 
-	result.data = (double *)qmckl_malloc_device(context, size1 * size2 * sizeof(double));
+	result.data =
+		(double *)qmckl_malloc_device(context, size1 * size2 * sizeof(double));
 
 	if (result.data == NULL) {
 		result.size[0] = (int64_t)0;
@@ -170,7 +171,8 @@ qmckl_tensor qmckl_tensor_alloc_device(qmckl_context context,
 		prod_size *= size[i];
 	}
 
-	result.data = (double *)qmckl_malloc_device(context, prod_size * sizeof(double));
+	result.data =
+		(double *)qmckl_malloc_device(context, prod_size * sizeof(double));
 
 	if (result.data == NULL) {
 		memset(&result, 0, sizeof(qmckl_tensor));

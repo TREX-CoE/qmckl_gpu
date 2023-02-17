@@ -16,7 +16,7 @@
 
 int main() {
 
-	//acc_set_device_num(0, acc_device_nvidia);
+	// acc_set_device_num(0, acc_device_nvidia);
 
 	qmckl_context context;
 	context = qmckl_context_create_device(0);
@@ -74,7 +74,6 @@ int main() {
 	double *prim_factor = &(chbrclf_basis_prim_factor[0]);
 	double *ao_factor = &(chbrclf_basis_ao_factor[0]);
 
-
 	// Put other stuff in GPU arrays
 	int64_t *nucleus_index_d =
 		qmckl_malloc_device(context, nucl_num * sizeof(int64_t));
@@ -94,8 +93,7 @@ int main() {
 		qmckl_malloc_device(context, prim_num * sizeof(double));
 	double *prim_factor_d =
 		qmckl_malloc_device(context, prim_num * sizeof(double));
-	double *ao_factor_d =
-		qmckl_malloc_device(context, ao_num * sizeof(double));
+	double *ao_factor_d = qmckl_malloc_device(context, ao_num * sizeof(double));
 
 	qmckl_memcpy_H2D(context, nucleus_index_d, nucleus_index,
 					 nucl_num * sizeof(int64_t));

@@ -24,23 +24,27 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	cutoff = 27.631021115928547; //-dlog(1.d-12)
 
 #pragma acc data deviceptr(nucleus_shell_num, nucleus_index, nucleus_range,    \
-							   shell_prim_index, shell_prim_num, coord,        \
-							   nucl_coord, expo, coef_normalized, shell_vgl)
+						   shell_prim_index, shell_prim_num, coord,            \
+						   nucl_coord, expo, coef_normalized, shell_vgl)
 	{
 
-// #pragma acc parallel loop gang worker vector
+		// #pragma acc parallel loop gang worker vector
 
-/*
- * BUG As of now, the above "acc parallel" has been replaced with a simple "acc kernels",
- * as it caused the following internal compiler error on  gcc (Spack GCC) 12.1.0 :
- *
- * ../src/qmckl_ao_acc.c: In function 'qmckl_compute_ao_basis_shell_gaussian_vgl_device._omp_fn.0':
- * ../src/qmckl_ao_acc.c:31:9: internal compiler error: in expand_UNIQUE, at internal-fn.cc:2996
- *  31 | #pragma acc parallel loop gang worker vector
- *
- *  TODO Until this error is fixed, we might want to wrap desired pragmas in #ifdefs
- *  depending on the compiler and restore the original acc parallel for other compilers.
- * */
+		/*
+		 * BUG As of now, the above "acc parallel" has been replaced with a
+		 * simple "acc kernels", as it caused the following internal compiler
+		 * error on  gcc (Spack GCC) 12.1.0 :
+		 *
+		 * ../src/qmckl_ao_acc.c: In function
+		 * 'qmckl_compute_ao_basis_shell_gaussian_vgl_device._omp_fn.0':
+		 * ../src/qmckl_ao_acc.c:31:9: internal compiler error: in
+		 * expand_UNIQUE, at internal-fn.cc:2996 31 | #pragma acc parallel loop
+		 * gang worker vector
+		 *
+		 *  TODO Until this error is fixed, we might want to wrap desired
+		 * pragmas in #ifdefs depending on the compiler and restore the original
+		 * acc parallel for other compilers.
+		 * */
 
 #pragma acc kernels
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
@@ -150,11 +154,11 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 	qmckl_exit_code rc;
 
-
 	lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Multiply "normal" size by point_num to affect subarrays to each thread
-	poly_vgl_shared = qmckl_malloc_device(context, sizeof(double) * 5 * ao_num * point_num);
+	poly_vgl_shared =
+		qmckl_malloc_device(context, sizeof(double) * 5 * ao_num * point_num);
 	ao_index = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
 
 	// Specific calling function
@@ -169,7 +173,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 #pragma acc update host(lmax)
 	}
 	// Multiply "normal" size by point_num to affect subarrays to each thread
-	double *pows_shared = qmckl_malloc_device(context, sizeof(double) * (lmax + 3) * 3 * point_num);
+	double *pows_shared = qmckl_malloc_device(
+		context, sizeof(double) * (lmax + 3) * 3 * point_num);
 
 #pragma acc data deviceptr(lstart)
 	{
@@ -180,7 +185,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 	int k = 1;
 #pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
-							   ao_index, lstart)
+						   ao_index, lstart)
 	{
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
 			int ishell_start = nucleus_index[inucl];
@@ -196,13 +201,13 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	}
 
 #pragma acc data deviceptr(                                                    \
-		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
-			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
-			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
+	ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,           \
+	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
+	pows_shared, shell_ang_mom, nucleus_range)
 	{
 
-// #pragma acc parallel loop gang worker vector
-// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
+		// #pragma acc parallel loop gang worker vector
+		// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
 
 #pragma acc kernels
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
@@ -428,7 +433,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	return QMCKL_SUCCESS;
 }
 
-
 /* ao_value */
 
 qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
@@ -451,11 +455,11 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 
 	qmckl_exit_code rc;
 
-
 	lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Multiply "normal" size by point_num to affect subarrays to each thread
-	poly_vgl_shared = qmckl_malloc_device(context, sizeof(double) * 5 * ao_num * point_num);
+	poly_vgl_shared =
+		qmckl_malloc_device(context, sizeof(double) * 5 * ao_num * point_num);
 	ao_index = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
 
 	// Specific calling function
@@ -470,7 +474,8 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 #pragma acc update host(lmax)
 	}
 	// Multiply "normal" size by point_num to affect subarrays to each thread
-	double *pows_shared = qmckl_malloc_device(context, sizeof(double) * (lmax + 3) * 3 * point_num);
+	double *pows_shared = qmckl_malloc_device(
+		context, sizeof(double) * (lmax + 3) * 3 * point_num);
 
 #pragma acc data deviceptr(lstart)
 	{
@@ -481,7 +486,7 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 
 	int k = 1;
 #pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
-							   ao_index, lstart)
+						   ao_index, lstart)
 	{
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
 			int ishell_start = nucleus_index[inucl];
@@ -497,177 +502,176 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 	}
 
 #pragma acc data deviceptr(                                                    \
-		ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
-			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
-			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
+	ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,         \
+	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
+	pows_shared, shell_ang_mom, nucleus_range)
 	{
 
-// #pragma acc parallel loop gang worker vector
-// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
+		// #pragma acc parallel loop gang worker vector
+		// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
 
 #pragma acc kernels
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
-				// Compute addresses of subarrays from ipoint
-				// This way, each thread can write to its own poly_vgl and pows
-				// without any race condition
-				double *poly_vgl = poly_vgl_shared + ipoint * 5 * ao_num;
-				double *pows = pows_shared + ipoint * (lmax + 3) * 3;
+			// Compute addresses of subarrays from ipoint
+			// This way, each thread can write to its own poly_vgl and pows
+			// without any race condition
+			double *poly_vgl = poly_vgl_shared + ipoint * 5 * ao_num;
+			double *pows = pows_shared + ipoint * (lmax + 3) * 3;
 
-				double e_coord_0 = coord[0 * point_num + ipoint];
-				double e_coord_1 = coord[1 * point_num + ipoint];
-				double e_coord_2 = coord[2 * point_num + ipoint];
+			double e_coord_0 = coord[0 * point_num + ipoint];
+			double e_coord_1 = coord[1 * point_num + ipoint];
+			double e_coord_2 = coord[2 * point_num + ipoint];
 
-				for (int inucl = 0; inucl < nucl_num; inucl++) {
+			for (int inucl = 0; inucl < nucl_num; inucl++) {
 
-					double n_coord_0 = nucl_coord[0 * nucl_num + inucl];
-					double n_coord_1 = nucl_coord[1 * nucl_num + inucl];
-					double n_coord_2 = nucl_coord[2 * nucl_num + inucl];
+				double n_coord_0 = nucl_coord[0 * nucl_num + inucl];
+				double n_coord_1 = nucl_coord[1 * nucl_num + inucl];
+				double n_coord_2 = nucl_coord[2 * nucl_num + inucl];
 
-					double x = e_coord_0 - n_coord_0;
-					double y = e_coord_1 - n_coord_1;
-					double z = e_coord_2 - n_coord_2;
+				double x = e_coord_0 - n_coord_0;
+				double y = e_coord_1 - n_coord_1;
+				double z = e_coord_2 - n_coord_2;
 
-					double r2 = x * x + y * y + z * z;
+				double r2 = x * x + y * y + z * z;
 
-					if (r2 > cutoff * nucleus_range[inucl]) {
-						continue;
+				if (r2 > cutoff * nucleus_range[inucl]) {
+					continue;
+				}
+
+				// Beginning of ao_polynomial computation (now inlined)
+				double Y1, Y2, Y3;
+				double xy, yz, xz;
+				int c, n;
+				double da, db, dc, dd;
+
+				// Already computed outsite of the ao_polynomial part
+				Y1 = x;
+				Y2 = y;
+				Y3 = z;
+
+				int llmax = nucleus_max_ang_mom[inucl];
+				if (llmax == 0) {
+					poly_vgl[0] = 1.;
+					poly_vgl[1] = 0.;
+					poly_vgl[2] = 0.;
+					poly_vgl[3] = 0.;
+					poly_vgl[4] = 0.;
+
+					int n = 0;
+				} else if (llmax > 0) {
+					// Reset pows to 0 for safety. Then we will write over
+					// the top left submatrix of size (llmax+3)x3. We will
+					// compute indices with llmax and not lmax, so we will
+					// use the (llmax+3)*3 first elements of the array
+					for (int i = 0; i < 3 * (lmax + 3); i++) {
+						pows[i] = 0.;
 					}
 
-					// Beginning of ao_polynomial computation (now inlined)
-					double Y1, Y2, Y3;
-					double xy, yz, xz;
-					int c, n;
-					double da, db, dc, dd;
-
-					// Already computed outsite of the ao_polynomial part
-					Y1 = x;
-					Y2 = y;
-					Y3 = z;
-
-					int llmax = nucleus_max_ang_mom[inucl];
-					if (llmax == 0) {
-						poly_vgl[0] = 1.;
-						poly_vgl[1] = 0.;
-						poly_vgl[2] = 0.;
-						poly_vgl[3] = 0.;
-						poly_vgl[4] = 0.;
-
-						int n = 0;
-					} else if (llmax > 0) {
-						// Reset pows to 0 for safety. Then we will write over
-						// the top left submatrix of size (llmax+3)x3. We will
-						// compute indices with llmax and not lmax, so we will
-						// use the (llmax+3)*3 first elements of the array
-						for (int i = 0; i < 3 * (lmax + 3); i++) {
-							pows[i] = 0.;
-						}
-
-						for (int i = 0; i < 3; i++) {
-							for (int j = 0; j < 3; j++) {
-								pows[i + (llmax + 3) * j] = 1.;
-							}
-						}
-
-						for (int i = 3; i < llmax + 3; i++) {
-							pows[i] = pows[(i - 1)] * Y1;
-							pows[i + (llmax + 3)] =
-								pows[(i - 1) + (llmax + 3)] * Y2;
-							pows[i + 2 * (llmax + 3)] =
-								pows[(i - 1) + 2 * (llmax + 3)] * Y3;
-						}
-
-						for (int i = 0; i < 5; i++) {
-							for (int j = 0; j < 4; j++) {
-								poly_vgl[i + 5 * j] = 0.;
-							}
-						}
-
-						poly_vgl[0] = 1.;
-
-						poly_vgl[5] = pows[3];
-						poly_vgl[6] = 1.;
-
-						poly_vgl[10] = pows[3 + (llmax + 3)];
-						poly_vgl[12] = 1.;
-
-						poly_vgl[15] = pows[3 + 2 * (llmax + 3)];
-						poly_vgl[18] = 1.;
-
-						n = 3;
-					}
-
-					// l>=2
-					dd = 2.;
-					for (int d = 2; d <= llmax; d++) {
-
-						da = dd;
-						for (int a = d; a >= 0; a--) {
-
-							db = dd - da;
-							for (int b = d - a; b >= 0; b--) {
-
-								int c = d - a - b;
-								dc = dd - da - db;
-								n = n + 1;
-
-								xy =
-									pows[(a + 2)] * pows[(b + 2) + (llmax + 3)];
-								yz = pows[(b + 2) + (llmax + 3)] *
-									 pows[(c + 2) + 2 * (llmax + 3)];
-								xz = pows[(a + 2)] *
-									 pows[(c + 2) + 2 * (llmax + 3)];
-
-								poly_vgl[5 * (n)] =
-									xy * pows[c + 2 + 2 * (llmax + 3)];
-
-								xy = dc * xy;
-								xz = db * xz;
-								yz = da * yz;
-
-								poly_vgl[1 + 5 * n] = pows[a + 1] * yz;
-								poly_vgl[2 + 5 * n] =
-									pows[b + 1 + (llmax + 3)] * xz;
-								poly_vgl[3 + 5 * n] =
-									pows[c + 1 + 2 * (llmax + 3)] * xy;
-
-								poly_vgl[4 + 5 * n] =
-									(da - 1.) * pows[a] * yz +
-									(db - 1.) * pows[b + (llmax + 3)] * xz +
-									(dc - 1.) * pows[c + 2 * (llmax + 3)] * xy;
-
-								db -= 1.;
-							}
-							da -= 1.;
-						}
-						dd += 1.;
-					}
-					// End of ao_polynomial computation (now inlined)
-					// poly_vgl is now set from here
-
-					int ishell_start = nucleus_index[inucl];
-					int ishell_end =
-						nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
-
-					// Loop over shells
-					for (int ishell = ishell_start; ishell <= ishell_end;
-						 ishell++) {
-						int k = ao_index[ishell] - 1;
-						int l = shell_ang_mom[ishell];
-
-						for (int il = lstart[l] - 1; il <= lstart[l + 1] - 2;
-							 il++) {
-
-							// value
-							ao_value[k + ipoint * ao_num] =
-								poly_vgl[il * 5 + 0] *
-								shell_vgl[ishell + 0 * shell_num +
-										  ipoint * shell_num * 5] *
-								ao_factor[k];
-
-							k = k + 1;
+					for (int i = 0; i < 3; i++) {
+						for (int j = 0; j < 3; j++) {
+							pows[i + (llmax + 3) * j] = 1.;
 						}
 					}
+
+					for (int i = 3; i < llmax + 3; i++) {
+						pows[i] = pows[(i - 1)] * Y1;
+						pows[i + (llmax + 3)] =
+							pows[(i - 1) + (llmax + 3)] * Y2;
+						pows[i + 2 * (llmax + 3)] =
+							pows[(i - 1) + 2 * (llmax + 3)] * Y3;
+					}
+
+					for (int i = 0; i < 5; i++) {
+						for (int j = 0; j < 4; j++) {
+							poly_vgl[i + 5 * j] = 0.;
+						}
+					}
+
+					poly_vgl[0] = 1.;
+
+					poly_vgl[5] = pows[3];
+					poly_vgl[6] = 1.;
+
+					poly_vgl[10] = pows[3 + (llmax + 3)];
+					poly_vgl[12] = 1.;
+
+					poly_vgl[15] = pows[3 + 2 * (llmax + 3)];
+					poly_vgl[18] = 1.;
+
+					n = 3;
+				}
+
+				// l>=2
+				dd = 2.;
+				for (int d = 2; d <= llmax; d++) {
+
+					da = dd;
+					for (int a = d; a >= 0; a--) {
+
+						db = dd - da;
+						for (int b = d - a; b >= 0; b--) {
+
+							int c = d - a - b;
+							dc = dd - da - db;
+							n = n + 1;
+
+							xy = pows[(a + 2)] * pows[(b + 2) + (llmax + 3)];
+							yz = pows[(b + 2) + (llmax + 3)] *
+								 pows[(c + 2) + 2 * (llmax + 3)];
+							xz =
+								pows[(a + 2)] * pows[(c + 2) + 2 * (llmax + 3)];
+
+							poly_vgl[5 * (n)] =
+								xy * pows[c + 2 + 2 * (llmax + 3)];
+
+							xy = dc * xy;
+							xz = db * xz;
+							yz = da * yz;
+
+							poly_vgl[1 + 5 * n] = pows[a + 1] * yz;
+							poly_vgl[2 + 5 * n] =
+								pows[b + 1 + (llmax + 3)] * xz;
+							poly_vgl[3 + 5 * n] =
+								pows[c + 1 + 2 * (llmax + 3)] * xy;
+
+							poly_vgl[4 + 5 * n] =
+								(da - 1.) * pows[a] * yz +
+								(db - 1.) * pows[b + (llmax + 3)] * xz +
+								(dc - 1.) * pows[c + 2 * (llmax + 3)] * xy;
+
+							db -= 1.;
+						}
+						da -= 1.;
+					}
+					dd += 1.;
+				}
+				// End of ao_polynomial computation (now inlined)
+				// poly_vgl is now set from here
+
+				int ishell_start = nucleus_index[inucl];
+				int ishell_end =
+					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+
+				// Loop over shells
+				for (int ishell = ishell_start; ishell <= ishell_end;
+					 ishell++) {
+					int k = ao_index[ishell] - 1;
+					int l = shell_ang_mom[ishell];
+
+					for (int il = lstart[l] - 1; il <= lstart[l + 1] - 2;
+						 il++) {
+
+						// value
+						ao_value[k + ipoint * ao_num] =
+							poly_vgl[il * 5 + 0] *
+							shell_vgl[ishell + 0 * shell_num +
+									  ipoint * shell_num * 5] *
+							ao_factor[k];
+
+						k = k + 1;
+					}
+				}
 			}
 		}
 		// End of outer compute loop
@@ -711,7 +715,9 @@ qmckl_exit_code qmckl_provide_ao_basis_ao_value_device(qmckl_context context) {
 		/* Allocate array */
 		if (ctx->ao_basis.ao_value == NULL) {
 
-			double *ao_value = (double *)qmckl_malloc_device(context, ctx->ao_basis.ao_num * ctx->point.num * sizeof(double));
+			double *ao_value = (double *)qmckl_malloc_device(
+				context,
+				ctx->ao_basis.ao_num * ctx->point.num * sizeof(double));
 
 			if (ao_value == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,

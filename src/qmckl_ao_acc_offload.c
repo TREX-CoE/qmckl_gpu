@@ -179,17 +179,16 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_acc_offload(
 	int expo_per_nucleus_size_1 = expo_per_nucleus.size[1];
 
 #pragma acc data copyin(                                                       \
-		prim_num_per_nucleus[0 : nucl_num], coord[0 : 3 * point_num],          \
-			nucl_coord[0 : 3 * nucl_num], nucleus_index[0 : nucl_num],         \
-			nucleus_shell_num[0 : nucl_num], nucleus_range[0 : nucl_num],      \
-			nucleus_max_ang_mom[0 : nucl_num], shell_ang_mom[0 : shell_num],   \
-			ao_factor[0 : ao_num],                                             \
-			expo_per_nucleus_data[0 : expo_per_nucleus_size_0 *                \
-									  expo_per_nucleus_size_1],                \
-			coef_mat[0 : nucl_num * shell_max * prim_max],                     \
-			ao_index[0 : shell_num + 1])                                       \
-	create(poly_vgl_shared[0 : point_num * 5 * size_max])                      \
-	copy(ao_vgl[0 : point_num * 5 * ao_num])
+	prim_num_per_nucleus [0:nucl_num], coord [0:3 * point_num],                \
+	nucl_coord [0:3 * nucl_num], nucleus_index [0:nucl_num],                   \
+	nucleus_shell_num [0:nucl_num], nucleus_range [0:nucl_num],                \
+	nucleus_max_ang_mom [0:nucl_num], shell_ang_mom [0:shell_num],             \
+	ao_factor [0:ao_num],                                                      \
+	expo_per_nucleus_data                                                      \
+	[0:expo_per_nucleus_size_0 * expo_per_nucleus_size_1],                     \
+	coef_mat [0:nucl_num * shell_max * prim_max], ao_index [0:shell_num + 1])  \
+	create(poly_vgl_shared [0:point_num * 5 * size_max])                       \
+		copy(ao_vgl [0:point_num * 5 * ao_num])
 	{
 
 #pragma acc parallel loop independent gang worker vector

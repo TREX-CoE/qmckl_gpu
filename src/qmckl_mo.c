@@ -30,7 +30,9 @@ qmckl_exit_code qmckl_provide_mo_basis_mo_vgl_device(qmckl_context context) {
 		/* Allocate array */
 		if (ctx->mo_basis.mo_vgl == NULL) {
 
-			double *mo_vgl = (double *)qmckl_malloc_device(context, 5 * ctx->mo_basis.mo_num * ctx->point.num * sizeof(double));
+			double *mo_vgl = (double *)qmckl_malloc_device(
+				context,
+				5 * ctx->mo_basis.mo_num * ctx->point.num * sizeof(double));
 
 			if (mo_vgl == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -87,7 +89,9 @@ qmckl_exit_code qmckl_provide_mo_basis_mo_value_device(qmckl_context context) {
 		/* Allocate array */
 		if (ctx->mo_basis.mo_value == NULL) {
 
-			double *mo_value = (double *)qmckl_malloc_device(context, ctx->mo_basis.mo_num * ctx->point.num * sizeof(double));
+			double *mo_value = (double *)qmckl_malloc_device(
+				context,
+				ctx->mo_basis.mo_num * ctx->point.num * sizeof(double));
 
 			if (mo_value == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,

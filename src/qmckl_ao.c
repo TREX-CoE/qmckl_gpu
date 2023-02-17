@@ -28,8 +28,9 @@ qmckl_provide_ao_basis_shell_vgl_device(qmckl_context_device context) {
 		/* Allocate array */
 		if (ctx->ao_basis.shell_vgl == NULL) {
 
-			double *shell_vgl =
-				(double *)qmckl_malloc_device(context, ctx->ao_basis.shell_num * 5 * ctx->point.num * sizeof(double));
+			double *shell_vgl = (double *)qmckl_malloc_device(
+				context,
+				ctx->ao_basis.shell_num * 5 * ctx->point.num * sizeof(double));
 
 			if (shell_vgl == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -90,7 +91,9 @@ qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context) {
 		/* Allocate array */
 		if (ctx->ao_basis.ao_vgl == NULL) {
 
-			double *ao_vgl = (double *)qmckl_malloc_device(context, ctx->ao_basis.ao_num * 5 * ctx->point.num * sizeof(double));
+			double *ao_vgl = (double *)qmckl_malloc_device(
+				context,
+				ctx->ao_basis.ao_num * 5 * ctx->point.num * sizeof(double));
 
 			if (ao_vgl == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -130,7 +133,6 @@ qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context) {
 
 	return QMCKL_SUCCESS;
 }
-
 
 //**********
 // GET

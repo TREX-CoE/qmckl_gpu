@@ -9,8 +9,7 @@
 // ALLOCS / FREES
 //**********
 
-void *qmckl_malloc_device(qmckl_context_device context,
-						  size_t size) {
+void *qmckl_malloc_device(qmckl_context_device context, size_t size) {
 
 	assert(qmckl_context_check((qmckl_context)context) != QMCKL_NULL_CONTEXT);
 

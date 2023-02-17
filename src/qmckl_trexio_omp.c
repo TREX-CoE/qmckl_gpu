@@ -154,8 +154,8 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
 
-	ctx->ao_basis.prim_num_per_nucleus =
-		(int32_t *)qmckl_malloc_device(context, ctx->nucleus.num * sizeof(int32_t));
+	ctx->ao_basis.prim_num_per_nucleus = (int32_t *)qmckl_malloc_device(
+		context, ctx->nucleus.num * sizeof(int32_t));
 
 	/* Find max number of primitives per nucleus */
 
@@ -172,9 +172,11 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 	int64_t *shell_max_ptr = &shell_max;
 	int64_t *prim_max_ptr = &prim_max;
 
-#pragma omp target map(tofrom : shell_max_ptr[ : 1], prim_max_ptr[ : 1])       \
+#pragma omp target map(tofrom                                                  \
+					   : shell_max_ptr[:1], prim_max_ptr                       \
+					   [:1])                                                   \
 	is_device_ptr(nucleus_shell_num, nucleus_index, shell_prim_num,            \
-					  prim_num_per_nucleus)
+				  prim_num_per_nucleus)
 	{
 
 		for (int inucl = 0; inucl < nucl_num; ++inucl) {
@@ -210,9 +212,11 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 	// struct combined expo[prim_max];
 	// ... gets replaced by :
 	double *expo_expo = qmckl_malloc_device(context, prim_max * sizeof(double));
-	int64_t *expo_index = qmckl_malloc_device(context, prim_max * sizeof(double));
+	int64_t *expo_index =
+		qmckl_malloc_device(context, prim_max * sizeof(double));
 
-	double *coef = qmckl_malloc_device(context, shell_max * prim_max * sizeof(double));
+	double *coef =
+		qmckl_malloc_device(context, shell_max * prim_max * sizeof(double));
 	double *newcoef = qmckl_malloc_device(context, prim_max * sizeof(double));
 
 	int64_t *newidx = qmckl_malloc_device(context, prim_max * sizeof(int64_t));
@@ -229,10 +233,10 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 	int coef_per_nucleus_s1 = ctx->ao_basis.coef_per_nucleus.size[1];
 
 #pragma omp target is_device_ptr(                                              \
-		expo_expo, expo_index, coef, newcoef, nucleus_index, shell_prim_index, \
-			nucleus_shell_num, exponent, coefficient_normalized,               \
-			shell_prim_num, expo_per_nucleus_data, coef_per_nucleus_data,      \
-			prim_num_per_nucleus, newidx)
+	expo_expo, expo_index, coef, newcoef, nucleus_index, shell_prim_index,     \
+	nucleus_shell_num, exponent, coefficient_normalized, shell_prim_num,       \
+	expo_per_nucleus_data, coef_per_nucleus_data, prim_num_per_nucleus,        \
+	newidx)
 	{
 
 		for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
@@ -383,8 +387,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 
 	/* nucleus_prim_index */
 	{
-		ctx->ao_basis.nucleus_prim_index =
-			(int64_t *)qmckl_malloc_device(context, (ctx->nucleus.num + (int64_t)1) * sizeof(int64_t));
+		ctx->ao_basis.nucleus_prim_index = (int64_t *)qmckl_malloc_device(
+			context, (ctx->nucleus.num + (int64_t)1) * sizeof(int64_t));
 
 		if (ctx->ao_basis.nucleus_prim_index == NULL) {
 			return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -399,7 +403,7 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 		int prim_num = ctx->ao_basis.prim_num;
 
 #pragma omp target is_device_ptr(nucleus_index, nucleus_prim_index,            \
-									 shell_prim_index)
+								 shell_prim_index)
 		{
 #pragma omp parallel for
 			for (int64_t i = 0; i < nucl_num; ++i) {
@@ -413,8 +417,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 
 	/* Normalize coefficients */
 	{
-		ctx->ao_basis.coefficient_normalized =
-			(double *)qmckl_malloc_device(context, ctx->ao_basis.prim_num * sizeof(double));
+		ctx->ao_basis.coefficient_normalized = (double *)qmckl_malloc_device(
+			context, ctx->ao_basis.prim_num * sizeof(double));
 
 		if (ctx->ao_basis.coefficient_normalized == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -433,8 +437,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 		int shell_num = ctx->ao_basis.shell_num;
 
 #pragma omp target is_device_ptr(shell_prim_index, shell_prim_num,             \
-									 coefficient_normalized, coefficient,      \
-									 prim_factor, shell_factor)
+								 coefficient_normalized, coefficient,          \
+								 prim_factor, shell_factor)
 		{
 			for (int64_t ishell = 0; ishell < shell_num; ++ishell) {
 				for (int64_t iprim = shell_prim_index[ishell];
@@ -450,8 +454,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 
 	/* Find max angular momentum on each nucleus */
 	{
-		ctx->ao_basis.nucleus_max_ang_mom =
-			(int32_t *)qmckl_malloc_device(context, ctx->nucleus.num * sizeof(int32_t));
+		ctx->ao_basis.nucleus_max_ang_mom = (int32_t *)qmckl_malloc_device(
+			context, ctx->nucleus.num * sizeof(int32_t));
 
 		if (ctx->ao_basis.nucleus_max_ang_mom == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -466,7 +470,7 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 		int32_t *shell_ang_mom = ctx->ao_basis.shell_ang_mom;
 
 #pragma omp target is_device_ptr(nucleus_max_ang_mom, nucleus_index,           \
-									 nucleus_shell_num, shell_ang_mom)
+								 nucleus_shell_num, shell_ang_mom)
 		{
 #pragma omp parallel for
 			for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
@@ -487,9 +491,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 	   The distance is obtained by sqrt(log(cutoff)*range) */
 	{
 		if (ctx->ao_basis.type == 'G') {
-			ctx->ao_basis.nucleus_range =
-				(double *)qmckl_malloc_device(context, ctx->nucleus.num * sizeof(double));
-
+			ctx->ao_basis.nucleus_range = (double *)qmckl_malloc_device(
+				context, ctx->nucleus.num * sizeof(double));
 
 			if (ctx->ao_basis.nucleus_range == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -507,8 +510,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 			int nucleus_num = ctx->nucleus.num;
 
 #pragma omp target is_device_ptr(nucleus_range, nucleus_index,                 \
-									 nucleus_shell_num, shell_prim_index,      \
-									 shell_prim_num, exponent)
+								 nucleus_shell_num, shell_prim_index,          \
+								 shell_prim_num, exponent)
 			{
 				for (int64_t inucl = 0; inucl < nucleus_num; ++inucl) {
 					nucleus_range[inucl] = 0.;
@@ -548,8 +551,8 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 
 	int device_id = qmckl_get_device_id(context);
 
-	ctx->ao_basis.prim_num_per_nucleus =
-		(int32_t *)qmckl_malloc_device(context, ctx->nucleus.num * sizeof(int32_t));
+	ctx->ao_basis.prim_num_per_nucleus = (int32_t *)qmckl_malloc_device(
+		context, ctx->nucleus.num * sizeof(int32_t));
 
 	/* Find max number of primitives per nucleus */
 
@@ -566,9 +569,11 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 	int64_t *shell_max_ptr = &shell_max;
 	int64_t *prim_max_ptr = &prim_max;
 
-#pragma omp target map(tofrom : shell_max_ptr[ : 1], prim_max_ptr[ : 1])       \
+#pragma omp target map(tofrom                                                  \
+					   : shell_max_ptr[:1], prim_max_ptr                       \
+					   [:1])                                                   \
 	is_device_ptr(nucleus_shell_num, nucleus_index, shell_prim_num,            \
-					  prim_num_per_nucleus)
+				  prim_num_per_nucleus)
 	{
 
 		for (int inucl = 0; inucl < nucl_num; ++inucl) {
@@ -604,9 +609,11 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 	// struct combined expo[prim_max];
 	// ... gets replaced by :
 	double *expo_expo = qmckl_malloc_device(context, prim_max * sizeof(double));
-	int64_t *expo_index = qmckl_malloc_device(context, prim_max * sizeof(double));
+	int64_t *expo_index =
+		qmckl_malloc_device(context, prim_max * sizeof(double));
 
-	double *coef = qmckl_malloc_device(context, shell_max * prim_max * sizeof(double));
+	double *coef =
+		qmckl_malloc_device(context, shell_max * prim_max * sizeof(double));
 	double *newcoef = qmckl_malloc_device(context, prim_max * sizeof(double));
 
 	int64_t *newidx = qmckl_malloc_device(context, prim_max * sizeof(int64_t));
@@ -623,10 +630,10 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 	int coef_per_nucleus_s1 = ctx->ao_basis.coef_per_nucleus.size[1];
 
 #pragma omp target is_device_ptr(                                              \
-		expo_expo, expo_index, coef, newcoef, nucleus_index, shell_prim_index, \
-			nucleus_shell_num, exponent, coefficient_normalized,               \
-			shell_prim_num, expo_per_nucleus_data, coef_per_nucleus_data,      \
-			prim_num_per_nucleus, newidx)
+	expo_expo, expo_index, coef, newcoef, nucleus_index, shell_prim_index,     \
+	nucleus_shell_num, exponent, coefficient_normalized, shell_prim_num,       \
+	expo_per_nucleus_data, coef_per_nucleus_data, prim_num_per_nucleus,        \
+	newidx)
 	{
 
 		for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
@@ -776,8 +783,8 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 	/* nucleus_prim_index */
 	{
 
-		ctx->ao_basis.nucleus_prim_index =
-			(int64_t *)qmckl_malloc_device(context, (ctx->nucleus.num + (int64_t)1) * sizeof(int64_t));
+		ctx->ao_basis.nucleus_prim_index = (int64_t *)qmckl_malloc_device(
+			context, (ctx->nucleus.num + (int64_t)1) * sizeof(int64_t));
 
 		if (ctx->ao_basis.nucleus_prim_index == NULL) {
 			return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -791,7 +798,7 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 
 		int prim_num = ctx->ao_basis.prim_num;
 #pragma omp target is_device_ptr(nucleus_index, nucleus_prim_index,            \
-									 shell_prim_index)
+								 shell_prim_index)
 		{
 #pragma omp parallel for
 			for (int64_t i = 0; i < nucl_num; ++i) {
@@ -806,8 +813,8 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 	/* Normalize coefficients */
 	{
 
-		ctx->ao_basis.coefficient_normalized =
-			(double *)qmckl_malloc_device(context, ctx->ao_basis.prim_num * sizeof(double));
+		ctx->ao_basis.coefficient_normalized = (double *)qmckl_malloc_device(
+			context, ctx->ao_basis.prim_num * sizeof(double));
 
 		if (ctx->ao_basis.coefficient_normalized == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -826,8 +833,8 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 		int shell_num = ctx->ao_basis.shell_num;
 
 #pragma omp target is_device_ptr(shell_prim_index, shell_prim_num,             \
-									 coefficient_normalized, coefficient,      \
-									 prim_factor, shell_factor)
+								 coefficient_normalized, coefficient,          \
+								 prim_factor, shell_factor)
 		{
 			for (int64_t ishell = 0; ishell < shell_num; ++ishell) {
 				for (int64_t iprim = shell_prim_index[ishell];
@@ -844,8 +851,8 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 	/* Find max angular momentum on each nucleus */
 	{
 
-		ctx->ao_basis.nucleus_max_ang_mom =
-			(int32_t *)qmckl_malloc_device(context, ctx->nucleus.num * sizeof(int32_t));
+		ctx->ao_basis.nucleus_max_ang_mom = (int32_t *)qmckl_malloc_device(
+			context, ctx->nucleus.num * sizeof(int32_t));
 
 		if (ctx->ao_basis.nucleus_max_ang_mom == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -860,7 +867,7 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 		int32_t *shell_ang_mom = ctx->ao_basis.shell_ang_mom;
 
 #pragma omp target is_device_ptr(nucleus_max_ang_mom, nucleus_index,           \
-									 nucleus_shell_num, shell_ang_mom)
+								 nucleus_shell_num, shell_ang_mom)
 		{
 #pragma omp parallel for
 			for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
@@ -882,8 +889,8 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 	{
 		if (ctx->ao_basis.type == 'G') {
 
-			ctx->ao_basis.nucleus_range =
-				(double *)qmckl_malloc_device(context, ctx->nucleus.num * sizeof(double));
+			ctx->ao_basis.nucleus_range = (double *)qmckl_malloc_device(
+				context, ctx->nucleus.num * sizeof(double));
 
 			if (ctx->ao_basis.nucleus_range == NULL) {
 				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
@@ -901,8 +908,8 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 			int nucleus_num = ctx->nucleus.num;
 
 #pragma omp target is_device_ptr(nucleus_range, nucleus_index,                 \
-									 nucleus_shell_num, shell_prim_index,      \
-									 shell_prim_num, exponent)
+								 nucleus_shell_num, shell_prim_index,          \
+								 shell_prim_num, exponent)
 			{
 				for (int64_t inucl = 0; inucl < nucleus_num; ++inucl) {
 					nucleus_range[inucl] = 0.;
@@ -944,7 +951,8 @@ qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context_device context) {
 	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
-	double *new_array = (double *)qmckl_malloc_device(context, ctx->ao_basis.ao_num * ctx->mo_basis.mo_num * sizeof(double));
+	double *new_array = (double *)qmckl_malloc_device(
+		context, ctx->ao_basis.ao_num * ctx->mo_basis.mo_num * sizeof(double));
 	if (new_array == NULL) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
 							  "qmckl_finalize_mo_basis_device", NULL);
