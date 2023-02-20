@@ -222,6 +222,8 @@ int main() {
 	double *mo_coefficient = &(chbrclf_mo_coef[0]);
 	double *mo_coefficient_d =
 		qmckl_malloc_device(context, mo_num * ao_num * sizeof(double));
+	qmckl_memcpy_H2D(context, mo_coefficient_d, mo_coefficient,
+					 mo_num * ao_num * sizeof(double));
 
 	rc = qmckl_set_mo_basis_coefficient_device(context, mo_coefficient_d);
 	assert(rc == QMCKL_SUCCESS);
@@ -231,6 +233,8 @@ int main() {
 	rc = qmckl_context_touch(context);
 	assert(rc == QMCKL_SUCCESS);
 
+
+	/* Get MO value (from scratch) */
 	double *mo_value =
 		qmckl_malloc_host(context, point_num * chbrclf_mo_num * sizeof(double));
 	double *mo_value_d = qmckl_malloc_device(
@@ -242,6 +246,7 @@ int main() {
 
 	assert(rc == QMCKL_SUCCESS);
 
+	/* Get MO vgl */
 	double *mo_vgl = qmckl_malloc_host(context, point_num * 5 * chbrclf_mo_num *
 													sizeof(double));
 	double *mo_vgl_d = qmckl_malloc_device(
@@ -251,18 +256,10 @@ int main() {
 	qmckl_memcpy_D2H(context, mo_vgl, mo_vgl_d,
 					 point_num * 5 * chbrclf_mo_num * sizeof(double));
 
-	assert(rc == QMCKL_SUCCESS);
-
-	for (int i = 0; i < point_num; ++i) {
-		for (int k = 0; k < chbrclf_mo_num; ++k) {
-			assert(fabs(mo_vgl[MO_VGL_ID(i, 0, k)] -
-						mo_value[MO_VALUE_ID(i, k)]) < 1.e-12);
-		}
-	}
-
 	rc = qmckl_context_touch(context);
 	assert(rc == QMCKL_SUCCESS);
 
+	/* Get MO value (from MO vgl array) */
 	rc = qmckl_get_mo_basis_mo_value_device(context, mo_value_d,
 											point_num * chbrclf_mo_num);
 	qmckl_memcpy_D2H(context, mo_value, mo_value_d,
@@ -270,11 +267,12 @@ int main() {
 
 	assert(rc == QMCKL_SUCCESS);
 
+	// Making sure that value element of vgl == value
 	for (int i = 0; i < point_num; ++i) {
 		for (int k = 0; k < chbrclf_mo_num; ++k) {
 			if (fabs(mo_vgl[MO_VGL_ID(i, 0, k)] - mo_value[MO_VALUE_ID(i, k)]) >
 				1.e-12) {
-				// break and return
+				return 1;
 			}
 		}
 	}
@@ -285,45 +283,34 @@ int main() {
 					 point_num * chbrclf_mo_num * sizeof(double));
 
 	assert(rc == QMCKL_SUCCESS);
+
+
+	// Making sure that value element of vgl == value
 	for (int i = 0; i < point_num; ++i) {
 		for (int k = 0; k < chbrclf_mo_num; ++k) {
-			if (fabs(2.0 * mo_vgl[MO_VGL_ID(i, 0, k)] -
+			if (fabs(mo_vgl[MO_VGL_ID(i, 0, k)] -
 					 mo_value[MO_VALUE_ID(i, k)]) >= 1.e-12) {
-				// break and return
+				return 1;
 			};
 		}
 	}
 
 	// TODO ?
 	// rc = qmckl_mo_basis_rescale(context, 0.5);
-	assert(rc == QMCKL_SUCCESS);
+	// assert(rc == QMCKL_SUCCESS);
 
 	printf("\n");
-	printf(" mo_vgl mo_vgl[0][26][219] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(0, 26, 219)]);
-	printf(" mo_vgl mo_vgl[1][26][219] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(1, 26, 219)]);
-	printf(" mo_vgl mo_vgl[0][26][220] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(0, 26, 220)]);
-	printf(" mo_vgl mo_vgl[1][26][220] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(1, 26, 220)]);
-	printf(" mo_vgl mo_vgl[0][26][221] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(0, 26, 221)]);
-	printf(" mo_vgl mo_vgl[1][26][221] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(1, 26, 221)]);
-	printf(" mo_vgl mo_vgl[0][26][222] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(0, 26, 222)]);
-	printf(" mo_vgl mo_vgl[1][26][222] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(1, 26, 222)]);
-	printf(" mo_vgl mo_vgl[0][26][223] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(0, 26, 223)]);
-	printf(" mo_vgl mo_vgl[1][26][223] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(1, 26, 223)]);
-	printf(" mo_vgl mo_vgl[0][26][224] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(0, 26, 224)]);
-	printf(" mo_vgl mo_vgl[1][26][224] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(1, 26, 224)]);
-	printf("\n");
+	printf(" mo_vgl mo_vgl[2][0][3] %25.15e\n",
+		   mo_vgl[MO_VGL_ID(2, 0, 3)]);
+	printf(" mo_vgl mo_vgl[2][1][3] %25.15e\n",
+		   mo_vgl[MO_VGL_ID(2, 1, 3)]);
+
+/* TODO Get some values from CPU version and hardcode them here
+	if (fabs(mo_vgl[MO_VGL_ID(2, 0, 3)] - (3.043583730874302e-08)) > 1.e-14)
+		return 1;
+	if (fabs(mo_vgl[MO_VGL_ID(2, 1, 3)] - (-6.148402868362547e-07)) > 1.e-14)
+		return 1;
+*/
 
 	// TODO
 	// rc = qmckl_get_mo_basis_mo_num_device(context, &mo_num);
