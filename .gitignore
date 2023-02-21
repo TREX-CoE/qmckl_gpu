@@ -31,11 +31,9 @@ ltmain.sh
 missing
 src/.deps
 src/.libs
-qmckl
 tests/*.o
 tests/*.trs
 tests/Makefile
 tests/Makefile.in
 tests/*.log
-qmckl
 .gitmodules

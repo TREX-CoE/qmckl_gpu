@@ -10,8 +10,16 @@
 #include "../include/qmckl_gpu.h"
 #include <omp.h>
 
+#define walk_num chbrclf_walk_num
+#define elec_num chbrclf_elec_num
+#define shell_num chbrclf_shell_num
+#define ao_num chbrclf_ao_num
+#define prim_num chbrclf_prim_num
+
+#define AO_VALUE_ID(x, y) ao_num *x + y
 #define MO_VALUE_ID(x, y) chbrclf_mo_num *x + y
 #define MO_VGL_ID(x, y, z) 5 * chbrclf_mo_num *x + chbrclf_mo_num *y + z
+#define AO_VGL_ID(x, y, z) 5 * ao_num *x + ao_num *y + z
 
 int main() {
 	qmckl_context_device context;
@@ -21,12 +29,6 @@ int main() {
 		exit(1);
 	}
 	context = qmckl_context_create_device(omp_get_default_device());
-
-#define walk_num chbrclf_walk_num
-#define elec_num chbrclf_elec_num
-#define shell_num chbrclf_shell_num
-#define ao_num chbrclf_ao_num
-#define prim_num chbrclf_prim_num
 
 	// Put nucleus stuff in CPU arrays
 	int64_t elec_up_num = chbrclf_elec_up_num;
@@ -44,6 +46,13 @@ int main() {
 		qmckl_malloc_device(context, nucl_num * sizeof(double));
 	double *nucl_coord_d =
 		qmckl_malloc_device(context, nucl_num * 3 * sizeof(double));
+
+	qmckl_memcpy_H2D(context, nucl_charge_d, nucl_charge,
+					 nucl_num * sizeof(double));
+	qmckl_memcpy_H2D(context, nucl_coord_d, nucl_coord,
+					 3 * nucl_num * sizeof(double));
+	qmckl_memcpy_H2D(context, elec_coord_d, elec_coord,
+					 3 * point_num * sizeof(double));
 
 	// Set nucleus stuff in context
 
@@ -191,30 +200,79 @@ int main() {
 
 	assert(qmckl_ao_basis_provided(context));
 
-	double *ao_vgl =
-		qmckl_malloc_host(context, point_num * 5 * ao_num * sizeof(double));
+	double *ao_vgl = malloc(point_num * 5 * ao_num * sizeof(double));
 	double *ao_vgl_d =
 		qmckl_malloc_device(context, point_num * 5 * ao_num * sizeof(double));
 
-	double *ao_value =
-		qmckl_malloc_host(context, point_num * 5 * ao_num * sizeof(double));
+	double *ao_value = malloc(point_num * ao_num * sizeof(double));
 	double *ao_value_d =
-		qmckl_malloc_device(context, point_num * 5 * ao_num * sizeof(double));
+		qmckl_malloc_device(context, point_num * ao_num * sizeof(double));
 
 	rc = qmckl_get_ao_basis_ao_vgl_device(context, ao_vgl_d,
 										  (int64_t)5 * point_num * ao_num);
 	qmckl_memcpy_D2H(context, ao_vgl, ao_vgl_d,
 					 point_num * 5 * ao_num * sizeof(double));
 
-	// We thus make sure that ao_value is set
-	rc = qmckl_get_ao_basis_ao_value_device(context, ao_vgl_d,
+	/* From here, context is completely initialized, we just
+	 * make sure that the ao_value array is set (because we
+	 * have computed ao_vgl) */
+
+	rc = qmckl_get_ao_basis_ao_value_device(context, ao_value_d,
 											(int64_t)point_num * ao_num);
 	qmckl_memcpy_D2H(context, ao_value, ao_value_d,
 					 point_num * ao_num * sizeof(double));
 
+	/* Check values from AO, so as to make sure that if we have errors in
+	 * MO later, they do come from MO */
+
+	printf("\n");
+	printf(" ao_vgl ao_vgl[26][0][219] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 0, 219)]);
+	printf(" ao_vgl ao_vgl[26][1][219] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 1, 219)]);
+	printf(" ao_vgl ao_vgl[26][2][219] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 2, 219)]);
+	printf(" ao_vgl ao_vgl[26][3][219] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 3, 219)]);
+	printf(" ao_vgl ao_vgl[26][4][219] %25.15e\n",
+		   ao_vgl[AO_VGL_ID(26, 4, 219)]);
+	printf("\n");
+
+	if (fabs(ao_vgl[AO_VGL_ID(26, 0, 219)] - (1.020298798341620e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 1, 219)] - (-4.928035238010602e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 2, 219)] - (-4.691009312035986e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 219)] - (1.449504046436699e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 219)] - (4.296442111843973e-07)) > 1.e-14)
+		return 1;
+
+	printf(" ao_value ao_value[26][219] %25.15e\n",
+		   ao_value[AO_VALUE_ID(26, 219)]);
+	printf(" ao_value ao_value[26][220] %25.15e\n",
+		   ao_value[AO_VALUE_ID(26, 220)]);
+	printf(" ao_value ao_value[26][221] %25.15e\n",
+		   ao_value[AO_VALUE_ID(26, 221)]);
+	printf(" ao_value ao_value[26][222] %25.15e\n",
+		   ao_value[AO_VALUE_ID(26, 222)]);
+	printf("\n");
+
+	if (fabs(ao_value[AO_VALUE_ID(26, 219)] - (1.020298798341620e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_value[AO_VALUE_ID(26, 220)] - (1.516643537739178e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_value[AO_VALUE_ID(26, 221)] - (-4.686370882518819e-09)) >
+		1.e-14)
+		return 1;
+	if (fabs(ao_value[AO_VALUE_ID(26, 222)] - (7.514816980753531e-09)) > 1.e-14)
+		return 1;
+
 	assert(rc == QMCKL_SUCCESS);
 
 	/* Set up MO data */
+
 	int64_t mo_num = chbrclf_mo_num;
 	rc = qmckl_set_mo_basis_mo_num(context, mo_num);
 	assert(rc == QMCKL_SUCCESS);
@@ -233,10 +291,8 @@ int main() {
 	rc = qmckl_context_touch(context);
 	assert(rc == QMCKL_SUCCESS);
 
-
 	/* Get MO value (from scratch) */
-	double *mo_value =
-		qmckl_malloc_host(context, point_num * chbrclf_mo_num * sizeof(double));
+	double *mo_value = malloc(point_num * chbrclf_mo_num * sizeof(double));
 	double *mo_value_d = qmckl_malloc_device(
 		context, point_num * chbrclf_mo_num * sizeof(double));
 	rc = qmckl_get_mo_basis_mo_value_device(context, mo_value_d,
@@ -247,14 +303,23 @@ int main() {
 	assert(rc == QMCKL_SUCCESS);
 
 	/* Get MO vgl */
-	double *mo_vgl = qmckl_malloc_host(context, point_num * 5 * chbrclf_mo_num *
-													sizeof(double));
+	double *mo_vgl = malloc(point_num * 5 * chbrclf_mo_num * sizeof(double));
 	double *mo_vgl_d = qmckl_malloc_device(
 		context, point_num * 5 * chbrclf_mo_num * sizeof(double));
 	rc = qmckl_get_mo_basis_mo_vgl_device(context, mo_vgl_d,
 										  point_num * 5 * chbrclf_mo_num);
 	qmckl_memcpy_D2H(context, mo_vgl, mo_vgl_d,
 					 point_num * 5 * chbrclf_mo_num * sizeof(double));
+
+	// Making sure that value element of vgl == value
+	for (int i = 0; i < point_num; ++i) {
+		for (int k = 0; k < chbrclf_mo_num; ++k) {
+			if (fabs(mo_vgl[MO_VGL_ID(i, 0, k)] - mo_value[MO_VALUE_ID(i, k)]) >
+				1.e-12) {
+				return 1;
+			}
+		}
+	}
 
 	rc = qmckl_context_touch(context);
 	assert(rc == QMCKL_SUCCESS);
@@ -284,7 +349,6 @@ int main() {
 
 	assert(rc == QMCKL_SUCCESS);
 
-
 	// Making sure that value element of vgl == value
 	for (int i = 0; i < point_num; ++i) {
 		for (int k = 0; k < chbrclf_mo_num; ++k) {
@@ -295,22 +359,65 @@ int main() {
 		}
 	}
 
-	// TODO ?
+	// TODO Add support for mo_basis_rescale at some point ?
 	// rc = qmckl_mo_basis_rescale(context, 0.5);
 	// assert(rc == QMCKL_SUCCESS);
 
 	printf("\n");
-	printf(" mo_vgl mo_vgl[2][0][3] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(2, 0, 3)]);
-	printf(" mo_vgl mo_vgl[2][1][3] %25.15e\n",
-		   mo_vgl[MO_VGL_ID(2, 1, 3)]);
+	printf(" mo_vgl mo_vgl[0][0][0] %25.15e\n", mo_vgl[MO_VGL_ID(0, 0, 0)]);
+	printf(" mo_vgl mo_vgl[0][0][1] %25.15e\n", mo_vgl[MO_VGL_ID(0, 0, 1)]);
+	printf(" mo_vgl mo_vgl[0][0][2] %25.15e\n", mo_vgl[MO_VGL_ID(0, 0, 2)]);
+	printf(" mo_vgl mo_vgl[0][0][3] %25.15e\n", mo_vgl[MO_VGL_ID(0, 0, 3)]);
+	printf(" mo_vgl mo_vgl[0][1][0] %25.15e\n", mo_vgl[MO_VGL_ID(0, 1, 0)]);
+	printf(" mo_vgl mo_vgl[0][1][1] %25.15e\n", mo_vgl[MO_VGL_ID(0, 1, 1)]);
+	printf(" mo_vgl mo_vgl[0][1][2] %25.15e\n", mo_vgl[MO_VGL_ID(0, 1, 2)]);
+	printf(" mo_vgl mo_vgl[0][1][3] %25.15e\n", mo_vgl[MO_VGL_ID(0, 1, 3)]);
+	printf(" mo_vgl mo_vgl[0][4][0] %25.15e\n", mo_vgl[MO_VGL_ID(0, 4, 0)]);
+	printf(" mo_vgl mo_vgl[0][4][1] %25.15e\n", mo_vgl[MO_VGL_ID(0, 4, 1)]);
+	printf(" mo_vgl mo_vgl[0][4][2] %25.15e\n", mo_vgl[MO_VGL_ID(0, 4, 2)]);
+	printf(" mo_vgl mo_vgl[0][4][3] %25.15e\n", mo_vgl[MO_VGL_ID(0, 4, 3)]);
+	printf("\n");
 
-/* TODO Get some values from CPU version and hardcode them here
-	if (fabs(mo_vgl[MO_VGL_ID(2, 0, 3)] - (3.043583730874302e-08)) > 1.e-14)
+	/*
+	Expected logs :
+	 mo_vgl mo_vgl[0][0][0]     2.136993056201904e-08
+	 mo_vgl mo_vgl[0][0][1]     5.301876482412777e-08
+	 mo_vgl mo_vgl[0][0][2]    -9.979057209754264e-08
+	 mo_vgl mo_vgl[0][0][3]    -6.159082130225148e-07
+	 mo_vgl mo_vgl[0][1][0]     1.738954130773860e-09
+	 mo_vgl mo_vgl[0][1][1]    -4.046360478166010e-08
+	 mo_vgl mo_vgl[0][1][2]     6.166687071299842e-08
+	 mo_vgl mo_vgl[0][1][3]     1.860432535394803e-07
+	 mo_vgl mo_vgl[0][4][0]    -5.368817513320710e-08
+	 mo_vgl mo_vgl[0][4][1]    -1.465098318223922e-07
+	 mo_vgl mo_vgl[0][4][2]     1.570579313400192e-07
+	 mo_vgl mo_vgl[0][4][3]     1.848343348520137e-06
+	*/
+
+	if (fabs(mo_vgl[MO_VGL_ID(0, 0, 0)] - (2.136993056201904e-08)) > 1.e-14)
 		return 1;
-	if (fabs(mo_vgl[MO_VGL_ID(2, 1, 3)] - (-6.148402868362547e-07)) > 1.e-14)
+	if (fabs(mo_vgl[MO_VGL_ID(0, 0, 1)] - (5.301876482412777e-08)) > 1.e-14)
 		return 1;
-*/
+	if (fabs(mo_vgl[MO_VGL_ID(0, 0, 2)] - (-9.979057209754264e-08)) > 1.e-14)
+		return 1;
+	if (fabs(mo_vgl[MO_VGL_ID(0, 0, 3)] - (-6.159082130225148e-07)) > 1.e-14)
+		return 1;
+	if (fabs(mo_vgl[MO_VGL_ID(0, 1, 0)] - (1.738954130773860e-09)) > 1.e-14)
+		return 1;
+	if (fabs(mo_vgl[MO_VGL_ID(0, 1, 1)] - (-4.046360478166010e-08)) > 1.e-14)
+		return 1;
+	if (fabs(mo_vgl[MO_VGL_ID(0, 1, 2)] - (6.166687071299842e-08)) > 1.e-14)
+		return 1;
+	if (fabs(mo_vgl[MO_VGL_ID(0, 1, 3)] - (1.860432535394803e-07)) > 1.e-14)
+		return 1;
+	if (fabs(mo_vgl[MO_VGL_ID(0, 4, 0)] - (-5.368817513320710e-08)) > 1.e-14)
+		return 1;
+	if (fabs(mo_vgl[MO_VGL_ID(0, 4, 1)] - (-1.465098318223922e-07)) > 1.e-14)
+		return 1;
+	if (fabs(mo_vgl[MO_VGL_ID(0, 4, 2)] - (1.570579313400192e-07)) > 1.e-14)
+		return 1;
+	if (fabs(mo_vgl[MO_VGL_ID(0, 4, 3)] - (1.848343348520137e-06)) > 1.e-14)
+		return 1;
 
 	// TODO
 	// rc = qmckl_get_mo_basis_mo_num_device(context, &mo_num);

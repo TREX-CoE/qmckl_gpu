@@ -11,6 +11,7 @@
 #include "../include/qmckl_gpu.h"
 #include <omp.h>
 
+#define AO_VALUE_ID(x, y) ao_num *x + y
 #define AO_VGL_ID(x, y, z) 5 * ao_num *x + ao_num *y + z
 
 int main() {
@@ -378,7 +379,6 @@ int main() {
 	if (wrong_val)
 		return 1;
 
-		// Test ao_vgl  values
 #define shell_num chbrclf_shell_num
 #define ao_num chbrclf_ao_num
 #define elec_num chbrclf_elec_num
@@ -400,6 +400,38 @@ int main() {
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
+	// Get & test ao_value values
+	double *ao_value_d =
+		qmckl_malloc_device(context, point_num * ao_num * sizeof(double));
+	double *ao_value = malloc(point_num * ao_num * sizeof(double));
+
+	rc = qmckl_get_ao_basis_ao_value_device(context, ao_value_d,
+											(int64_t)(point_num * ao_num));
+
+	qmckl_memcpy_D2H(context, ao_value, ao_value_d,
+					 point_num * ao_num * sizeof(double));
+
+	printf(" ao_value ao_value[26][219] %25.15e\n",
+		   ao_value[AO_VALUE_ID(26, 219)]);
+	printf(" ao_value ao_value[26][220] %25.15e\n",
+		   ao_value[AO_VALUE_ID(26, 220)]);
+	printf(" ao_value ao_value[26][221] %25.15e\n",
+		   ao_value[AO_VALUE_ID(26, 221)]);
+	printf(" ao_value ao_value[26][222] %25.15e\n",
+		   ao_value[AO_VALUE_ID(26, 222)]);
+	printf("\n");
+
+	if (fabs(ao_value[AO_VALUE_ID(26, 219)] - (1.020298798341620e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_value[AO_VALUE_ID(26, 220)] - (1.516643537739178e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_value[AO_VALUE_ID(26, 221)] - (-4.686370882518819e-09)) >
+		1.e-14)
+		return 1;
+	if (fabs(ao_value[AO_VALUE_ID(26, 222)] - (7.514816980753531e-09)) > 1.e-14)
+		return 1;
+
+	// Get & test ao_vgl values
 	double *ao_vgl_d =
 		qmckl_malloc_device(context, point_num * 5 * ao_num * sizeof(double));
 	double *ao_vgl = malloc(point_num * 5 * ao_num * sizeof(double));
@@ -536,7 +568,6 @@ int main() {
 	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 224)] - (3.153244195820293e-08)) > 1.e-14)
 		return 1;
 
-	printf("About to return\n");
 	// TODO Fix this
 	// rc = qmckl_context_destroy_device(context);
 	// if (rc != QMCKL_SUCCESS)
