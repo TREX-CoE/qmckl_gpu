@@ -726,12 +726,13 @@ qmckl_exit_code qmckl_provide_ao_basis_ao_value_device(qmckl_context context) {
 			ctx->ao_basis.ao_value = ao_value;
 		}
 
-		if (ctx->ao_basis.ao_vgl_date == ctx->point.date) {
+		if (ctx->point.date <= ctx->ao_basis.ao_vgl_date &&
+			ctx->ao_basis.ao_vgl != NULL) {
+			// ao_vgl is already computed and recent enough, we just need to
+			// copy the required data to ao_value
 
-			// ao_vgl has been computed at this step: Just copy the data.
-
-			double *v = &(ctx->ao_basis.ao_value[0]);
-			double *vgl = &(ctx->ao_basis.ao_vgl[0]);
+			double *v = ctx->ao_basis.ao_value;
+			double *vgl = ctx->ao_basis.ao_vgl;
 			int point_num = ctx->point.num;
 			int ao_num = ctx->ao_basis.ao_num;
 
@@ -739,16 +740,20 @@ qmckl_exit_code qmckl_provide_ao_basis_ao_value_device(qmckl_context context) {
 			{
 				for (int i = 0; i < point_num; ++i) {
 					for (int k = 0; k < ao_num; ++k) {
-						v[k] = vgl[k];
+						v[i * ao_num + k] = vgl[i * ao_num * 5 + k];
 					}
-					v += ao_num;
-					vgl += ao_num * 5;
 				}
 			}
 
 		} else {
-
 			// We don't have ao_vgl, so we will compute the values only
+
+			/* Checking for shell_vgl */
+			if (ctx->ao_basis.shell_vgl == NULL ||
+				ctx->point.date > ctx->ao_basis.shell_vgl_date) {
+				qmckl_provide_ao_basis_shell_vgl_device(context);
+			}
+
 			if (ctx->ao_basis.type == 'G') {
 				rc = qmckl_compute_ao_value_gaussian_device(
 					context, ctx->ao_basis.ao_num, ctx->ao_basis.shell_num,

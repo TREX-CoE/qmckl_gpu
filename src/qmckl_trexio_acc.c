@@ -15,7 +15,6 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 									   char transp, int64_t num, double *coord,
 									   int64_t size_max) {
 
-	// const size_t device_id = qmckl_get_device_id(context);
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return QMCKL_NULL_CONTEXT;
 	}
@@ -37,7 +36,7 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 							  "coord is a NULL pointer");
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	qmckl_exit_code rc;
@@ -98,7 +97,7 @@ qmckl_exit_code qmckl_set_nucleus_coord_device(qmckl_context_device context,
 							  "qmckl_set_nucleus_coord_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	qmckl_exit_code rc;
 
 	const int64_t nucl_num = (int64_t)ctx->nucleus.num;
@@ -151,7 +150,7 @@ qmckl_exit_code qmckl_set_nucleus_coord_device(qmckl_context_device context,
 qmckl_exit_code
 qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
 
@@ -389,7 +388,7 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 							  "qmckl_finalize_nucleus_basis_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 	int device_id = qmckl_get_device_id(context);
 
@@ -576,7 +575,7 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 qmckl_exit_code
 qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 
 	int device_id = qmckl_get_device_id(context);
 
@@ -813,7 +812,7 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 							  "qmckl_finalize_ao_basis_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	int64_t nucl_num = 0;
@@ -1002,7 +1001,7 @@ qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context_device context) {
 							  "qmckl_finalize_mo_basis_device", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	double *new_array = (double *)qmckl_malloc_device(

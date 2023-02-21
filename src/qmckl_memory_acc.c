@@ -12,7 +12,6 @@
 
 void *qmckl_malloc_device(qmckl_context_device context, size_t size) {
 
-	printf("[qmckl_malloc_device] In\n");
 	assert(qmckl_context_check((qmckl_context)context) != QMCKL_NULL_CONTEXT);
 
 	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
@@ -83,7 +82,6 @@ qmckl_exit_code qmckl_free_device(qmckl_context_device context, void *ptr) {
 	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	qmckl_context_device_struct *ds =
 		(qmckl_context_device_struct *)ctx->qmckl_extra;
-	// int device_id = qmckl_get_device_id(context);
 
 	qmckl_lock((qmckl_context)context);
 	{
