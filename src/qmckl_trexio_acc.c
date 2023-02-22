@@ -60,14 +60,14 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 	double *a = ctx->point.coord.data;
 	int size_0 = ctx->point.coord.size[0];
 	if (transp == 'T') {
-#pragma acc data deviceptr(a, coord)
+#pragma acc kernels deviceptr(a, coord)
 		{
 			for (int64_t i = 0; i < 3 * num; ++i) {
 				a[i] = coord[i];
 			}
 		}
 	} else {
-#pragma acc data deviceptr(a, coord)
+#pragma acc kernels deviceptr(a, coord)
 		{
 			for (int64_t i = 0; i < num; ++i) {
 				a[i] = coord[3 * i];

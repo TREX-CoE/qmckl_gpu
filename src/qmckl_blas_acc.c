@@ -15,7 +15,7 @@ qmckl_matrix qmckl_matrix_set_device(qmckl_matrix matrix, double value) {
 	int prod_size = matrix.size[0] * matrix.size[1];
 
 	double *data = matrix.data;
-#pragma acc data deviceptr(data)
+#pragma acc kernels deviceptr(data)
 	{
 		for (int i = 0; i < prod_size; i++) {
 			data[i] = value;

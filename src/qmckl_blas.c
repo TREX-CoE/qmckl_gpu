@@ -95,6 +95,7 @@ qmckl_matrix qmckl_matrix_alloc_device(qmckl_context_device context,
 		result.size[0] = (int64_t)0;
 		result.size[1] = (int64_t)0;
 	}
+	double *data = result.data;
 
 	return result;
 }

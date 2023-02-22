@@ -17,9 +17,14 @@
 int main() {
 	qmckl_context_device context;
 
+	acc_device_t device_type = acc_get_device_type();
+	if (acc_get_num_devices(device_type) <= 0) {
+		printf("Error : no device found. Aborting execution\n");
+		exit(1);
+	}
+	acc_init(device_type);
 	context = qmckl_context_create_device(0);
 
-	printf("0\n");
 	int64_t nucl_num = chbrclf_nucl_num;
 
 	// Put nucleus stuff in CPU arrays
@@ -37,7 +42,6 @@ int main() {
 	qmckl_memcpy_H2D(context, nucl_coord_d, nucl_coord,
 					 3 * nucl_num * sizeof(double));
 
-	printf("1\n");
 	// Set nucleus stuff in context
 	qmckl_exit_code rc;
 	rc = qmckl_set_nucleus_num_device(context, nucl_num);
@@ -56,7 +60,6 @@ int main() {
 	if (!qmckl_nucleus_provided(context))
 		return 1;
 
-	printf("2\n");
 	int64_t shell_num = chbrclf_shell_num;
 	int64_t prim_num = chbrclf_prim_num;
 	int64_t ao_num = chbrclf_ao_num;
@@ -94,7 +97,6 @@ int main() {
 		qmckl_malloc_device(context, prim_num * sizeof(double));
 	double *ao_factor_d = qmckl_malloc_device(context, ao_num * sizeof(double));
 
-	printf("3\n");
 	qmckl_memcpy_H2D(context, nucleus_index_d, nucleus_index,
 					 nucl_num * sizeof(int64_t));
 	qmckl_memcpy_H2D(context, nucleus_shell_num_d, nucleus_shell_num,
@@ -114,82 +116,68 @@ int main() {
 					 prim_num * sizeof(double));
 	qmckl_memcpy_H2D(context, ao_factor_d, ao_factor, ao_num * sizeof(double));
 
-	printf("4\n");
 	char typ = 'G';
 
 	rc = qmckl_set_ao_basis_type_device(context, typ);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("4.1\n");
 	rc = qmckl_set_ao_basis_shell_num_device(context, shell_num);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("4.2\n");
 	rc = qmckl_set_ao_basis_prim_num_device(context, prim_num);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("4.3\n");
 	rc = qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index_d,
 												 nucl_num);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("4.4\n");
 	rc = qmckl_set_ao_basis_nucleus_shell_num_device(
 		context, nucleus_shell_num_d, nucl_num);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("4.5\n");
 	rc = qmckl_set_ao_basis_shell_ang_mom_device(context, shell_ang_mom_d,
 												 shell_num);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("4.6\n");
 	rc = qmckl_set_ao_basis_shell_factor_device(context, shell_factor_d,
 												shell_num);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("4.7\n");
 	rc = qmckl_set_ao_basis_shell_prim_num_device(context, shell_prim_num_d,
 												  shell_num);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("4.8\n");
 	rc = qmckl_set_ao_basis_shell_prim_index_device(context, shell_prim_index_d,
 													shell_num);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("4.9\n");
 	rc = qmckl_set_ao_basis_exponent_device(context, exponent_d, prim_num);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("4.10\n");
 	rc =
 		qmckl_set_ao_basis_coefficient_device(context, coefficient_d, prim_num);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("4.11\n");
 	rc =
 		qmckl_set_ao_basis_prim_factor_device(context, prim_factor_d, prim_num);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("4.12\n");
 	rc = qmckl_set_ao_basis_ao_num_device(context, ao_num);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("4.13\n");
 	rc = qmckl_set_ao_basis_ao_factor_device(context, ao_factor_d, ao_num);
 	if (rc != QMCKL_SUCCESS)
 		return 1;
@@ -197,7 +185,6 @@ int main() {
 	if (!qmckl_ao_basis_provided(context))
 		return 1;
 
-	printf("5\n");
 	// Checking arrays after context set and get
 
 	int64_t shell_num_test;
@@ -399,7 +386,6 @@ int main() {
 	if (wrong_val)
 		return 1;
 
-	printf("6\n");
 #define shell_num chbrclf_shell_num
 #define ao_num chbrclf_ao_num
 #define elec_num chbrclf_elec_num
@@ -421,7 +407,6 @@ int main() {
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-	printf("7\n");
 	// Get & test ao_value values
 	double *ao_value_d =
 		qmckl_malloc_device(context, point_num * ao_num * sizeof(double));
