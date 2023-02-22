@@ -16,6 +16,9 @@ endif
 if HAVE_ACC_DEVICE
   test_qmckl_ao_SOURCES = test_qmckl_ao_acc.c chbrclf.h
   test_qmckl_ao_LDFLAGS = -lm
+
+  test_qmckl_mo_SOURCES = test_qmckl_mo_acc.c chbrclf.h
+  test_qmckl_mo_LDFLAGS = -lm
 endif
 
 # TODO
