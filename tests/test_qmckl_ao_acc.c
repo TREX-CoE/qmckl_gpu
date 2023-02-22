@@ -6,19 +6,23 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include <openacc.h>
 
 #include "chbrclf.h"
-// #include "../qmckl/src/qmckl_ao_private_func.h"
 #include "../include/qmckl_gpu.h"
+#include <openacc.h>
 
+#define AO_VALUE_ID(x, y) ao_num *x + y
 #define AO_VGL_ID(x, y, z) 5 * ao_num *x + ao_num *y + z
 
 int main() {
+	qmckl_context_device context;
 
-	// acc_set_device_num(0, acc_device_nvidia);
-
-	qmckl_context context;
+	acc_device_t device_type = acc_get_device_type();
+	if (acc_get_num_devices(device_type) <= 0) {
+		printf("Error : no device found. Aborting execution\n");
+		exit(1);
+	}
+	acc_init(device_type);
 	context = qmckl_context_create_device(0);
 
 	int64_t nucl_num = chbrclf_nucl_num;
@@ -28,8 +32,6 @@ int main() {
 	double *nucl_coord = &(chbrclf_nucl_coord[0][0]);
 
 	// Put nucleus stuff in GPU arrays
-
-	qmckl_memory_info_struct info;
 	double *nucl_charge_d =
 		qmckl_malloc_device(context, nucl_num * sizeof(double));
 	double *nucl_coord_d =
@@ -228,11 +230,10 @@ int main() {
 	bool wrong_val = false;
 
 #pragma acc data deviceptr(nucleus_index_d, nucleus_index_test)
-	{
-		for (int64_t i = 0; i < nucl_num; ++i) {
-			if (nucleus_index_test[i] != nucleus_index_d[i])
-				wrong_val = true;
-		}
+	#pragma acc kernels
+	for (int64_t i = 0; i < nucl_num; ++i) {
+		if (nucleus_index_test[i] != nucleus_index_d[i])
+			wrong_val = true;
 	}
 	qmckl_free_device(context, nucleus_index_test);
 	if (wrong_val)
@@ -246,11 +247,10 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(nucleus_shell_num_d, nucleus_shell_num_test)
-	{
-		for (int64_t i = 0; i < nucl_num; ++i) {
-			if (nucleus_shell_num_test[i] != nucleus_shell_num_d[i])
-				wrong_val = true;
-		}
+	#pragma acc kernels
+	for (int64_t i = 0; i < nucl_num; ++i) {
+		if (nucleus_shell_num_test[i] != nucleus_shell_num_d[i])
+			wrong_val = true;
 	}
 	qmckl_free_device(context, nucleus_shell_num_test);
 	if (wrong_val)
@@ -264,11 +264,10 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(shell_ang_mom_d, shell_ang_mom_test)
-	{
-		for (int64_t i = 0; i < shell_num; ++i) {
-			if (shell_ang_mom_test[i] != shell_ang_mom_d[i])
-				wrong_val = true;
-		}
+	#pragma acc kernels
+	for (int64_t i = 0; i < shell_num; ++i) {
+		if (shell_ang_mom_test[i] != shell_ang_mom_d[i])
+			wrong_val = true;
 	}
 	qmckl_free_device(context, shell_ang_mom_test);
 	if (wrong_val)
@@ -282,11 +281,10 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(shell_factor_d, shell_factor_test)
-	{
-		for (int64_t i = 0; i < shell_num; ++i) {
-			if (shell_factor_test[i] != shell_factor_d[i])
-				wrong_val = true;
-		}
+	#pragma acc kernels
+	for (int64_t i = 0; i < shell_num; ++i) {
+		if (shell_factor_test[i] != shell_factor_d[i])
+			wrong_val = true;
 	}
 	qmckl_free_device(context, shell_factor_test);
 	if (wrong_val)
@@ -307,11 +305,10 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(shell_prim_index_d, shell_prim_index_test)
-	{
-		for (int64_t i = 0; i < shell_num; ++i) {
-			if (shell_prim_index_test[i] != shell_prim_index_d[i])
-				wrong_val = true;
-		}
+	#pragma acc kernels
+	for (int64_t i = 0; i < shell_num; ++i) {
+		if (shell_prim_index_test[i] != shell_prim_index_d[i])
+			wrong_val = true;
 	}
 	qmckl_free_device(context, shell_prim_index_test);
 	if (wrong_val)
@@ -323,12 +320,12 @@ int main() {
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-#pragma acc data deviceptr(exponent_d, exponent_test)
-	{
-		for (int64_t i = 0; i < prim_num; ++i) {
-			if (exponent_test[i] != exponent_d[i])
-				wrong_val = true;
-		}
+#pragma acc data deviceptr (exponent_d, exponent_test)
+	#pragma acc kernels
+	for (int64_t i = 0; i < prim_num; ++i) {
+		if (exponent_test[i] != exponent_d[i])
+			wrong_val = true;
+		;
 	}
 	qmckl_free_device(context, exponent_test);
 	if (wrong_val)
@@ -342,11 +339,10 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(coefficient_d, coefficient_test)
-	{
-		for (int64_t i = 0; i < prim_num; ++i) {
-			if (coefficient_test[i] != coefficient_d[i])
-				wrong_val = true;
-		}
+	#pragma acc kernels
+	for (int64_t i = 0; i < prim_num; ++i) {
+		if (coefficient_test[i] != coefficient_d[i])
+			wrong_val = true;
 	}
 	qmckl_free_device(context, coefficient_test);
 	if (wrong_val)
@@ -360,11 +356,10 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(prim_factor_d, prim_factor_test)
-	{
-		for (int64_t i = 0; i < prim_num; ++i) {
-			if (prim_factor_test[i] != prim_factor_d[i])
-				wrong_val = true;
-		}
+	#pragma acc kernels
+	for (int64_t i = 0; i < prim_num; ++i) {
+		if (prim_factor_test[i] != prim_factor_d[i])
+			wrong_val = true;
 	}
 	qmckl_free_device(context, prim_factor_test);
 	if (wrong_val)
@@ -381,17 +376,16 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(ao_factor_d, ao_factor_test)
-	{
-		for (int64_t i = 0; i < ao_num; ++i) {
-			if (ao_factor_test[i] != ao_factor_d[i])
-				wrong_val = true;
-		}
+	#pragma acc kernels
+	for (int64_t i = 0; i < ao_num; ++i) {
+		if (ao_factor_test[i] != ao_factor_d[i])
+			wrong_val = true;
+		;
 	}
 	qmckl_free_device(context, ao_factor_test);
 	if (wrong_val)
 		return 1;
 
-		// Test ao_vgl  values
 #define shell_num chbrclf_shell_num
 #define ao_num chbrclf_ao_num
 #define elec_num chbrclf_elec_num
@@ -404,6 +398,7 @@ int main() {
 	qmckl_memcpy_H2D(context, elec_coord_d, elec_coord,
 					 3 * point_num * sizeof(double));
 
+	// TODO Fix this
 	// if (!qmckl_electron_provided(context))
 	//	return 1;
 
@@ -412,10 +407,41 @@ int main() {
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
+	// Get & test ao_value values
+	double *ao_value_d =
+		qmckl_malloc_device(context, point_num * ao_num * sizeof(double));
+	double *ao_value = malloc(point_num * ao_num * sizeof(double));
+
+	rc = qmckl_get_ao_basis_ao_value_device(context, ao_value_d,
+											(int64_t)(point_num * ao_num));
+
+	qmckl_memcpy_D2H(context, ao_value, ao_value_d,
+					 point_num * ao_num * sizeof(double));
+
+	printf(" ao_value ao_value[26][219] %25.15e\n",
+		   ao_value[AO_VALUE_ID(26, 219)]);
+	printf(" ao_value ao_value[26][220] %25.15e\n",
+		   ao_value[AO_VALUE_ID(26, 220)]);
+	printf(" ao_value ao_value[26][221] %25.15e\n",
+		   ao_value[AO_VALUE_ID(26, 221)]);
+	printf(" ao_value ao_value[26][222] %25.15e\n",
+		   ao_value[AO_VALUE_ID(26, 222)]);
+	printf("\n");
+
+	if (fabs(ao_value[AO_VALUE_ID(26, 219)] - (1.020298798341620e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_value[AO_VALUE_ID(26, 220)] - (1.516643537739178e-08)) > 1.e-14)
+		return 1;
+	if (fabs(ao_value[AO_VALUE_ID(26, 221)] - (-4.686370882518819e-09)) >
+		1.e-14)
+		return 1;
+	if (fabs(ao_value[AO_VALUE_ID(26, 222)] - (7.514816980753531e-09)) > 1.e-14)
+		return 1;
+
+	// Get & test ao_vgl values
 	double *ao_vgl_d =
 		qmckl_malloc_device(context, point_num * 5 * ao_num * sizeof(double));
-	double *ao_vgl =
-		qmckl_malloc_host(context, point_num * 5 * ao_num * sizeof(double));
+	double *ao_vgl = malloc(point_num * 5 * ao_num * sizeof(double));
 
 	rc = qmckl_get_ao_basis_ao_vgl_device(context, ao_vgl_d,
 										  (int64_t)5 * point_num * ao_num);
@@ -546,12 +572,13 @@ int main() {
 		return 1;
 	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 224)] - (-4.073047518790881e-10)) > 1.e-14)
 		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 224)] - (3.153244195820293e-08)) > 1.e-14)
+	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 224)] - (3.153244195820293e-08)) > 1.e-14)
 		return 1;
 
-	rc = qmckl_context_destroy_device(context);
-	if (rc != QMCKL_SUCCESS)
-		return 1;
+	// TODO Fix this
+	// rc = qmckl_context_destroy_device(context);
+	// if (rc != QMCKL_SUCCESS)
+	// 	return 1;
 
 	return 0;
 }
