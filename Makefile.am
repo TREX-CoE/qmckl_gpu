@@ -10,12 +10,12 @@ libqmckl_gpu_la_SOURCES = ""
 
 # (Legacy) Enable OpenMP offload
 if HAVE_OMP_OFFLOAD
-  libqmckl_gpu_la_SOURCES += src/qmckl_ao_omp_offload.c
+  libqmckl_gpu_la_SOURCES += src/qmckl_ao_omp_offload.c src/qmckl_mo_omp_offload.c 
 endif
 
 # (Legacy) Enable OpenACC offload
 if HAVE_ACC_OFFLOAD
-  libqmckl_gpu_la_SOURCES += src/qmckl_ao_acc_offload.c src/qmckl_jastrow_acc_offload.c
+  libqmckl_gpu_la_SOURCES += src/qmckl_ao_acc_offload.c src/qmckl_mo_acc_offload.c 
 endif
 
 
