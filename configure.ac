@@ -117,7 +117,7 @@ AC_ARG_ENABLE(acc, [AS_HELP_STRING([--enable-acc],[Enable OpenACC device pointer
 # Fallback solution if nothing is enabled :
 # (probably because no GPU argument have been provided),
 # Enable OpenMP offload by default
-AS_IF([ test "x$have_omp" = "xno" -a "x$have_acc" = "xno"], [
+AS_IF([ test "x$have_omp" = "xno" -a "x$have_acc" = "xno" -a "x$have_acc_offload" = "xno" -a "x$have_omp_offload" = "xno"], [
 	AC_OUTPUT
 	echo \
 	"Warning: Neither OpenMP or OpenACC could be enabled using the passed arguments. Attempting to enable OpenMP as fallback."
@@ -188,6 +188,8 @@ AM_CONDITIONAL([HAVE_OMP_OFFLOAD], [test "x$have_omp_offload"  = "xyes"])
 AM_CONDITIONAL([HAVE_ACC_OFFLOAD], [test "x$have_acc_offload" = "xyes"])
 AM_CONDITIONAL([HAVE_OMP_DEVICE],  [test "x$have_omp"  = "xyes"])
 AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc"  = "xyes"])
+
+AM_CONDITIONAL([HAVE_DEVICE_POINTERS], [test "x$have_omp"  = "xyes" -o "x$have_acc"  = "xyes"])
 
 ####
 # List other Makefiles to generate

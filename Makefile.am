@@ -20,8 +20,10 @@ endif
 
 
 # Base library files (needed for both OpenMP and OpenACC)
+if HAVE_DEVICE_POINTERS
 libqmckl_gpu_la_SOURCES += src/qmckl_context.c src/qmckl_memory.c src/qmckl_blas.c \
 src/qmckl_trexio.c src/qmckl_ao.c src/qmckl_mo.c
+endif
 
 # Enable OpenMP-specific device functions
 if HAVE_OMP_DEVICE
