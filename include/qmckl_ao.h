@@ -52,6 +52,9 @@ qmckl_exit_code
 qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context);
 
 qmckl_exit_code
+qmckl_provide_ao_basis_shell_vgl_device(qmckl_context_device context);
+
+qmckl_exit_code
 qmckl_provide_ao_basis_ao_value_device(qmckl_context_device context);
 
 qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
