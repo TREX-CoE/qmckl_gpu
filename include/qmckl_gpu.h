@@ -14,11 +14,8 @@ typedef int64_t qmckl_context_device;
 
 qmckl_context_device
 qmckl_context_touch_device(const qmckl_context_device context);
-qmckl_context_device
-qmckl_context_touch_device(const qmckl_context_device context);
 
 qmckl_context_device qmckl_context_create_device(int device_id);
-qmckl_context_device qmckl_context_create_device();
 
 qmckl_exit_code
 qmckl_context_destroy_device(const qmckl_context_device context);

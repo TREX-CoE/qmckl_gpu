@@ -22,11 +22,16 @@ qmckl_context_device qmckl_context_create_device(int device_id) {
 		(qmckl_context_device)qmckl_context_create();
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 
-	qmckl_context_device_struct *const ds =
-		(qmckl_context_device_struct *)ctx->qmckl_extra;
-
 	/* Allocate the qmckl_context_device_struct */
 	ctx->qmckl_extra = malloc(sizeof(qmckl_context_device_struct));
+
+
+	qmckl_context_device_struct *const ds =
+		(qmckl_context_device_struct *)ctx->qmckl_extra;
+	if(ds == NULL){
+		printf("%p\n", ds);
+
+	}
 
 	/* Allocate qmckl_memory_struct */
 	const size_t size = 128L;
