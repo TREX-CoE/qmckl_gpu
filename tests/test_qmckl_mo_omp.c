@@ -379,9 +379,9 @@ int main() {
 	printf("\n");
 
 
-	// Read the ao_vgl ref
+	// Read the mo_vgl ref
 
-	// We will try to open ao_reference.txt "from" qmckl_gpu/ and qmckl_gpu/tests/
+	// We will try to open mo_reference.txt "from" qmckl_gpu/ and qmckl_gpu/tests/
 	FILE* fp = fopen("tests/mo_reference.txt", "r");
 	if (fp == NULL) {
 		fp = fopen("mo_reference.txt", "r");
@@ -401,10 +401,6 @@ int main() {
 			}
 		}
 	}
-
-
-	if (fabs(mo_vgl[MO_VGL_ID(0, 4, 3)] - (1.848343348520137e-06)) > 1.e-14)
-		return 1;
 
 	// TODO
 	// rc = qmckl_get_mo_basis_mo_num_device(context, &mo_num);
