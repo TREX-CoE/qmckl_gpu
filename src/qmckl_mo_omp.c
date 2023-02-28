@@ -15,28 +15,33 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 
 #pragma omp target is_device_ptr(coefficient_t, ao_vgl, mo_vgl)
 	{
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (int64_t j = 0; j < point_num; ++j) {
 
 			// Set j subarray to 0
+#pragma omp simd
 			for (int k = 0; k < 5; ++k) {
 				for (int l = 0; l < mo_num; l++) {
 					mo_vgl[l + mo_num * k + mo_num * 5 * j] = 0.;
 				}
 			}
 
+#pragma omp simd 
 			for (int64_t k = 0; k < ao_num; k++) {
 				if (ao_vgl[k + ao_num * 5 * j] != 0.) {
-					double c1 = ao_vgl[k + ao_num * 0 + ao_num * 5 * j];
-					double c2 = ao_vgl[k + ao_num * 1 + ao_num * 5 * j];
+					for(int l = 0; l < 5; l++)
+					{
+					double c1 = ao_vgl[k + ao_num * l + ao_num * 5 * j];
+	/*				double c2 = ao_vgl[k + ao_num * 1 + ao_num * 5 * j];
 					double c3 = ao_vgl[k + ao_num * 2 + ao_num * 5 * j];
 					double c4 = ao_vgl[k + ao_num * 3 + ao_num * 5 * j];
 					double c5 = ao_vgl[k + ao_num * 4 + ao_num * 5 * j];
-
+*/
 					for (int i = 0; i < mo_num; i++) {
-						mo_vgl[i + mo_num * 0 + mo_num * 5 * j] =
-							mo_vgl[i + mo_num * 0 + mo_num * 5 * j] +
-							coefficient_t[i + mo_num * k] * c1;
+						mo_vgl[i + mo_num * l + mo_num * 5 * j] =
+								mo_vgl[i + mo_num * l + mo_num * 5 * j] +
+								coefficient_t[i + mo_num * k] * c1;
+						/*
 						mo_vgl[i + mo_num * 1 + mo_num * 5 * j] =
 							mo_vgl[i + mo_num * 1 + mo_num * 5 * j] +
 							coefficient_t[i + mo_num * k] * c2;
@@ -48,7 +53,8 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 							coefficient_t[i + mo_num * k] * c4;
 						mo_vgl[i + mo_num * 4 + mo_num * 5 * j] =
 							mo_vgl[i + mo_num * 4 + mo_num * 5 * j] +
-							coefficient_t[i + mo_num * k] * c5;
+							coefficient_t[i + mo_num * k] * c5;*/
+						}
 					}
 				}
 			}
@@ -110,7 +116,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 				double a31 = av1[n + 2];
 				double a41 = av1[n + 3];
 
-#pragma omp simd
+#pragma omp parallel 
 				for (int64_t i = 0; i < mo_num; ++i) {
 					vgl1[i] = vgl1[i] + ck1[i] * a11 + ck2[i] * a21 +
 							  ck3[i] * a31 + ck4[i] * a41;
@@ -121,7 +127,8 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 				double *restrict ck = coefficient_t + idx[m] * mo_num;
 				double a1 = av1[m];
 
-#pragma omp simd
+#pragma omp parallel
+
 				for (int64_t i = 0; i < mo_num; ++i) {
 					vgl1[i] += ck[i] * a1;
 				}
