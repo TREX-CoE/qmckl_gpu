@@ -231,6 +231,11 @@ qmckl_exit_code
 qmckl_get_mo_basis_mo_value_inplace_device(qmckl_context_device context,
 										   double *mo_value, int64_t size_max);
 
+
+qmckl_exit_code qmckl_get_mo_basis_mo_vgl_inplace_device(
+	qmckl_context context, double *const mo_vgl, const int64_t size_max); 
+
+
 qmckl_exit_code qmckl_provide_mo_basis_mo_value_device(qmckl_context context);
 
 qmckl_exit_code qmckl_provide_mo_basis_mo_vgl_device(qmckl_context context);
