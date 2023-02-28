@@ -148,7 +148,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	int lmax = -1;
 #pragma omp target is_device_ptr(nucleus_max_ang_mom) map(tofrom : lmax)
 	{
-#pragma omp teams distribute parallel for
 		for (int i = 0; i < nucl_num; i++) {
 			if (lmax < nucleus_max_ang_mom[i]) {
 				lmax = nucleus_max_ang_mom[i];
@@ -172,7 +171,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 								 shell_ang_mom, ao_index, lstart) map(tofrom   \
 																	  : k)
 	{
-#pragma omp teams distribute parallel for
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
 			int ishell_start = nucleus_index[inucl];
 			int ishell_end =
@@ -203,7 +201,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			double e_coord_1 = coord[1 * point_num + ipoint];
 			double e_coord_2 = coord[2 * point_num + ipoint];
 
-#pragma omp parallel for
 			for (int inucl = 0; inucl < nucl_num; inucl++) {
 
 				double n_coord_0 = nucl_coord[0 * nucl_num + inucl];

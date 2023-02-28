@@ -378,44 +378,31 @@ int main() {
 	printf(" mo_vgl mo_vgl[0][4][3] %25.15e\n", mo_vgl[MO_VGL_ID(0, 4, 3)]);
 	printf("\n");
 
-	/*
-	Expected logs :
-	 mo_vgl mo_vgl[0][0][0]     2.136993056201904e-08
-	 mo_vgl mo_vgl[0][0][1]     5.301876482412777e-08
-	 mo_vgl mo_vgl[0][0][2]    -9.979057209754264e-08
-	 mo_vgl mo_vgl[0][0][3]    -6.159082130225148e-07
-	 mo_vgl mo_vgl[0][1][0]     1.738954130773860e-09
-	 mo_vgl mo_vgl[0][1][1]    -4.046360478166010e-08
-	 mo_vgl mo_vgl[0][1][2]     6.166687071299842e-08
-	 mo_vgl mo_vgl[0][1][3]     1.860432535394803e-07
-	 mo_vgl mo_vgl[0][4][0]    -5.368817513320710e-08
-	 mo_vgl mo_vgl[0][4][1]    -1.465098318223922e-07
-	 mo_vgl mo_vgl[0][4][2]     1.570579313400192e-07
-	 mo_vgl mo_vgl[0][4][3]     1.848343348520137e-06
-	*/
 
-	if (fabs(mo_vgl[MO_VGL_ID(0, 0, 0)] - (2.136993056201904e-08)) > 1.e-14)
-		return 1;
-	if (fabs(mo_vgl[MO_VGL_ID(0, 0, 1)] - (5.301876482412777e-08)) > 1.e-14)
-		return 1;
-	if (fabs(mo_vgl[MO_VGL_ID(0, 0, 2)] - (-9.979057209754264e-08)) > 1.e-14)
-		return 1;
-	if (fabs(mo_vgl[MO_VGL_ID(0, 0, 3)] - (-6.159082130225148e-07)) > 1.e-14)
-		return 1;
-	if (fabs(mo_vgl[MO_VGL_ID(0, 1, 0)] - (1.738954130773860e-09)) > 1.e-14)
-		return 1;
-	if (fabs(mo_vgl[MO_VGL_ID(0, 1, 1)] - (-4.046360478166010e-08)) > 1.e-14)
-		return 1;
-	if (fabs(mo_vgl[MO_VGL_ID(0, 1, 2)] - (6.166687071299842e-08)) > 1.e-14)
-		return 1;
-	if (fabs(mo_vgl[MO_VGL_ID(0, 1, 3)] - (1.860432535394803e-07)) > 1.e-14)
-		return 1;
-	if (fabs(mo_vgl[MO_VGL_ID(0, 4, 0)] - (-5.368817513320710e-08)) > 1.e-14)
-		return 1;
-	if (fabs(mo_vgl[MO_VGL_ID(0, 4, 1)] - (-1.465098318223922e-07)) > 1.e-14)
-		return 1;
-	if (fabs(mo_vgl[MO_VGL_ID(0, 4, 2)] - (1.570579313400192e-07)) > 1.e-14)
-		return 1;
+	// Read the ao_vgl ref
+
+	// We will try to open ao_reference.txt "from" qmckl_gpu/ and qmckl_gpu/tests/
+	FILE* fp = fopen("tests/mo_reference.txt", "r");
+	if (fp == NULL) {
+		fp = fopen("mo_reference.txt", "r");
+	}
+	if(fp == NULL) {
+		printf("Error : mo_reference.txt not found, leaving\n");
+		exit(1);
+	}
+
+	double ref;
+	for(int i=0; i<point_num; i++) {
+		for(int j=0; j<5; j++) {
+			for(int k=0; k<mo_num; k++) {
+				fscanf(fp, "%lf", &ref);
+				if (fabs(mo_vgl[MO_VGL_ID(i, j, k)] - ref) > 1.e-14)
+					return 1;
+			}
+		}
+	}
+
+
 	if (fabs(mo_vgl[MO_VGL_ID(0, 4, 3)] - (1.848343348520137e-06)) > 1.e-14)
 		return 1;
 

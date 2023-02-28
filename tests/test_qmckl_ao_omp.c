@@ -438,7 +438,6 @@ int main() {
 
 	rc = qmckl_get_ao_basis_ao_vgl_device(context, ao_vgl_d,
 										  (int64_t)5 * point_num * ao_num);
-
 	qmckl_memcpy_D2H(context, ao_vgl, ao_vgl_d,
 					 point_num * 5 * ao_num * sizeof(double));
 	if (rc != QMCKL_SUCCESS)
@@ -507,66 +506,28 @@ int main() {
 		   ao_vgl[AO_VGL_ID(26, 4, 224)]);
 	printf("\n");
 
-	if (fabs(ao_vgl[AO_VGL_ID(26, 0, 219)] - (1.020298798341620e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 1, 219)] - (-4.928035238010602e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 2, 219)] - (-4.691009312035986e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 219)] - (1.449504046436699e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 219)] - (4.296442111843973e-07)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 0, 220)] - (1.516643537739178e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 1, 220)] - (-7.725221462603871e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 2, 220)] - (-6.507140835104833e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 220)] - (2.154644255710413e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 220)] - (6.365449359656352e-07)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 0, 221)] - (-4.686370882518819e-09)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 1, 221)] - (2.387064067626827e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 2, 221)] - (2.154644255710412e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 221)] - (-1.998731863512374e-09)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 221)] - (-1.966899656441993e-07)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 0, 222)] - (7.514816980753531e-09)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 1, 222)] - (-4.025889138635182e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 2, 222)] - (-2.993372555126361e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 222)] - (1.067604670272904e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 222)] - (3.168199650002648e-07)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 0, 223)] - (-4.021908374204471e-09)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 1, 223)] - (2.154644255710413e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 2, 223)] - (1.725594944732276e-08)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 223)] - (-1.715339357718333e-09)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 223)] - (-1.688020516893476e-07)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 0, 224)] - (7.175045873560788e-10)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 1, 224)] - (-3.843864637762753e-09)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 2, 224)] - (-3.298857850451910e-09)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 3, 224)] - (-4.073047518790881e-10)) > 1.e-14)
-		return 1;
-	if (fabs(ao_vgl[AO_VGL_ID(26, 4, 224)] - (3.153244195820293e-08)) > 1.e-14)
-		return 1;
+	// Read the ao_vgl ref
+
+	// We will try to open ao_reference.txt "from" qmckl_gpu/ and qmckl_gpu/tests/
+	FILE* fp = fopen("tests/ao_reference.txt", "r");
+	if (fp == NULL) {
+		fp = fopen("ao_reference.txt", "r");
+	}
+	if(fp == NULL) {
+		printf("Error : ao_reference.txt not found, leaving\n");
+		exit(1);
+	}
+
+	double ref;
+	for(int i=0; i<point_num; i++) {
+		for(int j=0; j<5; j++) {
+			for(int k=0; k<ao_num; k++) {
+				fscanf(fp, "%lf", &ref);
+				if (fabs(ao_vgl[AO_VGL_ID(i, j, k)] - ref) > 1.e-14)
+					return 1;
+			}
+		}
+	}
 
 	// TODO Fix this
 	// rc = qmckl_context_destroy_device(context);
