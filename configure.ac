@@ -191,14 +191,6 @@ AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc"  = "xyes"])
 
 AM_CONDITIONAL([HAVE_DEVICE_POINTERS], [test "x$have_omp"  = "xyes" -o "x$have_acc"  = "xyes"])
 
-####
-# List other Makefiles to generate
-####
-
-AC_CONFIG_FILES([
-                 tests/Makefile
-				])
-
 
 ####
 # Print configure status
