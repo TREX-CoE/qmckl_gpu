@@ -64,35 +64,30 @@ qmckl_context_destroy_device(const qmckl_context_device context) {
 		(qmckl_context_device_struct *)ctx->qmckl_extra;
 	int device_id = qmckl_get_device_id(context);
 
-	qmckl_lock((qmckl_context)context);
-	{
-		free(ctx->qmckl_extra);
-		/* Memory: Remove all allocated data */
-		for (size_t pos = (size_t)0; pos < ctx->memory.array_size; ++pos) {
-			if (ctx->memory.element[pos].pointer != NULL) {
-				qmckl_free(context, ctx->memory.element[pos].pointer);
-			}
+	/* Memory: Remove all allocated data */
+	for (size_t pos = (size_t)0; pos < ctx->memory.array_size; ++pos) {
+		if (ctx->memory.element[pos].pointer != NULL) {
+			qmckl_free(context, ctx->memory.element[pos].pointer);
 		}
-		assert(ctx->memory.n_allocated == (size_t)0);
-		free(ctx->memory.element);
-		ctx->memory.element = NULL;
-		ctx->memory.array_size = (size_t)0;
-
-		/* Device memory: Remove all allocated data */
-		for (size_t pos = (size_t)0; pos < ds->memory.array_size; ++pos) {
-			if (ds->memory.element[pos].pointer != NULL) {
-				qmckl_free_device(context, ds->memory.element[pos].pointer);
-			}
-		}
-		assert(ds->memory.n_allocated == (size_t)0);
-		free(ds->memory.element);
-		ds->memory.element = NULL;
-		ds->memory.array_size = (size_t)0;
-
-		/* Free the qmckl_context_device_structured allocated in qmckl_extra */
-		free(ctx->qmckl_extra);
 	}
-	qmckl_unlock((qmckl_context)context);
+	assert(ctx->memory.n_allocated == (size_t)0);
+	free(ctx->memory.element);
+	ctx->memory.element = NULL;
+	ctx->memory.array_size = (size_t)0;
+
+	/* Device memory: Remove all allocated data */
+	for (size_t pos = (size_t)0; pos < ds->memory.array_size; ++pos) {
+		if (ds->memory.element[pos].pointer != NULL) {
+			qmckl_free_device(context, ds->memory.element[pos].pointer);
+		}
+	}
+	assert(ds->memory.n_allocated == (size_t)0);
+	free(ds->memory.element);
+	ds->memory.element = NULL;
+	ds->memory.array_size = (size_t)0;
+
+	/* Free the qmckl_context_device_structured allocated in qmckl_extra */
+	free(ctx->qmckl_extra);
 
 	ctx->tag = INVALID_TAG;
 

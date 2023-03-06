@@ -230,7 +230,7 @@ int main() {
 	bool wrong_val = false;
 
 #pragma acc data deviceptr(nucleus_index_d, nucleus_index_test)
-	#pragma acc kernels
+#pragma acc kernels
 	for (int64_t i = 0; i < nucl_num; ++i) {
 		if (nucleus_index_test[i] != nucleus_index_d[i])
 			wrong_val = true;
@@ -247,7 +247,7 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(nucleus_shell_num_d, nucleus_shell_num_test)
-	#pragma acc kernels
+#pragma acc kernels
 	for (int64_t i = 0; i < nucl_num; ++i) {
 		if (nucleus_shell_num_test[i] != nucleus_shell_num_d[i])
 			wrong_val = true;
@@ -264,7 +264,7 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(shell_ang_mom_d, shell_ang_mom_test)
-	#pragma acc kernels
+#pragma acc kernels
 	for (int64_t i = 0; i < shell_num; ++i) {
 		if (shell_ang_mom_test[i] != shell_ang_mom_d[i])
 			wrong_val = true;
@@ -281,7 +281,7 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(shell_factor_d, shell_factor_test)
-	#pragma acc kernels
+#pragma acc kernels
 	for (int64_t i = 0; i < shell_num; ++i) {
 		if (shell_factor_test[i] != shell_factor_d[i])
 			wrong_val = true;
@@ -305,7 +305,7 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(shell_prim_index_d, shell_prim_index_test)
-	#pragma acc kernels
+#pragma acc kernels
 	for (int64_t i = 0; i < shell_num; ++i) {
 		if (shell_prim_index_test[i] != shell_prim_index_d[i])
 			wrong_val = true;
@@ -320,8 +320,8 @@ int main() {
 	if (rc != QMCKL_SUCCESS)
 		return 1;
 
-#pragma acc data deviceptr (exponent_d, exponent_test)
-	#pragma acc kernels
+#pragma acc data deviceptr(exponent_d, exponent_test)
+#pragma acc kernels
 	for (int64_t i = 0; i < prim_num; ++i) {
 		if (exponent_test[i] != exponent_d[i])
 			wrong_val = true;
@@ -339,7 +339,7 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(coefficient_d, coefficient_test)
-	#pragma acc kernels
+#pragma acc kernels
 	for (int64_t i = 0; i < prim_num; ++i) {
 		if (coefficient_test[i] != coefficient_d[i])
 			wrong_val = true;
@@ -356,7 +356,7 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(prim_factor_d, prim_factor_test)
-	#pragma acc kernels
+#pragma acc kernels
 	for (int64_t i = 0; i < prim_num; ++i) {
 		if (prim_factor_test[i] != prim_factor_d[i])
 			wrong_val = true;
@@ -376,7 +376,7 @@ int main() {
 		return 1;
 
 #pragma acc data deviceptr(ao_factor_d, ao_factor_test)
-	#pragma acc kernels
+#pragma acc kernels
 	for (int64_t i = 0; i < ao_num; ++i) {
 		if (ao_factor_test[i] != ao_factor_d[i])
 			wrong_val = true;
@@ -514,23 +514,23 @@ int main() {
 		   ao_vgl[AO_VGL_ID(26, 4, 224)]);
 	printf("\n");
 
-
 	// Read the ao_vgl ref
 
-	// We will try to open ao_reference.txt "from" qmckl_gpu/ and qmckl_gpu/tests/
-	FILE* fp = fopen("tests/ao_reference.txt", "r");
+	// We will try to open ao_reference.txt "from" qmckl_gpu/ and
+	// qmckl_gpu/tests/
+	FILE *fp = fopen("tests/ao_reference.txt", "r");
 	if (fp == NULL) {
 		fp = fopen("ao_reference.txt", "r");
 	}
-	if(fp == NULL) {
+	if (fp == NULL) {
 		printf("Error : ao_reference.txt not found, leaving\n");
 		exit(1);
 	}
 
 	double ref;
-	for(int i=0; i<point_num; i++) {
-		for(int j=0; j<5; j++) {
-			for(int k=0; k<ao_num; k++) {
+	for (int i = 0; i < point_num; i++) {
+		for (int j = 0; j < 5; j++) {
+			for (int k = 0; k < ao_num; k++) {
 				fscanf(fp, "%lf", &ref);
 				if (fabs(ao_vgl[AO_VGL_ID(i, j, k)] - ref) > 1.e-14)
 					return 1;
@@ -538,11 +538,10 @@ int main() {
 		}
 	}
 
-
 	// TODO Fix this
-	// rc = qmckl_context_destroy_device(context);
-	// if (rc != QMCKL_SUCCESS)
-	// 	return 1;
+	rc = qmckl_context_destroy_device(context);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
 	return 0;
 }

@@ -380,23 +380,23 @@ int main() {
 	printf(" mo_vgl mo_vgl[0][4][3] %25.15e\n", mo_vgl[MO_VGL_ID(0, 4, 3)]);
 	printf("\n");
 
-
 	// Read the mo_vgl ref
 
-	// We will try to open mo_reference.txt "from" qmckl_gpu/ and qmckl_gpu/tests/
-	FILE* fp = fopen("tests/mo_reference.txt", "r");
+	// We will try to open mo_reference.txt "from" qmckl_gpu/ and
+	// qmckl_gpu/tests/
+	FILE *fp = fopen("tests/mo_reference.txt", "r");
 	if (fp == NULL) {
 		fp = fopen("mo_reference.txt", "r");
 	}
-	if(fp == NULL) {
+	if (fp == NULL) {
 		printf("Error : mo_reference.txt not found, leaving\n");
 		exit(1);
 	}
 
 	double ref;
-	for(int i=0; i<point_num; i++) {
-		for(int j=0; j<5; j++) {
-			for(int k=0; k<mo_num; k++) {
+	for (int i = 0; i < point_num; i++) {
+		for (int j = 0; j < 5; j++) {
+			for (int k = 0; k < mo_num; k++) {
 				fscanf(fp, "%lf", &ref);
 				if (fabs(mo_vgl[MO_VGL_ID(i, j, k)] - ref) > 1.e-14)
 					return 1;
@@ -410,7 +410,7 @@ int main() {
 	// assert(mo_num == 2);
 
 	// TODO
-	// rc = qmckl_context_destroy_device(context);
+	rc = qmckl_context_destroy_device(context);
 	assert(rc == QMCKL_SUCCESS);
 
 	return 0;

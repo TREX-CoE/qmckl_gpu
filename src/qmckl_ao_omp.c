@@ -267,7 +267,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 						}
 					}
 
-
 					poly_vgl[0] = 1.;
 
 					poly_vgl[5] = pows[3];
