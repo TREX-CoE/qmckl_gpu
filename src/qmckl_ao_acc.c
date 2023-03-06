@@ -163,18 +163,18 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 	// Specific calling function
 	int lmax = -1;
-	int* lmax_p = &lmax;
-#pragma acc data deviceptr(nucleus_max_ang_mom) copyin(lmax_p[0:1])
+	int *lmax_p = &lmax;
+#pragma acc data deviceptr(nucleus_max_ang_mom) copyin(lmax_p [0:1])
 	{
 #pragma acc kernels
-	{
-		for (int i = 0; i < nucl_num; i++) {
-			if (lmax_p[0] < nucleus_max_ang_mom[i]) {
-				lmax_p[0] = nucleus_max_ang_mom[i];
+		{
+			for (int i = 0; i < nucl_num; i++) {
+				if (lmax_p[0] < nucleus_max_ang_mom[i]) {
+					lmax_p[0] = nucleus_max_ang_mom[i];
+				}
 			}
 		}
-	}
-#pragma acc update host(lmax_p[0:1])
+#pragma acc update host(lmax_p [0:1])
 	}
 	// Multiply "normal" size by point_num to affect subarrays to each thread
 	double *pows_shared = qmckl_malloc_device(
@@ -188,25 +188,25 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	}
 
 	int k = 1;
-	int* k_p = &k;
+	int *k_p = &k;
 #pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
-						   ao_index, lstart)                                   \
-	copyin(k_p[0:1])
+						   ao_index, lstart) copyin(k_p [0:1])
 	{
 #pragma acc kernels
-	{
-		for (int inucl = 0; inucl < nucl_num; inucl++) {
-			int ishell_start = nucleus_index[inucl];
-			int ishell_end =
-				nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
-			for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
-				int l = shell_ang_mom[ishell];
-				ao_index[ishell] = k_p[0];
-				k_p[0] = k_p[0] + lstart[l + 1] - lstart[l];
+		{
+			for (int inucl = 0; inucl < nucl_num; inucl++) {
+				int ishell_start = nucleus_index[inucl];
+				int ishell_end =
+					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+				for (int ishell = ishell_start; ishell <= ishell_end;
+					 ishell++) {
+					int l = shell_ang_mom[ishell];
+					ao_index[ishell] = k_p[0];
+					k_p[0] = k_p[0] + lstart[l + 1] - lstart[l];
+				}
 			}
 		}
-	}
-#pragma acc update host(k_p[0:1])
+#pragma acc update host(k_p [0:1])
 	}
 
 #pragma acc data deviceptr(                                                    \
@@ -473,18 +473,18 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 
 	// Specific calling function
 	int lmax = -1;
-	int* lmax_p = &lmax;
-#pragma acc data deviceptr(nucleus_max_ang_mom) copyin(lmax_p[0:1])
+	int *lmax_p = &lmax;
+#pragma acc data deviceptr(nucleus_max_ang_mom) copyin(lmax_p [0:1])
 	{
 #pragma acc kernels
-	{
-		for (int i = 0; i < nucl_num; i++) {
-			if (lmax_p[0] < nucleus_max_ang_mom[i]) {
-				lmax_p[0] = nucleus_max_ang_mom[i];
+		{
+			for (int i = 0; i < nucl_num; i++) {
+				if (lmax_p[0] < nucleus_max_ang_mom[i]) {
+					lmax_p[0] = nucleus_max_ang_mom[i];
+				}
 			}
 		}
-	}
-#pragma acc update host(lmax_p[0:1])
+#pragma acc update host(lmax_p [0:1])
 	}
 	// Multiply "normal" size by point_num to affect subarrays to each thread
 	double *pows_shared = qmckl_malloc_device(
@@ -498,25 +498,25 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 	}
 
 	int k = 1;
-	int* k_p = &k;
+	int *k_p = &k;
 #pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
-						   ao_index, lstart)                                   \
-	copyin(k_p[0:1])
+						   ao_index, lstart) copyin(k_p [0:1])
 	{
 #pragma acc kernels
-	{
-		for (int inucl = 0; inucl < nucl_num; inucl++) {
-			int ishell_start = nucleus_index[inucl];
-			int ishell_end =
-				nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
-			for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
-				int l = shell_ang_mom[ishell];
-				ao_index[ishell] = k_p[0];
-				k_p[0] = k_p[0] + lstart[l + 1] - lstart[l];
+		{
+			for (int inucl = 0; inucl < nucl_num; inucl++) {
+				int ishell_start = nucleus_index[inucl];
+				int ishell_end =
+					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+				for (int ishell = ishell_start; ishell <= ishell_end;
+					 ishell++) {
+					int l = shell_ang_mom[ishell];
+					ao_index[ishell] = k_p[0];
+					k_p[0] = k_p[0] + lstart[l + 1] - lstart[l];
+				}
 			}
 		}
-	}
-#pragma acc update host(k_p[0:1])
+#pragma acc update host(k_p [0:1])
 	}
 
 #pragma acc data deviceptr(                                                    \

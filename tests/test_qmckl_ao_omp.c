@@ -508,20 +508,21 @@ int main() {
 
 	// Read the ao_vgl ref
 
-	// We will try to open ao_reference.txt "from" qmckl_gpu/ and qmckl_gpu/tests/
-	FILE* fp = fopen("tests/ao_reference.txt", "r");
+	// We will try to open ao_reference.txt "from" qmckl_gpu/ and
+	// qmckl_gpu/tests/
+	FILE *fp = fopen("tests/ao_reference.txt", "r");
 	if (fp == NULL) {
 		fp = fopen("ao_reference.txt", "r");
 	}
-	if(fp == NULL) {
+	if (fp == NULL) {
 		printf("Error : ao_reference.txt not found, leaving\n");
 		exit(1);
 	}
 
 	double ref;
-	for(int i=0; i<point_num; i++) {
-		for(int j=0; j<5; j++) {
-			for(int k=0; k<ao_num; k++) {
+	for (int i = 0; i < point_num; i++) {
+		for (int j = 0; j < 5; j++) {
+			for (int k = 0; k < ao_num; k++) {
 				fscanf(fp, "%lf", &ref);
 				if (fabs(ao_vgl[AO_VGL_ID(i, j, k)] - ref) > 1.e-14)
 					return 1;
@@ -530,9 +531,9 @@ int main() {
 	}
 
 	// TODO Fix this
-	// rc = qmckl_context_destroy_device(context);
-	// if (rc != QMCKL_SUCCESS)
-	// 	return 1;
+	rc = qmckl_context_destroy_device(context);
+	if (rc != QMCKL_SUCCESS)
+		return 1;
 
 	return 0;
 }

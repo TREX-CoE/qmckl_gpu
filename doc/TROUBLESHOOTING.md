@@ -13,7 +13,15 @@ Libomptarget error: Consult https://openmp.llvm.org/design/Runtimes.html for deb
 qmckl_trexio_omp.c:827:1: Libomptarget fatal error 1: failure of target construct while offloading is mandatory
 ```
 
-While getting shared libaries to work is possible with other compilers, it has been a common cause of runtime issues that you should be aware of. The best workaround is simply to link executables against the static version of the library. 
+Using GCC, we encoutered issues such as : 
+
+```
+/usr/bin/ld: tests/.libs/test_qmckl_ao: hidden symbol `__offload_funcs_end' in /var/lib/spack/packages/linux-endeavourosrolling-skylake/gcc-11.1.0/gcc-12.1.0-5radiwu4xtwuhqyxjhs4ue4qttn4gueq/lib/gcc/x86_64-pc-linux-gnu/12.1.0/crtoffloadend.o is referenced by DSO
+/usr/bin/ld: final link failed: bad value
+collect2: error: ld returned 1 exit status
+```
+
+While getting shared libaries to work is possible with compilers other than LLVM, it has been a common cause of runtime issues that you should be aware of. The best workaround is simply to link executables against the static version of the library. 
 
 Generation of the shared library can be disabled at configure time using the `--disable-shared` option. Also, generation of the static library can be forced (even though this should be the default behaviour) with the `--enable-static` option.
 
