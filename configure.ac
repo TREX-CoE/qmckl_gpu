@@ -107,6 +107,14 @@ AC_ARG_ENABLE(omp, [AS_HELP_STRING([--enable-omp],[Enable OpenMP device pointers
 # OpenACC + device pointers
 AC_ARG_ENABLE(acc, [AS_HELP_STRING([--enable-acc],[Enable OpenACC device pointers functions])], have_acc=yes, have_acc=no)
 
+# Auto offloading flags
+AC_ARG_ENABLE(autoflags, [AS_HELP_STRING([--disable-autoflags],[By default, configure will try to infer and add offloading compiler flags by itself. Disable this option and set your flags manually if you encounter issues.])], have_autoflags=no, have_autoflags=yes)
+AS_IF([test "x$have_autoflags" = "xyes"], [
+	echo "Autoflags have been kept enabled"
+], [
+	echo "Autoflags have been disabled"
+])
+
 # TODO Add cuBLAS functions at some point ?
 
 
@@ -138,7 +146,7 @@ AS_IF([test "x$have_omp" = "xyes" -a  "x$have_acc" = "xyes"], [
 ####
 
 ## Add compilers flags depending on what has been enabled
-AS_IF([test "x$have_omp_offload" = "xyes" -o "x$have_omp" = "xyes"], [
+AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp" = "xyes"], [
 	case $CC in
 		*gcc*)
 			CFLAGS="$CFLAGS -fopenmp -foffload=-lm"
@@ -155,8 +163,26 @@ AS_IF([test "x$have_omp_offload" = "xyes" -o "x$have_omp" = "xyes"], [
 			echo "Warning : compiler not recognized for OpenMP. Make sure to add necessary offload flags manually."
 	esac
 ])
+AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp_offload" = "xyes"], [
+	case $CC in
+		*gcc*)
+			CFLAGS="$CFLAGS -fopenmp -foffload=-lm"
+			;;
+		*nvc*)
+			CFLAGS="$CFLAGS -mp=gpu"
+			;;
+		*clang*)
+			CFLAGS="$CFLAGS -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda"
+			;;
 
-AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc" = "xyes"], [
+
+		*)
+			echo "Warning : compiler not recognized for OpenMP offload. Make sure to add necessary offload flags manually."
+	esac
+])
+
+
+AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc" = "xyes"], [
 	case $CC in
 		*gcc*)
 			CFLAGS="$CFLAGS -fopenacc -foffload=-lm"
@@ -170,6 +196,21 @@ AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc" = "xyes"], [
 			echo "Warning : compiler not supported for OpenACC. Make sure to add necessary offload flags manually."
 	esac
 ])
+AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc_offload" = "xyes"], [
+	case $CC in
+		*gcc*)
+			CFLAGS="$CFLAGS -fopenacc -foffload=-lm"
+			LDFLAGS="$LDFLAGS -lm -fopenacc"
+			;;
+		*nvc*)
+			CFLAGS="$CFLAGS -acc=gpu -ta=nvidia:nordc"
+		;;
+
+		*)
+			echo "Warning : compiler not supported for OpenACC offload. Make sure to add necessary offload flags manually."
+	esac
+])
+
 
 # Specific options required with some compilers
 AS_CASE([$FC],
@@ -211,6 +252,7 @@ LDFLAGS:...........: ${LDFLAGS}
 
 OpenMP ............: ${have_omp}
 OpenACC ...........: ${have_acc}
+Autoflags .........: ${have_autoflags}
 
 Now type 'make @<:@<target>@:>@'
 where the optional <target> is:
