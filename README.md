@@ -13,7 +13,7 @@ The project uses GNU Autotools :
 
 ```
 bash autogen.sh
-./configure [GPU functions-related arguments & other arguments]
+./configure [arguments]
 make
 make install
 ```
@@ -36,9 +36,9 @@ In either case, the library interface is going to be exactly the same, as all of
 
 ## Compilers support 
 
-We currently support nvc, gcc and clang. You can specify which compiler to use by specifying the `CC=...` variable to the configure (gcc should be default). 
+We currently support nvc, gcc and clang. This means we have succesfully built and run the library with one of these compilers, on hardware from at least one vendor. You can specify which compiler to use by specifying the `CC=...` variable to the configure (gcc should be the default). 
 
-The configure will also automatically try to set required flags to enable OpenMP or OpenACC offloading. In case the proposed flags don't work on your system, you can disable them whith the `--disable-autoflags` configure option.
+When specifying a known compiler, the configure also automatically tries to set the required flags to enable OpenMP or OpenACC offloading. In case the proposed flags don't work on your system, you can disable them whith the `--disable-autoflags` configure option. Then, simply specify correct compiler flags in the `CFLAGS` variable.
 
 # Usage
 
