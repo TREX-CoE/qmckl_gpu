@@ -112,7 +112,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 				double a31 = av1[n + 2];
 				double a41 = av1[n + 3];
 
-#pragma omp parallel 
+#pragma omp simd
 				for (int64_t i = 0; i < mo_num; ++i) {
 					vgl1[i] = vgl1[i] + ck1[i] * a11 + ck2[i] * a21 +
 							  ck3[i] * a31 + ck4[i] * a41;
@@ -123,8 +123,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 				double *restrict ck = coefficient_t + idx[m] * mo_num;
 				double a1 = av1[m];
 
-#pragma omp parallel
-
+#pragma omp simd
 				for (int64_t i = 0; i < mo_num; ++i) {
 					vgl1[i] += ck[i] * a1;
 				}
