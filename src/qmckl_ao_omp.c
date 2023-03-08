@@ -23,9 +23,10 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	// TODO : Use numerical precision here
 	cutoff = 27.631021115928547; //-dlog(1.d-12)
 
-#pragma omp target is_device_ptr(                                              \
-	nucleus_shell_num, nucleus_index, nucleus_range, shell_prim_index,         \
-	shell_prim_num, coord, nucl_coord, expo, coef_normalized, shell_vgl)
+#pragma omp target is_device_ptr(nucleus_shell_num, nucleus_index,             \
+									 nucleus_range, shell_prim_index,          \
+									 shell_prim_num, coord, nucl_coord, expo,  \
+									 coef_normalized, shell_vgl)
 	{
 
 #pragma omp teams distribute parallel for simd collapse(2)
@@ -168,8 +169,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 	int k = 1;
 #pragma omp target is_device_ptr(nucleus_index, nucleus_shell_num,             \
-								 shell_ang_mom, ao_index, lstart) map(tofrom   \
-																	  : k)
+									 shell_ang_mom, ao_index, lstart)          \
+	map(tofrom : k)
 	{
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
 			int ishell_start = nucleus_index[inucl];
@@ -184,11 +185,11 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	}
 
 #pragma omp target is_device_ptr(                                              \
-	ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,           \
-	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
-	pows_shared, shell_ang_mom, nucleus_range)
+		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
+			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
+			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 	{
-#pragma omp teams distribute parallel for //private(pows, poly_vgl)
+#pragma omp teams distribute parallel for // private(pows, poly_vgl)
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
 			// Compute addresses of subarrays from ipoint
@@ -196,7 +197,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			// without any race condition
 			double *poly_vgl = poly_vgl_shared + ipoint * 5 * ao_num;
 			double *pows = pows_shared + ipoint * (lmax + 3) * 3;
-
 
 			double e_coord_0 = coord[0 * point_num + ipoint];
 			double e_coord_1 = coord[1 * point_num + ipoint];
@@ -289,7 +289,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 					for (int a = d; a >= 0; a--) {
 
 						db = dd - da;
-//#pragma omp parallel for private(poly_vgl,  xy, yz, xz) reduction(-:db)
+						// #pragma omp parallel for private(poly_vgl,  xy, yz,
+						// xz) reduction(-:db)
 						for (int b = d - a; b >= 0; b--) {
 
 							int c = d - a - b;
@@ -334,7 +335,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
 
 				// Loop over shells
-				int k,l;
+				int k, l;
 				for (int ishell = ishell_start; ishell <= ishell_end;
 					 ishell++) {
 					k = ao_index[ishell] - 1;
@@ -469,8 +470,8 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 
 	int k = 1;
 #pragma omp target is_device_ptr(nucleus_index, nucleus_shell_num,             \
-								 shell_ang_mom, ao_index, lstart) map(tofrom   \
-																	  : k)
+									 shell_ang_mom, ao_index, lstart)          \
+	map(tofrom : k)
 	{
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
 			int ishell_start = nucleus_index[inucl];
@@ -485,11 +486,11 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 	}
 
 #pragma omp target is_device_ptr(                                              \
-	ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,         \
-	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
-	pows_shared, shell_ang_mom, nucleus_range)
+		ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,     \
+			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
+			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 	{
-		//#pragma omp teams distribute parallel for
+		// #pragma omp teams distribute parallel for
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
 			// Compute addresses of subarrays from ipoint
