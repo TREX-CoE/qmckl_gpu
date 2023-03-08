@@ -46,10 +46,8 @@ qmckl_exit_code qmckl_compute_tmp_c_omp_offload(
 	const int64_t size_e = walk_num * (cord_num + 1) * elec_num * elec_num;
 	const int64_t size_n = walk_num * (cord_num + 1) * nucl_num * elec_num;
 
-#pragma omp target data map(from                                               \
-							: tmp_c [0:size_tmp_c])                            \
-	map(to                                                                     \
-		: een_rescaled_e [0:size_e], een_rescaled_n [0:size_n])
+#pragma omp target data map(from : tmp_c[0 : size_tmp_c])                      \
+	map(to : een_rescaled_e[0 : size_e], een_rescaled_n[0 : size_n])
 	{
 #pragma omp target teams distribute parallel for collapse(4)
 		for (int nw = 0; nw < walk_num; ++nw) {
@@ -127,10 +125,8 @@ qmckl_exit_code qmckl_compute_dtmp_c_omp_offload(
 	const int64_t size_e = walk_num * (cord_num + 1) * elec_num * 4 * elec_num;
 
 	double sum = 0.;
-#pragma omp target data map(from                                               \
-							: dtmp_c [0:size_dtmp_c])                          \
-	map(to                                                                     \
-		: een_rescaled_e_deriv_e [0:size_e], een_rescaled_n [0:size_n])
+#pragma omp target data map(from : dtmp_c[0 : size_dtmp_c])                    \
+	map(to : een_rescaled_e_deriv_e[0 : size_e], een_rescaled_n[0 : size_n])
 	{
 #pragma omp target teams distribute parallel for collapse(4)
 		for (int nw = 0; nw < walk_num; nw++) {

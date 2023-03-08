@@ -26,23 +26,23 @@ qmckl_exit_code qmckl_context_destroy_device(qmckl_context_device context);
 /* Allocs & frees */
 
 void *qmckl_malloc_host(qmckl_context_device context,
-						qmckl_memory_info_struct info);
+						const qmckl_memory_info_struct info);
 
-qmckl_exit_code qmckl_free_host(qmckl_context_device context, void *ptr);
+qmckl_exit_code qmckl_free_host(qmckl_context_device context, void *const ptr);
 
-void *qmckl_malloc_device(qmckl_context_device context,
-						  qmckl_memory_info_struct info);
+void *qmckl_malloc_device(qmckl_context_device context, size_t size);
 
-qmckl_exit_code qmckl_free_device(qmckl_context_device context, void *ptr);
+qmckl_exit_code qmckl_free_device(qmckl_context_device context,
+								  void *const ptr);
 
 /* Memcpys */
 
-qmckl_exit_code qmckl_memcpy_H2D(qmckl_context_device context, void *dest,
-								 void *src, size_t size);
-qmckl_exit_code qmckl_memcpy_D2H(qmckl_context_device context, void *dest,
-								 void *src, size_t size);
-qmckl_exit_code qmckl_memcpy_D2D(qmckl_context_device context, void *dest,
-								 void *src, size_t size);
+qmckl_exit_code qmckl_memcpy_H2D(qmckl_context_device context, void *const dest,
+								 void *const src, size_t size);
+qmckl_exit_code qmckl_memcpy_D2H(qmckl_context_device context, void *const dest,
+								 void *const src, size_t size);
+qmckl_exit_code qmckl_memcpy_D2D(qmckl_context_device context, void *const dest,
+								 void *const src, size_t size);
 
 //**********
 // TREXIO
@@ -50,9 +50,6 @@ qmckl_exit_code qmckl_memcpy_D2D(qmckl_context_device context, void *dest,
 
 qmckl_exit_code qmckl_trexio_read_device(qmckl_context_device context,
 										 char *file_name, int64_t size_max);
-
-qmckl_exit_code qmckl_set_electron_num_device(qmckl_context_device context,
-											  int64_t up_num, int64_t down_num);
 
 qmckl_exit_code qmckl_set_electron_num_device(qmckl_context_device context,
 											  int64_t up_num, int64_t down_num);
@@ -68,11 +65,6 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 
 qmckl_exit_code qmckl_get_nucleus_num_device(qmckl_context_device context,
 											 int64_t *num);
-qmckl_exit_code qmckl_get_nucleus_num_device(qmckl_context_device context,
-											 int64_t *num);
-
-qmckl_exit_code qmckl_set_nucleus_num_device(qmckl_context_device context,
-											 int64_t num);
 
 qmckl_exit_code qmckl_set_nucleus_num_device(qmckl_context_device context,
 											 int64_t num);
@@ -86,8 +78,6 @@ qmckl_exit_code qmckl_set_nucleus_coord_device(qmckl_context_device context,
 
 qmckl_exit_code qmckl_get_ao_basis_ao_num_device(qmckl_context_device context,
 												 int64_t *ao_num);
-qmckl_exit_code qmckl_get_ao_basis_ao_num_device(qmckl_context_device context,
-												 int64_t *ao_num);
 
 qmckl_exit_code qmckl_set_ao_basis_type_device(qmckl_context_device context,
 											   char basis_type);
@@ -97,8 +87,6 @@ qmckl_set_ao_basis_shell_num_device(qmckl_context_device context,
 qmckl_exit_code qmckl_set_ao_basis_prim_num_device(qmckl_context_device context,
 												   int64_t prim_num);
 
-qmckl_exit_code qmckl_get_ao_basis_ao_num_device(qmckl_context_device context,
-												 int64_t *ao_num);
 qmckl_exit_code qmckl_get_ao_basis_ao_num_device(qmckl_context_device context,
 												 int64_t *ao_num);
 
@@ -192,8 +180,6 @@ qmckl_exit_code qmckl_set_mo_basis_coefficient_device(qmckl_context context,
 
 qmckl_exit_code qmckl_get_ao_basis_ao_num_device(qmckl_context_device context,
 												 int64_t *ao_num);
-qmckl_exit_code qmckl_get_ao_basis_ao_num_device(qmckl_context_device context,
-												 int64_t *ao_num);
 
 qmckl_exit_code qmckl_get_ao_basis_ao_vgl_inplace_offload(qmckl_context context,
 														  double *ao_vgl,
@@ -230,10 +216,8 @@ qmckl_exit_code
 qmckl_get_mo_basis_mo_value_inplace_device(qmckl_context_device context,
 										   double *mo_value, int64_t size_max);
 
-
 qmckl_exit_code qmckl_get_mo_basis_mo_vgl_inplace_device(
-	qmckl_context context, double *const mo_vgl, const int64_t size_max); 
-
+	qmckl_context context, double *const mo_vgl, const int64_t size_max);
 
 qmckl_exit_code qmckl_provide_mo_basis_mo_value_device(qmckl_context context);
 

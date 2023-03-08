@@ -117,6 +117,10 @@ AS_IF([test "x$have_autoflags" = "xyes"], [
 
 # TODO Add cuBLAS functions at some point ?
 
+####
+## Enable the optional Fortran interface
+####
+AC_ARG_ENABLE(fortran-interface, [AS_HELP_STRING([--enable-fortran-interface],[Enable the optional Fortran interface])], have_fortran_interface=yes, have_fortran_interface=no)
 
 ####
 ## Perform checks on what has been enabled (at least one function type, no OpenACC and OpenMP at the same time)
@@ -229,7 +233,7 @@ AM_CONDITIONAL([HAVE_OMP_OFFLOAD], [test "x$have_omp_offload"  = "xyes"])
 AM_CONDITIONAL([HAVE_ACC_OFFLOAD], [test "x$have_acc_offload" = "xyes"])
 AM_CONDITIONAL([HAVE_OMP_DEVICE],  [test "x$have_omp"  = "xyes"])
 AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc"  = "xyes"])
-
+AM_CONDITIONAL([HAVE_FORTRAN_INTERFACE],  [test "x$have_fortran_interface"  = "xyes"])
 AM_CONDITIONAL([HAVE_DEVICE_POINTERS], [test "x$have_omp"  = "xyes" -o "x$have_acc"  = "xyes"])
 
 
@@ -247,12 +251,14 @@ ${PACKAGE_NAME} Version ${PACKAGE_VERSION}
 Prefix: '${prefix}'
 
 CC.................: ${CC}
+FC.................: ${FC}
 CFLAGS.............: ${CFLAGS}
 LDFLAGS:...........: ${LDFLAGS}
 
 OpenMP ............: ${have_omp}
 OpenACC ...........: ${have_acc}
 Autoflags .........: ${have_autoflags}
+Fortran interface .: ${have_fortran_interface}
 
 Now type 'make @<:@<target>@:>@'
 where the optional <target> is:

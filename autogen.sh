@@ -10,4 +10,4 @@ install_qmckl()
 
 test -f qmckl/configure || \
  	(git submodule update --init && install_qmckl)
-autoreconf -is
+autoreconf --force -is
