@@ -251,6 +251,7 @@ ${PACKAGE_NAME} Version ${PACKAGE_VERSION}
 Prefix: '${prefix}'
 
 CC.................: ${CC}
+FC.................: ${FC}
 CFLAGS.............: ${CFLAGS}
 LDFLAGS:...........: ${LDFLAGS}
 

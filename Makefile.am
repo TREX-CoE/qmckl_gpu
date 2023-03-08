@@ -58,7 +58,7 @@ endif
 # Build test programs
 ###
 
-check_PROGRAMS = tests/test_qmckl_ao tests/test_qmckl_mo
+check_PROGRAMS = tests/test_qmckl_ao tests/test_qmckl_mo 
 
 qmckl/src/libqmckl.la:
 	cd qmckl && make && cd ..
@@ -83,6 +83,11 @@ endif
 tests_test_qmckl_ao_LDADD = qmckl/src/libqmckl.la libqmckl_gpu.la
 tests_test_qmckl_mo_LDADD = qmckl/src/libqmckl.la libqmckl_gpu.la
 
+if HAVE_FORTRAN_INTERFACE
+  check_PROGRAMS += tests/test_qmckl_fortran_interface
+  tests_test_qmckl_fortran_interface_SOURCES = tests/test_qmckl_fortran_interface.f90
+  tests_test_qmckl_ao_LDADD = qmckl/src/libqmckl.la libqmckl_gpu.la
+endif
 
 ###
 # Run test programs
