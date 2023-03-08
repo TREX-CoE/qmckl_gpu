@@ -173,7 +173,6 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_ao_basis_ao_value_device
 
-
     !!!!!!!!!!!
         ! MO
     !!!!!!!!!!!
@@ -199,6 +198,49 @@ module qmckl_gpu
             double precision, intent(out)         :: mo_value(*)
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_value_device
+
+        integer(qmckl_exit_code) function qmckl_get_mo_basis_mo_vgl_inplace_device(context, mo_vgl, size_max) &
+            bind(C, name="qmckl_get_mo_basis_mo_vgl_inplace_device_f")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            double precision, intent(out)         :: mo_vgl(*)
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_mo_basis_mo_vgl_inplace_device
+
+        integer(qmckl_exit_code) function qmckl_get_mo_basis_mo_value_inplace_device(context, mo_value, size_max) &
+            bind(C, name="qmckl_get_mo_basis_mo_value_inplace_device_f")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            double precision, intent(out)         :: mo_value(*)
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_mo_basis_mo_value_inplace_device
+
+        integer(qmckl_exit_code) function qmckl_get_mo_basis_mo_num_device(context, mo_num) &
+            bind(C, name="qmckl_get_mo_basis_mo_num_device_f")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_int64_t), intent(in), value :: mo_num
+        end function qmckl_get_mo_basis_mo_num_device
+
+        integer(qmckl_exit_code) function qmckl_mo_basis_select_mo_device(context, keep) &
+            bind(C, name="qmckl_get_mo_basis_mo_num_device_f")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_int32_t), intent(out)         :: keep(*)
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_mo_basis_mo_num_device
 
 
     !!!!!!!!!!!

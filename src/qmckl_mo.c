@@ -1,6 +1,81 @@
 #include "include/qmckl_ao.h"
 #include "include/qmckl_mo.h"
 
+
+//**********
+// COMPUTE
+//**********
+
+/* mo_select */
+
+// Forward declare this, as its needed by select_mo
+qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context_device context);
+
+bool qmckl_mo_basis_select_mo_device(qmckl_context_device context,
+									 int32_t *keep,
+									 int64_t size_max) {
+	if (qmckl_context_check((qmckl_context) context) == QMCKL_NULL_CONTEXT) {
+		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
+							  "qmckl_get_mo_basis_select_mo_device", NULL);
+	}
+
+	// WARNING Here, we are expecting a CPU array (instead of a GPU array usually), because
+	// it will not be used as a data to be stored in the context. Thus, it makes more sense
+	// (and is actually more efficient) to use a CPU array.
+
+	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	assert(ctx != NULL);
+
+	if (!(qmckl_mo_basis_provided(context))) {
+		return qmckl_failwith(context, QMCKL_NOT_PROVIDED,
+							  "qmckl_get_mo_basis_select_mo_device", NULL);
+	}
+
+	if (keep == NULL) {
+		return qmckl_failwith(context, QMCKL_INVALID_ARG_2,
+							  "qmckl_get_mo_basis_select_mo_device", "NULL pointer");
+	}
+
+	const int64_t mo_num = ctx->mo_basis.mo_num;
+	const int64_t ao_num = ctx->ao_basis.ao_num;
+
+	if (size_max < mo_num) {
+		return qmckl_failwith(context, QMCKL_INVALID_ARG_3,
+							  "qmckl_get_mo_basis_select_mo",
+							  "Array too small: expected mo_num.");
+	}
+
+	int64_t mo_num_new = 0;
+	for (int64_t i = 0; i < mo_num; ++i) {
+		if (keep[i] != 0)
+			++mo_num_new;
+	}
+
+
+	double *restrict coefficient = (double *)qmckl_malloc_device(context, ao_num * mo_num_new * sizeof(double));
+
+	int64_t k = 0;
+	for (int64_t i = 0; i < mo_num; ++i) {
+		if (keep[i] != 0) {
+			qmckl_memcpy_D2D(context, &(coefficient[k * ao_num]),
+				   &(ctx->mo_basis.coefficient[i * ao_num]),
+				   ao_num * sizeof(double));
+			++k;
+		}
+	}
+
+	qmckl_exit_code rc = qmckl_free_device(context, ctx->mo_basis.coefficient);
+	if (rc != QMCKL_SUCCESS)
+		return rc;
+
+	ctx->mo_basis.coefficient = coefficient;
+	ctx->mo_basis.mo_num = mo_num_new;
+
+	rc = qmckl_finalize_mo_basis_device(context);
+	return rc;
+}
+
+
 //**********
 // PROVIDE
 //**********

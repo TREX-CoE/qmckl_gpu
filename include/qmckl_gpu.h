@@ -204,6 +204,10 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_inplace_acc_offload(
 // MO
 //**********
 
+bool qmckl_mo_basis_select_mo_device(qmckl_context_device context,
+									 int32_t *keep,
+									 int64_t size_max);
+
 qmckl_exit_code qmckl_get_mo_basis_mo_vgl_device(qmckl_context context,
 												 double *const mo_vgl,
 												 const int64_t size_max);

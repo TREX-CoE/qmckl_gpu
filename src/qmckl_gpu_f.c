@@ -25,7 +25,8 @@ qmckl_exit_code qmckl_context_destroy_device_f(qmckl_context_device context) {
 
 /* Allocs & frees */
 
-// Not implementing host funcs for now (should we get rid of qmckl_memory_info_struct)
+// Not implementing host funcs for now (should we get rid of
+// qmckl_memory_info_struct)
 void *qmckl_malloc_host_f(qmckl_context_device context,
 						  const qmckl_memory_info_struct info);
 
@@ -175,7 +176,7 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_num_device_f(
 qmckl_exit_code qmckl_set_ao_basis_shell_prim_index_device_f(
 	qmckl_context context, int64_t *shell_prim_index, int64_t *size_max) {
 	return qmckl_set_ao_basis_shell_prim_index_device(context, shell_prim_index,
-											   *size_max);
+													  *size_max);
 }
 
 qmckl_exit_code qmckl_set_ao_basis_shell_factor_device_f(
@@ -293,7 +294,6 @@ qmckl_exit_code qmckl_set_mo_basis_coefficient_device_f(qmckl_context context,
 // AO
 //**********
 
-
 qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device_f(qmckl_context_device context,
 												   double *ao_vgl,
 												   int64_t *size_max) {
@@ -331,4 +331,15 @@ qmckl_exit_code qmckl_get_mo_basis_mo_value_inplace_device_f(
 qmckl_exit_code qmckl_get_mo_basis_mo_vgl_inplace_device_f(
 	qmckl_context context, double *const mo_vgl, const int64_t *size_max) {
 	return qmckl_get_mo_basis_mo_vgl_inplace_device(context, mo_vgl, *size_max);
+}
+
+qmckl_exit_code qmckl_get_mo_basis_mo_num_device(const qmckl_context context,
+												 int64_t *mo_num) {
+	return qmckl_get_mo_basis_mo_num_device(context, mo_num);
+}
+
+bool qmckl_mo_basis_select_mo_device_f(qmckl_context_device context,
+									 int32_t *keep,
+									 int64_t *size_max) {
+	return qmckl_mo_basis_select_mo_device(context, keep, *size_max);
 }
