@@ -25,6 +25,7 @@ qmckl_exit_code qmckl_context_destroy_device_f(qmckl_context_device context) {
 
 /* Allocs & frees */
 
+// Not implementing host funcs for now (should we get rid of qmckl_memory_info_struct)
 void *qmckl_malloc_host_f(qmckl_context_device context,
 						  const qmckl_memory_info_struct info);
 

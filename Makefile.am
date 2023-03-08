@@ -79,10 +79,6 @@ if HAVE_ACC_DEVICE
   tests_test_qmckl_mo_LDFLAGS = -lm
 endif
 
-# TODO
-#test_qmckl_mo_SOURCES = tests/test_qmckl_mo.c
-#test_qmckl_mo_LDFLAGS = -lqmckl -lqmckl_gpu
-
 # This shoud be added whether we use OpenMP or ACC
 tests_test_qmckl_ao_LDADD = qmckl/src/libqmckl.la libqmckl_gpu.la
 tests_test_qmckl_mo_LDADD = qmckl/src/libqmckl.la libqmckl_gpu.la
