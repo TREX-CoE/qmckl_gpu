@@ -103,7 +103,7 @@ qmckl_exit_code qmckl_set_nucleus_num_device_f(qmckl_context_device context,
 qmckl_exit_code qmckl_set_nucleus_charge_device_f(qmckl_context_device context,
 												  double *charge,
 												  int64_t *size_max) {
-	return qmckl_set_nucleus_charge_device(contextn charge, *size_max);
+	return qmckl_set_nucleus_charge_device(context, charge, *size_max);
 }
 
 qmckl_exit_code qmckl_set_nucleus_coord_device_f(qmckl_context_device context,
@@ -173,7 +173,7 @@ qmckl_exit_code qmckl_set_ao_basis_shell_prim_num_device_f(
 
 qmckl_exit_code qmckl_set_ao_basis_shell_prim_index_device_f(
 	qmckl_context context, int64_t *shell_prim_index, int64_t *size_max) {
-	qmckl_set_ao_basis_shell_prim_index_device(context, shell_prim_index,
+	return qmckl_set_ao_basis_shell_prim_index_device(context, shell_prim_index,
 											   *size_max);
 }
 
@@ -292,10 +292,6 @@ qmckl_exit_code qmckl_set_mo_basis_coefficient_device_f(qmckl_context context,
 // AO
 //**********
 
-qmckl_exit_code qmckl_get_ao_basis_ao_num_device_f(qmckl_context_device context,
-												   int64_t *ao_num) {
-	return qmckl_get_ao_basis_ao_num_device(context, ao_num);
-}
 
 qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device_f(qmckl_context_device context,
 												   double *ao_vgl,
@@ -322,7 +318,7 @@ qmckl_exit_code qmckl_get_mo_basis_mo_vgl_device_f(qmckl_context context,
 qmckl_exit_code
 qmckl_get_mo_basis_mo_value_device_f(qmckl_context_device context,
 									 double *mo_value, int64_t *size_max) {
-	return qmckl_get_mo_basis_mo_value_device(context, mo_vgl, *size_max);
+	return qmckl_get_mo_basis_mo_value_device(context, mo_value, *size_max);
 }
 
 qmckl_exit_code qmckl_get_mo_basis_mo_value_inplace_device_f(

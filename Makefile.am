@@ -7,7 +7,11 @@ ACLOCAL_AMFLAGS = -I m4 -I include
 
 AM_CPPFLAGS  = -I$(top_builddir)/src -I$(top_builddir)/include -I$(top_srcdir)/qmckl/src -I$(top_srcdir)/qmckl/include
 
-include_HEADERS = include/qmckl_gpu.h include/qmckl_gpu_f.F90
+include_HEADERS = include/qmckl_gpu.h
+
+if HAVE_FORTRAN_INTERFACE
+  include_HEADERS += include/qmckl_gpu_f.f90
+endif
 
 lib_LTLIBRARIES = libqmckl_gpu.la
 
@@ -42,6 +46,11 @@ if HAVE_ACC_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_memory_acc.c \
   src/qmckl_blas_acc.c src/qmckl_trexio_acc.c \
   src/qmckl_ao_acc.c src/qmckl_mo_acc.c
+endif
+
+# Enable Fortran interface
+if HAVE_FORTRAN_INTERFACE
+  libqmckl_gpu_la_SOURCES += src/qmckl_gpu_f.c
 endif
 
 
