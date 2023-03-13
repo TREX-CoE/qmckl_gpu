@@ -5,7 +5,7 @@
 
 ACLOCAL_AMFLAGS = -I m4 -I include 
 
-AM_CPPFLAGS  = -I$(top_builddir)/src -I$(top_builddir)/include -I$(top_srcdir)/qmckl/src -I$(top_srcdir)/qmckl/include
+AM_CPPFLAGS  = -I$(top_builddir)/src -I$(top_builddir)/include 
 
 include_HEADERS = include/qmckl_gpu.h include/qmckl_gpu_f.F90
 
@@ -27,7 +27,7 @@ endif
 # Base library files (needed for both OpenMP and OpenACC)
 if HAVE_DEVICE_POINTERS
 libqmckl_gpu_la_SOURCES += src/qmckl_context.c src/qmckl_memory.c src/qmckl_blas.c \
-src/qmckl_trexio.c src/qmckl_ao.c src/qmckl_mo.c
+src/qmckl_trexio.c src/qmckl_ao.c src/qmckl_mo.c src/qmckl_basic_functions.c
 endif
 
 # Enable OpenMP-specific device functions

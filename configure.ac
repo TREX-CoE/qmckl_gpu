@@ -147,7 +147,7 @@ AS_IF([test "x$have_omp_offload" = "xyes" -o "x$have_omp" = "xyes"], [
 			CFLAGS="$CFLAGS -mp=gpu"
 			;;
 		*clang*)
-			CFLAGS="$CFLAGS -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda"
+			CFLAGS="$CFLAGS -fopenmp "
 			;;
 
 
