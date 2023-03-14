@@ -4,7 +4,6 @@
 // as well as the definition of qmckl_context_device and
 // qmckl_context_device_struct, the device specific datatypes for context
 
-#include <qmckl.h>
 
 #include <assert.h>
 #include <errno.h>

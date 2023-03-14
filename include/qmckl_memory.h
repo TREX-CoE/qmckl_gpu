@@ -2,7 +2,6 @@
 
 // This file contains functions prototypes for memory management functions
 
-#include <qmckl.h>
 
 #include <assert.h>
 #include <stdint.h>

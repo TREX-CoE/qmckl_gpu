@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <qmckl.h>
 
 typedef int64_t qmckl_context_device;
 typedef int64_t qmckl_memory_info_struct;
