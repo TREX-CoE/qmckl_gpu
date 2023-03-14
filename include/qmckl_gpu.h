@@ -252,3 +252,21 @@ qmckl_exit_code qmckl_set_electron_coord_device(qmckl_context_device context,
 qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 									   char transp, int64_t num, double *coord,
 									   int64_t size_max);
+
+
+//****************************
+// SHERMAN-MORRISON & WOODBURY
+//****************************
+
+qmckl_exit_code qmckl_woodbury_kxk(
+    cublasHandle_t b_handle,
+    cusolverDnHandle_t s_handle,
+    const uint64_t Lds,
+    const uint64_t Dim,
+    const uint64_t N_updates,
+    const double* __restrict Updates,
+    const uint64_t* __restrict Updates_index,
+    const double breakdown,
+    double* __restrict Slater_inv,
+    double* __restrict determinant);
+
