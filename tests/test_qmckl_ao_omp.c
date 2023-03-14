@@ -228,7 +228,7 @@ int main() {
 	bool wrong_val = false;
 
 #pragma omp target parallel for is_device_ptr(nucleus_index_d,                 \
-											  nucleus_index_test)
+												  nucleus_index_test)
 	for (int64_t i = 0; i < nucl_num; ++i) {
 		if (nucleus_index_test[i] != nucleus_index_d[i])
 			wrong_val = true;
@@ -245,7 +245,7 @@ int main() {
 		return 1;
 
 #pragma omp target parallel for is_device_ptr(nucleus_shell_num_d,             \
-											  nucleus_shell_num_test)
+												  nucleus_shell_num_test)
 	for (int64_t i = 0; i < nucl_num; ++i) {
 		if (nucleus_shell_num_test[i] != nucleus_shell_num_d[i])
 			wrong_val = true;
@@ -262,7 +262,7 @@ int main() {
 		return 1;
 
 #pragma omp target parallel for is_device_ptr(shell_ang_mom_d,                 \
-											  shell_ang_mom_test)
+												  shell_ang_mom_test)
 	for (int64_t i = 0; i < shell_num; ++i) {
 		if (shell_ang_mom_test[i] != shell_ang_mom_d[i])
 			wrong_val = true;
@@ -302,7 +302,7 @@ int main() {
 		return 1;
 
 #pragma omp target parallel for is_device_ptr(shell_prim_index_d,              \
-											  shell_prim_index_test)
+												  shell_prim_index_test)
 	for (int64_t i = 0; i < shell_num; ++i) {
 		if (shell_prim_index_test[i] != shell_prim_index_d[i])
 			wrong_val = true;

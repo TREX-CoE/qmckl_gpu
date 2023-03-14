@@ -130,9 +130,9 @@ module qmckl_gpu
             integer(qmckl_context_device), intent(in), value :: context
             character, intent(in), value :: transp
             integer(c_int64_t), intent(in), value :: walk_num
-            double precision, intent(in)          :: coord(*)
+            real(kind=c_double), intent(in)          :: coord(*)
             integer(c_int64_t), intent(in), value :: size_max
-        end function
+        end function qmckl_set_electron_coord_device
 
         integer(qmckl_exit_code) function qmckl_set_point_device(context, transp, num, coord, size_max) &
             bind(C, name="qmckl_set_point_device_f")
@@ -158,7 +158,7 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            double precision, intent(out)         :: ao_vgl(*)
+            real(kind=c_double), intent(out)         :: ao_vgl(*)
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_ao_basis_ao_vgl_device
 
@@ -169,7 +169,7 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            double precision, intent(out)         :: ao_value(*)
+            real(kind=c_double), intent(out)         :: ao_value(*)
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_ao_basis_ao_value_device
 
@@ -184,7 +184,7 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            double precision, intent(out)         :: mo_vgl(*)
+            real(kind=c_double), intent(out)         :: mo_vgl(*)
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_vgl_device
 
@@ -195,7 +195,7 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            double precision, intent(out)         :: mo_value(*)
+            real(kind=c_double), intent(out)         :: mo_value(*)
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_value_device
 
@@ -206,7 +206,7 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            double precision, intent(out)         :: mo_vgl(*)
+            real(kind=c_double), intent(out)         :: mo_vgl(*)
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_vgl_inplace_device
 
@@ -217,7 +217,7 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            double precision, intent(out)         :: mo_value(*)
+            real(kind=c_double), intent(out)         :: mo_value(*)
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_value_inplace_device
 
@@ -231,7 +231,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: mo_num
         end function qmckl_get_mo_basis_mo_num_device
 
-        integer(qmckl_exit_code) function qmckl_mo_basis_select_mo_device(context, keep) &
+        integer(qmckl_exit_code) function qmckl_mo_basis_select_mo_device(context, keep, size_max) &
             bind(C, name="qmckl_get_mo_basis_mo_num_device_f")
             use, intrinsic :: iso_c_binding
             import
@@ -240,7 +240,7 @@ module qmckl_gpu
             integer(qmckl_context_device), intent(in), value :: context
             integer(c_int32_t), intent(out)         :: keep(*)
             integer(c_int64_t), intent(in), value :: size_max
-        end function qmckl_get_mo_basis_mo_num_device
+        end function qmckl_mo_basis_select_mo_device
 
 
     !!!!!!!!!!!

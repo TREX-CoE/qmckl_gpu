@@ -199,46 +199,6 @@ int main() {
 		rc = qmckl_mo_basis_rescale(context, 0.5);
 		assert(rc == QMCKL_SUCCESS);
 
-		// Test overlap of MO
-		// double point_x[10];
-		// double point_y[10];
-		// double point_z[10];
-		// int32_t npoints=10;
-		//// obtain points
-		// double dr = 20./(npoints-1);
-		// double dr3 = dr*dr*dr;
-		//
-		// for (int i=0;i<npoints;++i) {
-		//  point_x[i] = -10. + dr*i;
-		//  point_y[i] = -10. + dr*i;
-		//  point_z[i] = -10. + dr*i;
-		//}
-		//
-		// double ovlmo1 = 0.0;
-		//// Calculate overlap
-		// for (int i=0;i<npoints;++i) {
-		//  fflush(stdout);
-		//  for (int j=0;j<npoints;++j) {
-		//  printf(" .. ");
-		//    for (int k=0;k<npoints;++k) {
-		//  printf(" . ");
-		//      // Set point
-		//      elec_coord[0] = point_x[i];
-		//      elec_coord[1] = point_y[j];
-		//      elec_coord[2] = point_z[k];
-		//      rc = qmckl_set_electron_coord (context, 'N', elec_coord);
-		//      assert(rc == QMCKL_SUCCESS);
-		//
-		//      // Calculate value of MO (1st electron)
-		//      double mo_vgl[5][point_num][chbrclf_mo_num];
-		//      rc = qmckl_get_mo_basis_mo_vgl(context, &(mo_vgl[0][0][0][0]));
-		//      assert (rc == QMCKL_SUCCESS);
-		//      ovlmo1 += mo_vgl[0][0][0][0]*mo_vgl[0][0][0][0]*dr3;
-		//    }
-		//  }
-		//}
-		// printf("OVL MO1 = %10.15f\n",ovlmo1);
-
 		printf("\n");
 		printf(" mo_vgl mo_vgl[0][26][219] %25.15e\n", mo_vgl[2][0][3]);
 		printf(" mo_vgl mo_vgl[1][26][219] %25.15e\n", mo_vgl[2][1][3]);
