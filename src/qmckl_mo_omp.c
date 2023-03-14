@@ -26,10 +26,10 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 				}
 			}
 
-#pragma omp simd 
 			for (int64_t k = 0; k < ao_num; k++) {
-				if (ao_vgl[k + ao_num * 5 * j] != 0.) {
-					for(int l = 0; l < 5; l++)
+				for(int l = 0; l < 5; l++)
+				{
+					if (ao_vgl[k + ao_num * 5 * j] != 0.) 
 					{
 					double c1 = ao_vgl[k + ao_num * l + ao_num * 5 * j];
 	/*				double c2 = ao_vgl[k + ao_num * 1 + ao_num * 5 * j];
@@ -37,6 +37,8 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 					double c4 = ao_vgl[k + ao_num * 3 + ao_num * 5 * j];
 					double c5 = ao_vgl[k + ao_num * 4 + ao_num * 5 * j];
 */
+#pragma omp simd
+
 					for (int i = 0; i < mo_num; i++) {
 						mo_vgl[i + mo_num * l + mo_num * 5 * j] =
 								mo_vgl[i + mo_num * l + mo_num * 5 * j] +
@@ -54,7 +56,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 						mo_vgl[i + mo_num * 4 + mo_num * 5 * j] =
 							mo_vgl[i + mo_num * 4 + mo_num * 5 * j] +
 							coefficient_t[i + mo_num * k] * c5;*/
-						}
+					}
 					}
 				}
 			}

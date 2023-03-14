@@ -16,8 +16,7 @@
 #include <string.h>
 #include <omp.h>
 
-#include "qmckl_context_private_type.h"
-#include "qmckl_memory_private_func.h"
+#include "qmckl_basic_functions.h"
 
 typedef int64_t qmckl_context_device;
 

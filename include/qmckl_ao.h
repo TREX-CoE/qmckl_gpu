@@ -8,15 +8,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <qmckl.h>
 
-#include "qmckl_ao_private_func.h"
-#include "qmckl_ao_private_type.h"
-#include "qmckl_blas_private_type.h"
-#include "qmckl_context_private_type.h"
-#include "qmckl_error_private_type.h"
-#include "qmckl_memory_private_func.h"
-#include "qmckl_memory_private_type.h"
+
+#include "qmckl_basic_functions.h"
 
 #include "qmckl_context.h"
 #include "qmckl_memory.h"
