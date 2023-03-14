@@ -10,6 +10,7 @@
 //**********
 
 void *qmckl_malloc_device(qmckl_context_device context, size_t size) {
+	printf("[malloc_device] In, allocating size=%ld\n", size);
 
 	assert(qmckl_context_check((qmckl_context)context) != QMCKL_NULL_CONTEXT);
 
@@ -189,6 +190,7 @@ qmckl_exit_code qmckl_memcpy_D2H(qmckl_context_device context, void *const dest,
 qmckl_exit_code qmckl_memcpy_D2D(qmckl_context_device context, void *dest,
 								 void *src, size_t size) {
 
+	printf("[memcpy_D2D] In, copying into dest=%ld from src=%ld for size=%ld\n", dest, src, size);
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_memcpy_D2D", NULL);

@@ -1,6 +1,7 @@
 // This files contains the C wrappers to be interfaced with Fortran
 
 #include "qmckl_gpu.h"
+#include <stdio.h>
 
 //**********
 // CONTEXT
@@ -11,8 +12,10 @@ qmckl_context_touch_device_f(qmckl_context_device context) {
 	return qmckl_context_touch_device(context);
 }
 
-qmckl_context_device qmckl_context_create_device_f(int *device_id) {
-	return qmckl_context_create_device(*device_id);
+qmckl_context_device qmckl_context_create_device_f(int device_id) {
+	printf("Device_id = %d\n", device_id);
+	return qmckl_context_create_device(device_id);
+	return 0;
 }
 
 qmckl_exit_code qmckl_context_destroy_device_f(qmckl_context_device context) {
@@ -333,7 +336,7 @@ qmckl_exit_code qmckl_get_mo_basis_mo_vgl_inplace_device_f(
 	return qmckl_get_mo_basis_mo_vgl_inplace_device(context, mo_vgl, *size_max);
 }
 
-qmckl_exit_code qmckl_get_mo_basis_mo_num_device(const qmckl_context context,
+qmckl_exit_code qmckl_get_mo_basis_mo_num_device_f(const qmckl_context context,
 												 int64_t *mo_num) {
 	return qmckl_get_mo_basis_mo_num_device(context, mo_num);
 }

@@ -28,6 +28,10 @@ int64_t get_shell_num() {
 	return chbrclf_shell_num;
 }
 
+int64_t get_prim_num() {
+	return chbrclf_prim_num;
+}
+
 int64_t get_ao_num() {
 	return chbrclf_ao_num;
 }

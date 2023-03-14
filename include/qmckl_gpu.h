@@ -244,6 +244,8 @@ qmckl_exit_code qmckl_get_mo_basis_mo_vgl_acc_offload(qmckl_context context,
 qmckl_exit_code qmckl_get_mo_basis_mo_vgl_acc_offload_inplace(
 	qmckl_context context, double *const mo_vgl, const int64_t size_max);
 
+qmckl_exit_code qmckl_get_mo_basis_mo_num_device(const qmckl_context context,
+												 int64_t *mo_num);
 //**********
 // ELECTRON
 //**********

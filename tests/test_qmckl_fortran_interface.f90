@@ -2,6 +2,12 @@ include '../include/qmckl_gpu_f.f90'
 
 program qmckl_test_fortran_interface
 
+    use, intrinsic :: iso_c_binding
+    use :: qmckl_gpu
+
+    !!!
+    ! Interface to read chbrclf.h header
+    !!!
 
     interface
         integer(kind=c_int64_t) function get_elec_up_num() &
@@ -51,6 +57,14 @@ program qmckl_test_fortran_interface
             implicit none
 
         end function get_shell_num
+
+        integer(kind=c_int64_t) function get_prim_num() &
+            bind(C, name="get_prim_num")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+        end function get_prim_num
 
         integer(kind=c_int64_t) function get_ao_num() &
             bind(C, name="get_ao_num")
@@ -167,9 +181,152 @@ program qmckl_test_fortran_interface
 
     end interface
 
-    ! For now, this test does nothing and  only ensures that the interface compiles
-    ! We might want to add simple calculations in the future
-    print *, "Interface compiles"
+    !!!
+    ! Declarations
+    !!!
 
+    integer(qmckl_context_device) context
+    integer(qmckl_exit_code) rc
+
+    character(c_signed_char) :: typ
+
+    integer(c_int64_t) elec_up_num
+    integer(c_int64_t) elec_dn_num
+    integer(c_int64_t) nucl_num
+    integer(c_int64_t) walk_num
+    integer(c_int64_t) point_num
+    integer(c_int64_t) shell_num
+    integer(c_int64_t) ao_num
+    integer(c_int64_t) prim_num
+    integer(c_int64_t) elec_num
+
+    type(c_ptr) elec_coord
+    type(c_ptr) nucl_charge
+    type(c_ptr) nucl_coord
+    type(c_ptr) elec_coord_d
+    type(c_ptr) nucl_charge_d
+    type(c_ptr) nucl_coord_d
+
+    type(c_ptr) nucleus_index
+    type(c_ptr) nucleus_shell_num
+    type(c_ptr) shell_ang_mom
+    type(c_ptr) shell_prim_num
+    type(c_ptr) shell_prim_index
+    type(c_ptr) shell_factor
+    type(c_ptr) exponent
+    type(c_ptr) coefficient
+    type(c_ptr) prim_factor
+    type(c_ptr) ao_factor
+    type(c_ptr) nucleus_index_d
+    type(c_ptr) nucleus_shell_num_d
+    type(c_ptr) shell_ang_mom_d
+    type(c_ptr) shell_prim_num_d
+    type(c_ptr) shell_prim_index_d
+    type(c_ptr) shell_factor_d
+    type(c_ptr) exponent_d
+    type(c_ptr) coefficient_d
+    type(c_ptr) prim_factor_d
+    type(c_ptr) ao_factor_d
+
+    context = qmckl_context_create_device(0)
+
+
+    !!!
+    ! Read CPU Fortran arrays from the .h file
+    !!!
+
+    elec_up_num = get_elec_up_num();
+    elec_dn_num = get_elec_dn_num();
+    nucl_num = get_elec_up_num();
+    walk_num = get_walk_num();
+    point_num = walk_num * elec_num;
+    shell_num = get_shell_num();
+    ao_num = get_ao_num();
+    prim_num = get_prim_num();
+    elec_num = get_elec_num();
+
+    elec_coord = get_elec_coord();
+    nucl_charge = get_nucl_charge();
+    nucl_coord = get_nucl_coord();
+
+    nucleus_index = get_nucleus_index();
+    nucleus_shell_num = get_nucleus_shell_num();
+    shell_ang_mom = get_shell_ang_mom();
+    shell_prim_num = get_shell_prim_num();
+    shell_prim_index = get_shell_prim_index();
+    shell_factor = get_shell_factor();
+    exponent = get_exponent();
+    coefficient = get_coefficient();
+    prim_factor = get_prim_factor();
+    ao_factor = get_ao_factor();
+
+
+    !!!
+    ! Allocate GPU arrays and copy the CPU arrays onto them
+    !!!
+
+    elec_coord_d = qmckl_malloc_device(context, point_num * 3 * c_sizeof(c_double) * 2);
+    rc = qmckl_memcpy_H2D(context, elec_coord_d, elec_coord, point_num * 3 * c_sizeof(c_double) * 2);
+
+    nucl_coord_d = qmckl_malloc_device(context, 3 * nucl_num * c_sizeof(c_double) * 2);
+    rc = qmckl_memcpy_H2D(context, nucl_coord_d, nucl_coord, 3 * nucl_num * c_sizeof(c_double) * 2);
+
+    nucl_charge_d = qmckl_malloc_device(context, nucl_num * c_sizeof(c_double) * 2);
+    rc = qmckl_memcpy_H2D(context, nucl_charge_d, nucl_charge, nucl_num * c_sizeof(c_double) * 2);
+
+
+    nucleus_index_d = qmckl_malloc_device(context, nucl_num * c_sizeof(c_int64_t) * 2);
+    rc = qmckl_memcpy_H2D(context, nucleus_index_d, nucleus_index, nucl_num * c_sizeof(c_int64_t) * 2);
+
+    nucleus_shell_num_d = qmckl_malloc_device(context, nucl_num * c_sizeof(c_int64_t) * 2);
+    rc = qmckl_memcpy_H2D(context, nucleus_shell_num_d, nucleus_shell_num, nucl_num * c_sizeof(c_int64_t) * 2);
+
+    shell_ang_mom_d = qmckl_malloc_device(context, shell_num * c_sizeof(c_int32_t));
+    rc = qmckl_memcpy_H2D(context, shell_ang_mom_d, shell_ang_mom, shell_num * c_sizeof(c_int32_t));
+
+    shell_prim_num_d = qmckl_malloc_device(context, shell_num * c_sizeof(c_int64_t) * 2);
+    rc = qmckl_memcpy_H2D(context, shell_prim_num_d, shell_prim_num, shell_num * c_sizeof(c_int64_t) * 2);
+
+    shell_prim_index_d = qmckl_malloc_device(context, shell_num * c_sizeof(c_int64_t) * 2);
+    rc = qmckl_memcpy_H2D(context, shell_prim_index_d, shell_prim_index, shell_num * c_sizeof(c_int64_t) * 2);
+
+    shell_factor_d = qmckl_malloc_device(context, shell_num * c_sizeof(c_double) * 2);
+    rc = qmckl_memcpy_H2D(context, shell_factor_d, shell_factor, shell_num * c_sizeof(c_double) * 2);
+
+    exponent_d = qmckl_malloc_device(context, prim_num * c_sizeof(c_double) * 2);
+    rc = qmckl_memcpy_H2D(context, exponent_d, exponent, prim_num * c_sizeof(c_double) * 2);
+
+    coefficient_d = qmckl_malloc_device(context, prim_num * c_sizeof(c_double) * 2);
+    rc = qmckl_memcpy_H2D(context, coefficient_d, coefficient, prim_num * c_sizeof(c_double) * 2);
+
+    prim_factor_d = qmckl_malloc_device(context, prim_num * c_sizeof(c_double) * 2);
+    rc = qmckl_memcpy_H2D(context, prim_factor_d, prim_factor, prim_num * c_sizeof(c_double) * 2);
+
+    ao_factor_d = qmckl_malloc_device(context, ao_num * c_sizeof(c_double) * 2);
+    rc = qmckl_memcpy_H2D(context, ao_factor_d, ao_factor, ao_num * c_sizeof(c_double) * 2);
+
+    !!!
+    ! Set context values
+    !!!
+
+    typ = 'G';
+    rc = qmckl_set_ao_basis_type_device(context, typ);
+    rc = qmckl_set_ao_basis_shell_num_device(context, shell_num);
+    rc = qmckl_set_ao_basis_prim_num_device(context, prim_num);
+    rc = qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index_d, nucl_num);
+    rc = qmckl_set_ao_basis_nucleus_shell_num_device(context, nucleus_shell_num_d, nucl_num);
+    rc = qmckl_set_ao_basis_shell_ang_mom_device(context, shell_ang_mom_d, shell_num);
+    rc = qmckl_set_ao_basis_shell_factor_device(context, shell_factor_d, shell_num);
+    rc = qmckl_set_ao_basis_shell_prim_num_device(context, shell_prim_num_d, shell_num);
+    rc = qmckl_set_ao_basis_shell_prim_index_device(context, shell_prim_index_d, shell_num);
+    rc = qmckl_set_ao_basis_exponent_device(context, exponent_d, prim_num);
+    rc = qmckl_set_ao_basis_coefficient_device(context, coefficient_d, prim_num);
+    rc = qmckl_set_ao_basis_prim_factor_device(context, prim_factor_d, prim_num);
+
+    rc = qmckl_set_ao_basis_ao_num_device(context, ao_num);
+    rc = qmckl_set_ao_basis_ao_factor_device(context, ao_factor_d, ao_num);
+
+    print *, "Interface compiles";
+    print *, elec_up_num;
 
 end program

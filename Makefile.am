@@ -86,6 +86,7 @@ tests_test_qmckl_mo_LDADD = qmckl/src/libqmckl.la libqmckl_gpu.la
 if HAVE_FORTRAN_INTERFACE
   check_PROGRAMS += tests/test_qmckl_fortran_interface
   tests_test_qmckl_fortran_interface_SOURCES = tests/test_qmckl_fortran_interface.f90 tests/chbrclf_fortran_interface.c
+  tests_test_qmckl_fortran_interface_LDADD = qmckl/src/libqmckl.la libqmckl_gpu.la
 endif
 
 ###
