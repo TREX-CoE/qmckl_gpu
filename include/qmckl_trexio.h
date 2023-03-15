@@ -12,11 +12,8 @@
 #include <string.h>
 #include <trexio.h>
 
-#include <qmckl.h>
-#include "qmckl_memory_private_type.h"
-#include "qmckl_memory_private_func.h"
-#include "qmckl_context_private_type.h"
 
+#include "qmckl_basic_functions.h"
 #include "qmckl_context.h"
 #include "qmckl_memory.h"
 #include "qmckl_blas.h"
@@ -153,7 +150,7 @@ qmckl_get_ao_basis_shell_factor_device(qmckl_context_device context,
 									   double *shell_factor, int64_t shell_num);
 
 qmckl_exit_code qmckl_get_ao_basis_shell_prim_num_device(
-	qmckl_context_device context, double *shell_prim_num, int64_t shell_num);
+	qmckl_context_device context, int64_t *shell_prim_num, int64_t shell_num);
 
 qmckl_exit_code
 qmckl_get_ao_basis_shell_prim_index_device(qmckl_context_device context,
