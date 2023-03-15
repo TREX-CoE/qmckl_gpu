@@ -160,7 +160,7 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp" = "xyes"], [
 			CFLAGS="$CFLAGS -mp=gpu"
 			;;
 		*clang*)
-			CFLAGS="$CFLAGS -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda"
+			CFLAGS="$CFLAGS -fopenmp "
 			;;
 
 

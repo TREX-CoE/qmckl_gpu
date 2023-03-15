@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <qmckl.h>
 #include "qmckl_context_private_type.h"
 #include "qmckl_memory_private_type.h"
 #include "qmckl_memory_private_func.h"

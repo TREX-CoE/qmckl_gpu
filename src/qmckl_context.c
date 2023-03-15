@@ -1,6 +1,7 @@
 // This file contains qmckl_context_device related functions
 
 #include "../include/qmckl_context.h"
+#include "../include/qmckl_basic_functions.h"
 
 //**********
 // MISC FUNCTIONS
