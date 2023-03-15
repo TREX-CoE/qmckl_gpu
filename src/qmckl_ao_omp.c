@@ -127,6 +127,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	const int32_t *restrict shell_ang_mom, const double *restrict ao_factor,
 	double *shell_vgl, double *restrict const ao_vgl) {
 
+	printf("[compute] In\n");
 	int64_t n_poly;
 	int64_t *lstart;
 	double cutoff = 27.631021115928547;

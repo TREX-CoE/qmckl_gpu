@@ -15,6 +15,8 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 									   char transp, int64_t num, double *coord,
 									   int64_t size_max) {
 
+	printf("[set_point_device] In, transp=%d, num=%d, size_max=%d\n", transp, num, size_max);
+	printf("[set_point_device] and coord=%ld\n", coord);
 	size_t device_id = qmckl_get_device_id(context);
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return QMCKL_NULL_CONTEXT;
@@ -48,6 +50,7 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 			assert(rc == QMCKL_SUCCESS);
 		}
 
+		printf("[set_point_device] Allocating matrix of %dx%d\n", num, 3);
 		ctx->point.coord = qmckl_matrix_alloc_device(context, num, 3);
 		if (ctx->point.coord.data == NULL) {
 			return qmckl_failwith((qmckl_context)context,
@@ -57,10 +60,12 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 	};
 
 	ctx->point.num = num;
+	printf("[set_point_device] 1\n");
 
 	double *a = ctx->point.coord.data;
 	int size_0 = ctx->point.coord.size[0];
 	if (transp == 'T') {
+		printf("[set_point_device] transp is T\n");
 #pragma omp target is_device_ptr(a, coord)
 		{
 			for (int64_t i = 0; i < 3 * num; ++i) {
@@ -68,6 +73,17 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 			}
 		}
 	} else {
+		printf("[set_point_device] transp is other\n");
+
+#pragma omp target is_device_ptr(a)
+		{
+			printf("a[1]=%lf\n", a[1]);
+		}
+#pragma omp target is_device_ptr(coord)
+		{
+			printf("coord[1]=%lf\n", coord[1]);
+		}
+
 #pragma omp target is_device_ptr(a, coord)
 		{
 			for (int64_t i = 0; i < num; ++i) {
@@ -77,6 +93,7 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 			}
 		}
 	}
+	printf("[set_point_device] 2\n");
 
 	/* Increment the date of the context */
 	rc = qmckl_context_touch_device(context);
@@ -101,7 +118,7 @@ qmckl_exit_code qmckl_set_nucleus_coord_device(qmckl_context_device context,
 	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	qmckl_exit_code rc;
 
-	int64_t nucl_num = (int64_t)ctx->nucleus.num;
+	int64_t nucl_num = (int64_t) ctx->nucleus.num;
 
 	if (ctx->nucleus.coord.data != NULL) {
 		rc = qmckl_matrix_free_device(context, &(ctx->nucleus.coord));

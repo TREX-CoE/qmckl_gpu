@@ -40,6 +40,7 @@ int main() {
 	int64_t point_num = walk_num * elec_num;
 
 	// Put nucleus stuff in GPU arrays
+	printf("[c] elec_coord_size = %d\n", point_num * 3 * sizeof(double));
 	double *elec_coord_d =
 		qmckl_malloc_device(context, point_num * 3 * sizeof(double));
 	double *nucl_charge_d =

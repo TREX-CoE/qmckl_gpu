@@ -74,6 +74,14 @@ program qmckl_test_fortran_interface
 
         end function get_ao_num
 
+        integer(kind=c_int64_t) function get_mo_num() &
+            bind(C, name="get_mo_num")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+        end function get_mo_num
+
         type(c_ptr) function get_elec_coord() result(elec_coord) &
             bind(C, name="get_elec_coord")
             use, intrinsic :: iso_c_binding
@@ -197,6 +205,7 @@ program qmckl_test_fortran_interface
     integer(c_int64_t) point_num
     integer(c_int64_t) shell_num
     integer(c_int64_t) ao_num
+    integer(c_int64_t) mo_num
     integer(c_int64_t) prim_num
     integer(c_int64_t) elec_num
 
@@ -228,6 +237,11 @@ program qmckl_test_fortran_interface
     type(c_ptr) prim_factor_d
     type(c_ptr) ao_factor_d
 
+    type(c_ptr) ao_vgl
+    type(c_ptr) mo_vgl
+    type(c_ptr) ao_vgl_d
+    type(c_ptr) mo_vgl_d
+
     context = qmckl_context_create_device(0)
 
 
@@ -235,19 +249,20 @@ program qmckl_test_fortran_interface
     ! Read CPU Fortran arrays from the .h file
     !!!
 
-    elec_up_num = get_elec_up_num();
-    elec_dn_num = get_elec_dn_num();
-    nucl_num = get_elec_up_num();
     walk_num = get_walk_num();
-    point_num = walk_num * elec_num;
+    elec_num = get_elec_num();
     shell_num = get_shell_num();
     ao_num = get_ao_num();
     prim_num = get_prim_num();
-    elec_num = get_elec_num();
 
+    elec_up_num = get_elec_up_num();
+    elec_dn_num = get_elec_dn_num();
     elec_coord = get_elec_coord();
+    nucl_num = get_nucl_num();
     nucl_charge = get_nucl_charge();
     nucl_coord = get_nucl_coord();
+    point_num = elec_num * walk_num;
+    mo_num = get_mo_num();
 
     nucleus_index = get_nucleus_index();
     nucleus_shell_num = get_nucleus_shell_num();
@@ -264,9 +279,11 @@ program qmckl_test_fortran_interface
     !!!
     ! Allocate GPU arrays and copy the CPU arrays onto them
     !!!
-
+    print *, "[fortran] elec_coord size = ", point_num * 3 * c_sizeof(c_double) * 2;
     elec_coord_d = qmckl_malloc_device(context, point_num * 3 * c_sizeof(c_double) * 2);
+    print *, "[fortran] elec_coord_d = ", elec_coord_d;
     rc = qmckl_memcpy_H2D(context, elec_coord_d, elec_coord, point_num * 3 * c_sizeof(c_double) * 2);
+    print *, "[fortran] after copy, elec_coord_d = ", elec_coord_d;
 
     nucl_coord_d = qmckl_malloc_device(context, 3 * nucl_num * c_sizeof(c_double) * 2);
     rc = qmckl_memcpy_H2D(context, nucl_coord_d, nucl_coord, 3 * nucl_num * c_sizeof(c_double) * 2);
@@ -309,6 +326,15 @@ program qmckl_test_fortran_interface
     ! Set context values
     !!!
 
+    print *, "1"
+    rc = qmckl_set_electron_num_device(context, elec_up_num, elec_dn_num);
+    print *, "2"
+    print *, "[fortran] before call, elec_coord_d = ", elec_coord_d;
+    rc = qmckl_set_point_device(context, 'N', point_num, elec_coord_d, point_num * 3);
+    print *, "3"
+    rc = qmckl_set_nucleus_num_device(context, nucl_num);
+    print *, "4"
+
     typ = 'G';
     rc = qmckl_set_ao_basis_type_device(context, typ);
     rc = qmckl_set_ao_basis_shell_num_device(context, shell_num);
@@ -326,7 +352,20 @@ program qmckl_test_fortran_interface
     rc = qmckl_set_ao_basis_ao_num_device(context, ao_num);
     rc = qmckl_set_ao_basis_ao_factor_device(context, ao_factor_d, ao_num);
 
-    print *, "Interface compiles";
-    print *, elec_up_num;
+
+    !!!
+    ! AO computations
+    !!!
+
+    ao_vgl_d = qmckl_malloc_device(context, 5 * point_num * ao_num * c_sizeof(c_double) * 2);
+    rc = qmckl_get_ao_basis_ao_vgl_device(context, ao_vgl_d, 5 * point_num * ao_num);
+
+
+    !!!
+    ! MO computations
+    !!!
+
+    mo_vgl_d = qmckl_malloc_device(context, 5 * point_num * mo_num * c_sizeof(c_double) * 2);
+    rc = qmckl_get_mo_basis_mo_vgl_device(context, ao_vgl_d, 5 * point_num * mo_num);
 
 end program

@@ -20,6 +20,7 @@ int64_t get_walk_num() {
 	return chbrclf_walk_num;
 }
 
+#include <stdio.h>
 int64_t get_elec_num() {
 	return chbrclf_elec_num;
 }
@@ -35,6 +36,11 @@ int64_t get_prim_num() {
 int64_t get_ao_num() {
 	return chbrclf_ao_num;
 }
+
+int64_t get_mo_num() {
+	return chbrclf_mo_num;
+}
+
 
 double * get_elec_coord() {
 	return &(chbrclf_elec_coord[0][0][0]);
