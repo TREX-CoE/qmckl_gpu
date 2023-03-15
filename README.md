@@ -6,20 +6,21 @@ This repository is a work-in-progress GPU addon to the [QMCkl library](https://g
 
 This readme contains configure, build and installation instructions, and redirects to dedicated files for usage instructions and the troubleshooting section.
 
-# Installation
+
+# Build & install instructions
 
 The project uses GNU Autotools :
 
 ```
 bash autogen.sh
-./configure [GPU functions-related arguments & other arguments]
+./configure [arguments]
 make
 make install
 ```
 
 The only other requirement for **building** the library is a compiler toolchain that supports OpenMP or OpenACC offloading for your chosen target(s). Linking with QMCkl to build QMCkl GPU is not needed (but it is when building an executable that uses QMCkl GPU).
 
-For more details, se the dedicated INSTALL.md file.
+You can also check that offloading works on your system with the `make check` command.
 
 ## Enabling either OpenMP or OpenACC
 
@@ -33,6 +34,11 @@ In either case, the library interface is going to be exactly the same, as all of
 
 **Note:** Using exactly one of those arguments is mandatory, as doing otherwise would result in an empty library. If none is specified, Autotools will throw a warning message and attempt to build the library with `--enable-omp` as a fallback solution.
 
+## Compilers support 
+
+We currently support nvc, gcc and clang. This means we have succesfully built and run the library with one of these compilers, on hardware from at least one vendor. You can specify which compiler to use by specifying the `CC=...` variable to the configure (gcc should be the default). 
+
+When specifying a known compiler, the configure also automatically tries to set the required flags to enable OpenMP or OpenACC offloading. In case the proposed flags don't work on your system, you can disable them whith the `--disable-autoflags` configure option. Then, simply specify correct compiler flags in the `CFLAGS` variable.
 
 # Usage
 
@@ -41,7 +47,7 @@ See the dedicated [USAGE.md](https://github.com/TREX-CoE/qmckl_gpu/blob/main/doc
 
 # Troubleshooting
 
-During the development and testing of the library, we encountered some compiler related issues. This section contains a list of known issues and fixes if any. 
+During the development and testing of the library, we encountered some compiler related issues. This section contains a list of known issues and fixes (if any). 
 
 See the dedicated [TROUBLESHOOTING.md](https://github.com/TREX-CoE/qmckl_gpu/blob/main/doc/TROUBLESHOOTING.md) file.
 

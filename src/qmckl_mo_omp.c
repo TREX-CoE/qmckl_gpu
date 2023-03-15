@@ -15,7 +15,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 
 #pragma omp target is_device_ptr(coefficient_t, ao_vgl, mo_vgl)
 	{
-#pragma omp teams distribute parallel for 
+#pragma omp teams distribute parallel for
 		for (int64_t j = 0; j < point_num; ++j) {
 
 			// Set j subarray to 0
@@ -39,6 +39,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 */
 #pragma omp simd
 
+
 					for (int i = 0; i < mo_num; i++) {
 						mo_vgl[i + mo_num * l + mo_num * 5 * j] =
 								mo_vgl[i + mo_num * l + mo_num * 5 * j] +
@@ -57,6 +58,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 							mo_vgl[i + mo_num * 4 + mo_num * 5 * j] +
 							coefficient_t[i + mo_num * k] * c5;*/
 					}
+
 					}
 				}
 			}
@@ -81,7 +83,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 		qmckl_malloc_device(context, point_num * ao_num * sizeof(int64_t));
 
 #pragma omp target is_device_ptr(coefficient_t, ao_value, mo_value,            \
-								 idx_shared, av1_shared)
+									 idx_shared, av1_shared)
 	{
 #pragma omp teams distribute parallel for
 		for (int64_t ipoint = 0; ipoint < point_num; ++ipoint) {
@@ -118,7 +120,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 				double a31 = av1[n + 2];
 				double a41 = av1[n + 3];
 
-#pragma omp parallel 
+#pragma omp simd
 				for (int64_t i = 0; i < mo_num; ++i) {
 					vgl1[i] = vgl1[i] + ck1[i] * a11 + ck2[i] * a21 +
 							  ck3[i] * a31 + ck4[i] * a41;
@@ -129,8 +131,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 				double *restrict ck = coefficient_t + idx[m] * mo_num;
 				double a1 = av1[m];
 
-#pragma omp parallel
-
+#pragma omp simd
 				for (int64_t i = 0; i < mo_num; ++i) {
 					vgl1[i] += ck[i] * a1;
 				}

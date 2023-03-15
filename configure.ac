@@ -107,8 +107,20 @@ AC_ARG_ENABLE(omp, [AS_HELP_STRING([--enable-omp],[Enable OpenMP device pointers
 # OpenACC + device pointers
 AC_ARG_ENABLE(acc, [AS_HELP_STRING([--enable-acc],[Enable OpenACC device pointers functions])], have_acc=yes, have_acc=no)
 
+# Auto offloading flags
+AC_ARG_ENABLE(autoflags, [AS_HELP_STRING([--disable-autoflags],[By default, configure will try to infer and add offloading compiler flags by itself. Disable this option and set your flags manually if you encounter issues.])], have_autoflags=no, have_autoflags=yes)
+AS_IF([test "x$have_autoflags" = "xyes"], [
+	echo "Autoflags have been kept enabled"
+], [
+	echo "Autoflags have been disabled"
+])
+
 # TODO Add cuBLAS functions at some point ?
 
+####
+## Enable the optional Fortran interface
+####
+AC_ARG_ENABLE(fortran-interface, [AS_HELP_STRING([--enable-fortran-interface],[Enable the optional Fortran interface])], have_fortran_interface=yes, have_fortran_interface=no)
 
 ####
 ## Perform checks on what has been enabled (at least one function type, no OpenACC and OpenMP at the same time)
@@ -138,7 +150,7 @@ AS_IF([test "x$have_omp" = "xyes" -a  "x$have_acc" = "xyes"], [
 ####
 
 ## Add compilers flags depending on what has been enabled
-AS_IF([test "x$have_omp_offload" = "xyes" -o "x$have_omp" = "xyes"], [
+AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp" = "xyes"], [
 	case $CC in
 		*gcc*)
 			CFLAGS="$CFLAGS -fopenmp -foffload=-lm"
@@ -155,8 +167,26 @@ AS_IF([test "x$have_omp_offload" = "xyes" -o "x$have_omp" = "xyes"], [
 			echo "Warning : compiler not recognized for OpenMP. Make sure to add necessary offload flags manually."
 	esac
 ])
+AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp_offload" = "xyes"], [
+	case $CC in
+		*gcc*)
+			CFLAGS="$CFLAGS -fopenmp -foffload=-lm"
+			;;
+		*nvc*)
+			CFLAGS="$CFLAGS -mp=gpu"
+			;;
+		*clang*)
+			CFLAGS="$CFLAGS -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda"
+			;;
 
-AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc" = "xyes"], [
+
+		*)
+			echo "Warning : compiler not recognized for OpenMP offload. Make sure to add necessary offload flags manually."
+	esac
+])
+
+
+AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc" = "xyes"], [
 	case $CC in
 		*gcc*)
 			CFLAGS="$CFLAGS -fopenacc -foffload=-lm"
@@ -170,6 +200,21 @@ AS_IF([test "x$have_acc_offload" = "xyes" -o "x$have_acc" = "xyes"], [
 			echo "Warning : compiler not supported for OpenACC. Make sure to add necessary offload flags manually."
 	esac
 ])
+AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc_offload" = "xyes"], [
+	case $CC in
+		*gcc*)
+			CFLAGS="$CFLAGS -fopenacc -foffload=-lm"
+			LDFLAGS="$LDFLAGS -lm -fopenacc"
+			;;
+		*nvc*)
+			CFLAGS="$CFLAGS -acc=gpu -ta=nvidia:nordc"
+		;;
+
+		*)
+			echo "Warning : compiler not supported for OpenACC offload. Make sure to add necessary offload flags manually."
+	esac
+])
+
 
 # Specific options required with some compilers
 AS_CASE([$FC],
@@ -188,7 +233,7 @@ AM_CONDITIONAL([HAVE_OMP_OFFLOAD], [test "x$have_omp_offload"  = "xyes"])
 AM_CONDITIONAL([HAVE_ACC_OFFLOAD], [test "x$have_acc_offload" = "xyes"])
 AM_CONDITIONAL([HAVE_OMP_DEVICE],  [test "x$have_omp"  = "xyes"])
 AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc"  = "xyes"])
-
+AM_CONDITIONAL([HAVE_FORTRAN_INTERFACE],  [test "x$have_fortran_interface"  = "xyes"])
 AM_CONDITIONAL([HAVE_DEVICE_POINTERS], [test "x$have_omp"  = "xyes" -o "x$have_acc"  = "xyes"])
 
 
@@ -206,11 +251,14 @@ ${PACKAGE_NAME} Version ${PACKAGE_VERSION}
 Prefix: '${prefix}'
 
 CC.................: ${CC}
+FC.................: ${FC}
 CFLAGS.............: ${CFLAGS}
 LDFLAGS:...........: ${LDFLAGS}
 
 OpenMP ............: ${have_omp}
 OpenACC ...........: ${have_acc}
+Autoflags .........: ${have_autoflags}
+Fortran interface .: ${have_fortran_interface}
 
 Now type 'make @<:@<target>@:>@'
 where the optional <target> is:
