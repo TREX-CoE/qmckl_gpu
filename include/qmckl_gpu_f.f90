@@ -14,7 +14,7 @@ module qmckl_gpu
             import
             implicit none
 
-            integer(qmckl_context_device), value :: context
+            integer(qmckl_context_device), intent(in), value :: context
         end function qmckl_context_touch_device
 
         integer(qmckl_context_device) function qmckl_context_create_device(device_id) &
@@ -23,7 +23,7 @@ module qmckl_gpu
             import
             implicit none
 
-            integer(c_int32_t), value :: device_id
+            integer(c_int32_t), intent(in), value :: device_id
         end function qmckl_context_create_device
 
         integer(qmckl_exit_code) function qmckl_context_destroy_device(context) &
@@ -32,7 +32,7 @@ module qmckl_gpu
             import
             implicit none
 
-            integer(qmckl_context_device), value :: context
+            integer(qmckl_context_device),intent(in), value :: context
         end function qmckl_context_destroy_device
 
     !!!!!!!!!!!
@@ -45,8 +45,8 @@ module qmckl_gpu
             import
             implicit none
 
-            integer(qmckl_context_device), value :: context
-            integer(c_size_t), value :: size
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_size_t), intent(in), value :: size
         end function qmckl_malloc_device
 
         integer(qmckl_exit_code) function qmckl_free_device(context, ptr) &
@@ -55,8 +55,8 @@ module qmckl_gpu
             import
             implicit none
 
-            integer(qmckl_context_device), value :: context
-            type(c_ptr), value :: ptr
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: ptr
         end function qmckl_free_device
 
         integer(qmckl_exit_code) function qmckl_memcpy_H2D(context, dest, src, size) &
@@ -66,9 +66,9 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), value :: context
-            type(c_ptr), value :: dest
-            type(c_ptr), value :: src
-            integer(c_size_t), value :: size
+            type(c_ptr), intent(in), value :: dest
+            type(c_ptr), intent(in), value :: src
+            integer(c_size_t), intent(in), value :: size
         end function qmckl_memcpy_H2D
 
         integer(qmckl_exit_code) function qmckl_memcpy_D2H(context, dest, src, size) &
@@ -77,10 +77,10 @@ module qmckl_gpu
             import
             implicit none
 
-            integer(qmckl_context_device), value :: context
-            type(c_ptr), value :: dest
-            type(c_ptr), value :: src
-            integer(c_size_t), value :: size
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: dest
+            type(c_ptr), intent(in), value :: src
+            integer(c_size_t), intent(in), value :: size
         end function qmckl_memcpy_D2H
 
         integer(qmckl_exit_code) function qmckl_memcpy_D2D(context, dest, src, size) &
@@ -90,8 +90,8 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), value :: context
-            type(c_ptr), value :: dest
-            type(c_ptr), value :: src
+            type(c_ptr), intent(in), value :: dest
+            type(c_ptr), intent(in), value :: src
             integer(c_size_t), value :: size
         end function qmckl_memcpy_D2D
 
@@ -107,8 +107,8 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: file_name
             integer(c_int64_t), intent(in), value :: size_max
-            character(c_char), intent(in)          :: file_name(size_max)
         end function qmckl_trexio_read_device
 
         integer(qmckl_exit_code) function qmckl_set_nucleus_num_device(context, num) &
@@ -151,7 +151,7 @@ module qmckl_gpu
             integer(qmckl_context_device), intent(in), value :: context
             character, intent(in), value :: transp
             integer(c_int64_t), intent(in), value :: walk_num
-            type(c_ptr), intent(in)          :: coord
+            type(c_ptr), intent(in), value :: coord
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_electron_coord_device
 
@@ -164,9 +164,32 @@ module qmckl_gpu
             integer(qmckl_context_device), intent(in), value :: context
             character(c_char), intent(in), value :: transp
             integer(c_int64_t), intent(in), value :: num
-            type(c_ptr), intent(in)          :: coord
+            type(c_ptr), intent(in), value :: coord ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_point_device
+
+        integer(qmckl_exit_code) function qmckl_set_nucleus_coord_device(context, transp, nucl_coord, size_max) &
+            bind(C, name="qmckl_set_nucleus_coord_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            character(c_char), intent(in), value :: transp
+            type(c_ptr), intent(in), value :: nucl_coord
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_set_nucleus_coord_device
+
+        integer(qmckl_exit_code) function qmckl_set_nucleus_charge_device(context, nucl_charge, nucl_num) &
+            bind(C, name="qmckl_set_nucleus_charge_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: nucl_charge
+            integer(c_int64_t), intent(in), value :: nucl_num
+        end function qmckl_set_nucleus_charge_device
 
         integer(qmckl_exit_code) function qmckl_set_ao_basis_type_device(context, type) &
             bind(C, name="qmckl_set_ao_basis_type_device")
@@ -338,6 +361,26 @@ module qmckl_gpu
         ! MO
     !!!!!!!!!!!
 
+        integer(qmckl_exit_code) function qmckl_set_mo_basis_mo_num_device(context, num) &
+            bind(C, name="qmckl_set_mo_basis_mo_num_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_int64_t), intent(in), value :: num
+        end function qmckl_set_mo_basis_mo_num_device
+
+        integer(qmckl_exit_code) function qmckl_set_mo_basis_coefficient_device(context, mo_coefficient) &
+            bind(C, name="qmckl_set_mo_basis_coefficient_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_int32_t), intent(in), value :: mo_coefficient ! Elements of type double
+        end function qmckl_set_mo_basis_coefficient_device
+
         integer(qmckl_exit_code) function qmckl_get_mo_basis_mo_vgl_device(context, mo_vgl, size_max) &
             bind(C, name="qmckl_get_mo_basis_mo_vgl_device")
             use, intrinsic :: iso_c_binding
@@ -345,7 +388,7 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in)         :: mo_vgl
+            type(c_ptr), intent(in), value :: mo_vgl
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_vgl_device
 
@@ -356,7 +399,7 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(out)         :: mo_value
+            type(c_ptr), intent(in), value :: mo_value
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_value_device
 
@@ -367,7 +410,7 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in)         :: mo_vgl
+            type(c_ptr), intent(in), value :: mo_vgl
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_vgl_inplace_device
 
@@ -378,7 +421,7 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in)         :: mo_value
+            type(c_ptr), intent(in), value :: mo_value
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_value_inplace_device
 
@@ -399,7 +442,7 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(out)         :: keep
+            type(c_ptr), intent(in), value :: keep
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_mo_basis_select_mo_device
 

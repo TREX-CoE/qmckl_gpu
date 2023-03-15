@@ -70,29 +70,22 @@ qmckl_provide_ao_basis_shell_vgl_device(qmckl_context_device context) {
 qmckl_exit_code
 qmckl_provide_ao_basis_ao_vgl_device(qmckl_context_device context) {
 
-	printf("[provide_ao_basis_ao_vgl] In\n");
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_provide_ao_basis_ao_vgl_device", NULL);
 	}
-	printf("Context checked\n");
 
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
 
 	if (!ctx->ao_basis.provided) {
-		printf("ao_basis not provided\n");
 		return qmckl_failwith((qmckl_context)context, QMCKL_NOT_PROVIDED,
 							  "qmckl_ao_basis_ao_vgl_device", NULL);
 	}
-		printf("ao_basis provided\n");
 
 	/* Compute if necessary */
-	printf("Should we compute ?\n");
-	printf("%d > %d ?\n", ctx->point.date, ctx->ao_basis.ao_vgl_date);
 	if (ctx->point.date > ctx->ao_basis.ao_vgl_date) {
 
-		printf("Yes\n");
 		qmckl_exit_code rc;
 
 		/* Allocate array */
@@ -184,7 +177,6 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
 												 double *const ao_vgl,
 												 const int64_t size_max) {
 
-	printf("[get_ao_basis_ao_vgl] In\n");
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_get_ao_basis_ao_vgl_device", NULL);

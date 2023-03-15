@@ -279,11 +279,8 @@ program qmckl_test_fortran_interface
     !!!
     ! Allocate GPU arrays and copy the CPU arrays onto them
     !!!
-    print *, "[fortran] elec_coord size = ", point_num * 3 * c_sizeof(c_double) * 2;
     elec_coord_d = qmckl_malloc_device(context, point_num * 3 * c_sizeof(c_double) * 2);
-    print *, "[fortran] elec_coord_d = ", elec_coord_d;
     rc = qmckl_memcpy_H2D(context, elec_coord_d, elec_coord, point_num * 3 * c_sizeof(c_double) * 2);
-    print *, "[fortran] after copy, elec_coord_d = ", elec_coord_d;
 
     nucl_coord_d = qmckl_malloc_device(context, 3 * nucl_num * c_sizeof(c_double) * 2);
     rc = qmckl_memcpy_H2D(context, nucl_coord_d, nucl_coord, 3 * nucl_num * c_sizeof(c_double) * 2);
@@ -326,17 +323,15 @@ program qmckl_test_fortran_interface
     ! Set context values
     !!!
 
-    print *, "1"
+    ! electron / nucleus
     rc = qmckl_set_electron_num_device(context, elec_up_num, elec_dn_num);
-    print *, "2"
-    print *, "[fortran] before call, elec_coord_d = ", elec_coord_d;
     rc = qmckl_set_point_device(context, 'N', point_num, elec_coord_d, point_num * 3);
-    print *, "3"
     rc = qmckl_set_nucleus_num_device(context, nucl_num);
-    print *, "4"
+    rc = qmckl_set_nucleus_coord_device(context, 'T', nucl_coord_d, nucl_num * 3);
+    rc = qmckl_set_nucleus_charge_device(context, nucl_charge_d, nucl_num);
 
-    typ = 'G';
-    rc = qmckl_set_ao_basis_type_device(context, typ);
+    ! ao_basis
+    rc = qmckl_set_ao_basis_type_device(context, 'G');
     rc = qmckl_set_ao_basis_shell_num_device(context, shell_num);
     rc = qmckl_set_ao_basis_prim_num_device(context, prim_num);
     rc = qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index_d, nucl_num);
@@ -351,6 +346,10 @@ program qmckl_test_fortran_interface
 
     rc = qmckl_set_ao_basis_ao_num_device(context, ao_num);
     rc = qmckl_set_ao_basis_ao_factor_device(context, ao_factor_d, ao_num);
+
+    ! mo_basis
+    rc = qmckl_set_mo_basis_mo_num_device(context, mo_num);
+    rc = qmckl_set_mo_basis_coefficient_device(context, mo_coefficient_d);
 
 
     !!!

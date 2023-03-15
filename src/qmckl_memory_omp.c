@@ -64,7 +64,6 @@ void *qmckl_malloc_device(qmckl_context_device context, size_t size) {
 	}
 	qmckl_unlock((qmckl_context)context);
 
-	printf("[malloc_device] Returning pointer %ld\n", pointer);
 	return pointer;
 }
 
