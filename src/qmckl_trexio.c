@@ -899,7 +899,7 @@ qmckl_exit_code
 qmckl_get_ao_basis_shell_num_device(qmckl_context_device context,
 									int64_t *ao_num) {
 	return qmckl_get_ao_basis_shell_num((qmckl_context)context, ao_num);
-}
+} 
 
 qmckl_exit_code qmckl_get_ao_basis_prim_num_device(qmckl_context_device context,
 												   int64_t *prim_num) {
@@ -1061,7 +1061,7 @@ qmckl_get_ao_basis_shell_factor_device(qmckl_context_device context,
 }
 
 qmckl_exit_code qmckl_get_ao_basis_shell_prim_num_device(
-	qmckl_context_device context, double *shell_prim_num, int64_t size_max) {
+	qmckl_context_device context, int64_t *shell_prim_num, int64_t size_max) {
 
 	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,

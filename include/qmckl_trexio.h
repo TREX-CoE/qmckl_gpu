@@ -150,7 +150,7 @@ qmckl_get_ao_basis_shell_factor_device(qmckl_context_device context,
 									   double *shell_factor, int64_t shell_num);
 
 qmckl_exit_code qmckl_get_ao_basis_shell_prim_num_device(
-	qmckl_context_device context, double *shell_prim_num, int64_t shell_num);
+	qmckl_context_device context, int64_t *shell_prim_num, int64_t shell_num);
 
 qmckl_exit_code
 qmckl_get_ao_basis_shell_prim_index_device(qmckl_context_device context,

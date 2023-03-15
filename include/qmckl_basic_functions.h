@@ -20,9 +20,6 @@ qmckl_exit_code
 qmckl_context_destroy (const qmckl_context context);
 
 /* Error */
-const char*
-qmckl_string_of_error (const qmckl_exit_code error);
-
 qmckl_exit_code
 qmckl_failwith(qmckl_context context,
                const qmckl_exit_code exit_code,
@@ -112,10 +109,6 @@ qmckl_get_ao_basis_type (const qmckl_context context,
 /* MO */
 
 qmckl_exit_code qmckl_init_mo_basis(qmckl_context context);
-qmckl_exit_code
-qmckl_get_mo_basis_mo_num (const qmckl_context context,
-                           int64_t* mo_num);
-
 /* Determinant */
 
 qmckl_exit_code qmckl_init_determinant(qmckl_context context);
