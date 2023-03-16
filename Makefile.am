@@ -9,6 +9,7 @@ AM_CPPFLAGS  = -I$(top_builddir)/src -I$(top_builddir)/include
 
 include_HEADERS = include/qmckl_gpu.h
 
+# Optionally distribure the Fortran interface header
 if HAVE_FORTRAN_INTERFACE
   include_HEADERS += include/qmckl_gpu_f.f90
 endif
@@ -49,11 +50,6 @@ if HAVE_ACC_DEVICE
   src/qmckl_ao_acc.c src/qmckl_mo_acc.c
 endif
 
-# Enable Fortran interface
-if HAVE_FORTRAN_INTERFACE
-  libqmckl_gpu_la_SOURCES += src/qmckl_gpu_f.c
-endif
-
 
 ###
 # Build test programs
@@ -86,8 +82,8 @@ tests_test_qmckl_mo_LDADD = qmckl/src/libqmckl.la libqmckl_gpu.la
 
 if HAVE_FORTRAN_INTERFACE
   check_PROGRAMS += tests/test_qmckl_fortran_interface
-  tests_test_qmckl_fortran_interface_SOURCES = tests/test_qmckl_fortran_interface.f90
-  tests_test_qmckl_ao_LDADD = qmckl/src/libqmckl.la libqmckl_gpu.la
+  tests_test_qmckl_fortran_interface_SOURCES = tests/test_qmckl_fortran_interface.f90 tests/chbrclf_fortran_interface.c
+  tests_test_qmckl_fortran_interface_LDADD = qmckl/src/libqmckl.la libqmckl_gpu.la
 endif
 
 ###

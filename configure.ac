@@ -88,8 +88,9 @@ AS_CASE([$with_trexio],
   ])
 
 
-# Add mandatory CFLAGS
+# Add mandatory CFLAGS/FCFLAGS
 CFLAGS="-DHAVE_HPC -Iinclude ${CFLAGS}"
+FCFLAGS="-Iinclude ${FCFLAGS}"
 
 ####
 ## Enable the different function types (OpenMP, OpenACC, device)

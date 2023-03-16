@@ -1318,6 +1318,29 @@ qmckl_exit_code qmckl_set_mo_basis_mo_num_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
+qmckl_exit_code
+qmckl_get_mo_basis_mo_num_device(const qmckl_context_device context,
+								 int64_t *mo_num) {
+	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT) {
+		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
+							  "qmckl_get_mo_basis_mo_num_device", NULL);
+	}
+
+	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	assert(ctx != NULL);
+
+	int32_t mask = 1;
+
+	if ((ctx->mo_basis.uninitialized & mask) != 0) {
+		return qmckl_failwith(context, QMCKL_NOT_PROVIDED,
+							  "qmckl_get_mo_basis_mo_num", NULL);
+	}
+
+	assert(ctx->mo_basis.mo_num > (int64_t)0);
+	*mo_num = ctx->mo_basis.mo_num;
+	return QMCKL_SUCCESS;
+}
+
 qmckl_exit_code qmckl_set_mo_basis_coefficient_device(qmckl_context context,
 													  double *coefficient) {
 
