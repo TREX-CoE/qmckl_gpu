@@ -1,7 +1,6 @@
 #include "include/qmckl_ao.h"
 #include "include/qmckl_mo.h"
 
-
 //**********
 // COMPUTE
 //**********
@@ -12,16 +11,16 @@
 qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context_device context);
 
 bool qmckl_mo_basis_select_mo_device(qmckl_context_device context,
-									 int32_t *keep,
-									 int64_t size_max) {
-	if (qmckl_context_check((qmckl_context) context) == QMCKL_NULL_CONTEXT) {
+									 int32_t *keep, int64_t size_max) {
+	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
 		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
 							  "qmckl_get_mo_basis_select_mo_device", NULL);
 	}
 
-	// WARNING Here, we are expecting a CPU array (instead of a GPU array usually), because
-	// it will not be used as a data to be stored in the context. Thus, it makes more sense
-	// (and is actually more efficient) to use a CPU array.
+	// WARNING Here, we are expecting a CPU array (instead of a GPU array
+	// usually), because it will not be used as a data to be stored in the
+	// context. Thus, it makes more sense (and is actually more efficient) to
+	// use a CPU array.
 
 	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
 	assert(ctx != NULL);
@@ -33,7 +32,8 @@ bool qmckl_mo_basis_select_mo_device(qmckl_context_device context,
 
 	if (keep == NULL) {
 		return qmckl_failwith(context, QMCKL_INVALID_ARG_2,
-							  "qmckl_get_mo_basis_select_mo_device", "NULL pointer");
+							  "qmckl_get_mo_basis_select_mo_device",
+							  "NULL pointer");
 	}
 
 	const int64_t mo_num = ctx->mo_basis.mo_num;
@@ -51,15 +51,15 @@ bool qmckl_mo_basis_select_mo_device(qmckl_context_device context,
 			++mo_num_new;
 	}
 
-
-	double *restrict coefficient = (double *)qmckl_malloc_device(context, ao_num * mo_num_new * sizeof(double));
+	double *restrict coefficient = (double *)qmckl_malloc_device(
+		context, ao_num * mo_num_new * sizeof(double));
 
 	int64_t k = 0;
 	for (int64_t i = 0; i < mo_num; ++i) {
 		if (keep[i] != 0) {
 			qmckl_memcpy_D2D(context, &(coefficient[k * ao_num]),
-				   &(ctx->mo_basis.coefficient[i * ao_num]),
-				   ao_num * sizeof(double));
+							 &(ctx->mo_basis.coefficient[i * ao_num]),
+							 ao_num * sizeof(double));
 			++k;
 		}
 	}
@@ -74,7 +74,6 @@ bool qmckl_mo_basis_select_mo_device(qmckl_context_device context,
 	rc = qmckl_finalize_mo_basis_device(context);
 	return rc;
 }
-
 
 //**********
 // PROVIDE
@@ -354,4 +353,18 @@ qmckl_exit_code qmckl_get_mo_basis_mo_value_inplace_device(
 	ctx->mo_basis.mo_value = old_array;
 
 	return QMCKL_SUCCESS;
+}
+
+/* Provided check  */
+
+bool qmckl_mo_basis_provided(qmckl_context_device context) {
+
+	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT) {
+		return false;
+	}
+
+	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	assert(ctx != NULL);
+
+	return ctx->mo_basis.provided;
 }

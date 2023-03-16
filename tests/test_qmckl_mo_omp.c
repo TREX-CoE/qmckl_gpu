@@ -191,7 +191,7 @@ int main() {
 											   chbrclf_prim_num);
 	assert(rc == QMCKL_SUCCESS);
 
-	rc = qmckl_set_ao_basis_ao_num(context, chbrclf_ao_num);
+	rc = qmckl_set_ao_basis_ao_num_device(context, chbrclf_ao_num);
 	assert(rc == QMCKL_SUCCESS);
 
 	rc = qmckl_set_ao_basis_ao_factor_device(context, ao_factor_d,
@@ -274,7 +274,7 @@ int main() {
 	/* Set up MO data */
 
 	int64_t mo_num = chbrclf_mo_num;
-	rc = qmckl_set_mo_basis_mo_num(context, mo_num);
+	rc = qmckl_set_mo_basis_mo_num_device(context, mo_num);
 	assert(rc == QMCKL_SUCCESS);
 
 	double *mo_coefficient = &(chbrclf_mo_coef[0]);

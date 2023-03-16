@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-
 #include "qmckl_basic_functions.h"
 #include "qmckl_context.h"
 #include "qmckl_memory.h"

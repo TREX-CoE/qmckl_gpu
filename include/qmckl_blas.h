@@ -3,15 +3,12 @@
 // This file contains functions prototypes for BLAS related functions
 // (mostly manipulation of the device, matrix and tensor types)
 
-
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
-
 
 #include "qmckl_basic_functions.h"
 #include "qmckl_context.h"

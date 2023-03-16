@@ -102,7 +102,7 @@ qmckl_exit_code qmckl_set_nucleus_coord_device(qmckl_context_device context,
 	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
 	qmckl_exit_code rc;
 
-	int64_t nucl_num = (int64_t) ctx->nucleus.num;
+	int64_t nucl_num = (int64_t)ctx->nucleus.num;
 
 	if (ctx->nucleus.coord.data != NULL) {
 		rc = qmckl_matrix_free_device(context, &(ctx->nucleus.coord));

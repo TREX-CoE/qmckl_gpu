@@ -183,7 +183,6 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
 	}
 
 	qmckl_exit_code rc;
-
 	rc = qmckl_provide_ao_basis_ao_vgl_device(context);
 	if (rc != QMCKL_SUCCESS)
 		return rc;
@@ -237,4 +236,18 @@ qmckl_exit_code qmckl_get_ao_basis_ao_value_device(qmckl_context_device context,
 					 (size_t)sze * sizeof(double));
 
 	return QMCKL_SUCCESS;
+}
+
+/* Provided check  */
+
+bool qmckl_ao_basis_provided(qmckl_context_device context) {
+
+	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT) {
+		return false;
+	}
+
+	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	assert(ctx != NULL);
+
+	return ctx->ao_basis.provided;
 }

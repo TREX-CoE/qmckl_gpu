@@ -32,7 +32,7 @@ module qmckl_gpu
             import
             implicit none
 
-            integer(qmckl_context_device),intent(in), value :: context
+            integer(qmckl_context_device), intent(in), value :: context
         end function qmckl_context_destroy_device
 
     !!!!!!!!!!!
@@ -445,7 +445,6 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: keep
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_mo_basis_select_mo_device
-
 
     !!!!!!!!!!!
         ! ELECTRON

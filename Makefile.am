@@ -20,28 +20,31 @@ libqmckl_gpu_la_SOURCES = ""
 
 # (Legacy) Enable OpenMP offload
 if HAVE_OMP_OFFLOAD
-  libqmckl_gpu_la_SOURCES += src/qmckl_ao_omp_offload.c src/qmckl_mo_omp_offload.c 
+  libqmckl_gpu_la_SOURCES += src/qmckl_ao_omp_offload.c src/qmckl_mo_omp_offload.c
 endif
 
 # (Legacy) Enable OpenACC offload
 if HAVE_ACC_OFFLOAD
-  libqmckl_gpu_la_SOURCES += src/qmckl_ao_acc_offload.c src/qmckl_mo_acc_offload.c 
+  libqmckl_gpu_la_SOURCES += src/qmckl_ao_acc_offload.c src/qmckl_mo_acc_offload.c
 endif
 
 
-# Base library files (needed for both OpenMP and OpenACC)
-if HAVE_DEVICE_POINTERS
 libqmckl_gpu_la_SOURCES += src/qmckl_context.c src/qmckl_memory.c src/qmckl_blas.c \
 src/qmckl_trexio.c src/qmckl_ao.c src/qmckl_mo.c src/qmckl_basic_functions.c
-endif
 
 # Enable OpenMP-specific device functions
 if HAVE_OMP_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_memory_omp.c \
   src/qmckl_blas_omp.c src/qmckl_trexio_omp.c \
-  src/qmckl_ao_omp.c src/qmckl_mo_omp.c \
-  src/qmckl_woodbury_omp.c
+  src/qmckl_ao_omp.c src/qmckl_mo_omp.c
+
 endif
+
+# if HAVE_OMP_DEVICE
+#   if HAVE_CUBLAS
+#     libqmckl_gpu_la_SOURCES += src/qmckl_woodbury_omp.c
+#   endif
+# endif
 
 # Enable OpenACC-specific device functions
 if HAVE_ACC_DEVICE
@@ -55,10 +58,7 @@ endif
 # Build test programs
 ###
 
-check_PROGRAMS = tests/test_qmckl_ao tests/test_qmckl_mo 
-
-qmckl/src/libqmckl.la:
-	cd qmckl && make && cd ..
+check_PROGRAMS = tests/test_qmckl_ao tests/test_qmckl_mo
 
 if HAVE_OMP_DEVICE
   tests_test_qmckl_ao_SOURCES = tests/test_qmckl_ao_omp.c chbrclf.h
@@ -77,13 +77,13 @@ if HAVE_ACC_DEVICE
 endif
 
 # This shoud be added whether we use OpenMP or ACC
-tests_test_qmckl_ao_LDADD = qmckl/src/libqmckl.la libqmckl_gpu.la
-tests_test_qmckl_mo_LDADD = qmckl/src/libqmckl.la libqmckl_gpu.la
+tests_test_qmckl_ao_LDADD = libqmckl_gpu.la
+tests_test_qmckl_mo_LDADD = libqmckl_gpu.la
 
 if HAVE_FORTRAN_INTERFACE
   check_PROGRAMS += tests/test_qmckl_fortran_interface
   tests_test_qmckl_fortran_interface_SOURCES = tests/test_qmckl_fortran_interface.f90 tests/chbrclf_fortran_interface.c
-  tests_test_qmckl_fortran_interface_LDADD = qmckl/src/libqmckl.la libqmckl_gpu.la
+  tests_test_qmckl_fortran_interface_LDADD = libqmckl_gpu.la
 endif
 
 ###

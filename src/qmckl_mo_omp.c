@@ -4,7 +4,6 @@
 // COMPUTE
 //**********
 
-
 /* mo_vgl */
 
 qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
@@ -28,38 +27,35 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 			}
 
 			for (int64_t k = 0; k < ao_num; k++) {
-				for(int l = 0; l < 5; l++)
-				{
-					if (ao_vgl[k + ao_num * 5 * j] != 0.) 
-					{
-					double c1 = ao_vgl[k + ao_num * l + ao_num * 5 * j];
-	/*				double c2 = ao_vgl[k + ao_num * 1 + ao_num * 5 * j];
-					double c3 = ao_vgl[k + ao_num * 2 + ao_num * 5 * j];
-					double c4 = ao_vgl[k + ao_num * 3 + ao_num * 5 * j];
-					double c5 = ao_vgl[k + ao_num * 4 + ao_num * 5 * j];
-*/
+				for (int l = 0; l < 5; l++) {
+					if (ao_vgl[k + ao_num * 5 * j] != 0.) {
+						double c1 = ao_vgl[k + ao_num * l + ao_num * 5 * j];
+						/*				double c2 = ao_vgl[k + ao_num * 1 + ao_num *
+						 * 5 j]; double c3 = ao_vgl[k + ao_num * 2 + ao_num * 5
+						 * j]; double c4 = ao_vgl[k + ao_num * 3 + ao_num * 5
+						 * j]; double c5 = ao_vgl[k + ao_num * 4 + ao_num * 5
+						 * j];
+						 */
 #pragma omp simd
 
-
-					for (int i = 0; i < mo_num; i++) {
-						mo_vgl[i + mo_num * l + mo_num * 5 * j] =
+						for (int i = 0; i < mo_num; i++) {
+							mo_vgl[i + mo_num * l + mo_num * 5 * j] =
 								mo_vgl[i + mo_num * l + mo_num * 5 * j] +
 								coefficient_t[i + mo_num * k] * c1;
-						/*
-						mo_vgl[i + mo_num * 1 + mo_num * 5 * j] =
-							mo_vgl[i + mo_num * 1 + mo_num * 5 * j] +
-							coefficient_t[i + mo_num * k] * c2;
-						mo_vgl[i + mo_num * 2 + mo_num * 5 * j] =
-							mo_vgl[i + mo_num * 2 + mo_num * 5 * j] +
-							coefficient_t[i + mo_num * k] * c3;
-						mo_vgl[i + mo_num * 3 + mo_num * 5 * j] =
-							mo_vgl[i + mo_num * 3 + mo_num * 5 * j] +
-							coefficient_t[i + mo_num * k] * c4;
-						mo_vgl[i + mo_num * 4 + mo_num * 5 * j] =
-							mo_vgl[i + mo_num * 4 + mo_num * 5 * j] +
-							coefficient_t[i + mo_num * k] * c5;*/
-					}
-
+							/*
+							mo_vgl[i + mo_num * 1 + mo_num * 5 * j] =
+								mo_vgl[i + mo_num * 1 + mo_num * 5 * j] +
+								coefficient_t[i + mo_num * k] * c2;
+							mo_vgl[i + mo_num * 2 + mo_num * 5 * j] =
+								mo_vgl[i + mo_num * 2 + mo_num * 5 * j] +
+								coefficient_t[i + mo_num * k] * c3;
+							mo_vgl[i + mo_num * 3 + mo_num * 5 * j] =
+								mo_vgl[i + mo_num * 3 + mo_num * 5 * j] +
+								coefficient_t[i + mo_num * k] * c4;
+							mo_vgl[i + mo_num * 4 + mo_num * 5 * j] =
+								mo_vgl[i + mo_num * 4 + mo_num * 5 * j] +
+								coefficient_t[i + mo_num * k] * c5;*/
+						}
 					}
 				}
 			}

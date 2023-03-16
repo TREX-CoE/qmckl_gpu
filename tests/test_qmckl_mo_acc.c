@@ -1,9 +1,9 @@
-#include "qmckl.h"
 #include "assert.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+#include <stdint.h>
 #include <stdio.h>
 #include <math.h>
 #include "chbrclf.h"
@@ -193,7 +193,7 @@ int main() {
 											   chbrclf_prim_num);
 	assert(rc == QMCKL_SUCCESS);
 
-	rc = qmckl_set_ao_basis_ao_num(context, chbrclf_ao_num);
+	rc = qmckl_set_ao_basis_ao_num_device(context, chbrclf_ao_num);
 	assert(rc == QMCKL_SUCCESS);
 
 	rc = qmckl_set_ao_basis_ao_factor_device(context, ao_factor_d,
@@ -276,7 +276,7 @@ int main() {
 	/* Set up MO data */
 
 	int64_t mo_num = chbrclf_mo_num;
-	rc = qmckl_set_mo_basis_mo_num(context, mo_num);
+	rc = qmckl_set_mo_basis_mo_num_device(context, mo_num);
 	assert(rc == QMCKL_SUCCESS);
 
 	double *mo_coefficient = &(chbrclf_mo_coef[0]);
@@ -290,7 +290,7 @@ int main() {
 
 	assert(qmckl_mo_basis_provided(context));
 
-	rc = qmckl_context_touch(context);
+	rc = qmckl_context_touch_device(context);
 	assert(rc == QMCKL_SUCCESS);
 
 	/* Get MO value (from scratch) */

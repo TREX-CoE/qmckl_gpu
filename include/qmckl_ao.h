@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-
 #include "qmckl_basic_functions.h"
 
 #include "qmckl_context.h"
@@ -58,3 +56,5 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
 qmckl_exit_code qmckl_get_ao_basis_ao_value_device(qmckl_context_device context,
 												   double *const ao_vgl,
 												   const int64_t size_max);
+
+bool qmckl_ao_basis_provided(qmckl_context_device context);

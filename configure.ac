@@ -52,19 +52,22 @@ AC_ENABLE_SHARED
 AC_ENABLE_STATIC
 
 
-### Find QMCkl
+# Add mandatory CFLAGS/FCFLAGS
+CFLAGS="-Iinclude ${CFLAGS}"
+FCFLAGS="-Iinclude ${FCFLAGS}"
 
-#AC_CHECK_LIB([qmckl], [qmckl_context_create], [], [PKG_CHECK_MODULES([QMCKL], [qmckl]) ])
-#AC_CHECK_HEADERS([qmckl.h], [], [AC_MSG_ERROR("qmckl.h not found")])
 
+###
 # TREXIO
-AC_ARG_WITH([trexio],
-            [AS_HELP_STRING([--without-trexio],
-                            [disable support for TREXIO])],
-            [with_trexio=$withval],
-            [with_trexio=yes])
+###
 
-AS_CASE([$with_trexio],
+AC_ARG_ENABLE([trexio],
+            [AS_HELP_STRING([--disable-trexio],
+                            [disable support for TREXIO])],
+            [have_trexio=$enableval],
+            [have_trexio=yes])
+
+AS_CASE([$have_trexio],
   [no], [],
   [yes],
   [AC_CHECK_LIB([trexio], [trexio_open], [],
@@ -75,8 +78,8 @@ AS_CASE([$with_trexio],
                     [AC_MSG_ERROR("trexio.h not found")])
    AC_DEFINE([HAVE_TREXIO], [1], [Define if TREXIO support is available])
    ARGS="${ARGS} trexio"],
-  [AS_IF([test ! -d "$withval"],
-         [AC_MSG_ERROR([--with-trexio=$withval: argument is not a directory])])
+  [AS_IF([test ! -d "$enableval"],
+         [AC_MSG_ERROR([--with-trexio=$enableval: argument is not a directory])])
    TREXIO_LIBS="-L$with_trexio/lib -ltrexio"
    TREXIO_CFLAGS="-I$with_trexio/include"
    CFLAGS="$CFLAGS $TREXIO_CFLAGS"
@@ -87,13 +90,21 @@ AS_CASE([$with_trexio],
    ARGS="${ARGS} trexio"
   ])
 
+###
+# cuBLAS / cuSolver (optional, enables additional kernels)
+# TODO We should probably add compilation flags to link cuBLAS / solver automatically
+# in case the flag is enabled
+###
 
-# Add mandatory CFLAGS/FCFLAGS
-CFLAGS="-DHAVE_HPC -Iinclude ${CFLAGS}"
-FCFLAGS="-Iinclude ${FCFLAGS}"
+AC_ARG_ENABLE([cublas],
+            [AS_HELP_STRING([--enable-cublas],
+                            [Enable compilation of kernels that use cuBLAS and cuSolver])],
+            [have_cublas=yes],
+            [have_cublas=no])
+
 
 ####
-## Enable the different function types (OpenMP, OpenACC, device)
+## Enable OpenMP / OpenACC
 ####
 
 # OpenMP offloading (legacy, kept for now)
@@ -116,19 +127,20 @@ AS_IF([test "x$have_autoflags" = "xyes"], [
 	echo "Autoflags have been disabled"
 ])
 
-# TODO Add cuBLAS functions at some point ?
 
 ####
 ## Enable the optional Fortran interface
 ####
+
 AC_ARG_ENABLE(fortran-interface, [AS_HELP_STRING([--enable-fortran-interface],[Enable the optional Fortran interface])], have_fortran_interface=yes, have_fortran_interface=no)
+
 
 ####
 ## Perform checks on what has been enabled (at least one function type, no OpenACC and OpenMP at the same time)
 ####
 
 # Fallback solution if nothing is enabled :
-# (probably because no GPU argument have been provided),
+# (probably because no GPU argument have been provided)
 # Enable OpenMP offload by default
 AS_IF([ test "x$have_omp" = "xno" -a "x$have_acc" = "xno" -a "x$have_acc_offload" = "xno" -a "x$have_omp_offload" = "xno"], [
 	AC_OUTPUT
@@ -216,6 +228,13 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc_offload" = "xyes"], [
 	esac
 ])
 
+# If TREXIO or cuBLAS have been enabled, define Automake & preprocessors variables
+AS_IF([test "x$have_trexio" = "xyes"], [
+	AC_DEFINE([HAVE_TREXIO], [1], [Enable compilation of TREXIO functions])
+])
+AS_IF([test "x$have_cublas" = "xyes"], [
+	AC_DEFINE([HAVE_CUBLAS], [1], [Enable compilation of cuBLAS/cuSolver functions])
+])
 
 # Specific options required with some compilers
 AS_CASE([$FC],
@@ -227,7 +246,7 @@ AS_CASE([$FC],
 
 
 ####
-## Define Makefile variables
+## Define Makefile variables from configure flags
 ####
 
 AM_CONDITIONAL([HAVE_OMP_OFFLOAD], [test "x$have_omp_offload"  = "xyes"])
@@ -237,7 +256,6 @@ AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc"  = "xyes"])
 AM_CONDITIONAL([HAVE_FORTRAN_INTERFACE],  [test "x$have_fortran_interface"  = "xyes"])
 AM_CONDITIONAL([HAVE_DEVICE_POINTERS], [test "x$have_omp"  = "xyes" -o "x$have_acc"  = "xyes"])
 
-
 ####
 # Print configure status
 ####
@@ -246,7 +264,6 @@ AC_OUTPUT
 
 echo \
 "-------------------------------------------------
-
 ${PACKAGE_NAME} Version ${PACKAGE_VERSION}
 
 Prefix: '${prefix}'
@@ -256,10 +273,14 @@ FC.................: ${FC}
 CFLAGS.............: ${CFLAGS}
 LDFLAGS:...........: ${LDFLAGS}
 
-OpenMP ............: ${have_omp}
-OpenACC ...........: ${have_acc}
 Autoflags .........: ${have_autoflags}
 Fortran interface .: ${have_fortran_interface}
+
+TREXIO ............: ${have_trexio}
+cuBLAS ............: ${have_cublas}
+
+OpenMP ............: ${have_omp}
+OpenACC ...........: ${have_acc}
 
 Now type 'make @<:@<target>@:>@'
 where the optional <target> is:

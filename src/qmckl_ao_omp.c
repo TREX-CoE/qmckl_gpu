@@ -188,7 +188,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 	{
-#pragma omp teams distribute parallel for simd//private(pows, poly_vgl)
+#pragma omp teams distribute parallel for simd // private(pows, poly_vgl)
 
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
@@ -246,7 +246,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 					for (int i = 0; i < 3 * (lmax + 3); i++) {
 						pows[i] = 0.;
 					}
-#pragma omp simd
 
 					for (int i = 0; i < 3; i++) {
 						for (int j = 0; j < 3; j++) {
@@ -261,7 +260,6 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 						pows[i + 2 * (llmax + 3)] =
 							pows[(i - 1) + 2 * (llmax + 3)] * Y3;
 					}
-#pragma omp simd
 
 					for (int i = 0; i < 5; i++) {
 						for (int j = 0; j < 4; j++) {
