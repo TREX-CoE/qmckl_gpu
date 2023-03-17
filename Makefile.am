@@ -40,11 +40,11 @@ if HAVE_OMP_DEVICE
 
 endif
 
-# if HAVE_OMP_DEVICE
-#   if HAVE_CUBLAS
-#     libqmckl_gpu_la_SOURCES += src/qmckl_woodbury_omp.c
-#   endif
-# endif
+if HAVE_OMP_DEVICE
+if HAVE_CUBLAS
+    libqmckl_gpu_la_SOURCES += src/qmckl_woodbury_omp.c
+endif
+endif
 
 # Enable OpenACC-specific device functions
 if HAVE_ACC_DEVICE
