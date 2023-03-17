@@ -7,7 +7,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
+
+#ifdef HAVE_CUBLAS then
+#include <cublas_v2.h>
+#include <cusolverDn.h>
+#endif
 
 /* CPU */
 typedef int32_t qmckl_exit_code;
@@ -336,7 +340,8 @@ qmckl_exit_code qmckl_set_point_device(qmckl_context_device context,
 
 #ifdef HAVE_CUBLAS
 qmckl_exit_code
-qmckl_woodbury_kxk(cublasHandle_t b_handle, cusolverDnHandle_t s_handle,
+qmckl_woodbury_kxk(const qmckl_context context,
+                   cublasHandle_t b_handle, cusolverDnHandle_t s_handle,
 				   const uint64_t Lds, const uint64_t Dim,
 				   const uint64_t N_updates, const double *__restrict Updates,
 				   const uint64_t *__restrict Updates_index,

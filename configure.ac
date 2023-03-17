@@ -234,6 +234,14 @@ AS_IF([test "x$have_trexio" = "xyes"], [
 ])
 AS_IF([test "x$have_cublas" = "xyes"], [
 	AC_DEFINE([HAVE_CUBLAS], [1], [Enable compilation of cuBLAS/cuSolver functions])
+	case $CC in
+		*nvc*)
+			CFLAGS="$CFLAGS -Mcuda -Mcudalib"
+		;;
+
+		*)
+			echo "Warning : compiler not supported for cuBLAs linking"
+	esac
 ])
 
 # Specific options required with some compilers
@@ -255,6 +263,7 @@ AM_CONDITIONAL([HAVE_OMP_DEVICE],  [test "x$have_omp"  = "xyes"])
 AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc"  = "xyes"])
 AM_CONDITIONAL([HAVE_FORTRAN_INTERFACE],  [test "x$have_fortran_interface"  = "xyes"])
 AM_CONDITIONAL([HAVE_DEVICE_POINTERS], [test "x$have_omp"  = "xyes" -o "x$have_acc"  = "xyes"])
+AM_CONDITIONAL([HAVE_CUBLAS], [test "x$have_cublas"  = "xyes"])
 
 ####
 # Print configure status
