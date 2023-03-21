@@ -183,7 +183,20 @@ qmckl_exit_code qmckl_memcpy_D2D(qmckl_context_device context, void *dest,
 	}
 
 	qmckl_lock((qmckl_context)context);
-	{ acc_memcpy_to_device(dest, src, size); }
+	{ 
+      // NOT working from device to device
+      // acc_memcpy_to_device(dest, src, size); 
+      // 
+      // NOT fully supported
+      // int dest_dev_id = 0; 
+      // int src_dev_id = 0; 
+      // acc_memcpy_d2d(dest, src, size, dest_dev_id, src_dev_id); 
+      //
+      // Workaround (cast as int if multiple of 4 bytes?)
+      #pragma acc parallel loop gang vector deviceptr(src,dest), copyin(size)
+      for (int i=0;i<size;++i) 
+        ((char*)dest)[i] = ((char*)src)[i];
+    }
 	qmckl_unlock((qmckl_context)context);
 
 	return QMCKL_SUCCESS;
