@@ -121,10 +121,17 @@ qmckl_exit_code qmckl_provide_mo_basis_mo_vgl_device(qmckl_context context) {
 								  NULL);
 		}
 
+#ifdef HAVE_CUBLAS
+		rc = qmckl_compute_mo_basis_mo_vgl_cublas_device(
+			context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num, ctx->point.num,
+			ctx->mo_basis.coefficient_t, ctx->ao_basis.ao_vgl,
+			ctx->mo_basis.mo_vgl);
+#else
 		rc = qmckl_compute_mo_basis_mo_vgl_device(
 			context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num, ctx->point.num,
 			ctx->mo_basis.coefficient_t, ctx->ao_basis.ao_vgl,
 			ctx->mo_basis.mo_vgl);
+#endif
 
 		if (rc != QMCKL_SUCCESS) {
 			return rc;
