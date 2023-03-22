@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#ifdef HAVE_CUBLAS then
+#ifdef HAVE_CUBLAS 
 #include <cublas_v2.h>
 #include <cusolverDn.h>
 #endif

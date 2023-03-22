@@ -6,6 +6,7 @@
 
 /* mo_vgl */
 
+
 qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 	qmckl_context context, int64_t ao_num, int64_t mo_num, int64_t point_num,
 	double *restrict coefficient_t, double *restrict ao_vgl,

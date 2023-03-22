@@ -1,9 +1,49 @@
 #include "include/qmckl_ao.h"
 #include "include/qmckl_mo.h"
+#ifdef HAVE_CUBLAS 
+#include <cublas_v2.h>
+#endif
 
 //**********
 // COMPUTE
 //**********
+//
+#ifdef HAVE_CUBLAS
+qmckl_exit_code
+qmckl_compute_mo_basis_mo_vgl_cublas_device (const qmckl_context          context,
+                                             const int64_t                ao_num,
+                                             const int64_t                mo_num,
+                                             const int64_t                point_num,
+                                             const double* restrict       coefficient_t,
+                                             const double* restrict       ao_vgl,
+                                                   double* restrict const mo_vgl )
+{
+  assert (context != QMCKL_NULL_CONTEXT);
+
+  cublasHandle_t handle;
+
+  double const alpha =  1.;
+  double const beta  =  0.;
+
+  cublasOperation_t transa = CUBLAS_OP_N ;
+  cublasOperation_t transb = CUBLAS_OP_N ;
+
+  // NB: cublas views arrays as column-major (ie FORTRAN-like) ordered
+  int const m = mo_num ; 
+  int const k = ao_num ;
+  int const n = point_num * 5 ;
+
+  int const lda = m ;
+  int const ldb = k ;
+  int const ldc = m ;
+
+ cublasCreate(&handle);
+ cublasDgemm_v2( handle, transa, transb, m, n, k, &alpha, coefficient_t, lda, ao_vgl, ldb, &beta, mo_vgl, ldc );
+ cublasDestroy(handle);
+
+  return QMCKL_SUCCESS;
+}
+#endif
 
 /* mo_select */
 
@@ -121,10 +161,17 @@ qmckl_exit_code qmckl_provide_mo_basis_mo_vgl_device(qmckl_context context) {
 								  NULL);
 		}
 
+#ifdef HAVE_CUBLAS
+		rc = qmckl_compute_mo_basis_mo_vgl_cublas_device(
+			context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num, ctx->point.num,
+			ctx->mo_basis.coefficient_t, ctx->ao_basis.ao_vgl,
+			ctx->mo_basis.mo_vgl);
+#else
 		rc = qmckl_compute_mo_basis_mo_vgl_device(
 			context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num, ctx->point.num,
 			ctx->mo_basis.coefficient_t, ctx->ao_basis.ao_vgl,
 			ctx->mo_basis.mo_vgl);
+#endif
 
 		if (rc != QMCKL_SUCCESS) {
 			return rc;
