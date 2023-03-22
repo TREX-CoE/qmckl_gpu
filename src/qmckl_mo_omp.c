@@ -1,7 +1,4 @@
 #include "include/qmckl_mo.h"
-#ifdef HAVE_CUBLAS 
-#include <cublas_v2.h>
-#endif
 
 //**********
 // COMPUTE
@@ -9,50 +6,6 @@
 
 /* mo_vgl */
 
-#ifdef HAVE_CUBLAS
-qmckl_exit_code
-qmckl_compute_mo_basis_mo_vgl_cublas_device (const qmckl_context          context,
-                                             const int64_t                ao_num,
-                                             const int64_t                mo_num,
-                                             const int64_t                point_num,
-                                             const double* restrict       coefficient_t,
-                                             const double* restrict       ao_vgl,
-                                                   double* restrict const mo_vgl )
-{
-  assert (context != QMCKL_NULL_CONTEXT);
-
-  cublasHandle_t handle;
-
-  double const alpha =  1.;
-  double const beta  =  0.;
-
-  cublasOperation_t transa = CUBLAS_OP_N ;
-  cublasOperation_t transb = CUBLAS_OP_N ;
-
-  // NB: cublas views arrays as column-major (ie FORTRAN-like) ordered
-  int const m = mo_num ; 
-  int const k = ao_num ;
-  int const n = point_num * 5 ;
-
-  int const lda = m ;
-  int const ldb = k ;
-  int const ldc = m ;
-
- cublasCreate(&handle);
-    printf("co %p\n",coefficient_t);
-    printf("ao %p\n",ao_vgl);
-    printf("mo %p\n",mo_vgl);
-#pragma omp target data use_device_ptr(coefficient_t, ao_vgl, mo_vgl)
- {
-    double my_alpha = alpha;
-    double my_beta  = beta;
-    cublasDgemm_v2( handle, transa, transb, m, n, k, &my_alpha, coefficient_t, lda, ao_vgl, ldb, &my_beta, mo_vgl, ldc );
- }
- cublasDestroy(handle);
-
-  return QMCKL_SUCCESS;
-}
-#endif
 
 qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 	qmckl_context context, int64_t ao_num, int64_t mo_num, int64_t point_num,
