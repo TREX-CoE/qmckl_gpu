@@ -38,15 +38,7 @@ qmckl_compute_mo_basis_mo_vgl_cublas_device (const qmckl_context          contex
   int const ldc = m ;
 
  cublasCreate(&handle);
-//    printf("co %p\n",coefficient_t);
-//    printf("ao %p\n",ao_vgl);
-//    printf("mo %p\n",mo_vgl);
-// #pragma omp target data use_device_ptr(coefficient_t, ao_vgl, mo_vgl)
-// {
-//    double my_alpha = alpha;
-//    double my_beta  = beta;
-    cublasDgemm_v2( handle, transa, transb, m, n, k, &alpha, coefficient_t, lda, ao_vgl, ldb, &beta, mo_vgl, ldc );
-// }
+ cublasDgemm_v2( handle, transa, transb, m, n, k, &alpha, coefficient_t, lda, ao_vgl, ldb, &beta, mo_vgl, ldc );
  cublasDestroy(handle);
 
   return QMCKL_SUCCESS;
