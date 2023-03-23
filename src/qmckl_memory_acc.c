@@ -187,7 +187,7 @@ qmckl_exit_code qmckl_memcpy_D2D(qmckl_context_device context, void *dest,
       // NOT working from device to device
       // acc_memcpy_to_device(dest, src, size); 
       // 
-      // NOT fully supported
+      // NOT supporting device-pointers only
       // int dest_dev_id = 0; 
       // int src_dev_id = 0; 
       // acc_memcpy_d2d(dest, src, size, dest_dev_id, src_dev_id); 

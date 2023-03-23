@@ -14,6 +14,11 @@
 #include <cusolverDn.h>
 #endif
 
+#ifdef HAVE_CUSPARSE 
+#include <cuda_runtime_api.h>
+#include <cusparse_v2.h>
+#endif
+
 /* CPU */
 typedef int32_t qmckl_exit_code;
 typedef int64_t qmckl_context;

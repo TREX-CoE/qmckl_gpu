@@ -1,14 +1,14 @@
 #include "include/qmckl_mo.h"
 
-#ifdef _CUBLAS then
+#ifdef HAVE_CUBLAS 
 #include <cublas_v2.h>
 #endif
 
-#ifdef _NVBLAS then
+#ifdef HAVE_NVBLAS 
 #include <nvblas.h>
 #endif
 
-#ifdef _CUSPARSE then
+#ifdef HAVE_CUSPARSE 
 #include <cuda_runtime_api.h>
 #include <cusparse_v2.h>
 #endif
@@ -174,13 +174,13 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_acc_offload(
 	const qmckl_context context, const int64_t ao_num, const int64_t mo_num,
 	const int64_t point_num, const double *coefficient_t, const double *ao_vgl,
 	double *const mo_vgl) {
-#if defined(_CUBLAS)
+#if defined(HAVE_CUBLAS)
 	return qmckl_compute_mo_basis_mo_vgl_cublas_acc_offload(
 		context, ao_num, mo_num, point_num, coefficient_t, ao_vgl, mo_vgl);
-#elif defined(_CUSPARSE)
+#elif defined(HAVE_CUSPARSE)
 	return qmckl_compute_mo_basis_mo_vgl_cusparse_acc_offload(
 		context, ao_num, mo_num, point_num, coefficient_t, ao_vgl, mo_vgl);
-#elif defined(_NVBLAS)
+#elif defined(HAVE_NVBLAS)
 	return qmckl_compute_mo_basis_mo_vgl_nvblas_acc_offload(
 		context, ao_num, mo_num, point_num, coefficient_t, ao_vgl, mo_vgl);
 #else
@@ -191,7 +191,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_acc_offload(
 #endif
 }
 
-#if defined(_CUSPARSE)
+#if defined(HAVE_CUSPARSE)
 qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_cusparse_acc_offload(
 	const qmckl_context context, const int64_t ao_num, const int64_t mo_num,
 	const int64_t point_num, const double *restrict coefficient_t,
@@ -303,7 +303,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_cusparse_acc_offload(
 }
 #endif
 
-#if defined(_NVBLAS)
+#if defined(HAVE_NVBLAS)
 qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_nvblas_acc_offload(
 	const qmckl_context context, const int64_t ao_num, const int64_t mo_num,
 	const int64_t point_num, const double *restrict coefficient_t,
@@ -334,7 +334,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_nvblas_acc_offload(
 }
 #endif
 
-#if defined(_CUBLAS)
+#if defined(HAVE_CUBLAS)
 qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_cublas_acc_offload(
 	const qmckl_context context, const int64_t ao_num, const int64_t mo_num,
 	const int64_t point_num, const double *restrict coefficient_t,
