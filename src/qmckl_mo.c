@@ -3,6 +3,10 @@
 #ifdef HAVE_CUBLAS 
 #include <cublas_v2.h>
 #endif
+#ifdef HAVE_CUSPARSE 
+#include <cuda_runtime_api.h>
+#include <cusparse_v2.h>
+#endif
 
 //**********
 // COMPUTE
@@ -44,6 +48,115 @@ qmckl_compute_mo_basis_mo_vgl_cublas_device (const qmckl_context          contex
   return QMCKL_SUCCESS;
 }
 #endif
+
+#ifdef HAVE_CUSPARSE
+qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_cusparse_device(
+	const qmckl_context context, 
+    const int64_t ao_num, 
+    const int64_t mo_num,
+	const int64_t point_num, 
+    const double *restrict coefficient_t,
+	const double *restrict ao_vgl, 
+    double *restrict const mo_vgl) {
+	assert(context != QMCKL_NULL_CONTEXT);
+
+	// cusparse (dense) matrix descriptors
+	//
+	cusparseDnMatDescr_t matAd;
+	int64_t A_nrows = point_num * 5;
+	int64_t A_ncols = ao_num;
+	int64_t lda = A_ncols;
+	cusparseOrder_t A_storage_order = CUSPARSE_ORDER_ROW;
+
+	cusparseDnMatDescr_t matBd;
+	int64_t B_nrows = ao_num;
+	int64_t B_ncols = mo_num;
+	int64_t ldb = B_ncols;
+	cusparseOrder_t B_storage_order = CUSPARSE_ORDER_ROW;
+
+	cusparseDnMatDescr_t matCd;
+	int64_t C_nrows = point_num * 5;
+	int64_t C_ncols = mo_num;
+	int64_t ldc = C_ncols;
+	cusparseOrder_t C_storage_order = CUSPARSE_ORDER_ROW;
+
+	cudaDataType cuda_datatype = CUDA_R_64F;
+
+	cusparseHandle_t handle;
+	cusparseCreate(&handle);
+
+	cusparseCreateDnMat(&matAd, A_nrows, A_ncols, lda, ao_vgl,
+						cuda_datatype, A_storage_order);
+	cusparseCreateDnMat(&matBd, B_nrows, B_ncols, ldb, coefficient_t,
+						cuda_datatype, B_storage_order);
+	cusparseCreateDnMat(&matCd, C_nrows, C_ncols, ldc, mo_vgl,
+							cuda_datatype, C_storage_order);
+
+	// Convert sparse matrix A from dense to sparse(csr) format
+	//
+	cusparseSpMatDescr_t matAs;
+	int64_t As_nnz = 0;
+	int64_t *As_csr_offsets = NULL;
+	int64_t *As_csr_columns = NULL;
+	double *As_csr_values = NULL;
+
+	cusparseIndexBase_t As_csrRowOffsetsType = CUSPARSE_INDEX_64I;
+	cusparseIndexBase_t As_csrColIndType = CUSPARSE_INDEX_64I;
+	cusparseIndexBase_t As_idxBase = CUSPARSE_INDEX_BASE_ZERO;
+
+	// Why allocations needs to be done here?
+	cudaMalloc((void **)&As_csr_offsets, (A_nrows + 1) * sizeof(int64_t));
+
+	cusparseCreateCsr(&matAs, A_nrows, A_ncols, As_nnz, As_csr_offsets,
+					  As_csr_columns, As_csr_values, As_csrRowOffsetsType,
+					  As_csrColIndType, As_idxBase, cuda_datatype);
+
+	size_t As_buffer_size;
+	void *As_buffer = NULL;
+	cusparseDenseToSparseAlg_t AlgDtoS = CUSPARSE_DENSETOSPARSE_ALG_DEFAULT;
+
+	cusparseDenseToSparse_bufferSize(handle, matAd, matAs, AlgDtoS,
+									 &As_buffer_size);
+	cudaMalloc(&As_buffer, As_buffer_size);
+
+	cusparseDenseToSparse_analysis(handle, matAd, matAs, AlgDtoS, As_buffer);
+	cusparseSpMatGetSize(matAs, &A_nrows, &A_ncols, &As_nnz);
+
+	cudaMalloc((void **)&As_csr_columns, As_nnz * sizeof(int64_t));
+	cudaMalloc((void **)&As_csr_values, As_nnz * sizeof(double));
+
+	cusparseCsrSetPointers(matAs, As_csr_offsets, As_csr_columns,
+						   As_csr_values);
+	cusparseDenseToSparse_convert(handle, matAd, matAs, AlgDtoS, As_buffer);
+
+	// Sparse A * dense B = dense C
+	//
+	double const alpha = 1.;
+	double const beta = 0.;
+	cusparseOperation_t opA = CUSPARSE_OPERATION_NON_TRANSPOSE;
+	cusparseOperation_t opB = CUSPARSE_OPERATION_NON_TRANSPOSE;
+	cusparseSpMMAlg_t AlgSpMM = CUSPARSE_SPMM_ALG_DEFAULT;
+
+	size_t SpMM_buffer_size;
+	void *SpMM_buffer = NULL;
+
+	cusparseSpMM_bufferSize(handle, opA, opB, &alpha, matAs, matBd, &beta,
+							matCd, cuda_datatype, AlgSpMM, &SpMM_buffer_size);
+	cudaMalloc(&SpMM_buffer, SpMM_buffer_size);
+
+	cusparseSpMM(handle, opA, opB, &alpha, matAs, matBd, &beta, matCd,
+				 cuda_datatype, AlgSpMM, SpMM_buffer);
+
+	cusparseDestroyDnMat(matAd);
+	cusparseDestroyDnMat(matBd);
+	cusparseDestroyDnMat(matCd);
+	cusparseDestroySpMat(matAs);
+	cusparseDestroy(handle);
+
+	return QMCKL_SUCCESS;
+}
+#endif
+
 
 /* mo_select */
 
@@ -161,7 +274,12 @@ qmckl_exit_code qmckl_provide_mo_basis_mo_vgl_device(qmckl_context context) {
 								  NULL);
 		}
 
-#ifdef HAVE_CUBLAS
+#if HAVE_CUSPARSE
+		rc = qmckl_compute_mo_basis_mo_vgl_cusparse_device(
+			context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num, ctx->point.num,
+			ctx->mo_basis.coefficient_t, ctx->ao_basis.ao_vgl,
+			ctx->mo_basis.mo_vgl);
+#elif HAVE_CUBLAS
 		rc = qmckl_compute_mo_basis_mo_vgl_cublas_device(
 			context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num, ctx->point.num,
 			ctx->mo_basis.coefficient_t, ctx->ao_basis.ao_vgl,
