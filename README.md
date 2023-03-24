@@ -18,7 +18,7 @@ make
 make install
 ```
 
-The only other requirement for **building** the library is a compiler toolchain that supports OpenMP or OpenACC offloading for your chosen target(s). Linking with QMCkl to build QMCkl GPU is not needed (but it is when building an executable that uses QMCkl GPU).
+The only other requirement for the library is a compiler toolchain that supports OpenMP or OpenACC offloading for your chosen target(s). The library is now completely standalone, and it can be linked without QMCkl CPU.
 
 You can also check that offloading works on your system with the `make check` command.
 
@@ -39,6 +39,10 @@ In either case, the library interface is going to be exactly the same, as all of
 We currently support nvc, gcc and clang. This means we have succesfully built and run the library with one of these compilers, on hardware from at least one vendor. You can specify which compiler to use by specifying the `CC=...` variable to the configure (gcc should be the default). 
 
 When specifying a known compiler, the configure also automatically tries to set the required flags to enable OpenMP or OpenACC offloading. In case the proposed flags don't work on your system, you can disable them whith the `--disable-autoflags` configure option. Then, simply specify correct compiler flags in the `CFLAGS` variable.
+
+## TREXIO
+
+By default, QMCkl GPU will link with TREXIO, making it possible to initialize a GPU context by directly reading a TREXIO file. To disable this and skip the compilation of TREXIO related functions, use the `--disable-trexio` configure option.
 
 # Usage
 
