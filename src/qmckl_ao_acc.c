@@ -13,7 +13,6 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	double *coord, double *nucl_coord, double *expo, double *coef_normalized,
 	double *shell_vgl) {
 
-	int ishell_start, ishell_end;
 	int iprim_start, iprim_end;
 	double x, y, z, two_a, ar2, r2, v, cutoff;
 
@@ -23,33 +22,31 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	// TODO : Use numerical precision here
 	cutoff = 27.631021115928547; //-dlog(1.d-12)
 
+    int* shell_to_nucl = qmckl_malloc_device(context, sizeof(int)*shell_num);
+
 #pragma acc data deviceptr(nucleus_shell_num, nucleus_index, nucleus_range,    \
 							   shell_prim_index, shell_prim_num, coord,        \
-							   nucl_coord, expo, coef_normalized, shell_vgl)
+							   nucl_coord, expo, coef_normalized, shell_vgl,    \
+                               shell_to_nucl)
 	{
 
-		// #pragma acc parallel loop gang worker vector
-
-		/*
-		 * BUG As of now, the above "acc parallel" has been replaced with a
-		 * simple "acc kernels", as it caused the following internal compiler
-		 * error on  gcc (Spack GCC) 12.1.0 :
-		 *
-		 * ../src/qmckl_ao_acc.c: In function
-		 * 'qmckl_compute_ao_basis_shell_gaussian_vgl_device._omp_fn.0':
-		 * ../src/qmckl_ao_acc.c:31:9: internal compiler error: in
-		 * expand_UNIQUE, at internal-fn.cc:2996 31 | #pragma acc parallel loop
-		 * gang worker vector
-		 *
-		 *  TODO Until this error is fixed, we might want to wrap desired
-		 * pragmas in #ifdefs depending on the compiler and restore the original
-		 * acc parallel for other compilers.
-		 * */
-
 #pragma acc kernels
-		for (int ipoint = 0; ipoint < point_num; ipoint++) {
+    { 
+    for (int inucl = 0; inucl < nucl_num; inucl++) {
+        int ishell_start = nucleus_index[inucl];
+        int ishell_end = nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+        for (int ishell = ishell_start; ishell < ishell_end; ishell++) {
+            shell_to_nucl[ishell] = inucl ;
+        }
+    }
+    }
 
-			for (int inucl = 0; inucl < nucl_num; inucl++) {
+
+#pragma acc parallel loop collapse(2) 
+		for (int ipoint = 0; ipoint < point_num; ipoint++) {
+            for (int ishell = 0; ishell < shell_num; ishell++) {
+
+			    int inucl = shell_to_nucl[ishell];
 
 				x = coord[ipoint] - nucl_coord[inucl];
 				y = coord[ipoint + point_num] - nucl_coord[inucl + nucl_num];
@@ -62,68 +59,59 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 					continue;
 				}
 
-				ishell_start = nucleus_index[inucl];
-				ishell_end =
-					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+				shell_vgl[ishell + 0 * shell_num + ipoint * shell_num * 5] =
+					0;
+				shell_vgl[ishell + 1 * shell_num + ipoint * shell_num * 5] =
+					0;
+				shell_vgl[ishell + 2 * shell_num + ipoint * shell_num * 5] =
+					0;
+				shell_vgl[ishell + 3 * shell_num + ipoint * shell_num * 5] =
+					0;
+				shell_vgl[ishell + 4 * shell_num + ipoint * shell_num * 5] =
+					0;
 
-				for (int ishell = ishell_start; ishell <= ishell_end;
-					 ishell++) {
+				iprim_start = shell_prim_index[ishell];
+				iprim_end = shell_prim_index[ishell] + shell_prim_num[ishell] - 1;
 
-					shell_vgl[ishell + 0 * shell_num + ipoint * shell_num * 5] =
-						0;
-					shell_vgl[ishell + 1 * shell_num + ipoint * shell_num * 5] =
-						0;
-					shell_vgl[ishell + 2 * shell_num + ipoint * shell_num * 5] =
-						0;
-					shell_vgl[ishell + 3 * shell_num + ipoint * shell_num * 5] =
-						0;
-					shell_vgl[ishell + 4 * shell_num + ipoint * shell_num * 5] =
-						0;
+				for (int iprim = iprim_start; iprim <= iprim_end; iprim++) {
 
-					iprim_start = shell_prim_index[ishell];
-					iprim_end =
-						shell_prim_index[ishell] + shell_prim_num[ishell] - 1;
-
-					for (int iprim = iprim_start; iprim <= iprim_end; iprim++) {
-
-						ar2 = expo[iprim] * r2;
-						if (ar2 > cutoff) {
-							continue;
-						}
-
-						v = coef_normalized[iprim] * exp(-ar2);
-						two_a = -2 * expo[iprim] * v;
-
-						shell_vgl[ishell + 0 * shell_num +
-								  ipoint * shell_num * 5] =
-							shell_vgl[ishell + 0 * shell_num +
-									  ipoint * shell_num * 5] +
-							v;
-
-						shell_vgl[ishell + 1 * shell_num +
-								  ipoint * shell_num * 5] =
-							shell_vgl[ishell + 1 * shell_num +
-									  ipoint * shell_num * 5] +
-							two_a * x;
-
-						shell_vgl[ishell + 2 * shell_num +
-								  ipoint * shell_num * 5] =
-							shell_vgl[ishell + 2 * shell_num +
-									  ipoint * shell_num * 5] +
-							two_a * y;
-
-						shell_vgl[ishell + 3 * shell_num +
-								  ipoint * shell_num * 5] =
-							shell_vgl[ishell + 3 * shell_num +
-									  ipoint * shell_num * 5] +
-							two_a * z;
-
-						shell_vgl[ishell + 4 * shell_num +
-								  ipoint * shell_num * 5] =
-							shell_vgl[ishell + 4 * shell_num +
-									  ipoint * shell_num * 5] +
-							two_a * (3 - 2 * ar2);
+					ar2 = expo[iprim] * r2;
+					if (ar2 > cutoff) {
+						continue;
 					}
+
+					v = coef_normalized[iprim] * exp(-ar2);
+					two_a = -2 * expo[iprim] * v;
+
+					shell_vgl[ishell + 0 * shell_num +
+							  ipoint * shell_num * 5] =
+						shell_vgl[ishell + 0 * shell_num +
+								  ipoint * shell_num * 5] +
+						v;
+
+					shell_vgl[ishell + 1 * shell_num +
+							  ipoint * shell_num * 5] =
+						shell_vgl[ishell + 1 * shell_num +
+								  ipoint * shell_num * 5] +
+						two_a * x;
+
+					shell_vgl[ishell + 2 * shell_num +
+							  ipoint * shell_num * 5] =
+						shell_vgl[ishell + 2 * shell_num +
+								  ipoint * shell_num * 5] +
+						two_a * y;
+
+					shell_vgl[ishell + 3 * shell_num +
+							  ipoint * shell_num * 5] =
+						shell_vgl[ishell + 3 * shell_num +
+								  ipoint * shell_num * 5] +
+						two_a * z;
+
+					shell_vgl[ishell + 4 * shell_num +
+							  ipoint * shell_num * 5] =
+						shell_vgl[ishell + 4 * shell_num +
+								  ipoint * shell_num * 5] +
+						two_a * (3 - 2 * ar2);
 				}
 			}
 		}
@@ -212,10 +200,9 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 {
 
-	// #pragma acc parallel loop gang worker vector
 	// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
 
-#pragma acc kernels
+#pragma acc parallel loop gang worker vector
 	for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
 		// Compute addresses of subarrays from ipoint
@@ -513,10 +500,9 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 {
 
-	// #pragma acc parallel loop gang worker vector
 	// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
 
-#pragma acc kernels
+#pragma acc parallel loop gang worker vector
 	for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
 		// Compute addresses of subarrays from ipoint
