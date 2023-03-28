@@ -13,7 +13,6 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	double *coord, double *nucl_coord, double *expo, double *coef_normalized,
 	double *shell_vgl) {
 
-	int ishell_start, ishell_end;
 	int iprim_start, iprim_end;
 	double x, y, z, two_a, ar2, r2, v, cutoff;
 
@@ -23,16 +22,31 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	// TODO : Use numerical precision here
 	cutoff = 27.631021115928547; //-dlog(1.d-12)
 
+    int* shell_to_nucl = qmckl_malloc_device(context, sizeof(int)*shell_num);
+
+#pragma omp target is_device_ptr(shell_to_nucl)
+	{
+#pragma omp teams distribute parallel for 
+    for (int inucl = 0; inucl < nucl_num; inucl++) {
+        int ishell_start = nucleus_index[inucl];
+        int ishell_end = nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+        for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
+            shell_to_nucl[ishell] = inucl ;
+        }
+    }
+	}
+
 #pragma omp target is_device_ptr(nucleus_shell_num, nucleus_index,             \
 									 nucleus_range, shell_prim_index,          \
 									 shell_prim_num, coord, nucl_coord, expo,  \
-									 coef_normalized, shell_vgl)
+									 coef_normalized, shell_vgl, shell_to_nucl)
 	{
 
 #pragma omp teams distribute parallel for simd collapse(2)
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
+			for (int ishell = 0; ishell < shell_num; ishell++) {
 
-			for (int inucl = 0; inucl < nucl_num; inucl++) {
+				int inucl = shell_to_nucl[ishell];
 
 				x = coord[ipoint] - nucl_coord[inucl];
 				y = coord[ipoint + point_num] - nucl_coord[inucl + nucl_num];
@@ -45,70 +59,61 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 					continue;
 				}
 
-				ishell_start = nucleus_index[inucl];
-				ishell_end =
-					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
 
-				for (int ishell = ishell_start; ishell <= ishell_end;
-					 ishell++) {
+				shell_vgl[ishell + 0 * shell_num + ipoint * shell_num * 5] =
+					0;
+				shell_vgl[ishell + 1 * shell_num + ipoint * shell_num * 5] =
+					0;
+				shell_vgl[ishell + 2 * shell_num + ipoint * shell_num * 5] =
+					0;
+				shell_vgl[ishell + 3 * shell_num + ipoint * shell_num * 5] =
+					0;
+				shell_vgl[ishell + 4 * shell_num + ipoint * shell_num * 5] =
+					0;
 
-					shell_vgl[ishell + 0 * shell_num + ipoint * shell_num * 5] =
-						0;
-					shell_vgl[ishell + 1 * shell_num + ipoint * shell_num * 5] =
-						0;
-					shell_vgl[ishell + 2 * shell_num + ipoint * shell_num * 5] =
-						0;
-					shell_vgl[ishell + 3 * shell_num + ipoint * shell_num * 5] =
-						0;
-					shell_vgl[ishell + 4 * shell_num + ipoint * shell_num * 5] =
-						0;
+				iprim_start = shell_prim_index[ishell];
+				iprim_end = shell_prim_index[ishell] + shell_prim_num[ishell] - 1;
 
-					iprim_start = shell_prim_index[ishell];
-					iprim_end =
-						shell_prim_index[ishell] + shell_prim_num[ishell] - 1;
+				for (int iprim = iprim_start; iprim <= iprim_end; iprim++) {
 
-					for (int iprim = iprim_start; iprim <= iprim_end; iprim++) {
-
-						ar2 = expo[iprim] * r2;
-						if (ar2 > cutoff) {
-							continue;
-						}
-
-						v = coef_normalized[iprim] * exp(-ar2);
-						two_a = -2 * expo[iprim] * v;
-
-						shell_vgl[ishell + 0 * shell_num +
-								  ipoint * shell_num * 5] =
-							shell_vgl[ishell + 0 * shell_num +
-									  ipoint * shell_num * 5] +
-							v;
-
-						shell_vgl[ishell + 1 * shell_num +
-								  ipoint * shell_num * 5] =
-							shell_vgl[ishell + 1 * shell_num +
-									  ipoint * shell_num * 5] +
-							two_a * x;
-
-						shell_vgl[ishell + 2 * shell_num +
-								  ipoint * shell_num * 5] =
-							shell_vgl[ishell + 2 * shell_num +
-									  ipoint * shell_num * 5] +
-							two_a * y;
-
-						shell_vgl[ishell + 3 * shell_num +
-								  ipoint * shell_num * 5] =
-							shell_vgl[ishell + 3 * shell_num +
-									  ipoint * shell_num * 5] +
-							two_a * z;
-
-						shell_vgl[ishell + 4 * shell_num +
-								  ipoint * shell_num * 5] =
-							shell_vgl[ishell + 4 * shell_num +
-									  ipoint * shell_num * 5] +
-							two_a * (3 - 2 * ar2);
+					ar2 = expo[iprim] * r2;
+					if (ar2 > cutoff) {
+						continue;
 					}
+
+					v = coef_normalized[iprim] * exp(-ar2);
+					two_a = -2 * expo[iprim] * v;
+
+					shell_vgl[ishell + 0 * shell_num +
+							  ipoint * shell_num * 5] = 
+					shell_vgl[ishell + 0 * shell_num +
+							  ipoint * shell_num * 5] + v; 
+
+					shell_vgl[ishell + 1 * shell_num +
+							  ipoint * shell_num * 5] = 
+					shell_vgl[ishell + 1 * shell_num +
+							  ipoint * shell_num * 5] + two_a * x;
+
+					shell_vgl[ishell + 2 * shell_num +
+							  ipoint * shell_num * 5] = 
+					shell_vgl[ishell + 2 * shell_num +
+							  ipoint * shell_num * 5] + two_a * y;
+
+					shell_vgl[ishell + 3 * shell_num +
+							  ipoint * shell_num * 5] = 
+					shell_vgl[ishell + 3 * shell_num +
+							  ipoint * shell_num * 5] + two_a * z;
+
+					shell_vgl[ishell + 4 * shell_num +
+						  ipoint * shell_num * 5] = 
+					shell_vgl[ishell + 4 * shell_num +
+						  ipoint * shell_num * 5] + two_a * (3 - 2 * ar2);
+
+
 				}
+
 			}
+			
 		}
 	}
 
