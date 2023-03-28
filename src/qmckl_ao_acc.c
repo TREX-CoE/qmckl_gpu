@@ -28,11 +28,8 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 							   nucl_coord, expo, coef_normalized, shell_vgl)
 	{
 
-		// #pragma acc parallel loop gang worker vector
-
 		/*
-		 * BUG As of now, the above "acc parallel" has been replaced with a
-		 * simple "acc kernels", as it caused the following internal compiler
+		 * BUG As of now, "acc parallel" caused the following internal compiler
 		 * error on  gcc (Spack GCC) 12.1.0 :
 		 *
 		 * ../src/qmckl_ao_acc.c: In function
@@ -42,11 +39,9 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 		 * gang worker vector
 		 *
 		 *  TODO Until this error is fixed, we might want to wrap desired
-		 * pragmas in #ifdefs depending on the compiler and restore the original
-		 * acc parallel for other compilers.
+		 * pragmas in #ifdefs depending on the compiler 
 		 * */
-
-#pragma acc kernels
+#pragma acc parallel loop gang worker vector
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
 			for (int inucl = 0; inucl < nucl_num; inucl++) {
@@ -212,10 +207,9 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 {
 
-	// #pragma acc parallel loop gang worker vector
 	// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
 
-#pragma acc kernels
+#pragma acc parallel loop gang worker vector
 	for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
 		// Compute addresses of subarrays from ipoint
@@ -513,10 +507,9 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 {
 
-	// #pragma acc parallel loop gang worker vector
 	// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
 
-#pragma acc kernels
+#pragma acc parallel loop gang worker vector
 	for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
 		// Compute addresses of subarrays from ipoint
