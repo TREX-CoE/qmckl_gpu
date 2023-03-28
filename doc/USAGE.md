@@ -33,8 +33,7 @@ which performs the same task on a GPU, using memory allocated on it.
 Note that those functions accept a `qmckl_context_device` as parameter, as opposed to the `qmckl_context` used in the CPU library. A `qmckl_context_device` is associated to a single GPU.
 
 **Notes :** 
-- QMCkl GPU should be linked with an HPC-enabled QMCkl (configure QMCkl with `--enable-hpc`, see the [QMCkl README](https://github.com/TREX-CoE/qmckl/blob/master/README.md)), as well as with [TREXIO](https://github.com/TREX-CoE/trexio).
-- While it is possible to use different compilers to build QMCkl, QMCkl GPU and your final executable, doing so might result in some missing symbols when linking your final executable. In that case, you would have to manually tell your linker where to find those symbols (which might come from different libc implementations for example, for instance). 
+- If you plan on using QMCkl CPU and GPU together : while it is possible to use different compilers to build QMCkl, QMCkl GPU and your final executable, doing so might result in some missing symbols when linking your final executable. In that case, you would have to manually tell your linker where to find those symbols (which might come from different libc implementations, for instance). 
 
 The next sections provides more advanced explanations on how this library should be used compared to the standard CPU QMCkl.
 
