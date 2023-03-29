@@ -204,7 +204,9 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 #pragma acc parallel loop gang worker vector
 	for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
-    	double (*poly_vgl)[5*ao_num] = (double(*)[5*ao_num]) poly_vgl_shared;
+    	double (*poly_vgl)[5*ao_num][point_num] = (double(*)[5*ao_num*point_num]) poly_vgl_shared;
+
+//int (*c)[2] = (int(*)[2])new int[2];
         
    
 
