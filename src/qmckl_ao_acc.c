@@ -199,15 +199,16 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 {
 
-	// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
+    double poly_vgl[5*ao_num][point_num];
 
+	// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
 #pragma acc parallel loop gang worker vector
 	for (int ipoint = 0; ipoint < point_num; ipoint++) {
 
 		// Compute addresses of subarrays from ipoint
 		// This way, each thread can write to its own poly_vgl and pows
 		// without any race condition
-		double *poly_vgl = poly_vgl_shared + ipoint * 5 * ao_num;
+		//double *poly_vgl = poly_vgl_shared + ipoint * 5 * ao_num;
 		double *pows = pows_shared + ipoint * (lmax + 3) * 3;
 
 		double e_coord_0 = coord[0 * point_num + ipoint];
@@ -243,11 +244,11 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 			int llmax = nucleus_max_ang_mom[inucl];
 			if (llmax == 0) {
-				poly_vgl[0] = 1.;
-				poly_vgl[1] = 0.;
-				poly_vgl[2] = 0.;
-				poly_vgl[3] = 0.;
-				poly_vgl[4] = 0.;
+				poly_vgl[0][ipoint] = 1.;
+				poly_vgl[1][ipoint] = 0.;
+				poly_vgl[2][ipoint] = 0.;
+				poly_vgl[3][ipoint] = 0.;
+				poly_vgl[4][ipoint] = 0.;
 
 				int n = 0;
 			} else if (llmax > 0) {
@@ -274,20 +275,20 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 				for (int i = 0; i < 5; i++) {
 					for (int j = 0; j < 4; j++) {
-						poly_vgl[i + 5 * j] = 0.;
+						poly_vgl[i + 5 * j][ipoint] = 0.;
 					}
 				}
 
-				poly_vgl[0] = 1.;
+				poly_vgl[0][ipoint] = 1.;
 
-				poly_vgl[5] = pows[3];
-				poly_vgl[6] = 1.;
+				poly_vgl[5][ipoint] = pows[3];
+				poly_vgl[6][ipoint] = 1.;
 
-				poly_vgl[10] = pows[3 + (llmax + 3)];
-				poly_vgl[12] = 1.;
+				poly_vgl[10][ipoint] = pows[3 + (llmax + 3)];
+				poly_vgl[12][ipoint] = 1.;
 
-				poly_vgl[15] = pows[3 + 2 * (llmax + 3)];
-				poly_vgl[18] = 1.;
+				poly_vgl[15][ipoint] = pows[3 + 2 * (llmax + 3)];
+				poly_vgl[18][ipoint] = 1.;
 
 				n = 3;
 			}
@@ -311,18 +312,18 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 							 pows[(c + 2) + 2 * (llmax + 3)];
 						xz = pows[(a + 2)] * pows[(c + 2) + 2 * (llmax + 3)];
 
-						poly_vgl[5 * (n)] = xy * pows[c + 2 + 2 * (llmax + 3)];
+						poly_vgl[5 * (n)][ipoint] = xy * pows[c + 2 + 2 * (llmax + 3)];
 
 						xy = dc * xy;
 						xz = db * xz;
 						yz = da * yz;
 
-						poly_vgl[1 + 5 * n] = pows[a + 1] * yz;
-						poly_vgl[2 + 5 * n] = pows[b + 1 + (llmax + 3)] * xz;
-						poly_vgl[3 + 5 * n] =
+						poly_vgl[1 + 5 * n][ipoint] = pows[a + 1] * yz;
+						poly_vgl[2 + 5 * n][ipoint] = pows[b + 1 + (llmax + 3)] * xz;
+						poly_vgl[3 + 5 * n][ipoint] =
 							pows[c + 1 + 2 * (llmax + 3)] * xy;
 
-						poly_vgl[4 + 5 * n] =
+						poly_vgl[4 + 5 * n][ipoint] =
 							(da - 1.) * pows[a] * yz +
 							(db - 1.) * pows[b + (llmax + 3)] * xz +
 							(dc - 1.) * pows[c + 2 * (llmax + 3)] * xy;
@@ -349,56 +350,56 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 					// value
 					ao_vgl[k + 0 * ao_num + ipoint * 5 * ao_num] =
-						poly_vgl[il * 5 + 0] *
+						poly_vgl[il * 5 + 0][ipoint] *
 						shell_vgl[ishell + 0 * shell_num +
 								  ipoint * shell_num * 5] *
 						ao_factor[k];
 
 					// Grad x
 					ao_vgl[k + 1 * ao_num + ipoint * 5 * ao_num] =
-						(poly_vgl[il * 5 + 1] *
+						(poly_vgl[il * 5 + 1][ipoint] *
 							 shell_vgl[ishell + 0 * shell_num +
 									   ipoint * shell_num * 5] +
-						 poly_vgl[il * 5 + 0] *
+						 poly_vgl[il * 5 + 0][ipoint] *
 							 shell_vgl[ishell + 1 * shell_num +
 									   ipoint * shell_num * 5]) *
 						ao_factor[k];
 
 					// grad y
 					ao_vgl[k + 2 * ao_num + ipoint * 5 * ao_num] =
-						(poly_vgl[il * 5 + 2] *
+						(poly_vgl[il * 5 + 2][ipoint] *
 							 shell_vgl[ishell + 0 * shell_num +
 									   ipoint * shell_num * 5] +
-						 poly_vgl[il * 5 + 0] *
+						 poly_vgl[il * 5 + 0][ipoint] *
 							 shell_vgl[ishell + 2 * shell_num +
 									   ipoint * shell_num * 5]) *
 						ao_factor[k];
 
 					// grad z
 					ao_vgl[k + 3 * ao_num + ipoint * 5 * ao_num] =
-						(poly_vgl[il * 5 + 3] *
+						(poly_vgl[il * 5 + 3][ipoint] *
 							 shell_vgl[ishell + 0 * shell_num +
 									   ipoint * shell_num * 5] +
-						 poly_vgl[il * 5 + 0] *
+						 poly_vgl[il * 5 + 0][ipoint] *
 							 shell_vgl[ishell + 3 * shell_num +
 									   ipoint * shell_num * 5]) *
 						ao_factor[k];
 
 					// Lapl_z
 					ao_vgl[k + 4 * ao_num + ipoint * 5 * ao_num] =
-						(poly_vgl[il * 5 + 4] *
+						(poly_vgl[il * 5 + 4][ipoint] *
 							 shell_vgl[ishell + 0 * shell_num +
 									   ipoint * shell_num * 5] +
-						 poly_vgl[il * 5 + 0] *
+						 poly_vgl[il * 5 + 0][ipoint] *
 							 shell_vgl[ishell + 4 * shell_num +
 									   ipoint * shell_num * 5] +
-						 2.0 * (poly_vgl[il * 5 + 1] *
+						 2.0 * (poly_vgl[il * 5 + 1][ipoint] *
 									shell_vgl[ishell + 1 * shell_num +
 											  ipoint * shell_num * 5] +
-								poly_vgl[il * 5 + 2] *
+								poly_vgl[il * 5 + 2][ipoint] *
 									shell_vgl[ishell + 2 * shell_num +
 											  ipoint * shell_num * 5] +
-								poly_vgl[il * 5 + 3] *
+								poly_vgl[il * 5 + 3][ipoint] *
 									shell_vgl[ishell + 3 * shell_num +
 											  ipoint * shell_num * 5])) *
 						ao_factor[k];
