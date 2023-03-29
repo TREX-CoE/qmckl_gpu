@@ -199,11 +199,14 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 {
 
-    double poly_vgl[5*ao_num][point_num];
 
 	// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
 #pragma acc parallel loop gang worker vector
 	for (int ipoint = 0; ipoint < point_num; ipoint++) {
+
+    	double (*poly_vgl)[5*ao_num] = (double(*)[5*ao_num]) poly_vgl_shared;
+        
+   
 
 		// Compute addresses of subarrays from ipoint
 		// This way, each thread can write to its own poly_vgl and pows
