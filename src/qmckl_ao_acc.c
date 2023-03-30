@@ -356,6 +356,27 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 				int inucl = shell_to_nucl[ishell];
 				int iter = ipoint * nucl_num + inucl;
 
+				if ( ipoint >= point_num )
+					continue;
+
+				double e_coord_0 = coord[0 * point_num + ipoint];
+				double e_coord_1 = coord[1 * point_num + ipoint];
+				double e_coord_2 = coord[2 * point_num + ipoint];
+
+				double n_coord_0 = nucl_coord[0 * nucl_num + inucl];
+				double n_coord_1 = nucl_coord[1 * nucl_num + inucl];
+				double n_coord_2 = nucl_coord[2 * nucl_num + inucl];
+
+				double x = e_coord_0 - n_coord_0;
+				double y = e_coord_1 - n_coord_1;
+				double z = e_coord_2 - n_coord_2;
+
+				double r2 = x * x + y * y + z * z;
+
+				if (r2 > cutoff * nucleus_range[inucl]) {
+					continue;
+				}
+
 				int k = ao_index[ishell] - 1;
 				int l = shell_ang_mom[ishell];
 
