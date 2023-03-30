@@ -204,14 +204,13 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 {
 
-#pragma acc loop seq
 	for (int sub_iter = 0; sub_iter < num_sub_iters ; sub_iter++) {
-
-    	double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
-	   	double     (*pows)[chunk_size] = (double(*)[chunk_size]) pows_shared;
 
 #pragma acc parallel loop gang worker vector 
 		for (int iter = 0; iter < chunk_size; iter++) {
+
+	    	double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
+		   	double     (*pows)[chunk_size] = (double(*)[chunk_size]) pows_shared;
 
 			int step = iter + sub_iter * chunk_size;
 			if (step >= num_iters)
@@ -348,6 +347,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 #pragma acc parallel loop collapse(2) 
 		for (int iter = 0; iter < chunk_size/nucl_num; iter++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
+
+		    	double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
 
 				int ipoint = iter + chunk_size / nucl_num * sub_iter ;
 
