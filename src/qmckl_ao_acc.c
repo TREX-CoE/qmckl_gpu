@@ -144,7 +144,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Not to exceed GPU memory when allocating poly_vgl
-	int max_chunk_size = 128*1024;
+	int max_chunk_size = ( (128*1024)/nucl_num ) * nucl_num ;
 	int num_iters = point_num * nucl_num;
 	int chunk_size = (num_iters < max_chunk_size) ? num_iters : max_chunk_size;
 	int num_sub_iters = (num_iters + chunk_size - 1) / chunk_size;
@@ -204,14 +204,14 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 {
 
-// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
-#pragma acc parallel loop gang worker vector 
-	for (int iter = 0; iter < chunk_size; iter++) {
+#pragma acc loop seq
+	for (int sub_iter = 0; sub_iter < num_sub_iters ; sub_iter++) {
 
     	double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
-    	double     (*pows)[chunk_size] = (double(*)[chunk_size]) pows_shared;
+	   	double     (*pows)[chunk_size] = (double(*)[chunk_size]) pows_shared;
 
-		for (int sub_iter = 0; sub_iter < num_sub_iters ; sub_iter++) {
+#pragma acc parallel loop gang worker vector 
+		for (int iter = 0; iter < chunk_size; iter++) {
 
 			int step = iter + sub_iter * chunk_size;
 			if (step >= num_iters)
@@ -343,13 +343,14 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			}
 			// End of ao_polynomial computation (now inlined)
 			// poly_vgl is now set from here
+		}			
 
-			int ishell_start = nucleus_index[inucl];
-			int ishell_end =
-				nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+#pragma acc parallel loop collapse(2) 
+		for (int iter = 0; iter < chunk_size/nucl_num; iter++) {
+			for (int ishell = 0; ishell < shell_num; ishell++) {
 
-			// Loop over shells
-			for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
+				int ipoint = iter + chunk_size / nucl_num * sub_iter ;
+
 				int k = ao_index[ishell] - 1;
 				int l = shell_ang_mom[ishell];
 
