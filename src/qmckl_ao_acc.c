@@ -135,7 +135,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	int64_t *lstart;
 	double cutoff = 27.631021115928547;
 
-	double *poly_vgl_shared;
+	//double *poly_vgl_shared;
 	int64_t *powers;
 	int64_t *ao_index;
 
@@ -144,8 +144,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Multiply "normal" size by point_num to affect subarrays to each thread
-	size_t poly_dim =  5 * ao_num * point_num * nucl_num;
-	poly_vgl_shared = qmckl_malloc_device(context, sizeof(double)*poly_dim);
+	// size_t poly_dim =  5 * ao_num * point_num * nucl_num;
+	// poly_vgl_shared = qmckl_malloc_device(context, sizeof(double)*poly_dim);
 	ao_index = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
 
 	// Specific calling function
@@ -196,7 +196,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 #pragma acc data deviceptr(                                                    \
 		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
-			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
+			nucleus_index, nucleus_shell_num, shell_vgl,       \
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 {
 
@@ -205,7 +205,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	for (int ipoint = 0; ipoint < point_num; ipoint++) {
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
 
-    		double (*poly_vgl)[point_num][nucl_num] = (double(*)[point_num][nucl_num]) poly_vgl_shared;
+    		//double (*poly_vgl)[point_num][nucl_num] = (double(*)[point_num][nucl_num]) poly_vgl_shared;
+    		double poly_vgl[5*ao_num];
     		double (*pows)[point_num][nucl_num] = (double(*)[point_num][nucl_num]) pows_shared;
 
 			double e_coord_0 = coord[0 * point_num + ipoint];
@@ -240,11 +241,11 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 			int llmax = nucleus_max_ang_mom[inucl];
 			if (llmax == 0) {
-				poly_vgl[0][ipoint][inucl] = 1.;
-				poly_vgl[1][ipoint][inucl] = 0.;
-				poly_vgl[2][ipoint][inucl] = 0.;
-				poly_vgl[3][ipoint][inucl] = 0.;
-				poly_vgl[4][ipoint][inucl] = 0.;
+				poly_vgl[0] = 1.;
+				poly_vgl[1] = 0.;
+				poly_vgl[2] = 0.;
+				poly_vgl[3] = 0.;
+				poly_vgl[4] = 0.;
 
 				int n = 0;
 			} else if (llmax > 0) {
@@ -271,20 +272,20 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 				for (int i = 0; i < 5; i++) {
 					for (int j = 0; j < 4; j++) {
-						poly_vgl[i + 5 * j][ipoint][inucl]  = 0.;
+						poly_vgl[i + 5 * j]  = 0.;
 					}
 				}
 
-				poly_vgl[0][ipoint][inucl]  = 1.;
+				poly_vgl[0]  = 1.;
 
-				poly_vgl[5][ipoint][inucl]  = pows[3][ipoint][inucl] ;
-				poly_vgl[6][ipoint][inucl]  = 1.;
+				poly_vgl[5]  = pows[3][ipoint][inucl] ;
+				poly_vgl[6]  = 1.;
 
-				poly_vgl[10][ipoint][inucl]  = pows[3 + (llmax + 3)][ipoint][inucl] ;
-				poly_vgl[12][ipoint][inucl]  = 1.;
+				poly_vgl[10]  = pows[3 + (llmax + 3)][ipoint][inucl] ;
+				poly_vgl[12]  = 1.;
 
-				poly_vgl[15][ipoint][inucl]  = pows[3 + 2 * (llmax + 3)][ipoint][inucl] ;
-				poly_vgl[18][ipoint][inucl]  = 1.;
+				poly_vgl[15]  = pows[3 + 2 * (llmax + 3)][ipoint][inucl] ;
+				poly_vgl[18]  = 1.;
 
 				n = 3;
 			}
@@ -308,18 +309,18 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 							 pows[(c + 2) + 2 * (llmax + 3)][ipoint][inucl] ;
 						xz = pows[(a + 2)][ipoint][inucl]  * pows[(c + 2) + 2 * (llmax + 3)][ipoint][inucl] ;
 
-						poly_vgl[5 * (n)][ipoint][inucl]  = xy * pows[c + 2 + 2 * (llmax + 3)][ipoint][inucl] ;
+						poly_vgl[5 * (n)]  = xy * pows[c + 2 + 2 * (llmax + 3)][ipoint][inucl] ;
 
 						xy = dc * xy;
 						xz = db * xz;
 						yz = da * yz;
 
-						poly_vgl[1 + 5 * n][ipoint][inucl]  = pows[a + 1][ipoint][inucl]  * yz;
-						poly_vgl[2 + 5 * n][ipoint][inucl]  = pows[b + 1 + (llmax + 3)][ipoint][inucl]  * xz;
-						poly_vgl[3 + 5 * n][ipoint][inucl]  =
+						poly_vgl[1 + 5 * n]  = pows[a + 1][ipoint][inucl]  * yz;
+						poly_vgl[2 + 5 * n]  = pows[b + 1 + (llmax + 3)][ipoint][inucl]  * xz;
+						poly_vgl[3 + 5 * n]  =
 							pows[c + 1 + 2 * (llmax + 3)][ipoint][inucl]  * xy;
 
-						poly_vgl[4 + 5 * n][ipoint][inucl]  =
+						poly_vgl[4 + 5 * n]  =
 							(da - 1.) * pows[a][ipoint][inucl]  * yz +
 							(db - 1.) * pows[b + (llmax + 3)][ipoint][inucl]  * xz +
 							(dc - 1.) * pows[c + 2 * (llmax + 3)][ipoint][inucl]  * xy;
@@ -346,56 +347,56 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 					// value
 					ao_vgl[k + 0 * ao_num + ipoint * 5 * ao_num] =
-						poly_vgl[il * 5 + 0][ipoint][inucl]  *
+						poly_vgl[il * 5 + 0]  *
 						shell_vgl[ishell + 0 * shell_num +
 								  ipoint * shell_num * 5] *
 						ao_factor[k];
 
 					// Grad x
 					ao_vgl[k + 1 * ao_num + ipoint * 5 * ao_num] =
-						(poly_vgl[il * 5 + 1][ipoint][inucl]  *
+						(poly_vgl[il * 5 + 1]  *
 							 shell_vgl[ishell + 0 * shell_num +
 									   ipoint * shell_num * 5] +
-						 poly_vgl[il * 5 + 0][ipoint][inucl]  *
+						 poly_vgl[il * 5 + 0]  *
 							 shell_vgl[ishell + 1 * shell_num +
 									   ipoint * shell_num * 5]) *
 						ao_factor[k];
 
 					// grad y
 					ao_vgl[k + 2 * ao_num + ipoint * 5 * ao_num] =
-						(poly_vgl[il * 5 + 2][ipoint][inucl]  *
+						(poly_vgl[il * 5 + 2]  *
 							 shell_vgl[ishell + 0 * shell_num +
 									   ipoint * shell_num * 5] +
-						 poly_vgl[il * 5 + 0][ipoint][inucl]  *
+						 poly_vgl[il * 5 + 0]  *
 							 shell_vgl[ishell + 2 * shell_num +
 									   ipoint * shell_num * 5]) *
 						ao_factor[k];
 
 					// grad z
 					ao_vgl[k + 3 * ao_num + ipoint * 5 * ao_num] =
-						(poly_vgl[il * 5 + 3][ipoint][inucl]  *
+						(poly_vgl[il * 5 + 3]  *
 							 shell_vgl[ishell + 0 * shell_num +
 									   ipoint * shell_num * 5] +
-						 poly_vgl[il * 5 + 0][ipoint][inucl]  *
+						 poly_vgl[il * 5 + 0]  *
 							 shell_vgl[ishell + 3 * shell_num +
 									   ipoint * shell_num * 5]) *
 						ao_factor[k];
 
 					// Lapl_z
 					ao_vgl[k + 4 * ao_num + ipoint * 5 * ao_num] =
-						(poly_vgl[il * 5 + 4][ipoint][inucl]  *
+						(poly_vgl[il * 5 + 4]  *
 							 shell_vgl[ishell + 0 * shell_num +
 									   ipoint * shell_num * 5] +
-						 poly_vgl[il * 5 + 0][ipoint][inucl]  *
+						 poly_vgl[il * 5 + 0]  *
 							 shell_vgl[ishell + 4 * shell_num +
 									   ipoint * shell_num * 5] +
-						 2.0 * (poly_vgl[il * 5 + 1][ipoint][inucl]  *
+						 2.0 * (poly_vgl[il * 5 + 1]  *
 									shell_vgl[ishell + 1 * shell_num +
 											  ipoint * shell_num * 5] +
-								poly_vgl[il * 5 + 2][ipoint][inucl]  *
+								poly_vgl[il * 5 + 2]  *
 									shell_vgl[ishell + 2 * shell_num +
 											  ipoint * shell_num * 5] +
-								poly_vgl[il * 5 + 3][ipoint][inucl]  *
+								poly_vgl[il * 5 + 3]  *
 									shell_vgl[ishell + 3 * shell_num +
 											  ipoint * shell_num * 5])) *
 						ao_factor[k];
@@ -408,7 +409,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 }
 // End of target data region
 qmckl_free_device(context, lstart);
-qmckl_free_device(context, poly_vgl_shared);
+//qmckl_free_device(context, poly_vgl_shared);
 qmckl_free_device(context, ao_index);
 
 qmckl_free_device(context, pows_shared);
