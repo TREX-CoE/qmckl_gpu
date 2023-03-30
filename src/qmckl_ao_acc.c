@@ -180,8 +180,9 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 	int k = 1;
 	int *k_p = &k;
+    int* shell_to_nucl = qmckl_malloc_device(context, sizeof(int)*shell_num);
 #pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
-							   ao_index, lstart) copyin(k_p[0 : 1])
+							   ao_index, lstart, shell_to_nucl) copyin(k_p[0 : 1])
 	{
 #pragma acc kernels
 	{
@@ -192,6 +193,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 				int l = shell_ang_mom[ishell];
 				ao_index[ishell] = k_p[0];
 				k_p[0] = k_p[0] + lstart[l + 1] - lstart[l];
+            	shell_to_nucl[ishell] = inucl ;
 			}
 		}
 	}
@@ -201,7 +203,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 #pragma acc data deviceptr(                                                    \
 		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
 			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
-			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
+			nucl_coord, pows_shared, shell_ang_mom, nucleus_range, shell_to_nucl)
 {
 
 	for (int sub_iter = 0; sub_iter < num_sub_iters ; sub_iter++) {
@@ -345,12 +347,14 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 		}			
 
 #pragma acc parallel loop collapse(2) 
-		for (int iter = 0; iter < chunk_size/nucl_num; iter++) {
+		for (int iter_new = 0; iter_new < chunk_size/nucl_num; iter_new++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
 
 		    	double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
 
-				int ipoint = iter + chunk_size / nucl_num * sub_iter ;
+				int ipoint = iter_new + chunk_size / nucl_num * sub_iter;
+				int inucl = shell_to_nucl[ishell];
+				int iter = ipoint * nucl_num + inucl;
 
 				int k = ao_index[ishell] - 1;
 				int l = shell_ang_mom[ishell];
