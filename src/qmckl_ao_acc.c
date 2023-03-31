@@ -116,6 +116,8 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 		}
 	}
 
+	qmckl_free_device(context, shell_to_nucl);
+
 	return info;
 }
 
@@ -354,7 +356,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 				int ipoint = iter_new + chunk_size / nucl_num * sub_iter;
 				int inucl = shell_to_nucl[ishell];
-				int iter = ipoint * nucl_num + inucl;
+				int iter = iter_new * nucl_num + inucl;
 
 				if ( ipoint >= point_num )
 					continue;
@@ -448,8 +450,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 qmckl_free_device(context, lstart);
 qmckl_free_device(context, poly_vgl_shared);
 qmckl_free_device(context, ao_index);
-
 qmckl_free_device(context, pows_shared);
+qmckl_free_device(context, shell_to_nucl);
 
 return QMCKL_SUCCESS;
 }
@@ -700,7 +702,6 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 qmckl_free_device(context, lstart);
 qmckl_free_device(context, poly_vgl_shared);
 qmckl_free_device(context, ao_index);
-
 qmckl_free_device(context, pows_shared);
 
 return QMCKL_SUCCESS;
