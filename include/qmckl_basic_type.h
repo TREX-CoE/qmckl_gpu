@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 /* QMCKL DEFINE */
 
 #define VALID_TAG_DEVICE 0xBEEFFACE
@@ -48,7 +47,6 @@
 #define QMCKL_OUT_OF_BOUNDS_DEVICE ((qmckl_exit_code_device)107)
 #define QMCKL_ALREADY_SET_DEVICE ((qmckl_exit_code_device)108)
 #define QMCKL_INVALID_EXIT_CODE_DEVICE ((qmckl_exit_code_device)109)
-
 
 /* Error type */
 

@@ -24,8 +24,8 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	cutoff = 27.631021115928547; //-dlog(1.d-12)
 
 #pragma acc data deviceptr(nucleus_shell_num, nucleus_index, nucleus_range,    \
-							   shell_prim_index, shell_prim_num, coord,        \
-							   nucl_coord, expo, coef_normalized, shell_vgl)
+						   shell_prim_index, shell_prim_num, coord,            \
+						   nucl_coord, expo, coef_normalized, shell_vgl)
 	{
 
 		/*
@@ -39,7 +39,7 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 		 * gang worker vector
 		 *
 		 *  TODO Until this error is fixed, we might want to wrap desired
-		 * pragmas in #ifdefs depending on the compiler 
+		 * pragmas in #ifdefs depending on the compiler
 		 * */
 #pragma acc parallel loop gang worker vector
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
@@ -159,7 +159,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	// Specific calling function
 	int lmax = -1;
 	int *lmax_p = &lmax;
-#pragma acc data deviceptr(nucleus_max_ang_mom) copyin(lmax_p[0 : 1])
+#pragma acc data deviceptr(nucleus_max_ang_mom) copyin(lmax_p [0:1])
 	{
 #pragma acc kernels
 		{
@@ -169,7 +169,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 				}
 			}
 		}
-#pragma acc update host(lmax_p[0 : 1])
+#pragma acc update host(lmax_p [0:1])
 	}
 	// Multiply "normal" size by point_num to affect subarrays to each thread
 	double *pows_shared = qmckl_malloc_device(
@@ -185,7 +185,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	int k = 1;
 	int *k_p = &k;
 #pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
-							   ao_index, lstart) copyin(k_p[0 : 1])
+						   ao_index, lstart) copyin(k_p [0:1])
 	{
 #pragma acc kernels
 		{for (int inucl = 0; inucl < nucl_num;
@@ -198,13 +198,13 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	}
 }
 }
-#pragma acc update host(k_p[0 : 1])
+#pragma acc update host(k_p [0:1])
 }
 
 #pragma acc data deviceptr(                                                    \
-		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
-			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
-			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
+	ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,           \
+	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
+	pows_shared, shell_ang_mom, nucleus_range)
 {
 
 	// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
@@ -459,7 +459,7 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 	// Specific calling function
 	int lmax = -1;
 	int *lmax_p = &lmax;
-#pragma acc data deviceptr(nucleus_max_ang_mom) copyin(lmax_p[0 : 1])
+#pragma acc data deviceptr(nucleus_max_ang_mom) copyin(lmax_p [0:1])
 	{
 #pragma acc kernels
 		{
@@ -469,7 +469,7 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 				}
 			}
 		}
-#pragma acc update host(lmax_p[0 : 1])
+#pragma acc update host(lmax_p [0:1])
 	}
 	// Multiply "normal" size by point_num to affect subarrays to each thread
 	double *pows_shared = qmckl_malloc_device(
@@ -485,7 +485,7 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 	int k = 1;
 	int *k_p = &k;
 #pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
-							   ao_index, lstart) copyin(k_p[0 : 1])
+						   ao_index, lstart) copyin(k_p [0:1])
 	{
 #pragma acc kernels
 		{for (int inucl = 0; inucl < nucl_num;
@@ -498,13 +498,13 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 	}
 }
 }
-#pragma acc update host(k_p[0 : 1])
+#pragma acc update host(k_p [0:1])
 }
 
 #pragma acc data deviceptr(                                                    \
-		ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,     \
-			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
-			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
+	ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,         \
+	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
+	pows_shared, shell_ang_mom, nucleus_range)
 {
 
 	// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above

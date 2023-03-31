@@ -1,14 +1,14 @@
 #include "include/qmckl_mo.h"
 
-#ifdef HAVE_CUBLAS 
+#ifdef HAVE_CUBLAS
 #include <cublas_v2.h>
 #endif
 
-#ifdef HAVE_NVBLAS 
+#ifdef HAVE_NVBLAS
 #include <nvblas.h>
 #endif
 
-#ifdef HAVE_CUSPARSE 
+#ifdef HAVE_CUSPARSE
 #include <cuda_runtime_api.h>
 #include <cusparse_v2.h>
 #endif
@@ -145,19 +145,18 @@ qmckl_provide_mo_basis_mo_vgl_acc_offload(qmckl_context context) {
 #pragma acc enter data copyin(ctx->ao_basis.ao_num)
 #pragma acc enter data copyin(ctx->mo_basis.mo_num)
 #pragma acc enter data copyin(ctx->point.num)
-#pragma acc enter data copyin(                                                 \
-		ctx->mo_basis                                                          \
-			.coefficient_t[0 : ctx->ao_basis.ao_num * ctx->mo_basis.mo_num])
-#pragma acc enter data create(                                                 \
-		ctx->mo_basis.mo_vgl[0 : ctx->point.num * 5 * ctx->mo_basis.mo_num])
+#pragma acc enter data copyin(ctx->mo_basis.coefficient_t                      \
+							  [0:ctx->ao_basis.ao_num * ctx->mo_basis.mo_num])
+#pragma acc enter data create(ctx->mo_basis.mo_vgl                             \
+							  [0:ctx->point.num * 5 * ctx->mo_basis.mo_num])
 
 		rc = qmckl_compute_mo_basis_mo_vgl_acc_offload(
 			context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num, ctx->point.num,
 			ctx->mo_basis.coefficient_t, ctx->ao_basis.ao_vgl,
 			ctx->mo_basis.mo_vgl);
 
-#pragma acc exit data copyout(                                                 \
-		ctx->mo_basis.mo_vgl[0 : ctx->point.num * 5 * ctx->mo_basis.mo_num])
+#pragma acc exit data copyout(ctx->mo_basis.mo_vgl                             \
+							  [0:ctx->point.num * 5 * ctx->mo_basis.mo_num])
 #pragma acc exit data copyout(ctx)
 
 		if (rc != QMCKL_SUCCESS) {
@@ -224,8 +223,8 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_cusparse_acc_offload(
 	cusparseCreate(&handle);
 
 #pragma acc host_data use_device(ao_vgl[point_num * 5 * ao_num],               \
-									 mo_vgl[point_num * 5 * mo_num],           \
-									 coefficient_t[ao_num * mo_num])
+								 mo_vgl[point_num * 5 * mo_num],               \
+								 coefficient_t[ao_num * mo_num])
 	{
 		cusparseCreateDnMat(&matAd, A_nrows, A_ncols, lda, ao_vgl,
 							cuda_datatype, A_storage_order);
@@ -323,8 +322,8 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_nvblas_acc_offload(
 	int const ldc = m;
 
 #pragma acc host_data use_device(ao_vgl[point_num * 5 * ao_num],               \
-									 mo_vgl[point_num * 5 * mo_num],           \
-									 coefficient_t[ao_num * mo_num])
+								 mo_vgl[point_num * 5 * mo_num],               \
+								 coefficient_t[ao_num * mo_num])
 	{
 		dgemm("N", "N", &m, &n, &k, &alpha, coefficient_t, &lda, ao_vgl, &ldb,
 			  &beta, mo_vgl, &ldc);
@@ -360,8 +359,8 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_cublas_acc_offload(
 
 	cublasCreate(&handle);
 #pragma acc host_data use_device(ao_vgl[point_num * 5 * ao_num],               \
-									 mo_vgl[point_num * 5 * mo_num],           \
-									 coefficient_t[ao_num * mo_num])
+								 mo_vgl[point_num * 5 * mo_num],               \
+								 coefficient_t[ao_num * mo_num])
 	{
 		cublasDgemm_v2(handle, transa, transb, m, n, k, &alpha, coefficient_t,
 					   lda, ao_vgl, ldb, &beta, mo_vgl, ldc);
@@ -429,20 +428,17 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_hpc_acc_offload(
 	double vgl5[mo_num];
 
 #pragma acc enter data create(                                                 \
-		idx[0 : ao_num], av1[0 : ao_num], av2[0 : ao_num], av3[0 : ao_num],    \
-			av4[0 : ao_num], av5[0 : ao_num], vgl1[0 : mo_num],                \
-			vgl2[0 : mo_num], vgl3[0 : mo_num], vgl4[0 : mo_num],              \
-			vgl5[0 : mo_num])
+	idx [0:ao_num], av1 [0:ao_num], av2 [0:ao_num], av3 [0:ao_num],            \
+	av4 [0:ao_num], av5 [0:ao_num], vgl1 [0:mo_num], vgl2 [0:mo_num],          \
+	vgl3 [0:mo_num], vgl4 [0:mo_num], vgl5 [0:mo_num])
 
-#pragma acc parallel num_gangs(point_num)                                      \
-	present(coefficient_t[0 : ao_num * mo_num],                                \
-				ao_vgl[0 : point_num * 5 * ao_num],                            \
-				mo_vgl[0 : point_num * 5 * mo_num])
+#pragma acc parallel num_gangs(point_num) present(                             \
+	coefficient_t [0:ao_num * mo_num], ao_vgl [0:point_num * 5 * ao_num],      \
+	mo_vgl [0:point_num * 5 * mo_num])
 #pragma acc loop gang private(                                                 \
-		idx[0 : ao_num], av1[0 : ao_num], av2[0 : ao_num], av3[0 : ao_num],    \
-			av4[0 : ao_num], av5[0 : ao_num], vgl1[0 : mo_num],                \
-			vgl2[0 : mo_num], vgl3[0 : mo_num], vgl4[0 : mo_num],              \
-			vgl5[0 : mo_num])
+	idx [0:ao_num], av1 [0:ao_num], av2 [0:ao_num], av3 [0:ao_num],            \
+	av4 [0:ao_num], av5 [0:ao_num], vgl1 [0:mo_num], vgl2 [0:mo_num],          \
+	vgl3 [0:mo_num], vgl4 [0:mo_num], vgl5 [0:mo_num])
 	for (int64_t ipoint = 0; ipoint < point_num; ++ipoint) {
 
 #pragma acc loop vector
@@ -552,10 +548,9 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_hpc_acc_offload(
 		}
 	}
 #pragma acc exit data delete (                                                 \
-		vgl1[0 : mo_num], vgl2[0 : mo_num], vgl3[0 : mo_num],                  \
-			vgl4[0 : mo_num], vgl5[0 : mo_num], idx[0 : ao_num],               \
-			av1[0 : ao_num], av2[0 : ao_num], av3[0 : ao_num],                 \
-			av4[0 : ao_num], av5[0 : ao_num])
+	vgl1 [0:mo_num], vgl2 [0:mo_num], vgl3 [0:mo_num], vgl4 [0:mo_num],        \
+	vgl5 [0:mo_num], idx [0:ao_num], av1 [0:ao_num], av2 [0:ao_num],           \
+	av3 [0:ao_num], av4 [0:ao_num], av5 [0:ao_num])
 
 	return QMCKL_SUCCESS;
 }

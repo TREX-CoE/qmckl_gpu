@@ -9,12 +9,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#ifdef HAVE_CUBLAS 
+#ifdef HAVE_CUBLAS
 #include <cublas_v2.h>
 #include <cusolverDn.h>
 #endif
 
-#ifdef HAVE_CUSPARSE 
+#ifdef HAVE_CUSPARSE
 #include <cuda_runtime_api.h>
 #include <cusparse_v2.h>
 #endif
@@ -77,7 +77,8 @@ qmckl_exit_code_device qmckl_context_touch_device(qmckl_context_device context);
 
 qmckl_context_device qmckl_context_create_device(int device_id);
 
-qmckl_exit_code_device qmckl_context_destroy_device(qmckl_context_device context);
+qmckl_exit_code_device
+qmckl_context_destroy_device(qmckl_context_device context);
 
 //**********
 // MEMORY
@@ -89,20 +90,22 @@ typedef struct qmckl_memory_info_struct qmckl_memory_info_struct;
 void *qmckl_malloc_host(qmckl_context_device context,
 						const qmckl_memory_info_struct info);
 
-qmckl_exit_code_device qmckl_free_host(qmckl_context_device context, void *const ptr);
+qmckl_exit_code_device qmckl_free_host(qmckl_context_device context,
+									   void *const ptr);
 
 void *qmckl_malloc_device(qmckl_context_device context, size_t size);
 
-qmckl_exit_code_device qmckl_free_device(qmckl_context_device context, void *ptr);
+qmckl_exit_code_device qmckl_free_device(qmckl_context_device context,
+										 void *ptr);
 
 /* Memcpys */
 
-qmckl_exit_code_device qmckl_memcpy_H2D(qmckl_context_device context, void *dest,
-								 void *src, size_t size);
-qmckl_exit_code_device qmckl_memcpy_D2H(qmckl_context_device context, void *dest,
-								 void *src, size_t size);
-qmckl_exit_code_device qmckl_memcpy_D2D(qmckl_context_device context, void *dest,
-								 void *src, size_t size);
+qmckl_exit_code_device qmckl_memcpy_H2D(qmckl_context_device context,
+										void *dest, void *src, size_t size);
+qmckl_exit_code_device qmckl_memcpy_D2H(qmckl_context_device context,
+										void *dest, void *src, size_t size);
+qmckl_exit_code_device qmckl_memcpy_D2D(qmckl_context_device context,
+										void *dest, void *src, size_t size);
 
 // *********
 // ERROR MANAGEMENT
@@ -115,53 +118,56 @@ const char *qmckl_string_of_error(const qmckl_exit_code_device error);
 //**********
 
 qmckl_exit_code_device qmckl_trexio_read_device(qmckl_context_device context,
-										 char *file_name, int64_t size_max);
-
-qmckl_exit_code_device qmckl_set_electron_num_device(qmckl_context_device context,
-											  int64_t up_num, int64_t down_num);
-
-qmckl_exit_code_device qmckl_set_electron_coord_device(qmckl_context_device context,
-												char transp, int64_t walk_num,
-												double *coord,
+												char *file_name,
 												int64_t size_max);
+
+qmckl_exit_code_device
+qmckl_set_electron_num_device(qmckl_context_device context, int64_t up_num,
+							  int64_t down_num);
+
+qmckl_exit_code_device
+qmckl_set_electron_coord_device(qmckl_context_device context, char transp,
+								int64_t walk_num, double *coord,
+								int64_t size_max);
 
 qmckl_exit_code_device qmckl_set_point_device(qmckl_context_device context,
-									   char transp, int64_t num, double *coord,
-									   int64_t size_max);
+											  char transp, int64_t num,
+											  double *coord, int64_t size_max);
 
-qmckl_exit_code_device qmckl_get_nucleus_num_device(qmckl_context_device context,
-											 int64_t *num);
+qmckl_exit_code_device
+qmckl_get_nucleus_num_device(qmckl_context_device context, int64_t *num);
 
-qmckl_exit_code_device qmckl_set_nucleus_num_device(qmckl_context_device context,
-											 int64_t num);
+qmckl_exit_code_device
+qmckl_set_nucleus_num_device(qmckl_context_device context, int64_t num);
 
-qmckl_exit_code_device qmckl_set_nucleus_charge_device(qmckl_context_device context,
-												double *charge,
-												int64_t size_max);
-qmckl_exit_code_device qmckl_set_nucleus_coord_device(qmckl_context_device context,
-											   char transp, double *coord,
-											   int64_t size_max);
+qmckl_exit_code_device
+qmckl_set_nucleus_charge_device(qmckl_context_device context, double *charge,
+								int64_t size_max);
+qmckl_exit_code_device
+qmckl_set_nucleus_coord_device(qmckl_context_device context, char transp,
+							   double *coord, int64_t size_max);
 
-qmckl_exit_code_device qmckl_get_ao_basis_ao_num_device(qmckl_context_device context,
-												 int64_t *ao_num);
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_num_device(qmckl_context_device context, int64_t *ao_num);
 
-qmckl_exit_code_device qmckl_set_ao_basis_type_device(qmckl_context_device context,
-											   char basis_type);
+qmckl_exit_code_device
+qmckl_set_ao_basis_type_device(qmckl_context_device context, char basis_type);
 qmckl_exit_code_device
 qmckl_set_ao_basis_shell_num_device(qmckl_context_device context,
 									int64_t shell_num);
-qmckl_exit_code_device qmckl_set_ao_basis_prim_num_device(qmckl_context_device context,
-												   int64_t prim_num);
+qmckl_exit_code_device
+qmckl_set_ao_basis_prim_num_device(qmckl_context_device context,
+								   int64_t prim_num);
 
-qmckl_exit_code_device qmckl_get_ao_basis_ao_num_device(qmckl_context_device context,
-												 int64_t *ao_num);
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_num_device(qmckl_context_device context, int64_t *ao_num);
 
 qmckl_exit_code_device
 qmckl_set_ao_basis_coefficient_device(qmckl_context_device context,
 									  double *coefficient, int64_t size_max);
 
-qmckl_exit_code_device qmckl_set_ao_basis_ao_num_device(qmckl_context_device context,
-												 int64_t ao_num);
+qmckl_exit_code_device
+qmckl_set_ao_basis_ao_num_device(qmckl_context_device context, int64_t ao_num);
 qmckl_exit_code_device qmckl_set_ao_basis_nucleus_index_device(
 	qmckl_context_device context, int64_t *nucleus_index, int64_t size_max);
 qmckl_exit_code_device qmckl_set_ao_basis_nucleus_shell_num_device(
@@ -176,29 +182,30 @@ qmckl_exit_code_device
 qmckl_set_ao_basis_shell_factor_device(qmckl_context_device context,
 									   double *shell_factor, int64_t size_max);
 
-qmckl_exit_code_device qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
-												   double *exponent,
-												   int64_t size_max);
+qmckl_exit_code_device
+qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
+								   double *exponent, int64_t size_max);
 
-qmckl_exit_code_device qmckl_set_ao_basis_prim_factor_device(qmckl_context_device context,
-													  double *prim_factor,
-													  int64_t size_max);
+qmckl_exit_code_device
+qmckl_set_ao_basis_prim_factor_device(qmckl_context_device context,
+									  double *prim_factor, int64_t size_max);
 qmckl_exit_code_device
 qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
 									double *ao_factor, int64_t size_max);
 
-qmckl_exit_code_device qmckl_get_ao_basis_ao_num_device(qmckl_context_device context,
-												 int64_t *ao_num);
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_num_device(qmckl_context_device context, int64_t *ao_num);
 
 qmckl_exit_code_device
 qmckl_get_ao_basis_shell_num_device(qmckl_context_device context,
 									int64_t *ao_num);
 
-qmckl_exit_code_device qmckl_get_ao_basis_prim_num_device(qmckl_context_device context,
-												   int64_t *prim_num);
+qmckl_exit_code_device
+qmckl_get_ao_basis_prim_num_device(qmckl_context_device context,
+								   int64_t *prim_num);
 
-qmckl_exit_code_device qmckl_get_ao_basis_type_device(qmckl_context_device context,
-											   char *type);
+qmckl_exit_code_device
+qmckl_get_ao_basis_type_device(qmckl_context_device context, char *type);
 
 qmckl_exit_code_device qmckl_get_ao_basis_nucleus_shell_num_device(
 	qmckl_context_device context, int64_t *nucleus_shell_num, int64_t nucl_num);
@@ -218,9 +225,9 @@ qmckl_get_ao_basis_shell_prim_index_device(qmckl_context_device context,
 										   int64_t *nucleus_shell_num,
 										   int64_t shell_num);
 
-qmckl_exit_code_device qmckl_get_ao_basis_exponent_device(qmckl_context_device context,
-												   double *exponent,
-												   int64_t prim_num);
+qmckl_exit_code_device
+qmckl_get_ao_basis_exponent_device(qmckl_context_device context,
+								   double *exponent, int64_t prim_num);
 
 qmckl_exit_code_device
 qmckl_get_ao_basis_coefficient_device(qmckl_context_device context,
@@ -237,34 +244,34 @@ qmckl_get_ao_basis_ao_factor_device(qmckl_context_device context,
 qmckl_exit_code_device qmckl_get_ao_basis_nucleus_index_device(
 	qmckl_context_device context, int64_t *nucleus_index, int64_t nucl_num);
 
-qmckl_exit_code_device qmckl_set_mo_basis_coefficient_device(qmckl_context_device context,
-													  double *coefficient);
-qmckl_exit_code_device qmckl_set_mo_basis_mo_num_device(qmckl_context_device context,
-												 int64_t mo_num);
+qmckl_exit_code_device
+qmckl_set_mo_basis_coefficient_device(qmckl_context_device context,
+									  double *coefficient);
+qmckl_exit_code_device
+qmckl_set_mo_basis_mo_num_device(qmckl_context_device context, int64_t mo_num);
 bool qmckl_nucleus_provided(qmckl_context_device context);
 
 //**********
 // AO
 //**********
 
-qmckl_exit_code_device qmckl_get_ao_basis_ao_num_device(qmckl_context_device context,
-												 int64_t *ao_num);
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_num_device(qmckl_context_device context, int64_t *ao_num);
 
-qmckl_exit_code_device qmckl_get_ao_basis_ao_vgl_inplace_offload(qmckl_context_device context,
-														  double *ao_vgl,
-														  int64_t size_max);
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_vgl_inplace_offload(qmckl_context_device context,
+										  double *ao_vgl, int64_t size_max);
 
-qmckl_exit_code_device qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
-												 double *ao_vgl,
-												 int64_t size_max);
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context, double *ao_vgl,
+								 int64_t size_max);
 
-qmckl_exit_code_device qmckl_get_ao_basis_ao_value_device(qmckl_context_device context,
-												   double *ao_vgl,
-												   int64_t size_max);
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_value_device(qmckl_context_device context, double *ao_vgl,
+								   int64_t size_max);
 
-qmckl_exit_code_device qmckl_get_ao_basis_ao_vgl_acc_offload(qmckl_context_device context,
-													  double *const ao_vgl,
-													  const int64_t size_max);
+qmckl_exit_code_device qmckl_get_ao_basis_ao_vgl_acc_offload(
+	qmckl_context_device context, double *const ao_vgl, const int64_t size_max);
 
 qmckl_exit_code_device qmckl_get_ao_basis_ao_vgl_inplace_acc_offload(
 	qmckl_context_device context, double *const ao_vgl, const int64_t size_max);
@@ -278,16 +285,16 @@ bool qmckl_ao_basis_provided(qmckl_context_device context);
 bool qmckl_mo_basis_select_mo_device(qmckl_context_device context,
 									 int32_t *keep, int64_t size_max);
 
-qmckl_exit_code_device qmckl_get_mo_basis_mo_num(const qmckl_context_device context,
-										  int64_t *mo_num);
+qmckl_exit_code_device
+qmckl_get_mo_basis_mo_num(const qmckl_context_device context, int64_t *mo_num);
 
-qmckl_exit_code_device qmckl_get_mo_basis_mo_vgl_device(qmckl_context_device context,
-												 double *const mo_vgl,
-												 const int64_t size_max);
+qmckl_exit_code_device
+qmckl_get_mo_basis_mo_vgl_device(qmckl_context_device context,
+								 double *const mo_vgl, const int64_t size_max);
 
-qmckl_exit_code_device qmckl_get_mo_basis_mo_value_device(qmckl_context_device context,
-												   double *mo_value,
-												   int64_t size_max);
+qmckl_exit_code_device
+qmckl_get_mo_basis_mo_value_device(qmckl_context_device context,
+								   double *mo_value, int64_t size_max);
 
 qmckl_exit_code_device
 qmckl_get_mo_basis_mo_value_inplace_device(qmckl_context_device context,
@@ -296,29 +303,31 @@ qmckl_get_mo_basis_mo_value_inplace_device(qmckl_context_device context,
 qmckl_exit_code_device qmckl_get_mo_basis_mo_vgl_inplace_device(
 	qmckl_context_device context, double *const mo_vgl, const int64_t size_max);
 
-qmckl_exit_code_device qmckl_provide_mo_basis_mo_value_device(qmckl_context_device context);
+qmckl_exit_code_device
+qmckl_provide_mo_basis_mo_value_device(qmckl_context_device context);
 
-qmckl_exit_code_device qmckl_provide_mo_basis_mo_vgl_device(qmckl_context_device context);
+qmckl_exit_code_device
+qmckl_provide_mo_basis_mo_vgl_device(qmckl_context_device context);
 
 qmckl_exit_code_device qmckl_compute_mo_basis_mo_value_device(
-	qmckl_context_device context, int64_t ao_num, int64_t mo_num, int64_t point_num,
-	double *restrict coefficient_t, double *restrict ao_value,
-	double *restrict mo_value);
+	qmckl_context_device context, int64_t ao_num, int64_t mo_num,
+	int64_t point_num, double *restrict coefficient_t,
+	double *restrict ao_value, double *restrict mo_value);
 
 qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_device(
-	qmckl_context_device context, int64_t ao_num, int64_t mo_num, int64_t point_num,
-	double *restrict coefficient_t, double *restrict ao_vgl,
+	qmckl_context_device context, int64_t ao_num, int64_t mo_num,
+	int64_t point_num, double *restrict coefficient_t, double *restrict ao_vgl,
 	double *restrict mo_vgl);
 
-qmckl_exit_code_device qmckl_get_mo_basis_mo_vgl_acc_offload(qmckl_context_device context,
-													  double *const mo_vgl,
-													  const int64_t size_max);
+qmckl_exit_code_device qmckl_get_mo_basis_mo_vgl_acc_offload(
+	qmckl_context_device context, double *const mo_vgl, const int64_t size_max);
 
 qmckl_exit_code_device qmckl_get_mo_basis_mo_vgl_acc_offload_inplace(
 	qmckl_context_device context, double *const mo_vgl, const int64_t size_max);
 
-qmckl_exit_code_device qmckl_get_mo_basis_mo_num_device(const qmckl_context_device context,
-												 int64_t *mo_num);
+qmckl_exit_code_device
+qmckl_get_mo_basis_mo_num_device(const qmckl_context_device context,
+								 int64_t *mo_num);
 
 bool qmckl_mo_basis_provided(qmckl_context_device context);
 
@@ -326,14 +335,14 @@ bool qmckl_mo_basis_provided(qmckl_context_device context);
 // ELECTRON
 //**********
 
-qmckl_exit_code_device qmckl_set_electron_coord_device(qmckl_context_device context,
-												char transp, int64_t walk_num,
-												double *coord,
-												int64_t size_max);
+qmckl_exit_code_device
+qmckl_set_electron_coord_device(qmckl_context_device context, char transp,
+								int64_t walk_num, double *coord,
+								int64_t size_max);
 
 qmckl_exit_code_device qmckl_set_point_device(qmckl_context_device context,
-									   char transp, int64_t num, double *coord,
-									   int64_t size_max);
+											  char transp, int64_t num,
+											  double *coord, int64_t size_max);
 
 //****************************
 // SHERMAN-MORRISON & WOODBURY
@@ -344,12 +353,10 @@ qmckl_exit_code_device qmckl_set_point_device(qmckl_context_device context,
 // worry about preprocessor)
 
 #ifdef HAVE_CUBLAS
-qmckl_exit_code_device
-qmckl_woodbury_kxk(const qmckl_context_device context,
-                   cublasHandle_t b_handle, cusolverDnHandle_t s_handle,
-				   const uint64_t Lds, const uint64_t Dim,
-				   const uint64_t N_updates, const double *__restrict Updates,
-				   const uint64_t *__restrict Updates_index,
-				   const double breakdown, double *__restrict Slater_inv,
-				   double *__restrict determinant);
+qmckl_exit_code_device qmckl_woodbury_kxk(
+	const qmckl_context_device context, cublasHandle_t b_handle,
+	cusolverDnHandle_t s_handle, const uint64_t Lds, const uint64_t Dim,
+	const uint64_t N_updates, const double *__restrict Updates,
+	const uint64_t *__restrict Updates_index, const double breakdown,
+	double *__restrict Slater_inv, double *__restrict determinant);
 #endif

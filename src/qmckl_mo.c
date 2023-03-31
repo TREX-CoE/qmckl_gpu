@@ -1,9 +1,9 @@
 #include "include/qmckl_ao.h"
 #include "include/qmckl_mo.h"
-#ifdef HAVE_CUBLAS 
+#ifdef HAVE_CUBLAS
 #include <cublas_v2.h>
 #endif
-#ifdef HAVE_CUSPARSE 
+#ifdef HAVE_CUSPARSE
 #include <cuda_runtime_api.h>
 #include <cusparse_v2.h>
 #endif
@@ -13,51 +13,43 @@
 //**********
 //
 #ifdef HAVE_CUBLAS
-qmckl_exit_code
-qmckl_compute_mo_basis_mo_vgl_cublas_device (const qmckl_context          context,
-                                             const int64_t                ao_num,
-                                             const int64_t                mo_num,
-                                             const int64_t                point_num,
-                                             const double* restrict       coefficient_t,
-                                             const double* restrict       ao_vgl,
-                                                   double* restrict const mo_vgl )
-{
-  assert (context != QMCKL_NULL_CONTEXT);
+qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_cublas_device(
+	const qmckl_context context, const int64_t ao_num, const int64_t mo_num,
+	const int64_t point_num, const double *restrict coefficient_t,
+	const double *restrict ao_vgl, double *restrict const mo_vgl) {
+	assert(context != QMCKL_NULL_CONTEXT);
 
-  cublasHandle_t handle;
+	cublasHandle_t handle;
 
-  double const alpha =  1.;
-  double const beta  =  0.;
+	double const alpha = 1.;
+	double const beta = 0.;
 
-  cublasOperation_t transa = CUBLAS_OP_N ;
-  cublasOperation_t transb = CUBLAS_OP_N ;
+	cublasOperation_t transa = CUBLAS_OP_N;
+	cublasOperation_t transb = CUBLAS_OP_N;
 
-  // NB: cublas views arrays as column-major (ie FORTRAN-like) ordered
-  int const m = mo_num ; 
-  int const k = ao_num ;
-  int const n = point_num * 5 ;
+	// NB: cublas views arrays as column-major (ie FORTRAN-like) ordered
+	int const m = mo_num;
+	int const k = ao_num;
+	int const n = point_num * 5;
 
-  int const lda = m ;
-  int const ldb = k ;
-  int const ldc = m ;
+	int const lda = m;
+	int const ldb = k;
+	int const ldc = m;
 
- cublasCreate(&handle);
- cublasDgemm_v2( handle, transa, transb, m, n, k, &alpha, coefficient_t, lda, ao_vgl, ldb, &beta, mo_vgl, ldc );
- cublasDestroy(handle);
+	cublasCreate(&handle);
+	cublasDgemm_v2(handle, transa, transb, m, n, k, &alpha, coefficient_t, lda,
+				   ao_vgl, ldb, &beta, mo_vgl, ldc);
+	cublasDestroy(handle);
 
-  return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS;
 }
 #endif
 
 #ifdef HAVE_CUSPARSE
 qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_cusparse_device(
-	const qmckl_context context, 
-    const int64_t ao_num, 
-    const int64_t mo_num,
-	const int64_t point_num, 
-    const double *restrict coefficient_t,
-	const double *restrict ao_vgl, 
-    double *restrict const mo_vgl) {
+	const qmckl_context context, const int64_t ao_num, const int64_t mo_num,
+	const int64_t point_num, const double *restrict coefficient_t,
+	const double *restrict ao_vgl, double *restrict const mo_vgl) {
 	assert(context != QMCKL_NULL_CONTEXT);
 
 	// cusparse (dense) matrix descriptors
@@ -85,12 +77,12 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_cusparse_device(
 	cusparseHandle_t handle;
 	cusparseCreate(&handle);
 
-	cusparseCreateDnMat(&matAd, A_nrows, A_ncols, lda, ao_vgl,
-						cuda_datatype, A_storage_order);
+	cusparseCreateDnMat(&matAd, A_nrows, A_ncols, lda, ao_vgl, cuda_datatype,
+						A_storage_order);
 	cusparseCreateDnMat(&matBd, B_nrows, B_ncols, ldb, coefficient_t,
 						cuda_datatype, B_storage_order);
-	cusparseCreateDnMat(&matCd, C_nrows, C_ncols, ldc, mo_vgl,
-							cuda_datatype, C_storage_order);
+	cusparseCreateDnMat(&matCd, C_nrows, C_ncols, ldc, mo_vgl, cuda_datatype,
+						C_storage_order);
 
 	// Convert sparse matrix A from dense to sparse(csr) format
 	//
@@ -156,7 +148,6 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_cusparse_device(
 	return QMCKL_SUCCESS;
 }
 #endif
-
 
 /* mo_select */
 
