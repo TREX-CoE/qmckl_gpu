@@ -116,13 +116,15 @@ qmckl_get_malloc_info_host(qmckl_context_device context, const void *ptr,
 		(qmckl_context_struct_device *)context;
 
 	if (ptr == NULL) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_2_DEVICE,
-							  "qmckl_get_malloc_info_host", "Null pointer");
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
+									 "qmckl_get_malloc_info_host",
+									 "Null pointer");
 	}
 
 	if (info == NULL) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_3_DEVICE,
-							  "qmckl_get_malloc_info_host", "Null pointer");
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
+									 "qmckl_get_malloc_info_host",
+									 "Null pointer");
 	}
 
 	qmckl_lock_device(context);
@@ -136,10 +138,10 @@ qmckl_get_malloc_info_host(qmckl_context_device context, const void *ptr,
 
 		if (pos >= ctx->memory.array_size) {
 			/* Not found */
-			qmckl_unlock(context);
-			return qmckl_failwith(context, QMCKL_INVALID_ARG_2_DEVICE,
-								  "qmckl_get_malloc_info_host",
-								  "Pointer not found in context");
+			qmckl_unlock_device(context);
+			return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
+										 "qmckl_get_malloc_info_host",
+										 "Pointer not found in context");
 		}
 
 		/* Copy info */

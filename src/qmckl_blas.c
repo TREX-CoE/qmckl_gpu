@@ -9,15 +9,17 @@
 // VECTOR
 //**********
 
-qmckl_vector qmckl_vector_alloc_device(qmckl_context_device context,
-									   const int64_t size) {
+qmckl_vector_device
+qmckl_vector_device_alloc_device(qmckl_context_device context,
+								 const int64_t size) {
 	/* Should always be true by contruction */
 	assert(size > (int64_t)0);
 
-	qmckl_vector result;
+	qmckl_vector_device result;
 	result.size = size;
 
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
+	qmckl_memory_info_struct_device mem_info =
+		qmckl_memory_info_struct_zero_device;
 	result.data = qmckl_malloc_device(context, size * sizeof(double));
 
 	if (result.data == NULL) {
@@ -27,63 +29,65 @@ qmckl_vector qmckl_vector_alloc_device(qmckl_context_device context,
 	return result;
 }
 
-qmckl_exit_code qmckl_vector_free_device(qmckl_context_device context,
-										 qmckl_vector *vector) {
+qmckl_exit_code_device
+qmckl_vector_device_free_device(qmckl_context_device context,
+								qmckl_vector_device *vector) {
 	/* Always true */
 	assert(vector->data != NULL);
 
-	qmckl_exit_code rc;
+	qmckl_exit_code_device rc;
 
 	rc = qmckl_free_device(context, vector->data);
-	if (rc != QMCKL_SUCCESS) {
+	if (rc != QMCKL_SUCCESS_DEVICE) {
 		return rc;
 	}
 
 	vector->size = (int64_t)0;
 	vector->data = NULL;
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code
-qmckl_vector_of_double_device(const qmckl_context_device context,
-							  const double *target, const int64_t size_max,
-							  qmckl_vector *vector_out) {
+qmckl_exit_code_device qmckl_vector_device_of_double_device(
+	const qmckl_context_device context, const double *target,
+	const int64_t size_max, qmckl_vector_device *vector_out) {
 
 	int device_id = qmckl_get_device_id(context);
 
-	qmckl_vector vector = *vector_out;
+	qmckl_vector_device vector = *vector_out;
 	/* Always true by construction */
-	assert(qmckl_context_check((qmckl_context)context) != QMCKL_NULL_CONTEXT);
+	assert(((qmckl_context_device)context) != QMCKL_NULL_CONTEXT_DEVICE);
 
 	if (vector.size == 0) {
 		// This error is thrown
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_4,
-							  "qmckl_vector_of_double", "Vector not allocated");
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_4_DEVICE,
+									 "qmckl_vector_device_of_double",
+									 "Vector not allocated");
 	}
 
 	if (vector.size != size_max) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_4,
-							  "qmckl_vector_of_double", "Wrong vector size");
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_4_DEVICE,
+									 "qmckl_vector_device_of_double",
+									 "Wrong vector size");
 	}
 
 	omp_target_memcpy(vector.data, target, vector.size * sizeof(double), 0, 0,
 					  device_id, device_id);
 
 	*vector_out = vector;
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }
 
 //**********
 // MATRIX
 //**********
 
-qmckl_matrix qmckl_matrix_alloc_device(qmckl_context_device context,
-									   const int64_t size1,
-									   const int64_t size2) {
+qmckl_matrix_device
+qmckl_matrix_device_alloc_device(qmckl_context_device context,
+								 const int64_t size1, const int64_t size2) {
 	/* Should always be true by contruction */
 	assert(size1 * size2 > (int64_t)0);
 
-	qmckl_matrix result;
+	qmckl_matrix_device result;
 
 	result.size[0] = size1;
 	result.size[1] = size2;
@@ -100,69 +104,69 @@ qmckl_matrix qmckl_matrix_alloc_device(qmckl_context_device context,
 	return result;
 }
 
-qmckl_exit_code qmckl_matrix_free_device(qmckl_context_device context,
-										 qmckl_matrix *matrix) {
+qmckl_exit_code_device
+qmckl_matrix_device_free_device(qmckl_context_device context,
+								qmckl_matrix_device *matrix) {
 	/* Always true */
 	assert(matrix->data != NULL);
 
-	qmckl_exit_code rc;
+	qmckl_exit_code_device rc;
 
 	rc = qmckl_free_device(context, matrix->data);
-	if (rc != QMCKL_SUCCESS) {
+	if (rc != QMCKL_SUCCESS_DEVICE) {
 		return rc;
 	}
 	matrix->data = NULL;
 	matrix->size[0] = (int64_t)0;
 	matrix->size[1] = (int64_t)0;
 
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code
-qmckl_matrix_of_double_device(const qmckl_context_device context,
-							  const double *target, const int64_t size_max,
-							  qmckl_matrix *matrix_out) {
+qmckl_exit_code_device qmckl_matrix_device_of_double_device(
+	const qmckl_context_device context, const double *target,
+	const int64_t size_max, qmckl_matrix_device *matrix_out) {
 
 	// (assuming the matrix is already allocated)
 
 	int device_id = qmckl_get_device_id(context);
 
-	qmckl_matrix matrix = *matrix_out;
+	qmckl_matrix_device matrix = *matrix_out;
 	/* Always true by construction */
-	assert(qmckl_context_check((qmckl_context)context) != QMCKL_NULL_CONTEXT);
+	assert(((qmckl_context_device)context) != QMCKL_NULL_CONTEXT_DEVICE);
 
 	if (matrix.size[0] * matrix.size[1] == 0) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_4,
-							  "qmckl_matrix_of_double_device",
-							  "Matrix not allocated");
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_4_DEVICE,
+									 "qmckl_matrix_device_of_double_device",
+									 "Matrix not allocated");
 	}
 
 	if (matrix.size[0] * matrix.size[1] > size_max) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_4,
-							  "qmckl_matrix_of_double_device",
-							  "Wrong vector size");
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_4_DEVICE,
+									 "qmckl_matrix_device_of_double_device",
+									 "Wrong vector size");
 	}
 
 	omp_target_memcpy(matrix.data, target, size_max * sizeof(double), 0, 0,
 					  device_id, device_id);
 
 	*matrix_out = matrix;
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }
 
 //**********
 // TENSOR
 //**********
 
-qmckl_tensor qmckl_tensor_alloc_device(qmckl_context context,
-									   const int64_t order,
-									   const int64_t *size) {
+qmckl_tensor_device
+qmckl_tensor_device_alloc_device(qmckl_context_device context,
+								 const int64_t order, const int64_t *size) {
 	/* Should always be true by construction */
 	assert(order > 0);
-	assert(order <= QMCKL_TENSOR_ORDER_MAX);
+	assert(order <= QMCKL_TENSOR_ORDER_MAX_DEVICE);
 	assert(size != NULL);
 
-	qmckl_tensor result;
+	qmckl_tensor_device result;
 	result.order = order;
 
 	int64_t prod_size = (int64_t)1;
@@ -176,26 +180,27 @@ qmckl_tensor qmckl_tensor_alloc_device(qmckl_context context,
 		(double *)qmckl_malloc_device(context, prod_size * sizeof(double));
 
 	if (result.data == NULL) {
-		memset(&result, 0, sizeof(qmckl_tensor));
+		memset(&result, 0, sizeof(qmckl_tensor_device));
 	}
 
 	return result;
 }
 
-qmckl_exit_code qmckl_tensor_free_device(qmckl_context_device context,
-										 qmckl_tensor *tensor) {
+qmckl_exit_code_device
+qmckl_tensor_device_free_device(qmckl_context_device context,
+								qmckl_tensor_device *tensor) {
 	/* Always true */
 	assert(tensor->data != NULL);
 
-	qmckl_exit_code rc;
+	qmckl_exit_code_device rc;
 
 	rc = qmckl_free_device(context, tensor->data);
-	if (rc != QMCKL_SUCCESS) {
+	if (rc != QMCKL_SUCCESS_DEVICE) {
 		return rc;
 	}
 
 	// TODO Memset to 0
-	// memset(tensor, 0, sizeof(qmckl_tensor));
+	// memset(tensor, 0, sizeof(qmckl_tensor_device));
 
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }

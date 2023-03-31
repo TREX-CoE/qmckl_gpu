@@ -30,7 +30,8 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 				for (int l = 0; l < 5; l++) {
 					if (ao_vgl[k + ao_num * 5 * j] != 0.) {
 						double c1 = ao_vgl[k + ao_num * l + ao_num * 5 * j];
-						/*				double c2 = ao_vgl[k + ao_num * 1 + ao_num
+						/*				double c2 = ao_vgl[k + ao_num * 1 +
+						 * ao_num
 						 * * 5 j]; double c3 = ao_vgl[k + ao_num * 2 + ao_num *
 						 * 5 j]; double c4 = ao_vgl[k + ao_num * 3 + ao_num * 5
 						 * j]; double c5 = ao_vgl[k + ao_num * 4 + ao_num * 5

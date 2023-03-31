@@ -24,41 +24,11 @@ qmckl_exit_code_device
 qmckl_set_electron_num_device(qmckl_context_device context,
 							  const int64_t up_num, const int64_t down_num);
 
-qmckl_exit_code_device
-qmckl_set_electron_coord_device(qmckl_context_device context, const char transp,
-								const int64_t walk_num, const double *coord,
-								const int64_t size_max);
-
 qmckl_exit_code_device qmckl_init_electron_device(qmckl_context_device context);
-
-/* Nucleus */
-
-qmckl_exit_code_device qmckl_init_nucleus_device(qmckl_context_device context);
-
-qmckl_exit_code_device
-qmckl_get_nucleus_num_device(const qmckl_context_device context,
-							 int64_t *const numi);
-
-qmckl_exit_code_device
-qmckl_set_nucleus_num_device(qmckl_context_device context, const int64_t num);
-
-qmckl_exit_code_device
-qmckl_set_nucleus_charge_device(qmckl_context_device context,
-								const double *charge, const int64_t size_max);
-
-qmckl_exit_code_device
-qmckl_set_nucleus_coord_device(qmckl_context_device context, const char transp,
-							   const double *coord, const int64_t size_max);
 
 bool qmckl_nucleus_provided_device(qmckl_context_device context);
 
 /* Point */
-
-qmckl_exit_code_device qmckl_set_point_device(qmckl_context_device context,
-											  const char transp,
-											  const int64_t num,
-											  const double *coord,
-											  const int64_t size_max);
 
 qmckl_exit_code_device qmckl_init_point_device(qmckl_context_device context);
 

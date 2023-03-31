@@ -16,6 +16,7 @@
 
 // TODO Replace by file content
 #include "qmckl_basic_type.h"
+#include "qmckl_memory.h"
 
 typedef struct qmckl_context_struct_device {
 	/* -- State of the library -- */
