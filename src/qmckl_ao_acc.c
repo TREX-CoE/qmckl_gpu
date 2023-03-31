@@ -210,7 +210,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 	for (int sub_iter = 0; sub_iter < num_sub_iters ; sub_iter++) {
 
-#pragma acc parallel loop gang worker vector 
+#pragma acc parallel loop gang worker vector async(1) 
 		for (int iter = 0; iter < chunk_size; iter++) {
 
 	    	double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
@@ -348,7 +348,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			// poly_vgl is now set from here
 		}			
 
-#pragma acc parallel loop collapse(2) 
+#pragma acc parallel loop collapse(2) async(1) 
 		for (int iter_new = 0; iter_new < chunk_size/nucl_num; iter_new++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
 
@@ -444,6 +444,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			}
 		}
 	}
+#pragma acc wait(1)
 	// End of outer compute loop
 }
 // End of target data region
