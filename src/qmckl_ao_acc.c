@@ -1,4 +1,5 @@
 #include "include/qmckl_ao.h"
+#define MAX_MEMORY_SIZE 8*1024*1024*1024
 
 //**********
 // COMPUTE
@@ -146,7 +147,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Not to exceed GPU memory when allocating poly_vgl
-	int max_chunk_size = ( (128*1024)/nucl_num ) * nucl_num ;
+	//int max_chunk_size = ((MAX_MEMORY_SIZE/(sizeof(double)*5*ao_num))/nucl_num)*nucl_num ; 
+    int max_chunk_size = ( (128*1024)/nucl_num ) * nucl_num ;
 	int num_iters = point_num * nucl_num;
 	int chunk_size = (num_iters < max_chunk_size) ? num_iters : max_chunk_size;
 	int num_sub_iters = (num_iters + chunk_size - 1) / chunk_size;
