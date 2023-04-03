@@ -9,23 +9,7 @@
 
 #include <omp.h>
 
-#include "qmckl_basic_functions.h"
-
-typedef int64_t qmckl_context_device;
-
-typedef struct qmckl_memory_info_struct {
-	size_t size;
-	void *pointer;
-} qmckl_memory_info_struct_device;
-
-typedef struct qmckl_memory_struct_device {
-	size_t n_allocated;
-	size_t array_size;
-	qmckl_memory_info_struct_device *element;
-} qmckl_memory_struct_device;
-
-static const qmckl_memory_info_struct_device
-	qmckl_memory_info_struct_zero_device = {.size = (size_t)0, .pointer = NULL};
+#include "qmckl_types.h"
 
 /* Allocs & frees */
 void *qmckl_malloc_host(qmckl_context_device context,

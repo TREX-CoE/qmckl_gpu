@@ -10,9 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "qmckl_basic_functions.h"
-#include "qmckl_context.h"
-#include "qmckl_memory.h"
+#include "qmckl_types.h"
 
 qmckl_vector_device qmckl_vector_alloc_device(qmckl_context_device context,
 											  const int64_t size);

@@ -10,7 +10,7 @@
 //**********
 
 qmckl_vector_device
-qmckl_vector_device_alloc_device(qmckl_context_device context,
+qmckl_vector_alloc_device(qmckl_context_device context,
 								 const int64_t size) {
 	/* Should always be true by contruction */
 	assert(size > (int64_t)0);
@@ -30,7 +30,7 @@ qmckl_vector_device_alloc_device(qmckl_context_device context,
 }
 
 qmckl_exit_code_device
-qmckl_vector_device_free_device(qmckl_context_device context,
+qmckl_vector_free_device(qmckl_context_device context,
 								qmckl_vector_device *vector) {
 	/* Always true */
 	assert(vector->data != NULL);
@@ -47,7 +47,7 @@ qmckl_vector_device_free_device(qmckl_context_device context,
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code_device qmckl_vector_device_of_double_device(
+qmckl_exit_code_device qmckl_vector_of_double_device(
 	const qmckl_context_device context, const double *target,
 	const int64_t size_max, qmckl_vector_device *vector_out) {
 
@@ -82,7 +82,7 @@ qmckl_exit_code_device qmckl_vector_device_of_double_device(
 //**********
 
 qmckl_matrix_device
-qmckl_matrix_device_alloc_device(qmckl_context_device context,
+qmckl_matrix_alloc_device(qmckl_context_device context,
 								 const int64_t size1, const int64_t size2) {
 	/* Should always be true by contruction */
 	assert(size1 * size2 > (int64_t)0);
@@ -105,7 +105,7 @@ qmckl_matrix_device_alloc_device(qmckl_context_device context,
 }
 
 qmckl_exit_code_device
-qmckl_matrix_device_free_device(qmckl_context_device context,
+qmckl_matrix_free_device(qmckl_context_device context,
 								qmckl_matrix_device *matrix) {
 	/* Always true */
 	assert(matrix->data != NULL);
@@ -123,7 +123,7 @@ qmckl_matrix_device_free_device(qmckl_context_device context,
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code_device qmckl_matrix_device_of_double_device(
+qmckl_exit_code_device qmckl_matrix_of_double_device(
 	const qmckl_context_device context, const double *target,
 	const int64_t size_max, qmckl_matrix_device *matrix_out) {
 
@@ -159,7 +159,7 @@ qmckl_exit_code_device qmckl_matrix_device_of_double_device(
 //**********
 
 qmckl_tensor_device
-qmckl_tensor_device_alloc_device(qmckl_context_device context,
+qmckl_tensor_alloc_device(qmckl_context_device context,
 								 const int64_t order, const int64_t *size) {
 	/* Should always be true by construction */
 	assert(order > 0);
@@ -187,7 +187,7 @@ qmckl_tensor_device_alloc_device(qmckl_context_device context,
 }
 
 qmckl_exit_code_device
-qmckl_tensor_device_free_device(qmckl_context_device context,
+qmckl_tensor_free_device(qmckl_context_device context,
 								qmckl_tensor_device *tensor) {
 	/* Always true */
 	assert(tensor->data != NULL);

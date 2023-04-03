@@ -1,17 +1,11 @@
+#pragma once
+
 #include <stdint.h>
 #include <trexio.h>
 #include <stdlib.h>
-#include "qmckl_basic_type.h"
 
-/* Context */
-qmckl_context_device
-qmckl_context_check_device(const qmckl_context_device context);
-
-qmckl_exit_code_device
-qmckl_context_device_touch_device(const qmckl_context_device context);
-
-void qmckl_lock_device(qmckl_context_device context);
-void qmckl_unlock_device(qmckl_context_device context);
+#include "qmckl_types.h"
+#include "qmckl_types.h"
 
 /* Error */
 qmckl_exit_code_device
@@ -59,39 +53,3 @@ qmckl_init_determinant_device(qmckl_context_device context);
 /* Jastrow */
 
 qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context);
-
-/* BLAS */
-
-qmckl_vector_device qmckl_vector_alloc_device(qmckl_context_device context,
-											  const int64_t size);
-
-qmckl_exit_code_device qmckl_vector_free_device(qmckl_context_device context,
-												qmckl_vector_device *vector);
-
-qmckl_matrix_device qmckl_matrix_alloc_device(qmckl_context_device context,
-											  const int64_t size1,
-											  const int64_t size2);
-
-qmckl_exit_code_device qmckl_matrix_free_device(qmckl_context_device context,
-												qmckl_matrix_device *matrix);
-
-qmckl_exit_code_device
-qmckl_vector_of_double_device(const qmckl_context_device context,
-							  const double *target, const int64_t size_max,
-							  qmckl_vector_device *vector_out);
-
-qmckl_exit_code_device
-qmckl_matrix_of_double_device(const qmckl_context_device context,
-							  const double *target, const int64_t size_max,
-							  qmckl_matrix_device *matrix);
-
-qmckl_exit_code_device qmckl_transpose_device(qmckl_context_device context,
-											  const qmckl_matrix_device A,
-											  qmckl_matrix_device At);
-
-qmckl_vector_device
-qmckl_vector_of_matrix_device(const qmckl_matrix_device matrix);
-
-qmckl_matrix_device
-qmckl_matrix_of_vector_device(const qmckl_vector_device vector,
-							  const int64_t size1, const int64_t size2);
