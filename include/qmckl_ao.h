@@ -56,5 +56,121 @@ qmckl_exit_code_device qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device con
 qmckl_exit_code_device qmckl_get_ao_basis_ao_value_device(qmckl_context_device context,
 												   double *const ao_vgl,
 												   const int64_t size_max);
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_num_device(const qmckl_context_device context,
+								 int64_t *const ao_num);
+qmckl_exit_code_device
+qmckl_get_ao_basis_shell_num_device(const qmckl_context_device context,
+									int64_t *const shell_num);
+qmckl_exit_code_device
+qmckl_get_ao_basis_prim_num_device(const qmckl_context_device context,
+								   int64_t *const prim_num);
+qmckl_exit_code_device
+qmckl_get_ao_basis_type_device(const qmckl_context_device context,
+							   char *const basis_type);
+
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_num_device(qmckl_context_device context, int64_t *ao_num);
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_num_device(qmckl_context_device context, int64_t *ao_num);
+
+qmckl_exit_code_device
+qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context);
+
+qmckl_exit_code_device
+qmckl_finalize_ao_basis_device(qmckl_context_device context);
+
+qmckl_exit_code_device
+qmckl_set_ao_basis_type_device(qmckl_context_device context, char basis_type);
+qmckl_exit_code_device
+qmckl_set_ao_basis_shell_num_device(qmckl_context_device context,
+									int64_t shell_num);
+qmckl_exit_code_device
+qmckl_set_ao_basis_prim_num_device(qmckl_context_device context,
+								   int64_t prim_num);
+
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_num_device(qmckl_context_device context, int64_t *ao_num);
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_num_device(qmckl_context_device context, int64_t *ao_num);
+
+qmckl_exit_code_device
+qmckl_set_ao_basis_ao_num_device(qmckl_context_device context, int64_t ao_num);
+qmckl_exit_code_device qmckl_set_ao_basis_nucleus_index_device(
+	qmckl_context_device context, int64_t *nucleus_index, int64_t size_max);
+qmckl_exit_code_device qmckl_set_ao_basis_nucleus_shell_num_device(
+	qmckl_context_device context, int64_t *nucleus_shell_num, int64_t size_max);
+qmckl_exit_code_device qmckl_set_ao_basis_shell_ang_mom_device(
+	qmckl_context_device context, int32_t *shell_ang_mom, int64_t size_max);
+qmckl_exit_code_device qmckl_set_ao_basis_shell_prim_num_device(
+	qmckl_context_device context, int64_t *shell_prim_num, int64_t size_max);
+qmckl_exit_code_device qmckl_set_ao_basis_shell_prim_index_device(
+	qmckl_context_device context, int64_t *shell_prim_index, int64_t size_max);
+qmckl_exit_code_device
+qmckl_set_ao_basis_shell_factor_device(qmckl_context_device context,
+									   double *shell_factor, int64_t size_max);
+qmckl_exit_code_device
+qmckl_set_ao_basis_exponent_device(qmckl_context_device context,
+								   double *exponent, int64_t size_max);
+qmckl_exit_code_device
+qmckl_set_ao_basis_coefficient_device(qmckl_context_device context,
+									  double *coefficient, int64_t size_max);
+qmckl_exit_code_device
+qmckl_set_ao_basis_prim_factor_device(qmckl_context_device context,
+									  double *prim_factor, int64_t size_max);
+qmckl_exit_code_device
+qmckl_set_ao_basis_ao_factor_device(qmckl_context_device context,
+									double *ao_factor, int64_t size_max);
+
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_num_device(qmckl_context_device context, int64_t *ao_num);
+
+qmckl_exit_code_device
+qmckl_get_ao_basis_shell_num_device(qmckl_context_device context,
+									int64_t *ao_num);
+
+qmckl_exit_code_device
+qmckl_get_ao_basis_prim_num_device(qmckl_context_device context,
+								   int64_t *prim_num);
+
+qmckl_exit_code_device
+qmckl_get_ao_basis_type_device(qmckl_context_device context, char *type);
+
+qmckl_exit_code_device qmckl_get_ao_basis_nucleus_shell_num_device(
+	qmckl_context_device context, int64_t *nucleus_shell_num, int64_t nucl_num);
+qmckl_exit_code_device qmckl_get_ao_basis_nucleus_index_device(
+	qmckl_context_device context, int64_t *nucleus_index, int64_t nucl_num);
+
+qmckl_exit_code_device qmckl_get_ao_basis_shell_ang_mom_device(
+	qmckl_context_device context, int32_t *shell_ang_mom, int64_t shell_num);
+
+qmckl_exit_code_device
+qmckl_get_ao_basis_shell_factor_device(qmckl_context_device context,
+									   double *shell_factor, int64_t shell_num);
+
+qmckl_exit_code_device qmckl_get_ao_basis_shell_prim_num_device(
+	qmckl_context_device context, int64_t *shell_prim_num, int64_t shell_num);
+
+qmckl_exit_code_device
+qmckl_get_ao_basis_shell_prim_index_device(qmckl_context_device context,
+										   int64_t *nucleus_shell_num,
+										   int64_t shell_num);
+
+qmckl_exit_code_device
+qmckl_get_ao_basis_exponent_device(qmckl_context_device context,
+								   double *exponent, int64_t prim_num);
+
+qmckl_exit_code_device
+qmckl_get_ao_basis_coefficient_device(qmckl_context_device context,
+									  double *coefficient, int64_t prim_num);
+
+qmckl_exit_code_device
+qmckl_get_ao_basis_prim_factor_device(qmckl_context_device context,
+									  double *prim_factor, int64_t prim_num);
+
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_factor_device(qmckl_context_device context,
+									double *ao_factor, int64_t ao_num);
+
 
 bool qmckl_ao_basis_provided(qmckl_context_device context);

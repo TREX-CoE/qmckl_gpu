@@ -22,6 +22,13 @@
 qmckl_exit_code_device
 qmckl_context_touch_device(const qmckl_context_device context);
 
+qmckl_exit_code_device qmckl_init_point_device(qmckl_context_device context);
+qmckl_exit_code_device qmckl_init_ao_basis_device(qmckl_context_device context);
+qmckl_exit_code_device qmckl_init_mo_basis_device(qmckl_context_device context);
+qmckl_exit_code_device
+qmckl_init_determinant_device(qmckl_context_device context);
+qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context);
+
 qmckl_context_device qmckl_context_create_device(int device_id);
 qmckl_exit_code_device
 qmckl_context_destroy_device(const qmckl_context_device context);

@@ -138,3 +138,55 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 	}
 	return QMCKL_SUCCESS;
 }
+
+//**********
+// FINALIZE MO BASIS
+//**********
+
+qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context_device context) {
+
+	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
+							  "qmckl_finalize_mo_basis_device", NULL);
+	}
+
+	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
+	assert(ctx != NULL);
+
+	double *new_array = (double *)qmckl_malloc_device(
+		context, ctx->ao_basis.ao_num * ctx->mo_basis.mo_num * sizeof(double));
+	if (new_array == NULL) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
+							  "qmckl_finalize_mo_basis_device", NULL);
+	}
+
+	assert(ctx->mo_basis.coefficient != NULL);
+
+	if (ctx->mo_basis.coefficient_t != NULL) {
+		qmckl_exit_code rc =
+			qmckl_free_device(context, ctx->mo_basis.coefficient_t);
+		if (rc != QMCKL_SUCCESS) {
+			return qmckl_failwith((qmckl_context)context, rc,
+								  "qmckl_finalize_mo_basis_device", NULL);
+		}
+	}
+
+	double *coefficient = ctx->mo_basis.coefficient;
+
+	int64_t ao_num = ctx->ao_basis.ao_num;
+	int64_t mo_num = ctx->mo_basis.mo_num;
+
+#pragma omp target is_device_ptr(new_array, coefficient)
+	{
+#pragma omp parallel for collapse(2)
+		for (int64_t i = 0; i < ao_num; ++i) {
+			for (int64_t j = 0; j < mo_num; ++j) {
+				new_array[i * mo_num + j] = coefficient[j * ao_num + i];
+			}
+		}
+	}
+
+	ctx->mo_basis.coefficient_t = new_array;
+	qmckl_exit_code rc = QMCKL_SUCCESS;
+	return rc;
+}
