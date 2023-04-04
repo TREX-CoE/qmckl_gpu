@@ -1,4 +1,19 @@
-#include "../qmckl_electron.c"
+#include "../include/qmckl_electron.h"
+
+/* Provided check  */
+
+bool qmckl_electron_provided_device(qmckl_context_device context) {
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return false;
+	}
+
+	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	return ctx->electron.provided;
+}
+
 
 qmckl_exit_code_device
 qmckl_set_electron_num_device(qmckl_context_device context, int64_t up_num,
@@ -80,5 +95,33 @@ qmckl_set_electron_coord_device(qmckl_context_device context, char transp,
 	memcpy(&(ctx->electron.walker.point), &(ctx->point),
 		   sizeof(qmckl_point_struct_device));
 
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device
+qmckl_get_electron_num_device(const qmckl_context_device context,
+							  int64_t *const num) {
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_INVALID_CONTEXT_DEVICE;
+	}
+
+	if (num == NULL) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
+							  "qmckl_get_electron_num",
+							  "num is a null pointer");
+	}
+
+	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	int32_t mask = 1 << 0;
+
+	if ((ctx->electron.uninitialized & mask) != 0) {
+		return QMCKL_NOT_PROVIDED_DEVICE;
+	}
+
+	assert(ctx->electron.num > (int64_t)0);
+	*num = ctx->electron.num;
 	return QMCKL_SUCCESS_DEVICE;
 }

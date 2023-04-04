@@ -24,7 +24,7 @@ qmckl_set_error_device(qmckl_context_device context,
 	assert(exit_code < QMCKL_INVALID_EXIT_CODE_DEVICE);
 
 	/* The context is assumed to exist. */
-	assert(qmckl_context_check(context) != QMCKL_NULL_CONTEXT_DEVICE);
+	assert(qmckl_context_check_device(context) != QMCKL_NULL_CONTEXT_DEVICE);
 
 	qmckl_lock_device(context);
 	{
@@ -57,76 +57,18 @@ qmckl_failwith_device(qmckl_context_device context,
 		assert(strlen(message) < QMCKL_MAX_MSG_LEN_DEVICE);
 	}
 
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT_DEVICE)
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE)
 		return QMCKL_INVALID_CONTEXT_DEVICE;
 
 	if (message == NULL) {
-		qmckl_exit_code_device rc = qmckl_set_error(
-			context, exit_code, function, qmckl_string_of_error(exit_code));
+		qmckl_exit_code_device rc = qmckl_set_error_device(
+			context, exit_code, function, qmckl_string_of_error_device(exit_code));
 		assert(rc == QMCKL_SUCCESS_DEVICE);
 	} else {
 		qmckl_exit_code_device rc =
-			qmckl_set_error(context, exit_code, function, message);
+			qmckl_set_error_device(context, exit_code, function, message);
 		assert(rc == QMCKL_SUCCESS_DEVICE);
 	}
 
 	return exit_code;
-}
-
-/* Electron */
-
-
-bool qmckl_electron_provided_device(const qmckl_context_device context) {
-
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT_DEVICE) {
-		return false;
-	}
-
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
-	assert(ctx != NULL);
-
-	return ctx->electron.provided;
-}
-
-qmckl_exit_code_device
-qmckl_get_electron_num_device(const qmckl_context_device context,
-							  int64_t *const num) {
-
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT_DEVICE) {
-		return QMCKL_INVALID_CONTEXT_DEVICE;
-	}
-
-	if (num == NULL) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_2_DEVICE,
-							  "qmckl_get_electron_num",
-							  "num is a null pointer");
-	}
-
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
-	assert(ctx != NULL);
-
-	int32_t mask = 1 << 0;
-
-	if ((ctx->electron.uninitialized & mask) != 0) {
-		return QMCKL_NOT_PROVIDED;
-	}
-
-	assert(ctx->electron.num > (int64_t)0);
-	*num = ctx->electron.num;
-	return QMCKL_SUCCESS_DEVICE;
-}
-
-/* nucleus */
-
-
-bool qmckl_nucleus_provided_device(qmckl_context_device context) {
-
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT_DEVICE) {
-		return false;
-	}
-
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
-	assert(ctx != NULL);
-
-	return ctx->nucleus.provided;
 }

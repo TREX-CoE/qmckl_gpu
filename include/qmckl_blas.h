@@ -11,15 +11,18 @@
 #include <string.h>
 
 #include "qmckl_types.h"
+#include "qmckl_memory.h"
+#include "qmckl_context.h"
+#include "qmckl_nucleus.h"
 
 qmckl_vector_device qmckl_vector_alloc_device(qmckl_context_device context,
 											  const int64_t size);
 
 qmckl_exit_code_device
-qmckl_vector_device_free_device(qmckl_context_device context,
+qmckl_vector_free_device(qmckl_context_device context,
 								qmckl_vector_device *vector);
 
-qmckl_exit_code_device qmckl_vector_device_of_double_device(
+qmckl_exit_code_device qmckl_vector_of_double_device(
 	const qmckl_context_device context, const double *target,
 	const int64_t size_max, qmckl_vector_device *vector_out);
 
@@ -28,13 +31,13 @@ qmckl_matrix_device qmckl_matrix_alloc_device(qmckl_context_device context,
 											  const int64_t size2);
 
 qmckl_exit_code_device
-qmckl_matrix_device_free_device(qmckl_context_device context,
+qmckl_matrix_free_device(qmckl_context_device context,
 								qmckl_matrix_device *matrix);
 
 qmckl_matrix_device qmckl_matrix_set_device(qmckl_matrix_device matrix,
 											double value);
 
-qmckl_exit_code_device qmckl_matrix_device_of_double_device(
+qmckl_exit_code_device qmckl_matrix_of_double_device(
 	const qmckl_context_device context, const double *target,
 	const int64_t size_max, qmckl_matrix_device *matrix_out);
 
@@ -47,7 +50,7 @@ qmckl_tensor_device qmckl_tensor_alloc_device(qmckl_context_device context,
 											  const int64_t *size);
 
 qmckl_exit_code_device
-qmckl_tensor_device_free_device(qmckl_context_device context,
+qmckl_tensor_free_device(qmckl_context_device context,
 								qmckl_tensor_device *tensor);
 
 qmckl_tensor_device qmckl_tensor_set_device(qmckl_tensor_device tensor,

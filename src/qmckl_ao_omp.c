@@ -6,7 +6,7 @@
 
 /* shell_vgl */
 
-qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
+qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	qmckl_context_device context, int prim_num, int shell_num, int point_num,
 	int nucl_num, int64_t *nucleus_shell_num, int64_t *nucleus_index,
 	double *nucleus_range, int64_t *shell_prim_index, int64_t *shell_prim_num,
@@ -17,7 +17,7 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	int iprim_start, iprim_end;
 	double x, y, z, two_a, ar2, r2, v, cutoff;
 
-	qmckl_exit_code info = QMCKL_SUCCESS;
+	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
 
 	// Don't compute exponentials when the result will be almost zero.
 	// TODO : Use numerical precision here
@@ -116,8 +116,8 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 
 /* ao_vgl */
 
-qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
-	const qmckl_context context, const int64_t ao_num, const int64_t shell_num,
+qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
+	const qmckl_context_device context, const int64_t ao_num, const int64_t shell_num,
 	const int64_t point_num, const int64_t nucl_num,
 	const double *restrict coord, const double *restrict nucl_coord,
 	const int64_t *restrict nucleus_index,
@@ -134,7 +134,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	int64_t *powers;
 	int64_t *ao_index;
 
-	qmckl_exit_code rc;
+	qmckl_exit_code_device rc;
 
 	lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
@@ -411,13 +411,13 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 	qmckl_free_device(context, pows_shared);
 
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }
 
 /* ao_value */
 
-qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
-	const qmckl_context context, const int64_t ao_num, const int64_t shell_num,
+qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
+	const qmckl_context_device context, const int64_t ao_num, const int64_t shell_num,
 	const int64_t point_num, const int64_t nucl_num,
 	const double *restrict coord, const double *restrict nucl_coord,
 	const int64_t *restrict nucleus_index,
@@ -434,9 +434,9 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 	int64_t *powers;
 	int64_t *ao_index;
 
-	qmckl_exit_code rc;
+	qmckl_exit_code_device rc;
 
-	qmckl_memory_info_struct info;
+	qmckl_memory_info_struct_device info;
 
 	lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
@@ -661,7 +661,7 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 
 	qmckl_free_device(context, pows_shared);
 
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }
 
 //**********
@@ -670,20 +670,20 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 
 /* ao_value */
 
-qmckl_exit_code qmckl_provide_ao_basis_ao_value_device(qmckl_context context) {
+qmckl_exit_code_device qmckl_provide_ao_basis_ao_value_device(qmckl_context_device context) {
 
-	qmckl_exit_code rc = QMCKL_SUCCESS;
+	qmckl_exit_code_device rc = QMCKL_SUCCESS_DEVICE;
 
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT) {
-		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT,
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
 							  "qmckl_provide_ao_basis_ao_value", NULL);
 	}
 
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
 	if (!ctx->ao_basis.provided) {
-		return qmckl_failwith(context, QMCKL_NOT_PROVIDED,
+		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
 							  "qmckl_provide_ao_basis_ao_value", NULL);
 	}
 
@@ -698,7 +698,7 @@ qmckl_exit_code qmckl_provide_ao_basis_ao_value_device(qmckl_context context) {
 				ctx->ao_basis.ao_num * ctx->point.num * sizeof(double));
 
 			if (ao_value == NULL) {
-				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
+				return qmckl_failwith_device(context, QMCKL_ALLOCATION_FAILED_DEVICE,
 									  "qmckl_provide_ao_basis_ao_value", NULL);
 			}
 			ctx->ao_basis.ao_value = ao_value;
@@ -743,30 +743,30 @@ qmckl_exit_code qmckl_provide_ao_basis_ao_value_device(qmckl_context context) {
 					ctx->ao_basis.shell_ang_mom, ctx->ao_basis.ao_factor,
 					ctx->ao_basis.shell_vgl, ctx->ao_basis.ao_value);
 			} else {
-				return qmckl_failwith(context, QMCKL_ERRNO,
+				return qmckl_failwith_device(context, QMCKL_ERRNO_DEVICE,
 									  "qmckl_ao_basis_ao_value", NULL);
 			}
 		}
 	}
 
-	if (rc != QMCKL_SUCCESS) {
+	if (rc != QMCKL_SUCCESS_DEVICE) {
 		return rc;
 	}
 
 	ctx->ao_basis.ao_value_date = ctx->date;
 
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }
 
 //**********
 // FINALIZE AO BASIS
 //**********
 
-qmckl_exit_code
+qmckl_exit_code_device
 qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 
-	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
-	qmckl_memory_info_struct mem_info = qmckl_memory_info_struct_zero;
+	qmckl_context_struct_device *ctx = (qmckl_context_struct_device *)context;
+	qmckl_memory_info_struct_device mem_info = qmckl_memory_info_struct_zero_device;
 
 	int device_id = qmckl_get_device_id(context);
 
@@ -980,23 +980,23 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 	qmckl_free_device(context, newcoef);
 	qmckl_free_device(context, newidx);
 
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
+qmckl_exit_code_device qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 
-	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
-		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
 							  "qmckl_finalize_ao_basis_device", NULL);
 	}
 
-	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct_device *ctx = (qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
 	int64_t nucl_num = 0;
 
-	qmckl_exit_code rc = qmckl_get_nucleus_num(context, &nucl_num);
-	if (rc != QMCKL_SUCCESS)
+	qmckl_exit_code_device rc = qmckl_get_nucleus_num_device(context, &nucl_num);
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return rc;
 
 	/* nucleus_prim_index */
@@ -1006,7 +1006,7 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 			context, (ctx->nucleus.num + (int64_t)1) * sizeof(int64_t));
 
 		if (ctx->ao_basis.nucleus_prim_index == NULL) {
-			return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
+			return qmckl_failwith_device(context, QMCKL_ALLOCATION_FAILED_DEVICE,
 								  "ao_basis.nucleus_prim_index", NULL);
 		}
 
@@ -1036,8 +1036,8 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 			context, ctx->ao_basis.prim_num * sizeof(double));
 
 		if (ctx->ao_basis.coefficient_normalized == NULL) {
-			return qmckl_failwith((qmckl_context)context,
-								  QMCKL_ALLOCATION_FAILED,
+			return qmckl_failwith_device(context,
+								  QMCKL_ALLOCATION_FAILED_DEVICE,
 								  "ao_basis.coefficient_normalized", NULL);
 		}
 
@@ -1074,8 +1074,8 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 			context, ctx->nucleus.num * sizeof(int32_t));
 
 		if (ctx->ao_basis.nucleus_max_ang_mom == NULL) {
-			return qmckl_failwith((qmckl_context)context,
-								  QMCKL_ALLOCATION_FAILED,
+			return qmckl_failwith_device(context,
+								  QMCKL_ALLOCATION_FAILED_DEVICE,
 								  "ao_basis.nucleus_max_ang_mom", NULL);
 		}
 
@@ -1112,7 +1112,7 @@ qmckl_exit_code qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 				context, ctx->nucleus.num * sizeof(double));
 
 			if (ctx->ao_basis.nucleus_range == NULL) {
-				return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
+				return qmckl_failwith_device(context, QMCKL_ALLOCATION_FAILED_DEVICE,
 									  "ao_basis.nucleus_range", NULL);
 			}
 

@@ -62,7 +62,7 @@ void qmckl_unlock_device(const qmckl_context_device context) {
 qmckl_exit_code_device
 qmckl_init_electron_device(qmckl_context_device context) {
 
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return false;
 	}
 
@@ -76,7 +76,7 @@ qmckl_init_electron_device(qmckl_context_device context) {
 
 qmckl_exit_code_device qmckl_init_nucleus_device(qmckl_context_device context) {
 
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return false;
 	}
 
@@ -90,98 +90,23 @@ qmckl_exit_code_device qmckl_init_nucleus_device(qmckl_context_device context) {
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code_device qmckl_set_point_device(qmckl_context_device context,
-											  const char transp,
-											  const int64_t num,
-											  const double *coord,
-											  const int64_t size_max) {
-
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT_DEVICE) {
-		return QMCKL_NULL_CONTEXT_DEVICE;
-	}
-
-	if (num <= 0) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_3, "qmckl_set_point",
-							  "Number of points should be >0.");
-	}
-
-	if (size_max < 3 * num) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_4, "qmckl_set_point",
-							  "Array too small");
-	}
-
-	if (transp != 'N' && transp != 'T') {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_2_DEVICE, "qmckl_set_point",
-							  "transp should be 'N' or 'T'");
-	}
-
-	if (coord == NULL) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_3, "qmckl_set_point",
-							  "coord is a NULL pointer");
-	}
-
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
-	assert(ctx != NULL);
-
-	qmckl_exit_code_device rc;
-	if (num != ctx->point.num) {
-
-		if (ctx->point.coord.data != NULL) {
-			rc = qmckl_matrix_device_free(context, &(ctx->point.coord));
-			assert(rc == QMCKL_SUCCESS_DEVICE);
-		}
-
-		ctx->point.coord = qmckl_matrix_device_alloc(context, num, 3);
-		if (ctx->point.coord.data == NULL) {
-			return qmckl_failwith(context, QMCKL_ALLOCATION_FAILED,
-								  "qmckl_set_point", NULL);
-		}
-	};
-
-	ctx->point.num = num;
-	if (transp == 'T') {
-		double *a = ctx->point.coord.data;
-#ifdef HAVE_OPENMP
-#pragma omp for
-#endif
-		for (int64_t i = 0; i < 3 * num; ++i) {
-			a[i] = coord[i];
-		}
-	} else {
-#ifdef HAVE_OPENMP
-#pragma omp for
-#endif
-		for (int64_t i = 0; i < num; ++i) {
-			qmckl_mat(ctx->point.coord, i, 0) = coord[3 * i];
-			qmckl_mat(ctx->point.coord, i, 1) = coord[3 * i + 1];
-			qmckl_mat(ctx->point.coord, i, 2) = coord[3 * i + 2];
-		}
-	}
-
-	/* Increment the date of the context */
-	rc = qmckl_context_touch(context);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
-
-	return QMCKL_SUCCESS_DEVICE;
-}
-
 qmckl_exit_code_device qmckl_init_point_device(qmckl_context_device context) {
 
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return false;
 	}
 
 	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
-	memset(&(ctx->point), 0, sizeof(qmckl_point_struct));
+	memset(&(ctx->point), 0, sizeof(qmckl_point_struct_device));
 
 	return QMCKL_SUCCESS_DEVICE;
 }
 
 qmckl_exit_code_device qmckl_init_mo_basis_device(qmckl_context_device context) {
 
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return false;
 	}
 
@@ -195,7 +120,7 @@ qmckl_exit_code_device qmckl_init_mo_basis_device(qmckl_context_device context) 
 
 qmckl_exit_code_device qmckl_init_determinant_device(qmckl_context_device context) {
 
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return false;
 	}
 
@@ -209,7 +134,7 @@ qmckl_exit_code_device qmckl_init_determinant_device(qmckl_context_device contex
 
 qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context) {
 
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return false;
 	}
 
@@ -229,7 +154,7 @@ qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context) {
 }
 
 
-qmckl_context_device qmckl_context_create(int device_id) {
+qmckl_context_device qmckl_context_create_device(int device_id) {
 
 	qmckl_context_struct_device *const ctx =
 		(qmckl_context_struct_device *)malloc(

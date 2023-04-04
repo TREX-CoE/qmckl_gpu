@@ -12,7 +12,12 @@
 #include <string.h>
 #include <trexio.h>
 
-#include "qmckl_type.h"
+#include "qmckl_types.h"
+#include "qmckl_basic_functions.h"
+#include "qmckl_nucleus.h"
+#include "qmckl_context.h"
+#include "qmckl_ao.h"
+#include "qmckl_mo.h"
 
 // Prototype for standard QMCkl function
 trexio_t *qmckl_trexio_open_X_device(char *file_name,

@@ -19,6 +19,20 @@ qmckl_exit_code_device qmckl_init_ao_basis_device(qmckl_context_device context) 
 	return QMCKL_SUCCESS_DEVICE;
 }
 
+/* Provided check  */
+
+bool qmckl_ao_basis_provided_device(qmckl_context_device context) {
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return false;
+	}
+
+	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	return ctx->ao_basis.provided;
+}
+
 
 //**********
 // PROVIDE

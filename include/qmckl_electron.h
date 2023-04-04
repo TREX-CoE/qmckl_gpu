@@ -3,6 +3,7 @@
 #include "qmckl_context.h"
 #include "qmckl_memory.h"
 #include "qmckl_blas.h"
+#include "qmckl_point.h"
 
 qmckl_exit_code_device
 qmckl_set_electron_num_device(qmckl_context_device context, int64_t up_num,

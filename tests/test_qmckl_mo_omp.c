@@ -61,7 +61,7 @@ int main() {
 	rc = qmckl_set_electron_num_device(context, elec_up_num, elec_dn_num);
 	assert(rc == QMCKL_SUCCESS);
 
-	assert(qmckl_electron_provided(context));
+	assert(qmckl_electron_provided_device(context));
 
 	rc = qmckl_set_point_device(context, 'N', point_num, elec_coord_d,
 								point_num * 3);
@@ -77,7 +77,7 @@ int main() {
 	rc = qmckl_set_nucleus_charge_device(context, nucl_charge_d, nucl_num);
 	assert(rc == QMCKL_SUCCESS);
 
-	assert(qmckl_nucleus_provided(context));
+	assert(qmckl_nucleus_provided_device(context));
 
 	// Put other stuff in CPU arrays
 	int64_t *nucleus_index = &(chbrclf_basis_nucleus_index[0]);
@@ -286,9 +286,9 @@ int main() {
 	rc = qmckl_set_mo_basis_coefficient_device(context, mo_coefficient_d);
 	assert(rc == QMCKL_SUCCESS);
 
-	assert(qmckl_mo_basis_provided(context));
+	assert(qmckl_mo_basis_provided_device(context));
 
-	rc = qmckl_context_touch(context);
+	rc = qmckl_context_touch_device(context);
 	assert(rc == QMCKL_SUCCESS);
 
 	/* Get MO value (from scratch) */
@@ -321,7 +321,7 @@ int main() {
 		}
 	}
 
-	rc = qmckl_context_touch(context);
+	rc = qmckl_context_touch_device(context);
 	assert(rc == QMCKL_SUCCESS);
 
 	/* Get MO value (from MO vgl array) */

@@ -17,6 +17,7 @@
 #include "qmckl_types.h"
 #include "qmckl_basic_functions.h"
 #include "qmckl_memory.h"
+#include "qmckl_blas.h"
 
 
 qmckl_exit_code_device

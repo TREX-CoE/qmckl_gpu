@@ -945,7 +945,7 @@ qmckl_trexio_read_mo_X_device(qmckl_context_device context, trexio_t *file) {
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-trexio_t *qmckl_trexio_open_X_device(const char *file_name,
+trexio_t *qmckl_trexio_open_X_device(char *file_name,
 									 qmckl_exit_code_device *rc) {
 	*rc = QMCKL_SUCCESS_DEVICE;
 	trexio_t *file = NULL;
@@ -958,7 +958,7 @@ trexio_t *qmckl_trexio_open_X_device(const char *file_name,
 	if (file != NULL)
 		return file;
 
-	*rc = QMCKL_FAILURE;
+	*rc = QMCKL_FAILURE_DEVICE;
 	/* TODO
 	  return qmckl_failwith( context,
 							 QMCKL_FAILURE,

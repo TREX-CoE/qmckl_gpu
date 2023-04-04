@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include "qmckl_types.h"
-#include "qmckl_types.h"
+#include "qmckl_context.h"
 
 /* Error */
 qmckl_exit_code_device

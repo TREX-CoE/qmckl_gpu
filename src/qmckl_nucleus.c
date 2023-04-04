@@ -1,3 +1,20 @@
+#include "../include/qmckl_nucleus.h"
+
+/* Provided check  */
+
+bool qmckl_nucleus_provided_device(qmckl_context_device context) {
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return false;
+	}
+
+	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	return ctx->nucleus.provided;
+}
+
+
 qmckl_exit_code_device
 qmckl_set_nucleus_num_device(qmckl_context_device context, int64_t num) {
 	int32_t mask = 1 << 0;

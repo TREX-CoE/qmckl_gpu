@@ -1,5 +1,5 @@
-#include "include/qmckl_ao.h"
 #include "include/qmckl_mo.h"
+#include "include/qmckl_ao.h"
 #ifdef HAVE_CUBLAS
 #include <cublas_v2.h>
 #endif
@@ -245,7 +245,7 @@ qmckl_exit_code_device qmckl_provide_mo_basis_mo_vgl_device(qmckl_context_device
 
 	qmckl_exit_code_device rc = QMCKL_SUCCESS_DEVICE;
 
-	if (qmckl_context_device_check((qmckl_context_device)context) == QMCKL_NULL_CONTEXT_DEVICE) {
+	if (qmckl_context_check_device((qmckl_context_device)context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_NULL_CONTEXT_DEVICE,
 							  "qmckl_provide_mo_basis_mo_vgl_device", NULL);
 	}
@@ -314,7 +314,7 @@ qmckl_exit_code_device qmckl_provide_mo_basis_mo_value_device(qmckl_context_devi
 
 	qmckl_exit_code_device rc = QMCKL_SUCCESS_DEVICE;
 
-	if (qmckl_context_device_check(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_NULL_CONTEXT_DEVICE,
 							  "qmckl_provide_mo_basis_mo_value_device", NULL);
 	}
@@ -397,7 +397,7 @@ qmckl_exit_code_device qmckl_get_mo_basis_mo_vgl_device(qmckl_context_device con
 												 double *const mo_vgl,
 												 const int64_t size_max) {
 
-	if (qmckl_context_device_check((qmckl_context_device)context) == QMCKL_NULL_CONTEXT_DEVICE) {
+	if (qmckl_context_check_device((qmckl_context_device)context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return QMCKL_NULL_CONTEXT_DEVICE;
 	}
 
@@ -425,7 +425,7 @@ qmckl_exit_code_device qmckl_get_mo_basis_mo_vgl_device(qmckl_context_device con
 qmckl_exit_code_device qmckl_get_mo_basis_mo_vgl_inplace_device(
 	qmckl_context_device context, double *const mo_vgl, const int64_t size_max) {
 
-	if (qmckl_context_device_check((qmckl_context_device)context) == QMCKL_NULL_CONTEXT_DEVICE) {
+	if (qmckl_context_check_device((qmckl_context_device)context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device((qmckl_context_device)context, QMCKL_NULL_CONTEXT_DEVICE,
 							  "qmckl_get_mo_basis_mo_vgl_device", NULL);
 	}
@@ -442,7 +442,7 @@ qmckl_exit_code_device qmckl_get_mo_basis_mo_vgl_inplace_device(
 							  "input array too small");
 	}
 
-	rc = qmckl_context_device_touch_device(context);
+	rc = qmckl_context_touch_device(context);
 	if (rc != QMCKL_SUCCESS_DEVICE)
 		return rc;
 
@@ -465,7 +465,7 @@ qmckl_exit_code_device qmckl_get_mo_basis_mo_value_device(qmckl_context_device c
 												   double *const mo_value,
 												   const int64_t size_max) {
 
-	if (qmckl_context_device_check((qmckl_context_device)context) == QMCKL_NULL_CONTEXT_DEVICE) {
+	if (qmckl_context_check_device((qmckl_context_device)context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return QMCKL_NULL_CONTEXT_DEVICE;
 	}
 
@@ -493,7 +493,7 @@ qmckl_exit_code_device qmckl_get_mo_basis_mo_value_device(qmckl_context_device c
 qmckl_exit_code_device qmckl_get_mo_basis_mo_value_inplace_device(
 	qmckl_context_device context, double *const mo_value, const int64_t size_max) {
 
-	if (qmckl_context_device_check((qmckl_context_device)context) == QMCKL_NULL_CONTEXT_DEVICE) {
+	if (qmckl_context_check_device((qmckl_context_device)context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device((qmckl_context_device)context, QMCKL_NULL_CONTEXT_DEVICE,
 							  "qmckl_get_mo_basis_mo_value_device", NULL);
 	}
@@ -510,7 +510,7 @@ qmckl_exit_code_device qmckl_get_mo_basis_mo_value_inplace_device(
 							  "input array too small");
 	}
 
-	rc = qmckl_context_device_touch_device(context);
+	rc = qmckl_context_touch_device(context);
 	if (rc != QMCKL_SUCCESS_DEVICE)
 		return rc;
 
@@ -534,8 +534,8 @@ qmckl_exit_code_device qmckl_get_mo_basis_mo_value_inplace_device(
 
 qmckl_exit_code_device
 qmckl_get_mo_basis_mo_num_device(const qmckl_context_device context, int64_t *mo_num) {
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT_DEVICE) {
-		return qmckl_failwith(context, QMCKL_INVALID_CONTEXT_DEVICE,
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
 							  "qmckl_get_mo_basis_mo_num", NULL);
 	}
 
@@ -545,7 +545,7 @@ qmckl_get_mo_basis_mo_num_device(const qmckl_context_device context, int64_t *mo
 	int32_t mask = 1;
 
 	if ((ctx->mo_basis.uninitialized & mask) != 0) {
-		return qmckl_failwith(context, QMCKL_NOT_PROVIDED,
+		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
 							  "qmckl_get_mo_basis_mo_num", NULL);
 	}
 
@@ -587,30 +587,6 @@ qmckl_set_mo_basis_mo_num_device(qmckl_context_device context, int64_t mo_num) {
 			return rc_;
 	}
 
-	return QMCKL_SUCCESS_DEVICE;
-}
-
-qmckl_exit_code_device
-qmckl_get_mo_basis_mo_num_device(const qmckl_context_device context,
-								 int64_t *mo_num) {
-	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
-		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
-									 "qmckl_get_mo_basis_mo_num_device", NULL);
-	}
-
-	qmckl_context_struct_device *const ctx =
-		(qmckl_context_struct_device *)context;
-	assert(ctx != NULL);
-
-	int32_t mask = 1;
-
-	if ((ctx->mo_basis.uninitialized & mask) != 0) {
-		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
-									 "qmckl_get_mo_basis_mo_num", NULL);
-	}
-
-	assert(ctx->mo_basis.mo_num > (int64_t)0);
-	*mo_num = ctx->mo_basis.mo_num;
 	return QMCKL_SUCCESS_DEVICE;
 }
 

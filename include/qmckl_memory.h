@@ -10,6 +10,7 @@
 #include <omp.h>
 
 #include "qmckl_types.h"
+#include "qmckl_context.h"
 
 /* Allocs & frees */
 void *qmckl_malloc_host(qmckl_context_device context,
