@@ -8,6 +8,7 @@ qmckl_exit_code_device qmckl_set_point_device(qmckl_context_device context,
 		return QMCKL_NULL_CONTEXT_DEVICE;
 	}
 
+
 	if (size_max < 3 * num) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_4_DEVICE,
 							  "qmckl_set_point_device", "Array too small");

@@ -12,8 +12,7 @@
 //**********
 
 void *qmckl_malloc_device(qmckl_context_device context, size_t size) {
-
-	assert(qmckl_context_check_device(context != QMCKL_NULL_CONTEXT_DEVICE));
+	assert(qmckl_context_check_device(context) != QMCKL_NULL_CONTEXT_DEVICE);
 
 	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
 	int device_id = qmckl_get_device_id(context);

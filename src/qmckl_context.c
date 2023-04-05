@@ -7,8 +7,22 @@
 //**********
 
 qmckl_exit_code_device
-qmckl_context_touch_device(const qmckl_context_device context) {
-	return qmckl_context_touch_device(context);
+qmckl_context_touch_device(const qmckl_context_device context)
+{
+
+  if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+    return qmckl_failwith_device( context,
+                           QMCKL_INVALID_CONTEXT_DEVICE,
+                           "qmckl_context_touch_device",
+                           NULL);
+  }
+
+  qmckl_context_struct_device* const ctx = (qmckl_context_struct_device*) context;
+
+  ctx->electron.walker_old = ctx->electron.walker;
+  ctx->date += 1UL;
+  ctx->point.date = ctx-> date;
+  return QMCKL_SUCCESS_DEVICE;
 }
 
 qmckl_context_device

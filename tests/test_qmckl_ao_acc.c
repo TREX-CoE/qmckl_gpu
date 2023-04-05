@@ -185,6 +185,7 @@ int main() {
 	if (!qmckl_ao_basis_provided_device(context))
 		return 1;
 
+
 	// Checking arrays after context set and get
 
 	int64_t shell_num_test;
