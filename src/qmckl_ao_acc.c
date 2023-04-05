@@ -134,17 +134,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	const int32_t *restrict shell_ang_mom, const double *restrict ao_factor,
 	double *shell_vgl, double *restrict const ao_vgl) {
 
-	int64_t n_poly;
-	int64_t *lstart;
 	double cutoff = 27.631021115928547;
-
-	double *poly_vgl_shared;
-	int64_t *powers;
-	int64_t *ao_index;
-
-	qmckl_exit_code rc;
-
-	lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Not to exceed GPU memory when allocating poly_vgl
 	// size_t target_chunk = MAX_MEMORY_SIZE / (sizeof(double)*5*ao_num);
@@ -155,8 +145,9 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	int64_t num_sub_iters = (num_iters + chunk_size - 1) / chunk_size;
     int64_t poly_dim = 5 * ao_num * chunk_size;
 
-	poly_vgl_shared = qmckl_malloc_device(context, sizeof(double) * poly_dim);
-	ao_index        = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
+	double *poly_vgl_shared = qmckl_malloc_device(context, sizeof(double) * poly_dim);
+	int64_t *ao_index       = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
+	int64_t *lstart         = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Specific calling function
 	int lmax = -1;
@@ -451,11 +442,11 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	// End of outer compute loop
 }
 // End of target data region
-qmckl_free_device(context, lstart);
-qmckl_free_device(context, poly_vgl_shared);
 qmckl_free_device(context, ao_index);
+qmckl_free_device(context, poly_vgl_shared);
 qmckl_free_device(context, pows_shared);
 qmckl_free_device(context, shell_to_nucl);
+qmckl_free_device(context, lstart);
 
 return QMCKL_SUCCESS;
 }
