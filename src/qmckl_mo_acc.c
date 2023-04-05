@@ -6,12 +6,12 @@
 
 /* mo_vgl */
 
-qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
-	qmckl_context context, int64_t ao_num, int64_t mo_num, int64_t point_num,
+qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_device(
+	qmckl_context_device context, int64_t ao_num, int64_t mo_num, int64_t point_num,
 	double *restrict coefficient_t, double *restrict ao_vgl,
 	double *restrict mo_vgl) {
 
-	assert(context != QMCKL_NULL_CONTEXT);
+	assert(context != QMCKL_NULL_CONTEXT_DEVICE);
 
 #pragma acc data deviceptr(coefficient_t, ao_vgl, mo_vgl)
 	{
@@ -56,16 +56,16 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 	}
 	// End of GPU region
 
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }
 
 /* mo_value */
 
-qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
-	qmckl_context context, int64_t ao_num, int64_t mo_num, int64_t point_num,
+qmckl_exit_code_device qmckl_compute_mo_basis_mo_value_device(
+	qmckl_context_device context, int64_t ao_num, int64_t mo_num, int64_t point_num,
 	double *restrict coefficient_t, double *restrict ao_value,
 	double *restrict mo_value) {
-	assert(context != QMCKL_NULL_CONTEXT);
+	assert(context != QMCKL_NULL_CONTEXT_DEVICE);
 
 	double *av1_shared =
 		qmckl_malloc_device(context, point_num * ao_num * sizeof(double));
@@ -126,7 +126,7 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 			}
 		}
 	}
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }
 
 
@@ -134,30 +134,30 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 // FINALIZE MO BASIS
 //**********
 
-qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context_device context) {
+qmckl_exit_code_device qmckl_finalize_mo_basis_device(qmckl_context_device context) {
 
-	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
-		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
 							  "qmckl_finalize_mo_basis_device", NULL);
 	}
 
-	qmckl_context_struct *ctx = (qmckl_context_struct *)context;
+	qmckl_context_struct_device *ctx = (qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
 	double *new_array = (double *)qmckl_malloc_device(
 		context, ctx->ao_basis.ao_num * ctx->mo_basis.mo_num * sizeof(double));
 	if (new_array == NULL) {
-		return qmckl_failwith((qmckl_context)context, QMCKL_ALLOCATION_FAILED,
+		return qmckl_failwith_device(context, QMCKL_ALLOCATION_FAILED_DEVICE,
 							  "qmckl_finalize_mo_basis_device", NULL);
 	}
 
 	assert(ctx->mo_basis.coefficient != NULL);
 
 	if (ctx->mo_basis.coefficient_t != NULL) {
-		qmckl_exit_code rc =
+		qmckl_exit_code_device rc =
 			qmckl_free_device(context, ctx->mo_basis.coefficient_t);
-		if (rc != QMCKL_SUCCESS) {
-			return qmckl_failwith((qmckl_context)context, rc,
+		if (rc != QMCKL_SUCCESS_DEVICE) {
+			return qmckl_failwith_device(context, rc,
 								  "qmckl_finalize_mo_basis_device", NULL);
 		}
 	}
@@ -181,6 +181,6 @@ qmckl_exit_code qmckl_finalize_mo_basis_device(qmckl_context_device context) {
 	}
 
 	ctx->mo_basis.coefficient_t = new_array;
-	qmckl_exit_code rc = QMCKL_SUCCESS;
+	qmckl_exit_code_device rc = QMCKL_SUCCESS_DEVICE;
 	return rc;
 }

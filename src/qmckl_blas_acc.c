@@ -10,7 +10,7 @@
 // MATRIX
 //**********
 
-qmckl_matrix qmckl_matrix_set_device(qmckl_matrix matrix, double value) {
+qmckl_matrix_device qmckl_matrix_set_device(qmckl_matrix_device matrix, double value) {
 	// Recompute array size
 	int prod_size = matrix.size[0] * matrix.size[1];
 
@@ -24,25 +24,25 @@ qmckl_matrix qmckl_matrix_set_device(qmckl_matrix matrix, double value) {
 	return matrix;
 }
 
-qmckl_exit_code qmckl_transpose_device(qmckl_context_device context,
-									   const qmckl_matrix A, qmckl_matrix At) {
-	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
-		return QMCKL_INVALID_CONTEXT;
+qmckl_exit_code_device qmckl_transpose_device(qmckl_context_device context,
+									   const qmckl_matrix_device A, qmckl_matrix_device At) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_INVALID_CONTEXT_DEVICE;
 	}
 
 	if (A.size[0] < 1) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_2,
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
 							  "qmckl_transpose_device", "Invalid size for A");
 	}
 
 	if (At.data == NULL) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_3,
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
 							  "qmckl_transpose_device",
 							  "Output matrix not allocated");
 	}
 
 	if (At.size[0] != A.size[1] || At.size[1] != A.size[0]) {
-		return qmckl_failwith(context, QMCKL_INVALID_ARG_3,
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
 							  "qmckl_transpose_device", "Invalid size for At");
 	}
 
@@ -61,14 +61,14 @@ qmckl_exit_code qmckl_transpose_device(qmckl_context_device context,
 				At_data[i + j * At_s0] = A_data[j + i * A_s0];
 	}
 
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }
 
 //**********
 // TENSOR
 //**********
 
-qmckl_tensor qmckl_tensor_set_device(qmckl_tensor tensor, double value) {
+qmckl_tensor_device qmckl_tensor_set_device(qmckl_tensor_device tensor, double value) {
 	// Recompute array size
 	int prod_size = 1;
 

@@ -272,20 +272,6 @@ qmckl_exit_code_device qmckl_get_ao_basis_ao_value_device(qmckl_context_device c
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-/* Provided check  */
-
-bool qmckl_ao_basis_provided(qmckl_context_device context) {
-
-	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
-		return false;
-	}
-
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
-	assert(ctx != NULL);
-
-	return ctx->ao_basis.provided;
-}
-
 
 //**********
 // VARIOUS GETTERS/SETTERS

@@ -133,59 +133,59 @@ int main() {
 
 	char typ = 'G';
 
-	assert(!qmckl_ao_basis_provided(context));
+	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_type_device(context, typ);
 	assert(rc == QMCKL_SUCCESS);
-	assert(!qmckl_ao_basis_provided(context));
+	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_shell_num_device(context, chbrclf_shell_num);
 	assert(rc == QMCKL_SUCCESS);
-	assert(!qmckl_ao_basis_provided(context));
+	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_prim_num_device(context, chbrclf_prim_num);
 	assert(rc == QMCKL_SUCCESS);
-	assert(!qmckl_ao_basis_provided(context));
+	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index_d,
 												 nucl_num);
 	assert(rc == QMCKL_SUCCESS);
-	assert(!qmckl_ao_basis_provided(context));
+	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_nucleus_shell_num_device(
 		context, nucleus_shell_num_d, nucl_num);
 	assert(rc == QMCKL_SUCCESS);
-	assert(!qmckl_ao_basis_provided(context));
+	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_shell_ang_mom_device(context, shell_ang_mom_d,
 												 chbrclf_shell_num);
 	assert(rc == QMCKL_SUCCESS);
-	assert(!qmckl_ao_basis_provided(context));
+	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_shell_factor_device(context, shell_factor_d,
 												chbrclf_shell_num);
 	assert(rc == QMCKL_SUCCESS);
-	assert(!qmckl_ao_basis_provided(context));
+	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_shell_prim_num_device(context, shell_prim_num_d,
 												  chbrclf_shell_num);
 	assert(rc == QMCKL_SUCCESS);
-	assert(!qmckl_ao_basis_provided(context));
+	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_shell_prim_index_device(context, shell_prim_index_d,
 													chbrclf_shell_num);
 	assert(rc == QMCKL_SUCCESS);
-	assert(!qmckl_ao_basis_provided(context));
+	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_exponent_device(context, exponent_d,
 											chbrclf_prim_num);
 	assert(rc == QMCKL_SUCCESS);
-	assert(!qmckl_ao_basis_provided(context));
+	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_coefficient_device(context, coefficient_d,
 											   chbrclf_prim_num);
 	assert(rc == QMCKL_SUCCESS);
-	assert(!qmckl_ao_basis_provided(context));
+	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_prim_factor_device(context, prim_factor_d,
 											   chbrclf_prim_num);
@@ -198,7 +198,7 @@ int main() {
 											 chbrclf_ao_num);
 	assert(rc == QMCKL_SUCCESS);
 
-	assert(qmckl_ao_basis_provided(context));
+	assert(qmckl_ao_basis_provided_device(context));
 
 	double *ao_vgl = malloc(point_num * 5 * ao_num * sizeof(double));
 	double *ao_vgl_d =
