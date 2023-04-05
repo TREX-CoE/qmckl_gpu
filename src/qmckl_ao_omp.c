@@ -189,15 +189,14 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	}
 
 
-	for (int sub_iter = 0; sub_iter < num_sub_iters ; sub_iter++) {
-	    double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
-	    double     (*pows)[chunk_size] = (double(*)[chunk_size]) pows_shared;
-
+	double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
+	double     (*pows)[chunk_size] = (double(*)[chunk_size]) pows_shared;
 #pragma omp target is_device_ptr(                                              \
 		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
 			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, poly_vgl, pows,     \
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range, shell_to_nucl)
 	{
+	for (int sub_iter = 0; sub_iter < num_sub_iters ; sub_iter++) {
 #pragma omp parallel for
 		for (int iter = 0; iter < chunk_size; iter++) {
 
@@ -341,13 +340,8 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			// End of ao_polynomial computation (now inlined)
 			// poly_vgl is now set from here
 		}
-}
 
-#pragma omp target is_device_ptr(                                              \
-		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
-			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, poly_vgl, pows,      \
-			nucl_coord, pows_shared, shell_ang_mom, nucleus_range, shell_to_nucl)
-	{
+
 #pragma omp parallel for collapse(2) 
 		for (int iter_new = 0; iter_new < chunk_size/nucl_num; iter_new++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
