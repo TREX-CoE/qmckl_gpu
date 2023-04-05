@@ -155,6 +155,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	int64_t chunk_size = (num_iters < max_chunk_size) ? num_iters : max_chunk_size;
 	int64_t num_sub_iters = (num_iters + chunk_size - 1) / chunk_size;
     int64_t poly_dim = 5 * ao_num * chunk_size;
+	printf("chunk %d\n",chunk_size);
 
 	poly_vgl_shared = qmckl_malloc_device(context, sizeof(double) * poly_dim);
 	ao_index        = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
@@ -198,15 +199,15 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 		}
 	}
 
+
+	for (int sub_iter = 0; sub_iter < num_sub_iters ; sub_iter++) {
+
 #pragma omp target is_device_ptr(                                              \
 		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
 			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range, shell_to_nucl)
 	{
-
-	for (int sub_iter = 0; sub_iter < num_sub_iters ; sub_iter++) {
-
-#pragma omp loop 
+#pragma omp parallel for
 		for (int iter = 0; iter < chunk_size; iter++) {
 
 	    	double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
@@ -349,8 +350,14 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 			// End of ao_polynomial computation (now inlined)
 			// poly_vgl is now set from here
 		}
+}
 
-#pragma omp loop collapse(2) 
+#pragma omp target is_device_ptr(                                              \
+		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
+			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
+			nucl_coord, pows_shared, shell_ang_mom, nucleus_range, shell_to_nucl)
+	{
+#pragma omp parallel for collapse(2) 
 		for (int iter_new = 0; iter_new < chunk_size/nucl_num; iter_new++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
 
