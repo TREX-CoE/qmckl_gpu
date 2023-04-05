@@ -42,7 +42,6 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 									 shell_prim_num, coord, nucl_coord, expo,  \
 									 coef_normalized, shell_vgl, shell_to_nucl)
 	{
-
 #pragma omp teams distribute parallel for simd collapse(2)
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
@@ -342,7 +341,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 		}
 
 
-#pragma omp parallel for collapse(2) 
+#pragma omp loop collapse(2) 
 		for (int iter_new = 0; iter_new < chunk_size/nucl_num; iter_new++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
 
