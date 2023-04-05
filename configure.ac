@@ -169,7 +169,7 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp" = "xyes"], [
 			CFLAGS="$CFLAGS -fopenmp -foffload=-lm"
 			;;
 		*nvc*)
-			CFLAGS="$CFLAGS -mp=gpu"
+			CFLAGS="$CFLAGS -mp=gpu,noautopar"
 			;;
 		*clang*)
 			CFLAGS="$CFLAGS -fopenmp "
@@ -186,7 +186,7 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp_offload" = "xyes"], [
 			CFLAGS="$CFLAGS -fopenmp -foffload=-lm"
 			;;
 		*nvc*)
-			CFLAGS="$CFLAGS -mp=gpu"
+			CFLAGS="$CFLAGS -mp=gpu,noautopar"
 			;;
 		*clang*)
 			CFLAGS="$CFLAGS -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda"
@@ -206,7 +206,7 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc" = "xyes"], [
 			LDFLAGS="$LDFLAGS -lm -fopenacc"
 			;;
 		*nvc*)
-			CFLAGS="$CFLAGS -acc=gpu -ta=nvidia:nordc"
+			CFLAGS="$CFLAGS -acc=gpu,noautopar -ta=nvidia:nordc"
 		;;
 
 		*)
@@ -220,7 +220,7 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc_offload" = "xyes"], [
 			LDFLAGS="$LDFLAGS -lm -fopenacc"
 			;;
 		*nvc*)
-			CFLAGS="$CFLAGS -acc=gpu -ta=nvidia:nordc"
+			CFLAGS="$CFLAGS -acc=gpu,noautopar -ta=nvidia:nordc"
 		;;
 
 		*)
