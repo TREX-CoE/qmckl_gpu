@@ -15,6 +15,7 @@
 #include "qmckl_types.h"
 #include "qmckl_basic_functions.h"
 #include "qmckl_nucleus.h"
+#include "qmckl_electron.h"
 #include "qmckl_context.h"
 #include "qmckl_ao.h"
 #include "qmckl_mo.h"
