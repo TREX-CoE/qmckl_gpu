@@ -135,17 +135,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	const int32_t *restrict shell_ang_mom, const double *restrict ao_factor,
 	double *shell_vgl, double *restrict const ao_vgl) {
 
-	int64_t n_poly;
-	int64_t *lstart;
 	double cutoff = 27.631021115928547;
-
-	double *poly_vgl_shared;
-	int64_t *powers;
-	int64_t *ao_index;
-
-	qmckl_exit_code rc;
-
-	lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Not to exceed GPU memory when allocating poly_vgl
 	// size_t target_chunk = MAX_MEMORY_SIZE / (sizeof(double)*5*ao_num);
@@ -155,10 +145,10 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	int64_t chunk_size = (num_iters < max_chunk_size) ? num_iters : max_chunk_size;
 	int64_t num_sub_iters = (num_iters + chunk_size - 1) / chunk_size;
     int64_t poly_dim = 5 * ao_num * chunk_size;
-	printf("chunk %d\n",chunk_size);
 
-	poly_vgl_shared = qmckl_malloc_device(context, sizeof(double) * poly_dim);
-	ao_index        = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
+	double *poly_vgl_shared = qmckl_malloc_device(context, sizeof(double) * poly_dim);
+	int64_t *ao_index       = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
+	int64_t *lstart         = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Specific calling function
 	int lmax = -1;
@@ -188,8 +178,7 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 	{
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
 			int ishell_start = nucleus_index[inucl];
-			int ishell_end =
-				nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+			int ishell_end = nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
 			for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
 				int l = shell_ang_mom[ishell];
 				ao_index[ishell] = k;
@@ -201,17 +190,19 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 
 	for (int sub_iter = 0; sub_iter < num_sub_iters ; sub_iter++) {
+	    double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
+	    double     (*pows)[chunk_size] = (double(*)[chunk_size]) pows_shared;
 
 #pragma omp target is_device_ptr(                                              \
 		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
-			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
+			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, poly_vgl, pows,     \
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range, shell_to_nucl)
 	{
 #pragma omp parallel for
 		for (int iter = 0; iter < chunk_size; iter++) {
 
-	    	double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
-		   	double     (*pows)[chunk_size] = (double(*)[chunk_size]) pows_shared;
+	    	// double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
+		   	// double     (*pows)[chunk_size] = (double(*)[chunk_size]) pows_shared;
 
 			int step = iter + sub_iter * chunk_size;
 			if (step >= num_iters)
@@ -354,14 +345,14 @@ qmckl_exit_code qmckl_compute_ao_vgl_gaussian_device(
 
 #pragma omp target is_device_ptr(                                              \
 		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
-			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
+			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, poly_vgl, pows,      \
 			nucl_coord, pows_shared, shell_ang_mom, nucleus_range, shell_to_nucl)
 	{
 #pragma omp parallel for collapse(2) 
 		for (int iter_new = 0; iter_new < chunk_size/nucl_num; iter_new++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
 
-		    	double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
+		    	//double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
 	
 				int ipoint = iter_new + chunk_size / nucl_num * sub_iter;
 				int inucl = shell_to_nucl[ishell];
@@ -477,19 +468,19 @@ qmckl_exit_code qmckl_compute_ao_value_gaussian_device(
 	const int32_t *restrict shell_ang_mom, const double *restrict ao_factor,
 	double *shell_vgl, double *restrict const ao_value) {
 
-	int64_t n_poly;
-	int64_t *lstart;
+	// int64_t n_poly;
+	// int64_t *lstart;
 	double cutoff = 27.631021115928547;
 
 	double *poly_vgl_shared;
-	int64_t *powers;
+	//int64_t *powers;
 	int64_t *ao_index;
 
 	qmckl_exit_code rc;
 
 	qmckl_memory_info_struct info;
 
-	lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
+	int64_t *lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Multiply "normal" size by point_num to affect subarrays to each thread
 	poly_vgl_shared =
