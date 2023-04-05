@@ -14,7 +14,8 @@
 void *qmckl_malloc_device(qmckl_context_device context, size_t size) {
 	assert(qmckl_context_check_device(context) != QMCKL_NULL_CONTEXT_DEVICE);
 
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
 	int device_id = qmckl_get_device_id(context);
 
 	/* Allocate memory and zero it */
@@ -33,9 +34,9 @@ void *qmckl_malloc_device(qmckl_context_device context, size_t size) {
 		/* If qmckl_memory_struct is full, reallocate a larger one */
 		if (ctx->memory_device.n_allocated == ctx->memory_device.array_size) {
 			const size_t old_size = ctx->memory_device.array_size;
-			qmckl_memory_info_struct_device *new_array =
-				realloc(ctx->memory_device.element,
-						2L * old_size * sizeof(qmckl_memory_info_struct_device));
+			qmckl_memory_info_struct_device *new_array = realloc(
+				ctx->memory_device.element,
+				2L * old_size * sizeof(qmckl_memory_info_struct_device));
 			if (new_array == NULL) {
 				qmckl_unlock_device(context);
 				free(pointer);
@@ -67,19 +68,20 @@ void *qmckl_malloc_device(qmckl_context_device context, size_t size) {
 }
 
 qmckl_exit_code_device qmckl_free_device(qmckl_context_device context,
-								  void *const ptr) {
+										 void *const ptr) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
-							  "qmckl_free_device", NULL);
+									 "qmckl_free_device", NULL);
 	}
 
 	if (ptr == NULL) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
-							  "qmckl_free_device", "NULL pointer");
+									 "qmckl_free_device", "NULL pointer");
 	}
 
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
 	int device_id = qmckl_get_device_id(context);
 
 	qmckl_lock_device(context);
@@ -95,13 +97,14 @@ qmckl_exit_code_device qmckl_free_device(qmckl_context_device context,
 			/* Not found */
 			qmckl_unlock_device(context);
 			return qmckl_failwith_device(context, QMCKL_FAILURE_DEVICE,
-								  "qmckl_free_device",
-								  "Pointer not found in context");
+										 "qmckl_free_device",
+										 "Pointer not found in context");
 		}
 
 		acc_free(ptr);
 
-		memset(&(ctx->memory_device.element[pos]), 0, sizeof(qmckl_memory_info_struct_device));
+		memset(&(ctx->memory_device.element[pos]), 0,
+			   sizeof(qmckl_memory_info_struct_device));
 		ctx->memory_device.n_allocated -= (size_t)1;
 	}
 	qmckl_unlock_device(context);
@@ -113,22 +116,23 @@ qmckl_exit_code_device qmckl_free_device(qmckl_context_device context,
 // MEMCPYS
 //**********
 
-qmckl_exit_code_device qmckl_memcpy_H2D(qmckl_context_device context, void *const dest,
-								 void *const src, size_t size) {
+qmckl_exit_code_device qmckl_memcpy_H2D(qmckl_context_device context,
+										void *const dest, void *const src,
+										size_t size) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
-							  "qmckl_memcpy_H2D", NULL);
+									 "qmckl_memcpy_H2D", NULL);
 	}
 
 	if (dest == NULL) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
-							  "qmckl_memcpu_H2D", "NULL dest pointer");
+									 "qmckl_memcpu_H2D", "NULL dest pointer");
 	}
 
 	if (src == NULL) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
-							  "qmckl_memcpu_H2D", "NULL src pointer");
+									 "qmckl_memcpu_H2D", "NULL src pointer");
 	}
 
 	int device_id = qmckl_get_device_id(context);
@@ -140,22 +144,23 @@ qmckl_exit_code_device qmckl_memcpy_H2D(qmckl_context_device context, void *cons
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code_device qmckl_memcpy_D2H(qmckl_context_device context, void *const dest,
-								 void *const src, size_t size) {
+qmckl_exit_code_device qmckl_memcpy_D2H(qmckl_context_device context,
+										void *const dest, void *const src,
+										size_t size) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
-							  "qmckl_memcpy_D2H", NULL);
+									 "qmckl_memcpy_D2H", NULL);
 	}
 
 	if (dest == NULL) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
-							  "qmckl_memcpy_D2H", "NULL dest pointer");
+									 "qmckl_memcpy_D2H", "NULL dest pointer");
 	}
 
 	if (src == NULL) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
-							  "qmckl_memcpy_D2H", "NULL src pointer");
+									 "qmckl_memcpy_D2H", "NULL src pointer");
 	}
 
 	int device_id = qmckl_get_device_id(context);
@@ -167,22 +172,22 @@ qmckl_exit_code_device qmckl_memcpy_D2H(qmckl_context_device context, void *cons
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code_device qmckl_memcpy_D2D(qmckl_context_device context, void *dest,
-								 void *src, size_t size) {
+qmckl_exit_code_device qmckl_memcpy_D2D(qmckl_context_device context,
+										void *dest, void *src, size_t size) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
-							  "qmckl_memcpy_D2D", NULL);
+									 "qmckl_memcpy_D2D", NULL);
 	}
 
 	if (dest == NULL) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
-							  "qmckl_memcpy_D2D", "NULL dest pointer");
+									 "qmckl_memcpy_D2D", "NULL dest pointer");
 	}
 
 	if (src == NULL) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
-							  "qmckl_memcpy_D2D", "NULL src pointer");
+									 "qmckl_memcpy_D2D", "NULL src pointer");
 	}
 
 	int device_id = qmckl_get_device_id(context);

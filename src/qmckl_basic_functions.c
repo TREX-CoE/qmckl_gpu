@@ -28,11 +28,13 @@ qmckl_set_error_device(qmckl_context_device context,
 
 	qmckl_lock_device(context);
 	{
-		qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+		qmckl_context_struct_device *const ctx =
+			(qmckl_context_struct_device *)context;
 		assert(ctx != NULL); /* Impossible because the context is valid. */
 
 		ctx->error.exit_code = exit_code;
-		strncpy(ctx->error.function, function_name, QMCKL_MAX_FUN_LEN_DEVICE - 1);
+		strncpy(ctx->error.function, function_name,
+				QMCKL_MAX_FUN_LEN_DEVICE - 1);
 		strncpy(ctx->error.message, message, QMCKL_MAX_MSG_LEN_DEVICE - 1);
 	}
 	qmckl_unlock_device(context);
@@ -61,8 +63,9 @@ qmckl_failwith_device(qmckl_context_device context,
 		return QMCKL_INVALID_CONTEXT_DEVICE;
 
 	if (message == NULL) {
-		qmckl_exit_code_device rc = qmckl_set_error_device(
-			context, exit_code, function, qmckl_string_of_error_device(exit_code));
+		qmckl_exit_code_device rc =
+			qmckl_set_error_device(context, exit_code, function,
+								   qmckl_string_of_error_device(exit_code));
 		assert(rc == QMCKL_SUCCESS_DEVICE);
 	} else {
 		qmckl_exit_code_device rc =

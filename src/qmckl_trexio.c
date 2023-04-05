@@ -968,7 +968,6 @@ trexio_t *qmckl_trexio_open_X_device(char *file_name,
 	return NULL;
 }
 
-
 qmckl_exit_code_device qmckl_trexio_read_device(qmckl_context_device context,
 												char *file_name,
 												int64_t size_max) {

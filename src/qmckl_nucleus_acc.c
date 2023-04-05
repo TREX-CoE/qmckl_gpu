@@ -27,8 +27,9 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 
 	// TODO Manually specify OpenACC clauses
 
-#pragma acc data copy(shell_max_ptr[:1], prim_max_ptr[:1]) deviceptr(          \
-	nucleus_shell_num, nucleus_index, shell_prim_num, prim_num_per_nucleus)
+#pragma acc data copy(shell_max_ptr[ : 1], prim_max_ptr[ : 1])                 \
+	deviceptr(nucleus_shell_num, nucleus_index, shell_prim_num,                \
+				  prim_num_per_nucleus)
 	{
 #pragma acc kernels
 		{
@@ -90,11 +91,11 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 
 	// TODO Manually specify OpenACC clauses
 
-#pragma acc data deviceptr(expo_expo, expo_index, coef, newcoef,               \
-						   nucleus_index, shell_prim_index, nucleus_shell_num, \
-						   exponent, coefficient_normalized, shell_prim_num,   \
-						   expo_per_nucleus_data, coef_per_nucleus_data,       \
-						   prim_num_per_nucleus, newidx)
+#pragma acc data deviceptr(                                                    \
+		expo_expo, expo_index, coef, newcoef, nucleus_index, shell_prim_index, \
+			nucleus_shell_num, exponent, coefficient_normalized,               \
+			shell_prim_num, expo_per_nucleus_data, coef_per_nucleus_data,      \
+			prim_num_per_nucleus, newidx)
 	{
 #pragma acc kernels
 		{
@@ -238,7 +239,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
-							  "qmckl_finalize_nucleus_basis_device", NULL);
+									 "qmckl_finalize_nucleus_basis_device",
+									 NULL);
 	}
 
 	qmckl_context_struct_device *ctx = (qmckl_context_struct_device *)context;
@@ -247,7 +249,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 
 	int64_t nucl_num = 0;
 
-	qmckl_exit_code_device rc = qmckl_get_nucleus_num_device(context, &nucl_num);
+	qmckl_exit_code_device rc =
+		qmckl_get_nucleus_num_device(context, &nucl_num);
 	if (rc != QMCKL_SUCCESS_DEVICE)
 		return rc;
 
@@ -257,8 +260,9 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 			context, (ctx->nucleus.num + (int64_t)1) * sizeof(int64_t));
 
 		if (ctx->ao_basis.nucleus_prim_index == NULL) {
-			return qmckl_failwith_device(context, QMCKL_ALLOCATION_FAILED_DEVICE,
-								  "ao_basis.nucleus_prim_index", NULL);
+			return qmckl_failwith_device(context,
+										 QMCKL_ALLOCATION_FAILED_DEVICE,
+										 "ao_basis.nucleus_prim_index", NULL);
 		}
 
 		// Extract arrays from context
@@ -292,9 +296,9 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 			context, ctx->ao_basis.prim_num * sizeof(double));
 
 		if (ctx->ao_basis.coefficient_normalized == NULL) {
-			return qmckl_failwith_device(context,
-								  QMCKL_ALLOCATION_FAILED_DEVICE,
-								  "ao_basis.coefficient_normalized", NULL);
+			return qmckl_failwith_device(
+				context, QMCKL_ALLOCATION_FAILED_DEVICE,
+				"ao_basis.coefficient_normalized", NULL);
 		}
 
 		// Extract arrays from context
@@ -308,8 +312,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 		int shell_num = ctx->ao_basis.shell_num;
 
 #pragma acc data deviceptr(shell_prim_index, shell_prim_num,                   \
-						   coefficient_normalized, coefficient, prim_factor,   \
-						   shell_factor)
+							   coefficient_normalized, coefficient,            \
+							   prim_factor, shell_factor)
 		{
 #pragma acc kernels
 			{
@@ -334,8 +338,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 
 		if (ctx->ao_basis.nucleus_max_ang_mom == NULL) {
 			return qmckl_failwith_device(context,
-								  QMCKL_ALLOCATION_FAILED_DEVICE,
-								  "ao_basis.nucleus_max_ang_mom", NULL);
+										 QMCKL_ALLOCATION_FAILED_DEVICE,
+										 "ao_basis.nucleus_max_ang_mom", NULL);
 		}
 
 		// Extract arrays from context
@@ -345,7 +349,7 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 		int32_t *shell_ang_mom = ctx->ao_basis.shell_ang_mom;
 
 #pragma acc data deviceptr(nucleus_max_ang_mom, nucleus_index,                 \
-						   nucleus_shell_num, shell_ang_mom)
+							   nucleus_shell_num, shell_ang_mom)
 		{
 #pragma acc kernels
 			{
@@ -374,8 +378,9 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 				context, ctx->nucleus.num * sizeof(double));
 
 			if (ctx->ao_basis.nucleus_range == NULL) {
-				return qmckl_failwith_device(context, QMCKL_ALLOCATION_FAILED_DEVICE,
-									  "ao_basis.nucleus_range", NULL);
+				return qmckl_failwith_device(context,
+											 QMCKL_ALLOCATION_FAILED_DEVICE,
+											 "ao_basis.nucleus_range", NULL);
 			}
 
 			// Extract arrays from context
@@ -389,7 +394,7 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 			int nucleus_num = ctx->nucleus.num;
 
 #pragma acc data deviceptr(nucleus_range, nucleus_index, nucleus_shell_num,    \
-						   shell_prim_index, shell_prim_num, exponent)
+							   shell_prim_index, shell_prim_num, exponent)
 			{
 #pragma acc kernels
 				{

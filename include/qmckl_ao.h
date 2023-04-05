@@ -21,8 +21,8 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	double *shell_vgl);
 
 qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
-	const qmckl_context_device context, const int64_t ao_num, const int64_t shell_num,
-	const int64_t point_num, const int64_t nucl_num,
+	const qmckl_context_device context, const int64_t ao_num,
+	const int64_t shell_num, const int64_t point_num, const int64_t nucl_num,
 	const double *restrict coord, const double *restrict nucl_coord,
 	const int64_t *restrict nucleus_index,
 	const int64_t *restrict nucleus_shell_num, const double *nucleus_range,
@@ -31,8 +31,8 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 	double *shell_vgl, double *restrict const ao_vgl);
 
 qmckl_exit_code_device qmckl_compute_ao_value_device(
-	const qmckl_context_device context, const int64_t ao_num, const int64_t shell_num,
-	const int64_t point_num, const int64_t nucl_num,
+	const qmckl_context_device context, const int64_t ao_num,
+	const int64_t shell_num, const int64_t point_num, const int64_t nucl_num,
 	const double *restrict coord, const double *restrict nucl_coord,
 	const int64_t *restrict nucleus_index,
 	const int64_t *restrict nucleus_shell_num, const double *nucleus_range,
@@ -49,13 +49,12 @@ qmckl_provide_ao_basis_shell_vgl_device(qmckl_context_device context);
 qmckl_exit_code_device
 qmckl_provide_ao_basis_ao_value_device(qmckl_context_device context);
 
-qmckl_exit_code_device qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
-												 double *const ao_vgl,
-												 const int64_t size_max);
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
+								 double *const ao_vgl, const int64_t size_max);
 
-qmckl_exit_code_device qmckl_get_ao_basis_ao_value_device(qmckl_context_device context,
-												   double *const ao_vgl,
-												   const int64_t size_max);
+qmckl_exit_code_device qmckl_get_ao_basis_ao_value_device(
+	qmckl_context_device context, double *const ao_vgl, const int64_t size_max);
 qmckl_exit_code_device
 qmckl_get_ao_basis_ao_num_device(const qmckl_context_device context,
 								 int64_t *const ao_num);
@@ -171,6 +170,5 @@ qmckl_get_ao_basis_prim_factor_device(qmckl_context_device context,
 qmckl_exit_code_device
 qmckl_get_ao_basis_ao_factor_device(qmckl_context_device context,
 									double *ao_factor, int64_t ao_num);
-
 
 bool qmckl_ao_basis_provided(qmckl_context_device context);

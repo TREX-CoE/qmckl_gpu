@@ -8,12 +8,12 @@ bool qmckl_electron_provided_device(qmckl_context_device context) {
 		return false;
 	}
 
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
 	return ctx->electron.provided;
 }
-
 
 qmckl_exit_code_device
 qmckl_set_electron_num_device(qmckl_context_device context, int64_t up_num,
@@ -108,11 +108,12 @@ qmckl_get_electron_num_device(const qmckl_context_device context,
 
 	if (num == NULL) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
-							  "qmckl_get_electron_num",
-							  "num is a null pointer");
+									 "qmckl_get_electron_num",
+									 "num is a null pointer");
 	}
 
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
 	int32_t mask = 1 << 0;

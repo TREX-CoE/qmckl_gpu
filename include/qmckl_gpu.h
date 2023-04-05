@@ -21,7 +21,6 @@
 // TYPES
 //**********
 
-
 #define VALID_TAG_DEVICE 0xBEEFFACE
 #define INVALID_TAG_DEVICE 0xDEADBEEF
 
@@ -65,7 +64,6 @@
 #define QMCKL_ALREADY_SET_DEVICE ((qmckl_exit_code_device)108)
 #define QMCKL_INVALID_EXIT_CODE_DEVICE ((qmckl_exit_code_device)109)
 
-
 /* Error type */
 
 typedef int32_t qmckl_exit_code_device;
@@ -78,7 +76,6 @@ typedef struct qmckl_error_struct_device {
 
 } qmckl_error_struct_device;
 
-
 /* Numprec */
 
 typedef struct qmckl_numprec_struct_device {
@@ -87,7 +84,6 @@ typedef struct qmckl_numprec_struct_device {
 } qmckl_numprec_struct_device;
 
 #define QMCKL_NULL_CONTEXT_DEVICE (qmckl_context_device)0
-
 
 /* BLAS */
 
@@ -111,7 +107,6 @@ typedef struct qmckl_tensor_device {
 	int64_t size[QMCKL_TENSOR_ORDER_MAX_DEVICE];
 } qmckl_tensor_device;
 
-
 /* Memory */
 
 typedef struct qmckl_memory_info_struct {
@@ -127,7 +122,6 @@ typedef struct qmckl_memory_struct_device {
 
 static const qmckl_memory_info_struct_device
 	qmckl_memory_info_struct_zero_device = {.size = (size_t)0, .pointer = NULL};
-
 
 /* Context */
 
@@ -381,8 +375,6 @@ typedef struct qmckl_context_struct_device {
 
 } qmckl_context_struct_device;
 
-
-
 //**********
 // BASIC FUNCS
 //**********
@@ -421,7 +413,6 @@ qmckl_exit_code_device qmckl_memcpy_D2D(qmckl_context_device context,
 										void *const dest, void *const src,
 										size_t size);
 
-
 //**********
 // BLAS
 //**********
@@ -429,28 +420,28 @@ qmckl_exit_code_device qmckl_memcpy_D2D(qmckl_context_device context,
 qmckl_vector_device qmckl_vector_alloc_device(qmckl_context_device context,
 											  const int64_t size);
 
-qmckl_exit_code_device
-qmckl_vector_free_device(qmckl_context_device context,
-								qmckl_vector_device *vector);
+qmckl_exit_code_device qmckl_vector_free_device(qmckl_context_device context,
+												qmckl_vector_device *vector);
 
-qmckl_exit_code_device qmckl_vector_of_double_device(
-	const qmckl_context_device context, const double *target,
-	const int64_t size_max, qmckl_vector_device *vector_out);
+qmckl_exit_code_device
+qmckl_vector_of_double_device(const qmckl_context_device context,
+							  const double *target, const int64_t size_max,
+							  qmckl_vector_device *vector_out);
 
 qmckl_matrix_device qmckl_matrix_alloc_device(qmckl_context_device context,
 											  const int64_t size1,
 											  const int64_t size2);
 
-qmckl_exit_code_device
-qmckl_matrix_free_device(qmckl_context_device context,
-								qmckl_matrix_device *matrix);
+qmckl_exit_code_device qmckl_matrix_free_device(qmckl_context_device context,
+												qmckl_matrix_device *matrix);
 
 qmckl_matrix_device qmckl_matrix_set_device(qmckl_matrix_device matrix,
 											double value);
 
-qmckl_exit_code_device qmckl_matrix_of_double_device(
-	const qmckl_context_device context, const double *target,
-	const int64_t size_max, qmckl_matrix_device *matrix_out);
+qmckl_exit_code_device
+qmckl_matrix_of_double_device(const qmckl_context_device context,
+							  const double *target, const int64_t size_max,
+							  qmckl_matrix_device *matrix_out);
 
 qmckl_exit_code_device qmckl_transpose_device(qmckl_context_device context,
 											  const qmckl_matrix_device A,
@@ -460,13 +451,11 @@ qmckl_tensor_device qmckl_tensor_alloc_device(qmckl_context_device context,
 											  const int64_t order,
 											  const int64_t *size);
 
-qmckl_exit_code_device
-qmckl_tensor_free_device(qmckl_context_device context,
-								qmckl_tensor_device *tensor);
+qmckl_exit_code_device qmckl_tensor_free_device(qmckl_context_device context,
+												qmckl_tensor_device *tensor);
 
 qmckl_tensor_device qmckl_tensor_set_device(qmckl_tensor_device tensor,
 											double value);
-
 
 //**********
 // CONTEXT
@@ -498,7 +487,6 @@ qmckl_context_check_device(const qmckl_context_device context);
 void qmckl_lock_device(qmckl_context_device context);
 void qmckl_unlock_device(qmckl_context_device context);
 
-
 //**********
 // POINT
 //**********
@@ -506,7 +494,6 @@ void qmckl_unlock_device(qmckl_context_device context);
 qmckl_exit_code_device qmckl_set_point_device(qmckl_context_device context,
 											  char transp, int64_t num,
 											  double *coord, int64_t size_max);
-
 
 //**********
 // NUCLEUS
@@ -535,7 +522,6 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context);
 qmckl_exit_code_device
 qmckl_finalize_nucleus_basis_device(qmckl_context_device context);
 
-
 //**********
 // ELECTRON
 //**********
@@ -553,7 +539,6 @@ qmckl_set_electron_coord_device(qmckl_context_device context, char transp,
 								int64_t walk_num, double *coord,
 								int64_t size_max);
 
-
 //**********
 // AO
 //**********
@@ -566,8 +551,8 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	double *shell_vgl);
 
 qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
-	const qmckl_context_device context, const int64_t ao_num, const int64_t shell_num,
-	const int64_t point_num, const int64_t nucl_num,
+	const qmckl_context_device context, const int64_t ao_num,
+	const int64_t shell_num, const int64_t point_num, const int64_t nucl_num,
 	const double *restrict coord, const double *restrict nucl_coord,
 	const int64_t *restrict nucleus_index,
 	const int64_t *restrict nucleus_shell_num, const double *nucleus_range,
@@ -576,8 +561,8 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 	double *shell_vgl, double *restrict const ao_vgl);
 
 qmckl_exit_code_device qmckl_compute_ao_value_device(
-	const qmckl_context_device context, const int64_t ao_num, const int64_t shell_num,
-	const int64_t point_num, const int64_t nucl_num,
+	const qmckl_context_device context, const int64_t ao_num,
+	const int64_t shell_num, const int64_t point_num, const int64_t nucl_num,
 	const double *restrict coord, const double *restrict nucl_coord,
 	const int64_t *restrict nucleus_index,
 	const int64_t *restrict nucleus_shell_num, const double *nucleus_range,
@@ -594,13 +579,12 @@ qmckl_provide_ao_basis_shell_vgl_device(qmckl_context_device context);
 qmckl_exit_code_device
 qmckl_provide_ao_basis_ao_value_device(qmckl_context_device context);
 
-qmckl_exit_code_device qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
-												 double *const ao_vgl,
-												 const int64_t size_max);
+qmckl_exit_code_device
+qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
+								 double *const ao_vgl, const int64_t size_max);
 
-qmckl_exit_code_device qmckl_get_ao_basis_ao_value_device(qmckl_context_device context,
-												   double *const ao_vgl,
-												   const int64_t size_max);
+qmckl_exit_code_device qmckl_get_ao_basis_ao_value_device(
+	qmckl_context_device context, double *const ao_vgl, const int64_t size_max);
 qmckl_exit_code_device
 qmckl_get_ao_basis_ao_num_device(const qmckl_context_device context,
 								 int64_t *const ao_num);
@@ -717,38 +701,38 @@ qmckl_exit_code_device
 qmckl_get_ao_basis_ao_factor_device(qmckl_context_device context,
 									double *ao_factor, int64_t ao_num);
 
-
 bool qmckl_ao_basis_provided(qmckl_context_device context);
-
 
 //**********
 // MO
 //**********
 
-qmckl_exit_code_device qmckl_get_mo_basis_mo_vgl_device(qmckl_context_device context,
-												 double *const mo_vgl,
-												 const int64_t size_max);
+qmckl_exit_code_device
+qmckl_get_mo_basis_mo_vgl_device(qmckl_context_device context,
+								 double *const mo_vgl, const int64_t size_max);
 
-qmckl_exit_code_device qmckl_get_mo_basis_mo_value_device(qmckl_context_device context,
-												   double *mo_value,
-												   int64_t size_max);
+qmckl_exit_code_device
+qmckl_get_mo_basis_mo_value_device(qmckl_context_device context,
+								   double *mo_value, int64_t size_max);
 
 qmckl_exit_code_device
 qmckl_get_mo_basis_mo_value_inplace_device(qmckl_context_device context,
 										   double *mo_value, int64_t size_max);
 
-qmckl_exit_code_device qmckl_provide_mo_basis_mo_value_device(qmckl_context_device context);
+qmckl_exit_code_device
+qmckl_provide_mo_basis_mo_value_device(qmckl_context_device context);
 
-qmckl_exit_code_device qmckl_provide_mo_basis_mo_vgl_device(qmckl_context_device context);
+qmckl_exit_code_device
+qmckl_provide_mo_basis_mo_vgl_device(qmckl_context_device context);
 
 qmckl_exit_code_device qmckl_compute_mo_basis_mo_value_device(
-	qmckl_context_device context, int64_t ao_num, int64_t mo_num, int64_t point_num,
-	double *restrict coefficient_t, double *restrict ao_value,
-	double *restrict mo_value);
+	qmckl_context_device context, int64_t ao_num, int64_t mo_num,
+	int64_t point_num, double *restrict coefficient_t,
+	double *restrict ao_value, double *restrict mo_value);
 
 qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_device(
-	qmckl_context_device context, int64_t ao_num, int64_t mo_num, int64_t point_num,
-	double *restrict coefficient_t, double *restrict ao_vgl,
+	qmckl_context_device context, int64_t ao_num, int64_t mo_num,
+	int64_t point_num, double *restrict coefficient_t, double *restrict ao_vgl,
 	double *restrict mo_vgl);
 
 qmckl_exit_code_device
@@ -759,13 +743,10 @@ qmckl_exit_code_device
 qmckl_set_mo_basis_coefficient_device(qmckl_context_device context,
 									  double *coefficient);
 
-
 //**********
 // JASTROW
 //**********
 // TODO
-
-
 
 //****************************
 // SHERMAN-MORRISON & WOODBURY

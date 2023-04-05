@@ -7,8 +7,8 @@
 /* mo_vgl */
 
 qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_device(
-	qmckl_context_device context, int64_t ao_num, int64_t mo_num, int64_t point_num,
-	double *restrict coefficient_t, double *restrict ao_vgl,
+	qmckl_context_device context, int64_t ao_num, int64_t mo_num,
+	int64_t point_num, double *restrict coefficient_t, double *restrict ao_vgl,
 	double *restrict mo_vgl) {
 
 	assert(context != QMCKL_NULL_CONTEXT_DEVICE);
@@ -62,9 +62,9 @@ qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_device(
 /* mo_value */
 
 qmckl_exit_code_device qmckl_compute_mo_basis_mo_value_device(
-	qmckl_context_device context, int64_t ao_num, int64_t mo_num, int64_t point_num,
-	double *restrict coefficient_t, double *restrict ao_value,
-	double *restrict mo_value) {
+	qmckl_context_device context, int64_t ao_num, int64_t mo_num,
+	int64_t point_num, double *restrict coefficient_t,
+	double *restrict ao_value, double *restrict mo_value) {
 	assert(context != QMCKL_NULL_CONTEXT_DEVICE);
 
 	double *av1_shared =
@@ -73,7 +73,7 @@ qmckl_exit_code_device qmckl_compute_mo_basis_mo_value_device(
 		qmckl_malloc_device(context, point_num * ao_num * sizeof(int64_t));
 
 #pragma acc data deviceptr(coefficient_t, ao_value, mo_value, idx_shared,      \
-						   av1_shared)
+							   av1_shared)
 	{
 #pragma acc parallel loop gang worker vector
 		for (int64_t ipoint = 0; ipoint < point_num; ++ipoint) {
@@ -129,16 +129,16 @@ qmckl_exit_code_device qmckl_compute_mo_basis_mo_value_device(
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-
 //**********
 // FINALIZE MO BASIS
 //**********
 
-qmckl_exit_code_device qmckl_finalize_mo_basis_device(qmckl_context_device context) {
+qmckl_exit_code_device
+qmckl_finalize_mo_basis_device(qmckl_context_device context) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
-							  "qmckl_finalize_mo_basis_device", NULL);
+									 "qmckl_finalize_mo_basis_device", NULL);
 	}
 
 	qmckl_context_struct_device *ctx = (qmckl_context_struct_device *)context;
@@ -148,7 +148,7 @@ qmckl_exit_code_device qmckl_finalize_mo_basis_device(qmckl_context_device conte
 		context, ctx->ao_basis.ao_num * ctx->mo_basis.mo_num * sizeof(double));
 	if (new_array == NULL) {
 		return qmckl_failwith_device(context, QMCKL_ALLOCATION_FAILED_DEVICE,
-							  "qmckl_finalize_mo_basis_device", NULL);
+									 "qmckl_finalize_mo_basis_device", NULL);
 	}
 
 	assert(ctx->mo_basis.coefficient != NULL);
@@ -157,8 +157,8 @@ qmckl_exit_code_device qmckl_finalize_mo_basis_device(qmckl_context_device conte
 		qmckl_exit_code_device rc =
 			qmckl_free_device(context, ctx->mo_basis.coefficient_t);
 		if (rc != QMCKL_SUCCESS_DEVICE) {
-			return qmckl_failwith_device(context, rc,
-								  "qmckl_finalize_mo_basis_device", NULL);
+			return qmckl_failwith_device(
+				context, rc, "qmckl_finalize_mo_basis_device", NULL);
 		}
 	}
 

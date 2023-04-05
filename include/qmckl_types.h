@@ -50,7 +50,6 @@
 #define QMCKL_ALREADY_SET_DEVICE ((qmckl_exit_code_device)108)
 #define QMCKL_INVALID_EXIT_CODE_DEVICE ((qmckl_exit_code_device)109)
 
-
 /* Error type */
 
 typedef int32_t qmckl_exit_code_device;
@@ -63,7 +62,6 @@ typedef struct qmckl_error_struct_device {
 
 } qmckl_error_struct_device;
 
-
 /* Numprec */
 
 typedef struct qmckl_numprec_struct_device {
@@ -72,7 +70,6 @@ typedef struct qmckl_numprec_struct_device {
 } qmckl_numprec_struct_device;
 
 #define QMCKL_NULL_CONTEXT_DEVICE (qmckl_context_device)0
-
 
 /* BLAS */
 
@@ -96,7 +93,6 @@ typedef struct qmckl_tensor_device {
 	int64_t size[QMCKL_TENSOR_ORDER_MAX_DEVICE];
 } qmckl_tensor_device;
 
-
 /* Memory */
 
 typedef struct qmckl_memory_info_struct {
@@ -112,7 +108,6 @@ typedef struct qmckl_memory_struct_device {
 
 static const qmckl_memory_info_struct_device
 	qmckl_memory_info_struct_zero_device = {.size = (size_t)0, .pointer = NULL};
-
 
 /* Context */
 
@@ -165,64 +160,6 @@ typedef struct qmckl_determinant_struct_device {
 	int32_t uninitialized;
 	bool provided;
 } qmckl_determinant_struct_device;
-
-typedef struct qmckl_jastrow_struct_device {
-	int32_t uninitialized;
-	int64_t aord_num;
-	int64_t bord_num;
-	int64_t cord_num;
-	int64_t type_nucl_num;
-	uint64_t asymp_jasa_date;
-	uint64_t asymp_jasb_date;
-	uint64_t tmp_c_date;
-	uint64_t dtmp_c_date;
-	uint64_t factor_ee_date;
-	uint64_t factor_en_date;
-	uint64_t factor_een_date;
-	uint64_t factor_ee_deriv_e_date;
-	uint64_t factor_en_deriv_e_date;
-	uint64_t factor_een_deriv_e_date;
-	double rescale_factor_ee;
-	double *rescale_factor_en;
-	int64_t *type_nucl_vector;
-	double *a_vector;
-	double *b_vector;
-	double *c_vector;
-	double *asymp_jasa;
-	double *asymp_jasb;
-	double *factor_ee;
-	double *factor_en;
-	double *factor_een;
-	double *factor_ee_deriv_e;
-	double *factor_en_deriv_e;
-	double *factor_een_deriv_e;
-	int64_t dim_c_vector;
-	uint64_t dim_c_vector_date;
-	double *c_vector_full;
-	uint64_t c_vector_full_date;
-	int64_t *lkpm_combined_index;
-	uint64_t lkpm_combined_index_date;
-	double *tmp_c;
-	double *dtmp_c;
-	uint64_t ee_distance_rescaled_date;
-	uint64_t ee_distance_rescaled_deriv_e_date;
-	uint64_t en_distance_rescaled_date;
-	uint64_t en_distance_rescaled_deriv_e_date;
-	double *ee_distance_rescaled;
-	double *ee_distance_rescaled_deriv_e;
-	double *en_distance_rescaled;
-	double *en_distance_rescaled_deriv_e;
-	double *een_rescaled_e;
-	double *een_rescaled_n;
-	uint64_t een_rescaled_e_date;
-	uint64_t een_rescaled_n_date;
-	double *een_rescaled_e_deriv_e;
-	double *een_rescaled_n_deriv_e;
-	uint64_t een_rescaled_e_deriv_e_date;
-	uint64_t een_rescaled_n_deriv_e_date;
-	bool provided;
-	char *type;
-} qmckl_jastrow_struct_device;
 
 typedef struct qmckl_mo_basis_struct_device {
 	int64_t mo_num;
@@ -318,6 +255,68 @@ typedef struct qmckl_electron_struct_device {
 	bool provided;
 } qmckl_electron_struct_device;
 
+typedef struct qmckl_jastrow_struct_device {
+	int64_t *restrict lkpm_combined_index;
+	int64_t *restrict type_nucl_vector;
+	double *restrict asymp_jasa;
+	double *restrict asymp_jasb;
+	double *restrict a_vector;
+	double *restrict b_vector;
+	double *restrict c_vector;
+	double *restrict c_vector_full;
+	double *restrict dtmp_c;
+	double *restrict ee_distance_rescaled;
+	double *restrict ee_distance_rescaled_deriv_e;
+	double *restrict een_rescaled_e;
+	double *restrict een_rescaled_e_deriv_e;
+	double *restrict een_rescaled_n;
+	double *restrict een_rescaled_n_deriv_e;
+	double *restrict en_distance_rescaled;
+	double *restrict en_distance_rescaled_deriv_e;
+	double *restrict factor_ee;
+	double *restrict factor_ee_deriv_e;
+	double *restrict factor_een;
+	double *restrict factor_een_deriv_e;
+	double *restrict factor_en;
+	double *restrict factor_en_deriv_e;
+	double *restrict rescale_factor_en;
+	double *restrict tmp_c;
+	double *restrict value;
+	double *restrict gl;
+	int64_t aord_num;
+	int64_t bord_num;
+	int64_t cord_num;
+	int64_t dim_c_vector;
+	int64_t type_nucl_num;
+	uint64_t asymp_jasa_date;
+	uint64_t asymp_jasb_date;
+	uint64_t c_vector_full_date;
+	uint64_t dim_c_vector_date;
+	uint64_t dtmp_c_date;
+	uint64_t ee_distance_rescaled_date;
+	uint64_t ee_distance_rescaled_deriv_e_date;
+	uint64_t een_rescaled_e_date;
+	uint64_t een_rescaled_e_deriv_e_date;
+	uint64_t een_rescaled_n_date;
+	uint64_t een_rescaled_n_deriv_e_date;
+	uint64_t en_distance_rescaled_date;
+	uint64_t en_distance_rescaled_deriv_e_date;
+	uint64_t factor_ee_date;
+	uint64_t factor_ee_deriv_e_date;
+	uint64_t factor_een_date;
+	uint64_t factor_een_deriv_e_date;
+	uint64_t factor_en_date;
+	uint64_t factor_en_deriv_e_date;
+	uint64_t lkpm_combined_index_date;
+	uint64_t tmp_c_date;
+	uint64_t value_date;
+	uint64_t gl_date;
+	double rescale_factor_ee;
+	int32_t uninitialized;
+	bool provided;
+
+} qmckl_jastrow_struct_device;
+
 typedef struct qmckl_context_struct_device {
 	/* -- State of the library -- */
 
@@ -352,7 +351,6 @@ typedef struct qmckl_context_struct_device {
 	qmckl_electron_struct_device electron;
 	qmckl_ao_basis_struct_device ao_basis;
 	qmckl_mo_basis_struct_device mo_basis;
-	// TODO When available, add the Jastrow struct
 	qmckl_jastrow_struct_device jastrow;
 	qmckl_determinant_struct_device det;
 	qmckl_local_energy_struct_device local_energy;

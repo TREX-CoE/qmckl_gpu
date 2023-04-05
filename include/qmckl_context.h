@@ -19,7 +19,6 @@
 #include "qmckl_memory.h"
 #include "qmckl_blas.h"
 
-
 qmckl_exit_code_device
 qmckl_context_touch_device(const qmckl_context_device context);
 

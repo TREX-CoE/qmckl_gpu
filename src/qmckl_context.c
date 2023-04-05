@@ -7,22 +7,20 @@
 //**********
 
 qmckl_exit_code_device
-qmckl_context_touch_device(const qmckl_context_device context)
-{
+qmckl_context_touch_device(const qmckl_context_device context) {
 
-  if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
-    return qmckl_failwith_device( context,
-                           QMCKL_INVALID_CONTEXT_DEVICE,
-                           "qmckl_context_touch_device",
-                           NULL);
-  }
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
+									 "qmckl_context_touch_device", NULL);
+	}
 
-  qmckl_context_struct_device* const ctx = (qmckl_context_struct_device*) context;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
 
-  ctx->electron.walker_old = ctx->electron.walker;
-  ctx->date += 1UL;
-  ctx->point.date = ctx-> date;
-  return QMCKL_SUCCESS_DEVICE;
+	ctx->electron.walker_old = ctx->electron.walker;
+	ctx->date += 1UL;
+	ctx->point.date = ctx->date;
+	return QMCKL_SUCCESS_DEVICE;
 }
 
 qmckl_context_device
@@ -80,7 +78,8 @@ qmckl_init_electron_device(qmckl_context_device context) {
 		return false;
 	}
 
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
 	ctx->electron.uninitialized = (1 << 1) - 1;
@@ -94,7 +93,8 @@ qmckl_exit_code_device qmckl_init_nucleus_device(qmckl_context_device context) {
 		return false;
 	}
 
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
 	ctx->nucleus.uninitialized = (1 << 3) - 1;
@@ -110,7 +110,8 @@ qmckl_exit_code_device qmckl_init_point_device(qmckl_context_device context) {
 		return false;
 	}
 
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
 	memset(&(ctx->point), 0, sizeof(qmckl_point_struct_device));
@@ -118,13 +119,15 @@ qmckl_exit_code_device qmckl_init_point_device(qmckl_context_device context) {
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code_device qmckl_init_mo_basis_device(qmckl_context_device context) {
+qmckl_exit_code_device
+qmckl_init_mo_basis_device(qmckl_context_device context) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return false;
 	}
 
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
 	ctx->mo_basis.uninitialized = (1 << 2) - 1;
@@ -132,13 +135,15 @@ qmckl_exit_code_device qmckl_init_mo_basis_device(qmckl_context_device context) 
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code_device qmckl_init_determinant_device(qmckl_context_device context) {
+qmckl_exit_code_device
+qmckl_init_determinant_device(qmckl_context_device context) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return false;
 	}
 
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
 	ctx->det.uninitialized = (1 << 5) - 1;
@@ -152,7 +157,8 @@ qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context) {
 		return false;
 	}
 
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
 	ctx->jastrow.uninitialized = (1 << 10) - 1;
@@ -166,7 +172,6 @@ qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context) {
 
 	return QMCKL_SUCCESS_DEVICE;
 }
-
 
 qmckl_context_device qmckl_context_create_device(int device_id) {
 

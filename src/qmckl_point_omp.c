@@ -1,8 +1,8 @@
 #include "../include/qmckl_point.h"
 
 qmckl_exit_code_device qmckl_set_point_device(qmckl_context_device context,
-									   char transp, int64_t num, double *coord,
-									   int64_t size_max) {
+											  char transp, int64_t num,
+											  double *coord, int64_t size_max) {
 
 	size_t device_id = qmckl_get_device_id(context);
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
@@ -11,19 +11,20 @@ qmckl_exit_code_device qmckl_set_point_device(qmckl_context_device context,
 
 	if (size_max < 3 * num) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_4_DEVICE,
-							  "qmckl_set_point_device", "Array too small");
+									 "qmckl_set_point_device",
+									 "Array too small");
 	}
 
 	if (transp != 'N' && transp != 'T') {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
-							  "qmckl_set_point_device",
-							  "transp should be 'N' or 'T'");
+									 "qmckl_set_point_device",
+									 "transp should be 'N' or 'T'");
 	}
 
 	if (coord == NULL) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
-							  "qmckl_set_point_device",
-							  "coord is a NULL pointer");
+									 "qmckl_set_point_device",
+									 "coord is a NULL pointer");
 	}
 
 	qmckl_context_struct_device *ctx = (qmckl_context_struct_device *)context;
@@ -40,8 +41,8 @@ qmckl_exit_code_device qmckl_set_point_device(qmckl_context_device context,
 		ctx->point.coord = qmckl_matrix_alloc_device(context, num, 3);
 		if (ctx->point.coord.data == NULL) {
 			return qmckl_failwith_device(context,
-								  QMCKL_ALLOCATION_FAILED_DEVICE, "qmckl_set_point",
-								  NULL);
+										 QMCKL_ALLOCATION_FAILED_DEVICE,
+										 "qmckl_set_point", NULL);
 		}
 	};
 

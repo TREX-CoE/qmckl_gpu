@@ -8,12 +8,12 @@ bool qmckl_nucleus_provided_device(qmckl_context_device context) {
 		return false;
 	}
 
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
 	return ctx->nucleus.provided;
 }
-
 
 qmckl_exit_code_device
 qmckl_set_nucleus_num_device(qmckl_context_device context, int64_t num) {

@@ -23,9 +23,10 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	// TODO : Use numerical precision here
 	cutoff = 27.631021115928547; //-dlog(1.d-12)
 
-#pragma omp target is_device_ptr(                                              \
-	nucleus_shell_num, nucleus_index, nucleus_range, shell_prim_index,         \
-	shell_prim_num, coord, nucl_coord, expo, coef_normalized, shell_vgl)
+#pragma omp target is_device_ptr(nucleus_shell_num, nucleus_index,             \
+									 nucleus_range, shell_prim_index,          \
+									 shell_prim_num, coord, nucl_coord, expo,  \
+									 coef_normalized, shell_vgl)
 	{
 
 #pragma omp teams distribute parallel for simd collapse(2)
@@ -117,8 +118,8 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 /* ao_vgl */
 
 qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
-	const qmckl_context_device context, const int64_t ao_num, const int64_t shell_num,
-	const int64_t point_num, const int64_t nucl_num,
+	const qmckl_context_device context, const int64_t ao_num,
+	const int64_t shell_num, const int64_t point_num, const int64_t nucl_num,
 	const double *restrict coord, const double *restrict nucl_coord,
 	const int64_t *restrict nucleus_index,
 	const int64_t *restrict nucleus_shell_num, const double *nucleus_range,
@@ -167,8 +168,8 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 
 	int k = 1;
 #pragma omp target is_device_ptr(nucleus_index, nucleus_shell_num,             \
-								 shell_ang_mom, ao_index, lstart) map(tofrom   \
-																	  : k)
+									 shell_ang_mom, ao_index, lstart)          \
+	map(tofrom : k)
 	{
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
 			int ishell_start = nucleus_index[inucl];
@@ -183,9 +184,9 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 	}
 
 #pragma omp target is_device_ptr(                                              \
-	ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,           \
-	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
-	pows_shared, shell_ang_mom, nucleus_range)
+		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
+			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
+			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 	{
 #pragma omp teams distribute parallel for simd // private(pows, poly_vgl)
 
@@ -417,8 +418,8 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 /* ao_value */
 
 qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
-	const qmckl_context_device context, const int64_t ao_num, const int64_t shell_num,
-	const int64_t point_num, const int64_t nucl_num,
+	const qmckl_context_device context, const int64_t ao_num,
+	const int64_t shell_num, const int64_t point_num, const int64_t nucl_num,
 	const double *restrict coord, const double *restrict nucl_coord,
 	const int64_t *restrict nucleus_index,
 	const int64_t *restrict nucleus_shell_num, const double *nucleus_range,
@@ -468,8 +469,8 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 
 	int k = 1;
 #pragma omp target is_device_ptr(nucleus_index, nucleus_shell_num,             \
-								 shell_ang_mom, ao_index, lstart) map(tofrom   \
-																	  : k)
+									 shell_ang_mom, ao_index, lstart)          \
+	map(tofrom : k)
 	{
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
 			int ishell_start = nucleus_index[inucl];
@@ -484,9 +485,9 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 	}
 
 #pragma omp target is_device_ptr(                                              \
-	ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,         \
-	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
-	pows_shared, shell_ang_mom, nucleus_range)
+		ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,     \
+			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
+			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
 	{
 		// #pragma omp teams distribute parallel for
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
@@ -670,21 +671,23 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 
 /* ao_value */
 
-qmckl_exit_code_device qmckl_provide_ao_basis_ao_value_device(qmckl_context_device context) {
+qmckl_exit_code_device
+qmckl_provide_ao_basis_ao_value_device(qmckl_context_device context) {
 
 	qmckl_exit_code_device rc = QMCKL_SUCCESS_DEVICE;
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
-							  "qmckl_provide_ao_basis_ao_value", NULL);
+									 "qmckl_provide_ao_basis_ao_value", NULL);
 	}
 
-	qmckl_context_struct_device *const ctx = (qmckl_context_struct_device *)context;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
 	assert(ctx != NULL);
 
 	if (!ctx->ao_basis.provided) {
 		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
-							  "qmckl_provide_ao_basis_ao_value", NULL);
+									 "qmckl_provide_ao_basis_ao_value", NULL);
 	}
 
 	/* Compute if necessary */
@@ -698,8 +701,9 @@ qmckl_exit_code_device qmckl_provide_ao_basis_ao_value_device(qmckl_context_devi
 				ctx->ao_basis.ao_num * ctx->point.num * sizeof(double));
 
 			if (ao_value == NULL) {
-				return qmckl_failwith_device(context, QMCKL_ALLOCATION_FAILED_DEVICE,
-									  "qmckl_provide_ao_basis_ao_value", NULL);
+				return qmckl_failwith_device(
+					context, QMCKL_ALLOCATION_FAILED_DEVICE,
+					"qmckl_provide_ao_basis_ao_value", NULL);
 			}
 			ctx->ao_basis.ao_value = ao_value;
 		}
@@ -744,7 +748,7 @@ qmckl_exit_code_device qmckl_provide_ao_basis_ao_value_device(qmckl_context_devi
 					ctx->ao_basis.shell_vgl, ctx->ao_basis.ao_value);
 			} else {
 				return qmckl_failwith_device(context, QMCKL_ERRNO_DEVICE,
-									  "qmckl_ao_basis_ao_value", NULL);
+											 "qmckl_ao_basis_ao_value", NULL);
 			}
 		}
 	}
@@ -766,7 +770,8 @@ qmckl_exit_code_device
 qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 
 	qmckl_context_struct_device *ctx = (qmckl_context_struct_device *)context;
-	qmckl_memory_info_struct_device mem_info = qmckl_memory_info_struct_zero_device;
+	qmckl_memory_info_struct_device mem_info =
+		qmckl_memory_info_struct_zero_device;
 
 	int device_id = qmckl_get_device_id(context);
 
@@ -788,11 +793,9 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 	int64_t *shell_max_ptr = &shell_max;
 	int64_t *prim_max_ptr = &prim_max;
 
-#pragma omp target map(tofrom                                                  \
-					   : shell_max_ptr[:1], prim_max_ptr                       \
-					   [:1])                                                   \
+#pragma omp target map(tofrom : shell_max_ptr[ : 1], prim_max_ptr[ : 1])       \
 	is_device_ptr(nucleus_shell_num, nucleus_index, shell_prim_num,            \
-				  prim_num_per_nucleus)
+					  prim_num_per_nucleus)
 	{
 
 		for (int inucl = 0; inucl < nucl_num; ++inucl) {
@@ -849,10 +852,10 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 	int coef_per_nucleus_s1 = ctx->ao_basis.coef_per_nucleus.size[1];
 
 #pragma omp target is_device_ptr(                                              \
-	expo_expo, expo_index, coef, newcoef, nucleus_index, shell_prim_index,     \
-	nucleus_shell_num, exponent, coefficient_normalized, shell_prim_num,       \
-	expo_per_nucleus_data, coef_per_nucleus_data, prim_num_per_nucleus,        \
-	newidx)
+		expo_expo, expo_index, coef, newcoef, nucleus_index, shell_prim_index, \
+			nucleus_shell_num, exponent, coefficient_normalized,               \
+			shell_prim_num, expo_per_nucleus_data, coef_per_nucleus_data,      \
+			prim_num_per_nucleus, newidx)
 	{
 
 		for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
@@ -983,11 +986,12 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code_device qmckl_finalize_ao_basis_device(qmckl_context_device context) {
+qmckl_exit_code_device
+qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
-							  "qmckl_finalize_ao_basis_device", NULL);
+									 "qmckl_finalize_ao_basis_device", NULL);
 	}
 
 	qmckl_context_struct_device *ctx = (qmckl_context_struct_device *)context;
@@ -995,7 +999,8 @@ qmckl_exit_code_device qmckl_finalize_ao_basis_device(qmckl_context_device conte
 
 	int64_t nucl_num = 0;
 
-	qmckl_exit_code_device rc = qmckl_get_nucleus_num_device(context, &nucl_num);
+	qmckl_exit_code_device rc =
+		qmckl_get_nucleus_num_device(context, &nucl_num);
 	if (rc != QMCKL_SUCCESS_DEVICE)
 		return rc;
 
@@ -1006,8 +1011,9 @@ qmckl_exit_code_device qmckl_finalize_ao_basis_device(qmckl_context_device conte
 			context, (ctx->nucleus.num + (int64_t)1) * sizeof(int64_t));
 
 		if (ctx->ao_basis.nucleus_prim_index == NULL) {
-			return qmckl_failwith_device(context, QMCKL_ALLOCATION_FAILED_DEVICE,
-								  "ao_basis.nucleus_prim_index", NULL);
+			return qmckl_failwith_device(context,
+										 QMCKL_ALLOCATION_FAILED_DEVICE,
+										 "ao_basis.nucleus_prim_index", NULL);
 		}
 
 		// Extract arrays from context
@@ -1017,7 +1023,7 @@ qmckl_exit_code_device qmckl_finalize_ao_basis_device(qmckl_context_device conte
 
 		int prim_num = ctx->ao_basis.prim_num;
 #pragma omp target is_device_ptr(nucleus_index, nucleus_prim_index,            \
-								 shell_prim_index)
+									 shell_prim_index)
 		{
 #pragma omp parallel for
 			for (int64_t i = 0; i < nucl_num; ++i) {
@@ -1036,9 +1042,9 @@ qmckl_exit_code_device qmckl_finalize_ao_basis_device(qmckl_context_device conte
 			context, ctx->ao_basis.prim_num * sizeof(double));
 
 		if (ctx->ao_basis.coefficient_normalized == NULL) {
-			return qmckl_failwith_device(context,
-								  QMCKL_ALLOCATION_FAILED_DEVICE,
-								  "ao_basis.coefficient_normalized", NULL);
+			return qmckl_failwith_device(
+				context, QMCKL_ALLOCATION_FAILED_DEVICE,
+				"ao_basis.coefficient_normalized", NULL);
 		}
 
 		// Extract arrays from context
@@ -1052,8 +1058,8 @@ qmckl_exit_code_device qmckl_finalize_ao_basis_device(qmckl_context_device conte
 		int shell_num = ctx->ao_basis.shell_num;
 
 #pragma omp target is_device_ptr(shell_prim_index, shell_prim_num,             \
-								 coefficient_normalized, coefficient,          \
-								 prim_factor, shell_factor)
+									 coefficient_normalized, coefficient,      \
+									 prim_factor, shell_factor)
 		{
 			for (int64_t ishell = 0; ishell < shell_num; ++ishell) {
 				for (int64_t iprim = shell_prim_index[ishell];
@@ -1075,8 +1081,8 @@ qmckl_exit_code_device qmckl_finalize_ao_basis_device(qmckl_context_device conte
 
 		if (ctx->ao_basis.nucleus_max_ang_mom == NULL) {
 			return qmckl_failwith_device(context,
-								  QMCKL_ALLOCATION_FAILED_DEVICE,
-								  "ao_basis.nucleus_max_ang_mom", NULL);
+										 QMCKL_ALLOCATION_FAILED_DEVICE,
+										 "ao_basis.nucleus_max_ang_mom", NULL);
 		}
 
 		// Extract arrays from context
@@ -1086,7 +1092,7 @@ qmckl_exit_code_device qmckl_finalize_ao_basis_device(qmckl_context_device conte
 		int32_t *shell_ang_mom = ctx->ao_basis.shell_ang_mom;
 
 #pragma omp target is_device_ptr(nucleus_max_ang_mom, nucleus_index,           \
-								 nucleus_shell_num, shell_ang_mom)
+									 nucleus_shell_num, shell_ang_mom)
 		{
 #pragma omp parallel for
 			for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
@@ -1112,8 +1118,9 @@ qmckl_exit_code_device qmckl_finalize_ao_basis_device(qmckl_context_device conte
 				context, ctx->nucleus.num * sizeof(double));
 
 			if (ctx->ao_basis.nucleus_range == NULL) {
-				return qmckl_failwith_device(context, QMCKL_ALLOCATION_FAILED_DEVICE,
-									  "ao_basis.nucleus_range", NULL);
+				return qmckl_failwith_device(context,
+											 QMCKL_ALLOCATION_FAILED_DEVICE,
+											 "ao_basis.nucleus_range", NULL);
 			}
 
 			// Extract arrays from context
@@ -1127,8 +1134,8 @@ qmckl_exit_code_device qmckl_finalize_ao_basis_device(qmckl_context_device conte
 			int nucleus_num = ctx->nucleus.num;
 
 #pragma omp target is_device_ptr(nucleus_range, nucleus_index,                 \
-								 nucleus_shell_num, shell_prim_index,          \
-								 shell_prim_num, exponent)
+									 nucleus_shell_num, shell_prim_index,      \
+									 shell_prim_num, exponent)
 			{
 				for (int64_t inucl = 0; inucl < nucleus_num; ++inucl) {
 					nucleus_range[inucl] = 0.;
