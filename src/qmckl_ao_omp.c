@@ -42,7 +42,8 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 									 shell_prim_num, coord, nucl_coord, expo,  \
 									 coef_normalized, shell_vgl, shell_to_nucl)
 	{
-#pragma omp teams distribute parallel for simd collapse(2)
+//#pragma omp teams distribute parallel for simd collapse(2)
+#pragma omp teams loop collapse(2)
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
 
@@ -59,21 +60,19 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 					continue;
 				}
 
-
-				shell_vgl[ishell + 0 * shell_num + ipoint * shell_num * 5] =
-					0;
-				shell_vgl[ishell + 1 * shell_num + ipoint * shell_num * 5] =
-					0;
-				shell_vgl[ishell + 2 * shell_num + ipoint * shell_num * 5] =
-					0;
-				shell_vgl[ishell + 3 * shell_num + ipoint * shell_num * 5] =
-					0;
-				shell_vgl[ishell + 4 * shell_num + ipoint * shell_num * 5] =
-					0;
+				double t0 = 0;
+				double t1 = 0;
+				double t2 = 0;
+				double t3 = 0;
+				double t4 = 0;
 
 				iprim_start = shell_prim_index[ishell];
 				iprim_end = shell_prim_index[ishell] + shell_prim_num[ishell] - 1;
 
+// BEWARE: set noautopar with nvidia compilers, 
+// this loop must be executed serially not to degrade performances.
+// More safely, one can substitute the omp collapse above with the 
+// commented line losing about 10% perf.
 				for (int iprim = iprim_start; iprim <= iprim_end; iprim++) {
 
 					ar2 = expo[iprim] * r2;
@@ -84,33 +83,28 @@ qmckl_exit_code qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 					v = coef_normalized[iprim] * exp(-ar2);
 					two_a = -2 * expo[iprim] * v;
 
-					shell_vgl[ishell + 0 * shell_num +
-							  ipoint * shell_num * 5] = 
-					shell_vgl[ishell + 0 * shell_num +
-							  ipoint * shell_num * 5] + v; 
-
-					shell_vgl[ishell + 1 * shell_num +
-							  ipoint * shell_num * 5] = 
-					shell_vgl[ishell + 1 * shell_num +
-							  ipoint * shell_num * 5] + two_a * x;
-
-					shell_vgl[ishell + 2 * shell_num +
-							  ipoint * shell_num * 5] = 
-					shell_vgl[ishell + 2 * shell_num +
-							  ipoint * shell_num * 5] + two_a * y;
-
-					shell_vgl[ishell + 3 * shell_num +
-							  ipoint * shell_num * 5] = 
-					shell_vgl[ishell + 3 * shell_num +
-							  ipoint * shell_num * 5] + two_a * z;
-
-					shell_vgl[ishell + 4 * shell_num +
-						  ipoint * shell_num * 5] = 
-					shell_vgl[ishell + 4 * shell_num +
-						  ipoint * shell_num * 5] + two_a * (3 - 2 * ar2);
-
+					t0+= v; 
+					t1+= two_a * x;
+					t2+= two_a * y;
+					t3+= two_a * z;
+					t4+= two_a * (3 - 2 * ar2);
 
 				}
+
+				shell_vgl[ishell + 0 * shell_num +
+						  ipoint * shell_num * 5] = t0;
+
+				shell_vgl[ishell + 1 * shell_num +
+						  ipoint * shell_num * 5] = t1;
+
+				shell_vgl[ishell + 2 * shell_num +
+						  ipoint * shell_num * 5] = t2;
+
+				shell_vgl[ishell + 3 * shell_num +
+						  ipoint * shell_num * 5] = t3;
+
+				shell_vgl[ishell + 4 * shell_num +
+					  ipoint * shell_num * 5] = t4; 
 
 			}
 			
