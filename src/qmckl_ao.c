@@ -204,6 +204,44 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
 	return QMCKL_SUCCESS;
 }
 
+qmckl_exit_code 
+qmckl_get_ao_basis_ao_vgl_inplace_device(qmckl_context_device context,
+								     	double *const ao_vgl,
+								     	const int64_t size_max) {
+
+	if (qmckl_context_check((qmckl_context)context) == QMCKL_NULL_CONTEXT) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_CONTEXT,
+							  "qmckl_get_ao_basis_ao_vgl_device", NULL);
+	}
+
+	qmckl_exit_code rc;
+
+	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
+	assert(ctx != NULL);
+	int device_id = qmckl_get_device_id(context);
+
+	int64_t sze = ctx->ao_basis.ao_num * 5 * ctx->point.num;
+	if (size_max < sze) {
+		return qmckl_failwith((qmckl_context)context, QMCKL_INVALID_ARG_3,
+							  "qmckl_get_ao_basis_ao_vgl_device",
+							  "input array too small");
+	}
+
+    rc = qmckl_context_touch_device(context);
+    if (rc != QMCKL_SUCCESS) return rc;
+  
+    double* old_array = ctx->ao_basis.ao_vgl;
+  
+    ctx->ao_basis.ao_vgl = ao_vgl;
+  
+    rc = qmckl_provide_ao_basis_ao_vgl_device(context);
+    if (rc != QMCKL_SUCCESS) return rc;
+  
+    ctx->ao_basis.ao_vgl = old_array;
+
+	return QMCKL_SUCCESS;
+}
+
 /* ao_value */
 
 qmckl_exit_code qmckl_get_ao_basis_ao_value_device(qmckl_context_device context,

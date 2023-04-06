@@ -259,6 +259,10 @@ qmckl_exit_code qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
 												 double *ao_vgl,
 												 int64_t size_max);
 
+qmckl_exit_code qmckl_get_ao_basis_ao_vgl_inplace_device(qmckl_context_device context,
+												 double *ao_vgl,
+												 int64_t size_max);
+
 qmckl_exit_code qmckl_get_ao_basis_ao_value_device(qmckl_context_device context,
 												   double *ao_vgl,
 												   int64_t size_max);
