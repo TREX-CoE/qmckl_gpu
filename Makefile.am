@@ -29,15 +29,16 @@ if HAVE_ACC_OFFLOAD
 endif
 
 
-libqmckl_gpu_la_SOURCES += src/qmckl_context.c src/qmckl_memory.c src/qmckl_blas.c \
-src/qmckl_trexio.c src/qmckl_ao.c src/qmckl_mo.c src/qmckl_basic_functions.c
+libqmckl_gpu_la_SOURCES += src/qmckl_context.c src/qmckl_basic_functions.c \
+src/qmckl_memory.c src/qmckl_blas.c src/qmckl_electron.c src/qmckl_nucleus.c \
+src/qmckl_trexio.c src/qmckl_ao.c src/qmckl_mo.c
 
 # Enable OpenMP-specific device functions
 if HAVE_OMP_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_memory_omp.c \
-  src/qmckl_blas_omp.c src/qmckl_trexio_omp.c \
-  src/qmckl_ao_omp.c src/qmckl_mo_omp.c
-
+  src/qmckl_nucleus_omp.c src/qmckl_point_omp.c \
+  src/qmckl_blas_omp.c src/qmckl_ao_omp.c \
+  src/qmckl_mo_omp.c
 endif
 
 if HAVE_OMP_DEVICE
@@ -49,8 +50,9 @@ endif
 # Enable OpenACC-specific device functions
 if HAVE_ACC_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_memory_acc.c \
-  src/qmckl_blas_acc.c src/qmckl_trexio_acc.c \
-  src/qmckl_ao_acc.c src/qmckl_mo_acc.c
+  src/qmckl_nucleus_acc.c src/qmckl_point_acc.c \
+  src/qmckl_blas_acc.c src/qmckl_ao_acc.c \
+  src/qmckl_mo_acc.c
 endif
 
 

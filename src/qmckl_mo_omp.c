@@ -6,13 +6,12 @@
 
 /* mo_vgl */
 
-
-qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
-	qmckl_context context, int64_t ao_num, int64_t mo_num, int64_t point_num,
-	double *restrict coefficient_t, double *restrict ao_vgl,
+qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_device(
+	qmckl_context_device context, int64_t ao_num, int64_t mo_num,
+	int64_t point_num, double *restrict coefficient_t, double *restrict ao_vgl,
 	double *restrict mo_vgl) {
 
-	assert(context != QMCKL_NULL_CONTEXT);
+	assert(context != QMCKL_NULL_CONTEXT_DEVICE);
 
 #pragma omp target is_device_ptr(coefficient_t, ao_vgl, mo_vgl)
 	{
@@ -31,9 +30,10 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 				for (int l = 0; l < 5; l++) {
 					if (ao_vgl[k + ao_num * 5 * j] != 0.) {
 						double c1 = ao_vgl[k + ao_num * l + ao_num * 5 * j];
-						/*				double c2 = ao_vgl[k + ao_num * 1 + ao_num *
-						 * 5 j]; double c3 = ao_vgl[k + ao_num * 2 + ao_num * 5
-						 * j]; double c4 = ao_vgl[k + ao_num * 3 + ao_num * 5
+						/*				double c2 = ao_vgl[k + ao_num * 1 +
+						 * ao_num
+						 * * 5 j]; double c3 = ao_vgl[k + ao_num * 2 + ao_num *
+						 * 5 j]; double c4 = ao_vgl[k + ao_num * 3 + ao_num * 5
 						 * j]; double c5 = ao_vgl[k + ao_num * 4 + ao_num * 5
 						 * j];
 						 */
@@ -64,16 +64,16 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_vgl_device(
 	}
 	// End of GPU region
 
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }
 
 /* mo_value */
 
-qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
-	qmckl_context context, int64_t ao_num, int64_t mo_num, int64_t point_num,
-	double *restrict coefficient_t, double *restrict ao_value,
-	double *restrict mo_value) {
-	assert(context != QMCKL_NULL_CONTEXT);
+qmckl_exit_code_device qmckl_compute_mo_basis_mo_value_device(
+	qmckl_context_device context, int64_t ao_num, int64_t mo_num,
+	int64_t point_num, double *restrict coefficient_t,
+	double *restrict ao_value, double *restrict mo_value) {
+	assert(context != QMCKL_NULL_CONTEXT_DEVICE);
 
 	double *av1_shared =
 		qmckl_malloc_device(context, point_num * ao_num * sizeof(double));
@@ -136,5 +136,58 @@ qmckl_exit_code qmckl_compute_mo_basis_mo_value_device(
 			}
 		}
 	}
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+//**********
+// FINALIZE MO BASIS
+//**********
+
+qmckl_exit_code_device
+qmckl_finalize_mo_basis_device(qmckl_context_device context) {
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
+									 "qmckl_finalize_mo_basis_device", NULL);
+	}
+
+	qmckl_context_struct_device *ctx = (qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	double *new_array = (double *)qmckl_malloc_device(
+		context, ctx->ao_basis.ao_num * ctx->mo_basis.mo_num * sizeof(double));
+	if (new_array == NULL) {
+		return qmckl_failwith_device(context, QMCKL_ALLOCATION_FAILED_DEVICE,
+									 "qmckl_finalize_mo_basis_device", NULL);
+	}
+
+	assert(ctx->mo_basis.coefficient != NULL);
+
+	if (ctx->mo_basis.coefficient_t != NULL) {
+		qmckl_exit_code_device rc =
+			qmckl_free_device(context, ctx->mo_basis.coefficient_t);
+		if (rc != QMCKL_SUCCESS_DEVICE) {
+			return qmckl_failwith_device(
+				context, rc, "qmckl_finalize_mo_basis_device", NULL);
+		}
+	}
+
+	double *coefficient = ctx->mo_basis.coefficient;
+
+	int64_t ao_num = ctx->ao_basis.ao_num;
+	int64_t mo_num = ctx->mo_basis.mo_num;
+
+#pragma omp target is_device_ptr(new_array, coefficient)
+	{
+#pragma omp parallel for collapse(2)
+		for (int64_t i = 0; i < ao_num; ++i) {
+			for (int64_t j = 0; j < mo_num; ++j) {
+				new_array[i * mo_num + j] = coefficient[j * ao_num + i];
+			}
+		}
+	}
+
+	ctx->mo_basis.coefficient_t = new_array;
+	qmckl_exit_code_device rc = QMCKL_SUCCESS_DEVICE;
+	return rc;
 }

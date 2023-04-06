@@ -14,27 +14,33 @@
 #include <string.h>
 #include <omp.h>
 
+#include "qmckl_types.h"
 #include "qmckl_basic_functions.h"
-
-typedef int64_t qmckl_context_device;
-
 #include "qmckl_memory.h"
+#include "qmckl_blas.h"
 
-typedef struct {
-	size_t device_id;
-	qmckl_memory_struct memory;
-} qmckl_context_device_struct;
+qmckl_exit_code_device
+qmckl_context_touch_device(const qmckl_context_device context);
 
-qmckl_exit_code
-qmckl_context_destroy_omp_device(const qmckl_context_device context);
-
-qmckl_exit_code qmckl_context_touch_device(const qmckl_context_device context);
+qmckl_exit_code_device qmckl_init_point_device(qmckl_context_device context);
+qmckl_exit_code_device qmckl_init_ao_basis_device(qmckl_context_device context);
+qmckl_exit_code_device qmckl_init_mo_basis_device(qmckl_context_device context);
+qmckl_exit_code_device
+qmckl_init_determinant_device(qmckl_context_device context);
+qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context);
 
 qmckl_context_device qmckl_context_create_device(int device_id);
+qmckl_exit_code_device
+qmckl_context_destroy_device(const qmckl_context_device context);
 
 static inline size_t qmckl_get_device_id(qmckl_context_device context) {
-	qmckl_context_struct *const ctx = (qmckl_context_struct *)context;
-	qmckl_context_device_struct *const ds =
-		(qmckl_context_device_struct *)ctx->qmckl_extra;
-	return ds->device_id;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	return ctx->device_id;
 }
+
+qmckl_context_device
+qmckl_context_check_device(const qmckl_context_device context);
+
+void qmckl_lock_device(qmckl_context_device context);
+void qmckl_unlock_device(qmckl_context_device context);
