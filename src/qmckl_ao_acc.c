@@ -24,8 +24,8 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	cutoff = 27.631021115928547; //-dlog(1.d-12)
 
 #pragma acc data deviceptr(nucleus_shell_num, nucleus_index, nucleus_range,    \
-							   shell_prim_index, shell_prim_num, coord,        \
-							   nucl_coord, expo, coef_normalized, shell_vgl)
+						   shell_prim_index, shell_prim_num, coord,            \
+						   nucl_coord, expo, coef_normalized, shell_vgl)
 	{
 
 		/*
@@ -159,7 +159,7 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 	// Specific calling function
 	int lmax = -1;
 	int *lmax_p = &lmax;
-#pragma acc data deviceptr(nucleus_max_ang_mom) copyin(lmax_p[0 : 1])
+#pragma acc data deviceptr(nucleus_max_ang_mom) copyin(lmax_p [0:1])
 	{
 #pragma acc kernels
 		{
@@ -169,7 +169,7 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 				}
 			}
 		}
-#pragma acc update host(lmax_p[0 : 1])
+#pragma acc update host(lmax_p [0:1])
 	}
 	// Multiply "normal" size by point_num to affect subarrays to each thread
 	double *pows_shared = qmckl_malloc_device(
@@ -185,7 +185,7 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 	int k = 1;
 	int *k_p = &k;
 #pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
-							   ao_index, lstart) copyin(k_p[0 : 1])
+						   ao_index, lstart) copyin(k_p [0:1])
 	{
 #pragma acc kernels
 		{for (int inucl = 0; inucl < nucl_num;
@@ -198,13 +198,13 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 	}
 }
 }
-#pragma acc update host(k_p[0 : 1])
+#pragma acc update host(k_p [0:1])
 }
 
 #pragma acc data deviceptr(                                                    \
-		ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,       \
-			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
-			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
+	ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,           \
+	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
+	pows_shared, shell_ang_mom, nucleus_range)
 {
 
 	// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
@@ -459,7 +459,7 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 	// Specific calling function
 	int lmax = -1;
 	int *lmax_p = &lmax;
-#pragma acc data deviceptr(nucleus_max_ang_mom) copyin(lmax_p[0 : 1])
+#pragma acc data deviceptr(nucleus_max_ang_mom) copyin(lmax_p [0:1])
 	{
 #pragma acc kernels
 		{
@@ -469,7 +469,7 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 				}
 			}
 		}
-#pragma acc update host(lmax_p[0 : 1])
+#pragma acc update host(lmax_p [0:1])
 	}
 	// Multiply "normal" size by point_num to affect subarrays to each thread
 	double *pows_shared = qmckl_malloc_device(
@@ -485,7 +485,7 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 	int k = 1;
 	int *k_p = &k;
 #pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
-							   ao_index, lstart) copyin(k_p[0 : 1])
+						   ao_index, lstart) copyin(k_p [0:1])
 	{
 #pragma acc kernels
 		{for (int inucl = 0; inucl < nucl_num;
@@ -498,13 +498,13 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 	}
 }
 }
-#pragma acc update host(k_p[0 : 1])
+#pragma acc update host(k_p [0:1])
 }
 
 #pragma acc data deviceptr(                                                    \
-		ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,     \
-			nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,      \
-			nucl_coord, pows_shared, shell_ang_mom, nucleus_range)
+	ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,         \
+	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
+	pows_shared, shell_ang_mom, nucleus_range)
 {
 
 	// BUG See qmckl_compute_ao_basis_shell_gaussian_vgl_device above
@@ -807,9 +807,8 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 
 	// TODO Specify OpenACC clauses manually
 
-#pragma acc data copy(shell_max_ptr[ : 1], prim_max_ptr[ : 1])                 \
-	deviceptr(nucleus_shell_num, nucleus_index, shell_prim_num,                \
-				  prim_num_per_nucleus)
+#pragma acc data copy(shell_max_ptr[:1], prim_max_ptr[:1]) deviceptr(          \
+	nucleus_shell_num, nucleus_index, shell_prim_num, prim_num_per_nucleus)
 	{
 #pragma acc kernels
 		{
@@ -871,11 +870,11 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 
 	// TODO Manually write OpenACC clauses
 
-#pragma acc data deviceptr(                                                    \
-		expo_expo, expo_index, coef, newcoef, nucleus_index, shell_prim_index, \
-			nucleus_shell_num, exponent, coefficient_normalized,               \
-			shell_prim_num, expo_per_nucleus_data, coef_per_nucleus_data,      \
-			prim_num_per_nucleus, newidx)
+#pragma acc data deviceptr(expo_expo, expo_index, coef, newcoef,               \
+						   nucleus_index, shell_prim_index, nucleus_shell_num, \
+						   exponent, coefficient_normalized, shell_prim_num,   \
+						   expo_per_nucleus_data, coef_per_nucleus_data,       \
+						   prim_num_per_nucleus, newidx)
 	{
 #pragma acc kernels
 		{
@@ -1089,8 +1088,8 @@ qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 		int shell_num = ctx->ao_basis.shell_num;
 
 #pragma acc data deviceptr(shell_prim_index, shell_prim_num,                   \
-							   coefficient_normalized, coefficient,            \
-							   prim_factor, shell_factor)
+						   coefficient_normalized, coefficient, prim_factor,   \
+						   shell_factor)
 		{
 #pragma acc kernels
 			{
@@ -1126,7 +1125,7 @@ qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 		int32_t *shell_ang_mom = ctx->ao_basis.shell_ang_mom;
 
 #pragma acc data deviceptr(nucleus_max_ang_mom, nucleus_index,                 \
-							   nucleus_shell_num, shell_ang_mom)
+						   nucleus_shell_num, shell_ang_mom)
 		{
 #pragma acc kernels
 			{
@@ -1171,7 +1170,7 @@ qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 			int nucleus_num = ctx->nucleus.num;
 
 #pragma acc data deviceptr(nucleus_range, nucleus_index, nucleus_shell_num,    \
-							   shell_prim_index, shell_prim_num, exponent)
+						   shell_prim_index, shell_prim_num, exponent)
 			{
 #pragma acc kernels
 				{

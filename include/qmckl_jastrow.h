@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "qmckl_types.h"
+#include "qmckl_context.h"
 
 /* Init func */
 
@@ -102,6 +103,10 @@ qmckl_get_jastrow_dim_c_vector_device(qmckl_context_device context,
 //**********
 // COMPUTES
 //**********
+
+// Finalize
+qmckl_exit_code_device
+qmckl_finalize_jastrow_device(qmckl_context_device context);
 
 // Total Jastrow
 qmckl_exit_code_device
