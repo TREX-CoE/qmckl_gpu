@@ -1,14 +1,14 @@
 #include "include/qmckl_mo.h"
 
-#ifdef HAVE_CUBLAS 
+#ifdef HAVE_CUBLAS
 #include <cublas_v2.h>
 #endif
 
-#ifdef HAVE_NVBLAS 
+#ifdef HAVE_NVBLAS
 #include <nvblas.h>
 #endif
 
-#ifdef HAVE_CUSPARSE 
+#ifdef HAVE_CUSPARSE
 #include <cuda_runtime_api.h>
 #include <cusparse_v2.h>
 #endif

@@ -1,5 +1,5 @@
 #include "include/qmckl_ao.h"
-#define qmckl_ten3(t, i, j, k) t.data[(i) + t.size[0]*((j) + t.size[1]*(k))]
+#define qmckl_ten3(t, i, j, k) t.data[(i) + t.size[0] * ((j) + t.size[1] * (k))]
 
 //**********
 // COMPUTE
