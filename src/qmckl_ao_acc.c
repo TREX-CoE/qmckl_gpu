@@ -14,14 +14,9 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	double *coord, double *nucl_coord, double *expo, double *coef_normalized,
 	double *shell_vgl) {
 
-	int iprim_start, iprim_end;
-	double x, y, z, two_a, ar2, r2, v, cutoff;
-
-	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
-
 	// Don't compute exponentials when the result will be almost zero.
 	// TODO : Use numerical precision here
-	cutoff = 27.631021115928547; //-dlog(1.d-12)
+	double cutoff = 27.631021115928547; //-dlog(1.d-12)
 
     int* shell_to_nucl = qmckl_malloc_device(context, sizeof(int)*shell_num);
 
@@ -60,12 +55,12 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 
 			    int inucl = shell_to_nucl[ishell];
 
-				x = coord[ipoint] - nucl_coord[inucl];
-				y = coord[ipoint + point_num] - nucl_coord[inucl + nucl_num];
-				z = coord[ipoint + 2 * point_num] -
+				double x = coord[ipoint] - nucl_coord[inucl];
+				double y = coord[ipoint + point_num] - nucl_coord[inucl + nucl_num];
+				double z = coord[ipoint + 2 * point_num] -
 					nucl_coord[inucl + 2 * nucl_num];
 
-				r2 = x * x + y * y + z * z;
+				double r2 = x * x + y * y + z * z;
 
 				if (r2 > cutoff * nucleus_range[inucl]) {
 					continue;
@@ -77,19 +72,19 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 				double t3 = 0;
 				double t4 = 0;
 
-				iprim_start = shell_prim_index[ishell];
-				iprim_end = shell_prim_index[ishell] + shell_prim_num[ishell] - 1;
+				int iprim_start = shell_prim_index[ishell];
+				int iprim_end = shell_prim_index[ishell] + shell_prim_num[ishell] - 1;
 
 #pragma acc loop seq
 				for (int iprim = iprim_start; iprim <= iprim_end; iprim++) {
 
-					ar2 = expo[iprim] * r2;
+					double ar2 = expo[iprim] * r2;
 					if (ar2 > cutoff) {
 						continue;
 					}
 
-					v = coef_normalized[iprim] * exp(-ar2);
-					two_a = -2 * expo[iprim] * v;
+					double v = coef_normalized[iprim] * exp(-ar2);
+					double two_a = -2 * expo[iprim] * v;
 
 					t0+= v; 
 					t1+= two_a * x;
@@ -119,6 +114,7 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 
 	qmckl_free_device(context, shell_to_nucl);
 
+	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
 	return info;
 }
 
@@ -236,15 +232,12 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 			}
 
 			// Beginning of ao_polynomial computation (now inlined)
-			double Y1, Y2, Y3;
-			double xy, yz, xz;
-			int c, n;
-			double da, db, dc, dd;
+			int n;
 
 			// Already computed outsite of the ao_polynomial part
-			Y1 = x;
-			Y2 = y;
-			Y3 = z;
+			double Y1 = x;
+			double Y2 = y;
+			double Y3 = z;
 
 			int llmax = nucleus_max_ang_mom[inucl];
 			if (llmax == 0) {
@@ -254,7 +247,7 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 				poly_vgl[3][iter] = 0.;
 				poly_vgl[4][iter] = 0.;
 
-				int n = 0;
+				n = 0;
 			} else if (llmax > 0) {
 				// Reset pows to 0 for safety. Then we will write over the
 				// top left submatrix of size (llmax+3)x3. We will compute
@@ -296,6 +289,9 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 
 				n = 3;
 			}
+
+			double xy, yz, xz;
+			double da, db, dc, dd;
 
 			// l>=2
 			dd = 2.;
@@ -415,7 +411,7 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 									   ipoint * shell_num * 5]) *
 						ao_factor[k];
 
-					// Lapl_z
+					// Lapl_z (_z?)
 					ao_vgl[k + 4 * ao_num + ipoint * 5 * ao_num] =
 						(poly_vgl[il * 5 + 4][iter]  *
 							 shell_vgl[ishell + 0 * shell_num +
@@ -475,6 +471,7 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 
 	lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
+	// TG: Why *5? Check
 	// Multiply "normal" size by point_num to affect subarrays to each thread
 	poly_vgl_shared =
 		qmckl_malloc_device(context, sizeof(double) * 5 * ao_num * point_num);
@@ -512,18 +509,19 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 							   ao_index, lstart) copyin(k_p[0 : 1])
 	{
 #pragma acc kernels
-		{for (int inucl = 0; inucl < nucl_num;
-			  inucl++){int ishell_start = nucleus_index[inucl];
-	int ishell_end = nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
-	for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
-		int l = shell_ang_mom[ishell];
-		ao_index[ishell] = k_p[0];
-		k_p[0] = k_p[0] + lstart[l + 1] - lstart[l];
+		{
+	for (int inucl = 0; inucl < nucl_num; inucl++){
+		int ishell_start = nucleus_index[inucl];
+		int ishell_end = nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+		for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
+			int l = shell_ang_mom[ishell];
+			ao_index[ishell] = k_p[0];
+			k_p[0] = k_p[0] + lstart[l + 1] - lstart[l];
+		}
 	}
-}
-}
+		}	
 #pragma acc update host(k_p[0 : 1])
-}
+	}
 
 #pragma acc data deviceptr(                                                    \
 		ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,     \
@@ -669,8 +667,7 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 			// poly_vgl is now set from here
 
 			int ishell_start = nucleus_index[inucl];
-			int ishell_end =
-				nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+			int ishell_end = nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
 
 			// Loop over shells
 			for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
