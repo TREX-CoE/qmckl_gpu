@@ -1,4 +1,5 @@
 #include "include/qmckl_ao.h"
+#include "myheader.h"
 #define MAX_MEMORY_SIZE 10.8*1024*1024*1024
 
 //**********
@@ -13,11 +14,6 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 	double *nucleus_range, int64_t *shell_prim_index, int64_t *shell_prim_num,
 	double *coord, double *nucl_coord, double *expo, double *coef_normalized,
 	double *shell_vgl) {
-
-	int iprim_start, iprim_end;
-	double x, y, z, two_a, ar2, r2, v, cutoff;
-
-	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
 
 	// Don't compute exponentials when the result will be almost zero.
 	// TODO : Use numerical precision here
@@ -42,19 +38,18 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 									 shell_prim_num, coord, nucl_coord, expo,  \
 									 coef_normalized, shell_vgl, shell_to_nucl)
 	{
-//#pragma omp teams distribute parallel for simd collapse(2)
 #pragma omp teams loop collapse(2)
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
 
 				int inucl = shell_to_nucl[ishell];
 
-				x = coord[ipoint] - nucl_coord[inucl];
-				y = coord[ipoint + point_num] - nucl_coord[inucl + nucl_num];
-				z = coord[ipoint + 2 * point_num] -
+				double x = coord[ipoint] - nucl_coord[inucl];
+				double y = coord[ipoint + point_num] - nucl_coord[inucl + nucl_num];
+				double z = coord[ipoint + 2 * point_num] -
 					nucl_coord[inucl + 2 * nucl_num];
 
-				r2 = x * x + y * y + z * z;
+				double r2 = x * x + y * y + z * z;
 
 				if (r2 > cutoff * nucleus_range[inucl]) {
 					continue;
@@ -66,8 +61,8 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 				double t3 = 0;
 				double t4 = 0;
 
-				iprim_start = shell_prim_index[ishell];
-				iprim_end = shell_prim_index[ishell] + shell_prim_num[ishell] - 1;
+				int iprim_start = shell_prim_index[ishell];
+				int iprim_end = shell_prim_index[ishell] + shell_prim_num[ishell] - 1;
 
 // BEWARE: set noautopar with nvidia compilers, 
 // this loop must be executed serially not to degrade performances.
@@ -75,13 +70,13 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 // commented line losing about 10% perf.
 				for (int iprim = iprim_start; iprim <= iprim_end; iprim++) {
 
-					ar2 = expo[iprim] * r2;
+					double ar2 = expo[iprim] * r2;
 					if (ar2 > cutoff) {
 						continue;
 					}
 
-					v = coef_normalized[iprim] * exp(-ar2);
-					two_a = -2 * expo[iprim] * v;
+					double v = coef_normalized[iprim] * exp(-ar2);
+					double two_a = -2 * expo[iprim] * v;
 
 					t0+= v; 
 					t1+= two_a * x;
@@ -113,6 +108,7 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 
 	qmckl_free_device(context, shell_to_nucl);
 
+	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
 	return info;
 }
 
@@ -344,8 +340,6 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 		for (int iter_new = 0; iter_new < chunk_size/nucl_num; iter_new++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
 
-		    	//double (*poly_vgl)[chunk_size] = (double(*)[chunk_size]) poly_vgl_shared;
-	
 				int ipoint = iter_new + chunk_size / nucl_num * sub_iter;
 				int inucl = shell_to_nucl[ishell];
 				int iter = iter_new * nucl_num + inucl;
@@ -439,11 +433,11 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 	}	
 	}	
 	// End of target data region
-	qmckl_free_device(context, lstart);
-	qmckl_free_device(context, poly_vgl_shared);
 	qmckl_free_device(context, ao_index);
+	qmckl_free_device(context, poly_vgl_shared);
 	qmckl_free_device(context, pows_shared);
 	qmckl_free_device(context, shell_to_nucl);
+	qmckl_free_device(context, lstart);
 
 	return QMCKL_SUCCESS_DEVICE;
 }
