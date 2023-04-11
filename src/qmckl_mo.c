@@ -57,14 +57,14 @@ qmckl_compute_mo_basis_mo_vgl_sgemm_device(
 	float *B = qmckl_malloc_device(context, sizeof(float) * 5 * ao_num * point_num);
 	float *C = qmckl_malloc_device(context, sizeof(float) * 5 * mo_num * point_num);
 
-#pragma omp target teams loop is_device_ptr(A, coefficient_t) map(to: ao_num, mo_num)
+#pragma omp target teams distribute parallel for simd is_device_ptr(A, coefficient_t) map(to: ao_num, mo_num)
 #pragma acc parallel loop gang vector deviceptr(A, coefficient_t) copyin(ao_num, mo_num)
 	for (int ii = 0; ii < ao_num * mo_num ; ++ii) {
 		A[ii] = (float) coefficient_t[ii];
 	}
 
 
-#pragma omp target teams loop is_device_ptr(B, ao_vgl) map(to: ao_num, point_num)
+#pragma omp target teams distribute parallel for simd is_device_ptr(B, ao_vgl) map(to: ao_num, point_num)
 #pragma acc parallel loop gang vector deviceptr(B, ao_vgl) copyin(ao_num, point_num)
 	for (int ii = 0; ii < 5 * ao_num * point_num ; ++ii) {
 		B[ii] = (float) ao_vgl[ii];
@@ -76,7 +76,7 @@ qmckl_compute_mo_basis_mo_vgl_sgemm_device(
 				   B, ldb, &beta, C, ldc);
 	cublasDestroy(handle);
 
-#pragma omp target teams loop is_device_ptr(C, mo_vgl) map(to: mo_num, point_num)
+#pragma omp target teams distribute parallel for simd is_device_ptr(C, mo_vgl) map(to: mo_num, point_num)
 #pragma acc parallel loop gang vector deviceptr(C, mo_vgl) copyin(mo_num, point_num)
 	for (int ii = 0; ii < 5 * mo_num * point_num ; ++ii) {
 		mo_vgl[ii] = (double) C[ii];
@@ -360,8 +360,8 @@ qmckl_provide_mo_basis_mo_vgl_device(qmckl_context_device context) {
 			ctx->mo_basis.coefficient_t, ctx->ao_basis.ao_vgl,
 			ctx->mo_basis.mo_vgl);
 #elif HAVE_CUBLAS
-		//rc = qmckl_compute_mo_basis_mo_vgl_sgemm_device(
-		rc = qmckl_compute_mo_basis_mo_vgl_dgemm_device(
+		//rc = qmckl_compute_mo_basis_mo_vgl_dgemm_device(
+		rc = qmckl_compute_mo_basis_mo_vgl_sgemm_device(
 			context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num, ctx->point.num,
 			ctx->mo_basis.coefficient_t, ctx->ao_basis.ao_vgl,
 			ctx->mo_basis.mo_vgl);
