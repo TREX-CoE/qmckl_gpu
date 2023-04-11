@@ -17,7 +17,7 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 
 	// Don't compute exponentials when the result will be almost zero.
 	// TODO : Use numerical precision here
-	cutoff = 27.631021115928547; //-dlog(1.d-12)
+	double cutoff = 27.631021115928547; //-dlog(1.d-12)
 
     int* shell_to_nucl = qmckl_malloc_device(context, sizeof(int)*shell_num);
 
