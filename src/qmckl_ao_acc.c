@@ -704,11 +704,9 @@ qmckl_compute_ao_value_gaussian_device(
 
 				for (int il = lstart[l] - 1; il <= lstart[l + 1] - 2; il++) {
 
-					// value
 					ao_value[k + ipoint * ao_num] =
-						poly_vgl[il * 5 + 0][iter] *
-						shell_vgl[ishell + 0 * shell_num +
-								  ipoint * shell_num * 5] *
+						poly_vgl[il * 5][iter] *
+						shell_vgl[ishell + ipoint * shell_num * 5] *
 						ao_factor[k];
 
 					k = k + 1;
