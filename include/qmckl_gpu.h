@@ -585,6 +585,10 @@ qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
 
 qmckl_exit_code_device qmckl_get_ao_basis_ao_value_device(
 	qmckl_context_device context, double *const ao_vgl, const int64_t size_max);
+
+qmckl_exit_code_device qmckl_get_ao_basis_ao_value_inplace_device(
+	qmckl_context_device context, double *const ao_value, const int64_t size_max);
+
 qmckl_exit_code_device
 qmckl_get_ao_basis_ao_num_device(const qmckl_context_device context,
 								 int64_t *const ao_num);

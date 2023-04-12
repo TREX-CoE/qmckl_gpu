@@ -263,7 +263,7 @@ qmckl_get_ao_basis_ao_vgl_inplace_device(qmckl_context_device context,
 	if (qmckl_context_check_device((qmckl_context_device)context) == 
 		QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith((qmckl_context_device)context, QMCKL_INVALID_CONTEXT_DEVICE,
-							  "qmckl_get_ao_basis_ao_vgl_device", NULL);
+							  "qmckl_get_ao_basis_ao_vgl_inplace_device", NULL);
 	}
 
 	qmckl_exit_code_device rc;
@@ -276,7 +276,7 @@ qmckl_get_ao_basis_ao_vgl_inplace_device(qmckl_context_device context,
 	int64_t sze = ctx->ao_basis.ao_num * 5 * ctx->point.num;
 	if (size_max < sze) {
 		return qmckl_failwith((qmckl_context_device)context, QMCKL_INVALID_ARG_3_DEVICE,
-							  "qmckl_get_ao_basis_ao_vgl_device",
+							  "qmckl_get_ao_basis_ao_vgl_inplace_device",
 							  "input array too small");
 	}
 
@@ -329,6 +329,46 @@ qmckl_get_ao_basis_ao_value_device(qmckl_context_device context,
 
 	qmckl_memcpy_D2D(context, ao_value, ctx->ao_basis.ao_value,
 					 (size_t)sze * sizeof(double));
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device 
+qmckl_get_ao_basis_ao_value_inplace_device(qmckl_context_device context,
+								     	double *const ao_value,
+								     	const int64_t size_max) {
+
+	if (qmckl_context_check_device((qmckl_context_device)context) == 
+		QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith((qmckl_context_device)context, QMCKL_INVALID_CONTEXT_DEVICE,
+							  "qmckl_get_ao_basis_ao_value_inplace_device", NULL);
+	}
+
+	qmckl_exit_code_device rc;
+
+	qmckl_context_struct_device *const ctx = 
+			(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+	int device_id = qmckl_get_device_id(context);
+
+	int64_t sze = ctx->ao_basis.ao_num * ctx->point.num;
+	if (size_max < sze) {
+		return qmckl_failwith((qmckl_context_device)context, QMCKL_INVALID_ARG_3_DEVICE,
+							  "qmckl_get_ao_basis_ao_value_inplace_device",
+							  "input array too small");
+	}
+
+    rc = qmckl_context_touch_device(context);
+    if (rc != QMCKL_SUCCESS_DEVICE) return rc;
+  
+    double* old_array = ctx->ao_basis.ao_value;
+  
+    ctx->ao_basis.ao_value = ao_value;
+  
+    rc = qmckl_provide_ao_basis_ao_value_device(context);
+    if (rc != QMCKL_SUCCESS_DEVICE) return rc;
+  
+    ctx->ao_basis.ao_value = old_array;
 
 	return QMCKL_SUCCESS_DEVICE;
 }
