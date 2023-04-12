@@ -604,8 +604,6 @@ qmckl_get_ao_basis_type_device(const qmckl_context_device context,
 
 qmckl_exit_code_device
 qmckl_get_ao_basis_ao_num_device(qmckl_context_device context, int64_t *ao_num);
-qmckl_exit_code_device
-qmckl_get_ao_basis_ao_num_device(qmckl_context_device context, int64_t *ao_num);
 
 qmckl_exit_code_device
 qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context);
@@ -728,6 +726,9 @@ bool qmckl_ao_basis_provided(qmckl_context_device context);
 //**********
 // MO
 //**********
+//
+qmckl_exit_code_device
+qmckl_get_mo_basis_mo_num_device(qmckl_context_device context, int64_t *mo_num);
 
 qmckl_exit_code_device
 qmckl_get_mo_basis_mo_vgl_device(qmckl_context_device context,
@@ -740,6 +741,10 @@ qmckl_get_mo_basis_mo_value_device(qmckl_context_device context,
 qmckl_exit_code_device
 qmckl_get_mo_basis_mo_value_inplace_device(qmckl_context_device context,
 										   double *mo_value, int64_t size_max);
+
+qmckl_exit_code_device
+qmckl_get_mo_basis_mo_vgl_inplace_device(qmckl_context_device context,
+										   double *mo_vgl, int64_t size_max);
 
 qmckl_exit_code_device
 qmckl_provide_mo_basis_mo_value_device(qmckl_context_device context);
