@@ -248,6 +248,12 @@ qmckl_compute_mo_basis_mo_vgl_cusparse_device(
 	cusparseSpMM(handle, opA, opB, &alpha, matAs, matBd, &beta, matCd,
 				 cuda_datatype, AlgSpMM, SpMM_buffer);
 
+    cudaFree(As_csr_offsets);
+    cudaFree(As_buffer);
+    cudaFree(As_csr_columns);
+    cudaFree(As_csr_values);
+    cudaFree(SpMM_buffer);
+
 	cusparseDestroyDnMat(matAd);
 	cusparseDestroyDnMat(matBd);
 	cusparseDestroyDnMat(matCd);
@@ -350,6 +356,12 @@ qmckl_compute_mo_basis_mo_value_cusparse_device(
 
 	cusparseSpMM(handle, opA, opB, &alpha, matAs, matBd, &beta, matCd,
 				 cuda_datatype, AlgSpMM, SpMM_buffer);
+
+    cudaFree(As_csr_offsets);
+    cudaFree(As_buffer);
+    cudaFree(As_csr_columns);
+    cudaFree(As_csr_values);
+    cudaFree(SpMM_buffer);
 
 	cusparseDestroyDnMat(matAd);
 	cusparseDestroyDnMat(matBd);
