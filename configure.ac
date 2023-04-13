@@ -102,6 +102,12 @@ AC_ARG_ENABLE([cublas],
             [have_cublas=yes],
             [have_cublas=no])
 
+AC_ARG_ENABLE([floatmos],
+            [AS_HELP_STRING([--enable-floatmos],
+                            [Use single precision to compute MOs (with --enable-cublas only)])],
+            [have_floatmos=yes],
+            [have_floatmos=no])
+
 AC_ARG_ENABLE([cusparse],
             [AS_HELP_STRING([--enable-cusparse],
                             [Enable compilation of kernels that use cuSPARSE])],
@@ -113,6 +119,13 @@ AS_IF([ test "x$have_cublas" = "xyes" -a "x$have_cusparse" = "xyes" ], [
 	echo \
 	"Warning: cannot activate cuBLAS and cuSPARSE at the same time, activating cuBLAS only."
 	have_cusparse="no"
+])
+
+AS_IF([ test "x$have_floatmos" = "xyes" -a "x$have_cublas" = "xno" ], [
+	AC_OUTPUT
+	echo \
+	"Warning: --enable-floatmos working only with --enable-cublas, deactivating. " 
+	have_floatmos="no"
 ])
 
 
@@ -268,6 +281,10 @@ AS_IF([test "x$have_cusparse" = "xyes"], [
 		*)
 			echo "Warning : compiler not supported for cuBLAs linking"
 	esac
+])
+
+AS_IF([test "x$have_floatmos" = "xyes"], [
+	AC_DEFINE([HAVE_FLOATMOS], [1], [Using single-precision cuBLAS])
 ])
 
 # Specific options required with some compilers
