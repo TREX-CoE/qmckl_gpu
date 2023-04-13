@@ -1,6 +1,5 @@
 #include "include/qmckl_ao.h"
-#include "myheader.h"
-#define MAX_MEMORY_SIZE 10.8*1024*1024*1024
+#define MAX_MEMORY_SIZE 16.0*1024*1024*1024
 
 //**********
 // COMPUTE
@@ -126,9 +125,11 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 
 	double cutoff = 27.631021115928547;
 
+	// TG: MAX_MEMORY_SIZE should be roughly the GPU RAM, to be set at configure time?  
 	// Not to exceed GPU memory when allocating poly_vgl
-	// size_t target_chunk = MAX_MEMORY_SIZE / (sizeof(double)*5*ao_num);
-	int64_t target_chunk = 128*1024;
+	int64_t target_chunk = (MAX_MEMORY_SIZE /4.) / (sizeof(double)*5*ao_num);
+	// A good guess, can result in large memory occupation though
+	// int64_t target_chunk = 128*1024;
     size_t max_chunk_size = ( (target_chunk)/nucl_num ) * nucl_num ;
 	int64_t num_iters = point_num * nucl_num;
 	int64_t chunk_size = (num_iters < max_chunk_size) ? num_iters : max_chunk_size;
@@ -454,9 +455,8 @@ qmckl_compute_ao_value_gaussian_device(
 
 	double cutoff = 27.631021115928547;
 
-	// Not to exceed GPU memory when allocating poly_vgl
-	// size_t target_chunk = MAX_MEMORY_SIZE / (sizeof(double)*5*ao_num);
-	int64_t target_chunk = 128*1024;
+	// int64_t target_chunk = 128*1024;
+	int64_t target_chunk = (MAX_MEMORY_SIZE / 4.) / (sizeof(double)*ao_num);
     size_t max_chunk_size = ( (target_chunk)/nucl_num ) * nucl_num ;
 	int64_t num_iters = point_num * nucl_num;
 	int64_t chunk_size = (num_iters < max_chunk_size) ? num_iters : max_chunk_size;
