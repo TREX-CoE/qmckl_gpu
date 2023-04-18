@@ -12,6 +12,8 @@
 #include "qmckl_context.h"
 #include "qmckl_memory.h"
 
+bool qmckl_mo_basis_provided_device(qmckl_context_device context);
+
 qmckl_exit_code_device
 qmckl_get_mo_basis_mo_vgl_device(qmckl_context_device context,
 								 double *const mo_vgl, const int64_t size_max);

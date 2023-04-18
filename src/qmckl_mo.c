@@ -28,8 +28,7 @@ bool qmckl_mo_basis_provided_device(qmckl_context_device context) {
 //**********
 
 #ifdef HAVE_CUBLAS
-qmckl_exit_code_device 
-qmckl_compute_mo_basis_mo_vgl_sgemm_device(
+qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_sgemm_device(
 	const qmckl_context_device context, const int64_t ao_num,
 	const int64_t mo_num, const int64_t point_num,
 	const double *restrict coefficient_t, const double *restrict ao_vgl,
@@ -54,28 +53,37 @@ qmckl_compute_mo_basis_mo_vgl_sgemm_device(
 	int const ldc = m;
 
 	float *A = qmckl_malloc_device(context, sizeof(float) * ao_num * mo_num);
-	float *B = qmckl_malloc_device(context, sizeof(float) * 5 * ao_num * point_num);
-	float *C = qmckl_malloc_device(context, sizeof(float) * 5 * mo_num * point_num);
+	float *B =
+		qmckl_malloc_device(context, sizeof(float) * 5 * ao_num * point_num);
+	float *C =
+		qmckl_malloc_device(context, sizeof(float) * 5 * mo_num * point_num);
 
-#pragma omp target teams distribute parallel for simd is_device_ptr(A, coefficient_t) map(to: ao_num, mo_num)
-#pragma acc parallel loop gang vector deviceptr(A, coefficient_t) copyin(ao_num, mo_num)
-	for (int ii = 0; ii < ao_num * mo_num ; ++ii) {
-		A[ii] = (float) coefficient_t[ii];
+#pragma omp target teams distribute parallel for simd is_device_ptr(           \
+		A, coefficient_t) map(to : ao_num, mo_num)
+#pragma acc parallel loop gang vector deviceptr(A, coefficient_t)              \
+	copyin(ao_num, mo_num)
+	for (int ii = 0; ii < ao_num * mo_num; ++ii) {
+		A[ii] = (float)coefficient_t[ii];
 	}
-#pragma omp target teams distribute parallel for simd is_device_ptr(B, ao_vgl) map(to: ao_num, point_num)
-#pragma acc parallel loop gang vector deviceptr(B, ao_vgl) copyin(ao_num, point_num)
-	for (int ii = 0; ii < 5 * ao_num * point_num ; ++ii) {
-		B[ii] = (float) ao_vgl[ii];
+#pragma omp target teams distribute parallel for simd is_device_ptr(B, ao_vgl) \
+	map(to : ao_num, point_num)
+#pragma acc parallel loop gang vector deviceptr(B, ao_vgl)                     \
+	copyin(ao_num, point_num)
+	for (int ii = 0; ii < 5 * ao_num * point_num; ++ii) {
+		B[ii] = (float)ao_vgl[ii];
 	}
 
 	cublasCreate(&handle);
-	cublasSgemm_v2(handle, transa, transb, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc);
+	cublasSgemm_v2(handle, transa, transb, m, n, k, &alpha, A, lda, B, ldb,
+				   &beta, C, ldc);
 	cublasDestroy(handle);
 
-#pragma omp target teams distribute parallel for simd is_device_ptr(C, mo_vgl) map(to: mo_num, point_num)
-#pragma acc parallel loop gang vector deviceptr(C, mo_vgl) copyin(mo_num, point_num)
-	for (int ii = 0; ii < 5 * mo_num * point_num ; ++ii) {
-		mo_vgl[ii] = (double) C[ii];
+#pragma omp target teams distribute parallel for simd is_device_ptr(C, mo_vgl) \
+	map(to : mo_num, point_num)
+#pragma acc parallel loop gang vector deviceptr(C, mo_vgl)                     \
+	copyin(mo_num, point_num)
+	for (int ii = 0; ii < 5 * mo_num * point_num; ++ii) {
+		mo_vgl[ii] = (double)C[ii];
 	}
 
 	qmckl_free_device(context, A);
@@ -85,8 +93,7 @@ qmckl_compute_mo_basis_mo_vgl_sgemm_device(
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code_device 
-qmckl_compute_mo_basis_mo_vgl_dgemm_device(
+qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_dgemm_device(
 	const qmckl_context_device context, const int64_t ao_num,
 	const int64_t mo_num, const int64_t point_num,
 	const double *restrict coefficient_t, const double *restrict ao_vgl,
@@ -118,8 +125,7 @@ qmckl_compute_mo_basis_mo_vgl_dgemm_device(
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code_device 
-qmckl_compute_mo_basis_mo_value_dgemm_device(
+qmckl_exit_code_device qmckl_compute_mo_basis_mo_value_dgemm_device(
 	const qmckl_context_device context, const int64_t ao_num,
 	const int64_t mo_num, const int64_t point_num,
 	const double *restrict coefficient_t, const double *restrict ao_value,
@@ -150,8 +156,7 @@ qmckl_compute_mo_basis_mo_value_dgemm_device(
 
 	return QMCKL_SUCCESS_DEVICE;
 }
-qmckl_exit_code_device 
-qmckl_compute_mo_basis_mo_value_sgemm_device(
+qmckl_exit_code_device qmckl_compute_mo_basis_mo_value_sgemm_device(
 	const qmckl_context_device context, const int64_t ao_num,
 	const int64_t mo_num, const int64_t point_num,
 	const double *restrict coefficient_t, const double *restrict ao_vgl,
@@ -179,25 +184,32 @@ qmckl_compute_mo_basis_mo_value_sgemm_device(
 	float *B = qmckl_malloc_device(context, sizeof(float) * ao_num * point_num);
 	float *C = qmckl_malloc_device(context, sizeof(float) * mo_num * point_num);
 
-#pragma omp target teams distribute parallel for simd is_device_ptr(A, coefficient_t) map(to: ao_num, mo_num)
-#pragma acc parallel loop gang vector deviceptr(A, coefficient_t) copyin(ao_num, mo_num)
-	for (int ii = 0; ii < ao_num * mo_num ; ++ii) {
-		A[ii] = (float) coefficient_t[ii];
+#pragma omp target teams distribute parallel for simd is_device_ptr(           \
+		A, coefficient_t) map(to : ao_num, mo_num)
+#pragma acc parallel loop gang vector deviceptr(A, coefficient_t)              \
+	copyin(ao_num, mo_num)
+	for (int ii = 0; ii < ao_num * mo_num; ++ii) {
+		A[ii] = (float)coefficient_t[ii];
 	}
-#pragma omp target teams distribute parallel for simd is_device_ptr(B, ao_vgl) map(to: ao_num, point_num)
-#pragma acc parallel loop gang vector deviceptr(B, ao_vgl) copyin(ao_num, point_num)
-	for (int ii = 0; ii < ao_num * point_num ; ++ii) {
-		B[ii] = (float) ao_vgl[ii];
+#pragma omp target teams distribute parallel for simd is_device_ptr(B, ao_vgl) \
+	map(to : ao_num, point_num)
+#pragma acc parallel loop gang vector deviceptr(B, ao_vgl)                     \
+	copyin(ao_num, point_num)
+	for (int ii = 0; ii < ao_num * point_num; ++ii) {
+		B[ii] = (float)ao_vgl[ii];
 	}
 
 	cublasCreate(&handle);
-	cublasSgemm_v2(handle, transa, transb, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc);
+	cublasSgemm_v2(handle, transa, transb, m, n, k, &alpha, A, lda, B, ldb,
+				   &beta, C, ldc);
 	cublasDestroy(handle);
 
-#pragma omp target teams distribute parallel for simd is_device_ptr(C, mo_vgl) map(to: mo_num, point_num)
-#pragma acc parallel loop gang vector deviceptr(C, mo_vgl) copyin(mo_num, point_num)
-	for (int ii = 0; ii < mo_num * point_num ; ++ii) {
-		mo_vgl[ii] = (double) C[ii];
+#pragma omp target teams distribute parallel for simd is_device_ptr(C, mo_vgl) \
+	map(to : mo_num, point_num)
+#pragma acc parallel loop gang vector deviceptr(C, mo_vgl)                     \
+	copyin(mo_num, point_num)
+	for (int ii = 0; ii < mo_num * point_num; ++ii) {
+		mo_vgl[ii] = (double)C[ii];
 	}
 
 	qmckl_free_device(context, A);
@@ -209,8 +221,7 @@ qmckl_compute_mo_basis_mo_value_sgemm_device(
 #endif
 
 #ifdef HAVE_CUSPARSE
-qmckl_exit_code_device 
-qmckl_compute_mo_basis_mo_vgl_cusparse_device(
+qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_cusparse_device(
 	const qmckl_context_device context, const int64_t ao_num,
 	const int64_t mo_num, const int64_t point_num,
 	const double *restrict coefficient_t, const double *restrict ao_vgl,
@@ -304,11 +315,11 @@ qmckl_compute_mo_basis_mo_vgl_cusparse_device(
 	cusparseSpMM(handle, opA, opB, &alpha, matAs, matBd, &beta, matCd,
 				 cuda_datatype, AlgSpMM, SpMM_buffer);
 
-    cudaFree(As_csr_offsets);
-    cudaFree(As_buffer);
-    cudaFree(As_csr_columns);
-    cudaFree(As_csr_values);
-    cudaFree(SpMM_buffer);
+	cudaFree(As_csr_offsets);
+	cudaFree(As_buffer);
+	cudaFree(As_csr_columns);
+	cudaFree(As_csr_values);
+	cudaFree(SpMM_buffer);
 
 	cusparseDestroyDnMat(matAd);
 	cusparseDestroyDnMat(matBd);
@@ -318,8 +329,7 @@ qmckl_compute_mo_basis_mo_vgl_cusparse_device(
 
 	return QMCKL_SUCCESS_DEVICE;
 }
-qmckl_exit_code_device 
-qmckl_compute_mo_basis_mo_value_cusparse_device(
+qmckl_exit_code_device qmckl_compute_mo_basis_mo_value_cusparse_device(
 	const qmckl_context_device context, const int64_t ao_num,
 	const int64_t mo_num, const int64_t point_num,
 	const double *restrict coefficient_t, const double *restrict ao_value,
@@ -413,11 +423,11 @@ qmckl_compute_mo_basis_mo_value_cusparse_device(
 	cusparseSpMM(handle, opA, opB, &alpha, matAs, matBd, &beta, matCd,
 				 cuda_datatype, AlgSpMM, SpMM_buffer);
 
-    cudaFree(As_csr_offsets);
-    cudaFree(As_buffer);
-    cudaFree(As_csr_columns);
-    cudaFree(As_csr_values);
-    cudaFree(SpMM_buffer);
+	cudaFree(As_csr_offsets);
+	cudaFree(As_buffer);
+	cudaFree(As_csr_columns);
+	cudaFree(As_csr_values);
+	cudaFree(SpMM_buffer);
 
 	cusparseDestroyDnMat(matAd);
 	cusparseDestroyDnMat(matBd);
@@ -595,7 +605,6 @@ qmckl_provide_mo_basis_mo_vgl_device(qmckl_context_device context) {
 qmckl_exit_code_device
 qmckl_provide_mo_basis_mo_value_device(qmckl_context_device context) {
 
-
 	qmckl_exit_code_device rc = QMCKL_SUCCESS_DEVICE;
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
@@ -660,27 +669,27 @@ qmckl_provide_mo_basis_mo_value_device(qmckl_context_device context) {
 											 NULL);
 			}
 #if HAVE_CUSPARSE
-		rc = qmckl_compute_mo_basis_mo_value_cusparse_device(
-			context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num, ctx->point.num,
-			ctx->mo_basis.coefficient_t, ctx->ao_basis.ao_value,
-			ctx->mo_basis.mo_value);
+			rc = qmckl_compute_mo_basis_mo_value_cusparse_device(
+				context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num,
+				ctx->point.num, ctx->mo_basis.coefficient_t,
+				ctx->ao_basis.ao_value, ctx->mo_basis.mo_value);
 #elif HAVE_CUBLAS
 #if HAVE_FLOATMOS
-		rc = qmckl_compute_mo_basis_mo_value_sgemm_device(
-			context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num, ctx->point.num,
-			ctx->mo_basis.coefficient_t, ctx->ao_basis.ao_value,
-			ctx->mo_basis.mo_value);
+			rc = qmckl_compute_mo_basis_mo_value_sgemm_device(
+				context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num,
+				ctx->point.num, ctx->mo_basis.coefficient_t,
+				ctx->ao_basis.ao_value, ctx->mo_basis.mo_value);
 #else
-		rc = qmckl_compute_mo_basis_mo_value_dgemm_device(
-			context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num, ctx->point.num,
-			ctx->mo_basis.coefficient_t, ctx->ao_basis.ao_value,
-			ctx->mo_basis.mo_value);
+			rc = qmckl_compute_mo_basis_mo_value_dgemm_device(
+				context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num,
+				ctx->point.num, ctx->mo_basis.coefficient_t,
+				ctx->ao_basis.ao_value, ctx->mo_basis.mo_value);
 #endif
 #else
-		rc = qmckl_compute_mo_basis_mo_value_device(
-			context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num, ctx->point.num,
-			ctx->mo_basis.coefficient_t, ctx->ao_basis.ao_value,
-			ctx->mo_basis.mo_value);
+			rc = qmckl_compute_mo_basis_mo_value_device(
+				context, ctx->ao_basis.ao_num, ctx->mo_basis.mo_num,
+				ctx->point.num, ctx->mo_basis.coefficient_t,
+				ctx->ao_basis.ao_value, ctx->mo_basis.mo_value);
 #endif
 		}
 
