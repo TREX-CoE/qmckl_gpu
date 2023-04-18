@@ -585,6 +585,10 @@ qmckl_get_ao_basis_ao_vgl_device(qmckl_context_device context,
 
 qmckl_exit_code_device qmckl_get_ao_basis_ao_value_device(
 	qmckl_context_device context, double *const ao_vgl, const int64_t size_max);
+
+qmckl_exit_code_device qmckl_get_ao_basis_ao_value_inplace_device(
+	qmckl_context_device context, double *const ao_value, const int64_t size_max);
+
 qmckl_exit_code_device
 qmckl_get_ao_basis_ao_num_device(const qmckl_context_device context,
 								 int64_t *const ao_num);
@@ -598,8 +602,6 @@ qmckl_exit_code_device
 qmckl_get_ao_basis_type_device(const qmckl_context_device context,
 							   char *const basis_type);
 
-qmckl_exit_code_device
-qmckl_get_ao_basis_ao_num_device(qmckl_context_device context, int64_t *ao_num);
 qmckl_exit_code_device
 qmckl_get_ao_basis_ao_num_device(qmckl_context_device context, int64_t *ao_num);
 
@@ -701,11 +703,32 @@ qmckl_exit_code_device
 qmckl_get_ao_basis_ao_factor_device(qmckl_context_device context,
 									double *ao_factor, int64_t ao_num);
 
+
+qmckl_exit_code_device 
+qmckl_get_ao_basis_ao_vgl_inplace_device(qmckl_context_device context,
+												 double *ao_vgl,
+												 int64_t size_max);
+
+qmckl_exit_code
+qmckl_get_ao_basis_ao_vgl_inplace_offload(qmckl_context context,
+												double *ao_vgl,
+												int64_t size_max);
+qmckl_exit_code qmckl_get_ao_basis_ao_vgl_acc_offload(qmckl_context context,
+													  double *const ao_vgl,
+													  const int64_t size_max);
+
+qmckl_exit_code 
+qmckl_get_ao_basis_ao_vgl_inplace_acc_offload(
+	qmckl_context context, double *const ao_vgl, const int64_t size_max);
+
 bool qmckl_ao_basis_provided(qmckl_context_device context);
 
 //**********
 // MO
 //**********
+//
+qmckl_exit_code_device
+qmckl_get_mo_basis_mo_num_device(qmckl_context_device context, int64_t *mo_num);
 
 qmckl_exit_code_device
 qmckl_get_mo_basis_mo_vgl_device(qmckl_context_device context,
@@ -718,6 +741,10 @@ qmckl_get_mo_basis_mo_value_device(qmckl_context_device context,
 qmckl_exit_code_device
 qmckl_get_mo_basis_mo_value_inplace_device(qmckl_context_device context,
 										   double *mo_value, int64_t size_max);
+
+qmckl_exit_code_device
+qmckl_get_mo_basis_mo_vgl_inplace_device(qmckl_context_device context,
+										   double *mo_vgl, int64_t size_max);
 
 qmckl_exit_code_device
 qmckl_provide_mo_basis_mo_value_device(qmckl_context_device context);

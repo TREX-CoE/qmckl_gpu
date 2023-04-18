@@ -102,6 +102,32 @@ AC_ARG_ENABLE([cublas],
             [have_cublas=yes],
             [have_cublas=no])
 
+AC_ARG_ENABLE([floatmos],
+            [AS_HELP_STRING([--enable-floatmos],
+                            [Use single precision to compute MOs (with --enable-cublas only)])],
+            [have_floatmos=yes],
+            [have_floatmos=no])
+
+AC_ARG_ENABLE([cusparse],
+            [AS_HELP_STRING([--enable-cusparse],
+                            [Enable compilation of kernels that use cuSPARSE])],
+            [have_cusparse=yes],
+            [have_cusparse=no])
+
+AS_IF([ test "x$have_cublas" = "xyes" -a "x$have_cusparse" = "xyes" ], [
+	AC_OUTPUT
+	echo \
+	"Warning: cannot activate cuBLAS and cuSPARSE at the same time, activating cuBLAS only."
+	have_cusparse="no"
+])
+
+AS_IF([ test "x$have_floatmos" = "xyes" -a "x$have_cublas" = "xno" ], [
+	AC_OUTPUT
+	echo \
+	"Warning: --enable-floatmos working only with --enable-cublas, deactivating. " 
+	have_floatmos="no"
+])
+
 
 ####
 ## Enable OpenMP / OpenACC
@@ -169,7 +195,7 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp" = "xyes"], [
 			CFLAGS="$CFLAGS -fopenmp -foffload=-lm"
 			;;
 		*nvc*)
-			CFLAGS="$CFLAGS -mp=gpu"
+			CFLAGS="$CFLAGS -mp=gpu,noautopar"
 			;;
 		*clang*)
 			CFLAGS="$CFLAGS -fopenmp "
@@ -186,7 +212,7 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp_offload" = "xyes"], [
 			CFLAGS="$CFLAGS -fopenmp -foffload=-lm"
 			;;
 		*nvc*)
-			CFLAGS="$CFLAGS -mp=gpu"
+			CFLAGS="$CFLAGS -mp=gpu,noautopar"
 			;;
 		*clang*)
 			CFLAGS="$CFLAGS -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda"
@@ -206,7 +232,7 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc" = "xyes"], [
 			LDFLAGS="$LDFLAGS -lm -fopenacc"
 			;;
 		*nvc*)
-			CFLAGS="$CFLAGS -acc=gpu -ta=nvidia:nordc"
+			CFLAGS="$CFLAGS -acc=gpu,noautopar -gpu=nordc"
 		;;
 
 		*)
@@ -220,7 +246,7 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc_offload" = "xyes"], [
 			LDFLAGS="$LDFLAGS -lm -fopenacc"
 			;;
 		*nvc*)
-			CFLAGS="$CFLAGS -acc=gpu -ta=nvidia:nordc"
+			CFLAGS="$CFLAGS -acc=gpu,noautopar -gpu=nordc"
 		;;
 
 		*)
@@ -236,12 +262,29 @@ AS_IF([test "x$have_cublas" = "xyes"], [
 	AC_DEFINE([HAVE_CUBLAS], [1], [Enable compilation of cuBLAS/cuSolver functions])
 	case $CC in
 		*nvc*)
-			CFLAGS="$CFLAGS -Mcuda -Mcudalib"
+			CFLAGS="$CFLAGS -cudalib=cublas,cusolver"
 		;;
 
 		*)
 			echo "Warning : compiler not supported for cuBLAs linking"
 	esac
+])
+
+AS_IF([test "x$have_cusparse" = "xyes"], [
+	AC_DEFINE([HAVE_CUSPARSE], [1], [Enable compilation of cuSPARSE functions])
+	case $CC in
+		*nvc*)
+			echo "Warning : cuSPARSE needs cuda>=11.8. Setting -gpu=cuda11.8, change if another version is present inthe system." 
+			CFLAGS="$CFLAGS -gpu=cuda11.8 -cudalib=cusparse"
+		;;
+
+		*)
+			echo "Warning : compiler not supported for cuBLAs linking"
+	esac
+])
+
+AS_IF([test "x$have_floatmos" = "xyes"], [
+	AC_DEFINE([HAVE_FLOATMOS], [1], [Using single-precision cuBLAS])
 ])
 
 # Specific options required with some compilers
@@ -287,6 +330,7 @@ Fortran interface .: ${have_fortran_interface}
 
 TREXIO ............: ${have_trexio}
 cuBLAS ............: ${have_cublas}
+cuSPARSE ..........: ${have_cusparse}
 
 OpenMP ............: ${have_omp}
 OpenACC ...........: ${have_acc}
