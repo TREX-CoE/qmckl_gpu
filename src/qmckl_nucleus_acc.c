@@ -27,9 +27,8 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 
 	// TODO Manually specify OpenACC clauses
 
-#pragma acc data copy(shell_max_ptr[ : 1], prim_max_ptr[ : 1])                 \
-	deviceptr(nucleus_shell_num, nucleus_index, shell_prim_num,                \
-				  prim_num_per_nucleus)
+#pragma acc data copy(shell_max_ptr[:1], prim_max_ptr[:1]) deviceptr(          \
+	nucleus_shell_num, nucleus_index, shell_prim_num, prim_num_per_nucleus)
 	{
 #pragma acc kernels
 		{
@@ -91,11 +90,11 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 
 	// TODO Manually specify OpenACC clauses
 
-#pragma acc data deviceptr(                                                    \
-		expo_expo, expo_index, coef, newcoef, nucleus_index, shell_prim_index, \
-			nucleus_shell_num, exponent, coefficient_normalized,               \
-			shell_prim_num, expo_per_nucleus_data, coef_per_nucleus_data,      \
-			prim_num_per_nucleus, newidx)
+#pragma acc data deviceptr(expo_expo, expo_index, coef, newcoef,               \
+						   nucleus_index, shell_prim_index, nucleus_shell_num, \
+						   exponent, coefficient_normalized, shell_prim_num,   \
+						   expo_per_nucleus_data, coef_per_nucleus_data,       \
+						   prim_num_per_nucleus, newidx)
 	{
 #pragma acc kernels
 		{
@@ -312,8 +311,8 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 		int shell_num = ctx->ao_basis.shell_num;
 
 #pragma acc data deviceptr(shell_prim_index, shell_prim_num,                   \
-							   coefficient_normalized, coefficient,            \
-							   prim_factor, shell_factor)
+						   coefficient_normalized, coefficient, prim_factor,   \
+						   shell_factor)
 		{
 #pragma acc kernels
 			{
@@ -349,7 +348,7 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 		int32_t *shell_ang_mom = ctx->ao_basis.shell_ang_mom;
 
 #pragma acc data deviceptr(nucleus_max_ang_mom, nucleus_index,                 \
-							   nucleus_shell_num, shell_ang_mom)
+						   nucleus_shell_num, shell_ang_mom)
 		{
 #pragma acc kernels
 			{
@@ -394,7 +393,7 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 			int nucleus_num = ctx->nucleus.num;
 
 #pragma acc data deviceptr(nucleus_range, nucleus_index, nucleus_shell_num,    \
-							   shell_prim_index, shell_prim_num, exponent)
+						   shell_prim_index, shell_prim_num, exponent)
 			{
 #pragma acc kernels
 				{

@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "chbrclf.h"
 #include "../include/qmckl_gpu.h"
