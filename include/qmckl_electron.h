@@ -5,6 +5,8 @@
 #include "qmckl_blas.h"
 #include "qmckl_point.h"
 
+bool qmckl_electron_provided_device(qmckl_context_device context);
+
 qmckl_exit_code_device
 qmckl_set_electron_num_device(qmckl_context_device context, int64_t up_num,
 							  int64_t down_num);
