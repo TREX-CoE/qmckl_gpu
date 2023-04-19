@@ -500,7 +500,7 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 #pragma acc update host(lmax_p [0:1])
 }
 size_t pows_dim = (lmax + 3) * 3 * chunk_size;
-double *pows_shared = qmckl_malloc_device(context, sizeof(double) * pows_dim
+double *pows_shared = qmckl_malloc_device(context, sizeof(double) * pows_dim);
 
 #pragma acc kernels deviceptr(lstart)
 {
