@@ -165,6 +165,7 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 size_t pows_dim = (lmax + 3) * 3 * chunk_size;
 double *pows_shared = qmckl_malloc_device(context, sizeof(double) * pows_dim);
 
+
 #pragma acc kernels deviceptr(lstart)
 {
 	for (int l = 0; l < 21; l++) {
@@ -178,6 +179,7 @@ int *shell_to_nucl = qmckl_malloc_device(context, sizeof(int) * shell_num);
 #pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
 						   ao_index, lstart, shell_to_nucl) copyin(k_p [0:1])
 {
+
 #pragma acc kernels
 	{for (int inucl = 0; inucl < nucl_num;
 		  inucl++){int ishell_start = nucleus_index[inucl];
@@ -498,7 +500,7 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 #pragma acc update host(lmax_p [0:1])
 }
 size_t pows_dim = (lmax + 3) * 3 * chunk_size;
-double *pows_shared = qmckl_malloc_device(context, sizeof(double) * pows_dim);
+double *pows_shared = qmckl_malloc_device(context, sizeof(double) * pows_dim
 
 #pragma acc kernels deviceptr(lstart)
 {
