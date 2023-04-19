@@ -24,6 +24,46 @@ qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context) {
 }
 
 //**********
+// FINALIZE
+//**********
+
+qmckl_exit_code_device
+qmckl_finalize_jastrow_device(qmckl_context_device context) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_INVALID_CONTEXT_DEVICE;
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	/* ----------------------------------- */
+	/* Check for the necessary information */
+	/* ----------------------------------- */
+
+	if (!(ctx->electron.provided)) {
+		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
+									 "qmckl_electron", NULL);
+	}
+
+	if (!(ctx->nucleus.provided)) {
+		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
+									 "qmckl_nucleus", NULL);
+	}
+
+	qmckl_exit_code_device rc;
+
+	rc = qmckl_provide_jastrow_asymp_jasa_device(context);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
+
+	rc = qmckl_provide_jastrow_asymp_jasb_device(context);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
+
+	rc = qmckl_context_touch_device(context);
+	return rc;
+}
+
+//**********
 // SETTERS
 //**********
 
@@ -463,7 +503,8 @@ qmckl_set_jastrow_b_vector_device(qmckl_context_device context,
 	}
 
 	if (ctx->jastrow.b_vector != NULL) {
-		qmckl_exit_code_device rc = qmckl_free(context, ctx->jastrow.b_vector);
+		qmckl_exit_code_device rc =
+			qmckl_free_device(context, ctx->jastrow.b_vector);
 		if (rc != QMCKL_SUCCESS_DEVICE) {
 			return qmckl_failwith_device(
 				context, rc, "qmckl_set_jastrow_b_vector",
@@ -933,6 +974,115 @@ qmckl_get_jastrow_dim_c_vector_device(qmckl_context_device context,
 //**********
 // PROVIDE
 //**********
+
+// Finalize provides
+
+qmckl_exit_code_device
+qmckl_provide_jastrow_asymp_jasa_device(qmckl_context_device context) {
+
+	qmckl_exit_code_device rc;
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
+									 "qmckl_provide_jastrow_asymp_jasa_device",
+									 NULL);
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	if (!ctx->jastrow.provided) {
+		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
+									 "qmckl_provide_jastrow_asymp_jasa_device",
+									 NULL);
+	}
+
+	/* Compute if necessary */
+	if (ctx->date > ctx->jastrow.asymp_jasa_date) {
+
+		/* Allocate array */
+		if (ctx->jastrow.asymp_jasa == NULL) {
+
+			qmckl_memory_info_struct_device mem_info =
+				qmckl_memory_info_struct_zero_device;
+			double *asymp_jasa = (double *)qmckl_malloc_device(
+				context, ctx->jastrow.type_nucl_num * sizeof(double));
+
+			if (asymp_jasa == NULL) {
+				return qmckl_failwith_device(context,
+											 QMCKL_ALLOCATION_FAILED_DEVICE,
+											 "qmckl_asymp_jasa", NULL);
+			}
+			ctx->jastrow.asymp_jasa = asymp_jasa;
+		}
+
+		rc = qmckl_compute_jastrow_asymp_jasa_device(
+			context, ctx->jastrow.aord_num, ctx->jastrow.type_nucl_num,
+			ctx->jastrow.a_vector, ctx->jastrow.rescale_factor_en,
+			ctx->jastrow.asymp_jasa);
+		if (rc != QMCKL_SUCCESS_DEVICE) {
+			return rc;
+		}
+
+		ctx->jastrow.asymp_jasa_date = ctx->date;
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device
+qmckl_provide_jastrow_asymp_jasb_device(qmckl_context_device context) {
+
+	qmckl_exit_code_device rc;
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
+									 "qmckl_provide_jastrow_asymp_jasb_device",
+									 NULL);
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	if (!ctx->jastrow.provided) {
+		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
+									 "qmckl_provide_jastrow_asymp_jasb_device",
+									 NULL);
+	}
+
+	/* Compute if necessary */
+	if (ctx->date > ctx->jastrow.asymp_jasb_date) {
+
+		/* Allocate array */
+		if (ctx->jastrow.asymp_jasb == NULL) {
+
+			qmckl_memory_info_struct_device mem_info =
+				qmckl_memory_info_struct_zero_device;
+			double *asymp_jasb =
+				(double *)qmckl_malloc_device(context, 2 * sizeof(double));
+
+			if (asymp_jasb == NULL) {
+				return qmckl_failwith_device(context,
+											 QMCKL_ALLOCATION_FAILED_DEVICE,
+											 "qmckl_asymp_jasb_device", NULL);
+			}
+			ctx->jastrow.asymp_jasb = asymp_jasb;
+		}
+
+		rc = qmckl_compute_jastrow_asymp_jasb_device(
+			context, ctx->jastrow.bord_num, ctx->jastrow.b_vector,
+			ctx->jastrow.rescale_factor_ee, ctx->jastrow.asymp_jasb);
+		if (rc != QMCKL_SUCCESS_DEVICE) {
+			return rc;
+		}
+
+		ctx->jastrow.asymp_jasb_date = ctx->date;
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}
 
 // Total Jastrow
 qmckl_exit_code_device

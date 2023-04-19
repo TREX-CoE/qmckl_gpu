@@ -165,7 +165,6 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 size_t pows_dim = (lmax + 3) * 3 * chunk_size;
 double *pows_shared = qmckl_malloc_device(context, sizeof(double) * pows_dim);
 
-
 #pragma acc kernels deviceptr(lstart)
 {
 	for (int l = 0; l < 21; l++) {
