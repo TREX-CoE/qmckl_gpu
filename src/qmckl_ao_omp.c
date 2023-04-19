@@ -20,7 +20,7 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 
 	int *shell_to_nucl = qmckl_malloc_device(context, sizeof(int) * shell_num);
 
-#pragma omp target is_device_ptr(shell_to_nucl)
+#pragma omp target is_device_ptr(shell_to_nucl, nucleus_index, nucleus_shell_num)
 	{
 #pragma omp teams distribute parallel for
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
