@@ -20,37 +20,24 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 
 	int *shell_to_nucl = qmckl_malloc_device(context, sizeof(int) * shell_num);
 
+#pragma acc data deviceptr(shell_to_nucl, nucleus_index, nucleus_shell_num)
+	{
+#pragma acc parallel loop
+		for (int inucl = 0; inucl < nucl_num; inucl++) {
+			int ishell_start = nucleus_index[inucl];
+			int ishell_end =
+				nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+			for (int ishell = ishell_start; ishell <= ishell_end;
+				 ishell++) {
+				shell_to_nucl[ishell] = inucl;
+			}
+		}
+	}
 #pragma acc data deviceptr(nucleus_shell_num, nucleus_index, nucleus_range,    \
 						   shell_prim_index, shell_prim_num, coord,            \
 						   nucl_coord, expo, coef_normalized, shell_vgl,       \
 						   shell_to_nucl)
 	{
-
-#pragma acc kernels
-		{
-			for (int inucl = 0; inucl < nucl_num; inucl++) {
-				int ishell_start = nucleus_index[inucl];
-				int ishell_end =
-					nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
-				for (int ishell = ishell_start; ishell <= ishell_end;
-					 ishell++) {
-					shell_to_nucl[ishell] = inucl;
-				}
-			}
-		}
-		/*
-		 * BUG As of now, "acc parallel" caused the following internal compiler
-		 * error on  gcc (Spack GCC) 12.1.0 :
-		 *
-		 * ../src/qmckl_ao_acc.c: In function
-		 * 'qmckl_compute_ao_basis_shell_gaussian_vgl_device._omp_fn.0':
-		 * ../src/qmckl_ao_acc.c:31:9: internal compiler error: in
-		 * expand_UNIQUE, at internal-fn.cc:2996 31 | #pragma acc parallel loop
-		 * gang worker vector
-		 *
-		 *  TODO Until this error is fixed, we might want to wrap desired
-		 * pragmas in #ifdefs depending on the compiler
-		 * */
 #pragma acc parallel loop collapse(2)
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
@@ -132,10 +119,9 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 
 	// TG: MAX_MEMORY_SIZE should be roughly the GPU RAM, to be set at configure
 	// time? Not to exceed GPU memory when allocating poly_vgl
-	int64_t target_chunk =
-		(MAX_MEMORY_SIZE / 4.) / (sizeof(double) * 5 * ao_num);
+	// int64_t target_chunk = (MAX_MEMORY_SIZE / 4.) / (sizeof(double) * 5 * ao_num);
 	// A good guess, can result in large memory occupation though
-	// int64_t target_chunk = 128*1024;
+	int64_t target_chunk = 128*1024;
 	size_t max_chunk_size = ((target_chunk) / nucl_num) * nucl_num;
 	int64_t num_iters = point_num * nucl_num;
 	int64_t chunk_size =
@@ -150,63 +136,60 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 
 	// Specific calling function
 	int lmax = -1;
-	int *lmax_p = &lmax;
-#pragma acc data deviceptr(nucleus_max_ang_mom) copyin(lmax_p [0:1])
+#pragma acc data deviceptr(nucleus_max_ang_mom) copy(lmax)
 	{
 #pragma acc kernels
-		{for (int i = 0; i < nucl_num;
-			  i++){if (lmax_p[0] < nucleus_max_ang_mom[i]){
-			lmax_p[0] = nucleus_max_ang_mom[i];
-}
-}
-}
-#pragma acc update host(lmax_p [0:1])
-}
-size_t pows_dim = (lmax + 3) * 3 * chunk_size;
-double *pows_shared = qmckl_malloc_device(context, sizeof(double) * pows_dim);
+		{
+		for (int i = 0; i < nucl_num; i++){
+			if (lmax < nucleus_max_ang_mom[i]){
+				lmax = nucleus_max_ang_mom[i];
+			}
+		}
+		}
+	}
+	size_t pows_dim = (lmax + 3) * 3 * chunk_size;
+	double *pows_shared = qmckl_malloc_device(context, sizeof(double) * pows_dim);
 
 #pragma acc kernels deviceptr(lstart)
-{
-	for (int l = 0; l < 21; l++) {
-		lstart[l] = l * (l + 1) * (l + 2) / 6 + 1;
+	{
+		for (int l = 0; l < 21; l++) {
+			lstart[l] = l * (l + 1) * (l + 2) / 6 + 1;
+		}
 	}
-}
-
-int k = 1;
-int *k_p = &k;
-int *shell_to_nucl = qmckl_malloc_device(context, sizeof(int) * shell_num);
+	
+	int k = 1;
+	int *shell_to_nucl = qmckl_malloc_device(context, sizeof(int) * shell_num);
 #pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
-						   ao_index, lstart, shell_to_nucl) copyin(k_p [0:1])
-{
+						   ao_index, lstart, shell_to_nucl) copy(k)
+	{
 #pragma acc kernels
-	{for (int inucl = 0; inucl < nucl_num;
-		  inucl++){int ishell_start = nucleus_index[inucl];
-int ishell_end = nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
-for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
-	int l = shell_ang_mom[ishell];
-	ao_index[ishell] = k_p[0];
-	k_p[0] = k_p[0] + lstart[l + 1] - lstart[l];
-	shell_to_nucl[ishell] = inucl;
-}
-}
-}
-#pragma acc update host(k_p [0:1])
-}
+	{
+	for (int inucl = 0; inucl < nucl_num; inucl++){
+		int ishell_start = nucleus_index[inucl];
+		int ishell_end = nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
+		for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
+			int l = shell_ang_mom[ishell];
+			ao_index[ishell] = k;
+			k = k + lstart[l + 1] - lstart[l];
+			shell_to_nucl[ishell] = inucl;
+		}
+	}
+	}
+	}
 
-#pragma acc data deviceptr(                                                    \
-	ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,           \
-	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, nucl_coord,  \
-	pows_shared, shell_ang_mom, nucleus_range, shell_to_nucl)
-{
+	double(*poly_vgl)[chunk_size] = (double(*)[chunk_size])poly_vgl_shared;
+	double(*pows)[chunk_size] = (double(*)[chunk_size])pows_shared;
+
 
 	for (int sub_iter = 0; sub_iter < num_sub_iters; sub_iter++) {
-
+#pragma acc data deviceptr(                                                    \
+	ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,           \
+	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, poly_vgl, nucl_coord,  \
+	pows_shared, pows, shell_ang_mom, nucleus_range, shell_to_nucl)
+	{
 #pragma acc parallel loop gang worker vector async(1)
 		for (int iter = 0; iter < chunk_size; iter++) {
 
-			double(*poly_vgl)[chunk_size] =
-				(double(*)[chunk_size])poly_vgl_shared;
-			double(*pows)[chunk_size] = (double(*)[chunk_size])pows_shared;
 
 			int step = iter + sub_iter * chunk_size;
 			if (step >= num_iters)
@@ -344,13 +327,15 @@ for (int ishell = ishell_start; ishell <= ishell_end; ishell++) {
 			// End of ao_polynomial computation (now inlined)
 			// poly_vgl is now set from here
 		}
-
+}
+#pragma acc data deviceptr(                                                    \
+	ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom,           \
+	nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared, poly_vgl, nucl_coord,  \
+	pows_shared, pows, shell_ang_mom, nucleus_range, shell_to_nucl)
+{
 #pragma acc parallel loop collapse(2) async(1)
 		for (int iter_new = 0; iter_new < chunk_size / nucl_num; iter_new++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
-
-				double(*poly_vgl)[chunk_size] =
-					(double(*)[chunk_size])poly_vgl_shared;
 
 				int ipoint = iter_new + chunk_size / nucl_num * sub_iter;
 				int inucl = shell_to_nucl[ishell];

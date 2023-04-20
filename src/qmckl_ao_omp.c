@@ -32,7 +32,6 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 			}
 		}
 	}
-
 #pragma omp target is_device_ptr(nucleus_shell_num, nucleus_index,             \
 								 nucleus_range, shell_prim_index,              \
 								 shell_prim_num, coord, nucl_coord, expo,      \
@@ -497,8 +496,7 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 	int *shell_to_nucl = qmckl_malloc_device(context, sizeof(int) * shell_num);
 #pragma omp target is_device_ptr(nucleus_index, nucleus_shell_num,             \
 								 shell_ang_mom, ao_index, lstart,              \
-								 shell_to_nucl) map(tofrom                     \
-													: k)
+								 shell_to_nucl) map(tofrom : k)
 	{
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
 			int ishell_start = nucleus_index[inucl];

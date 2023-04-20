@@ -26,7 +26,7 @@ src/qmckl_trexio.c src/qmckl_ao.c src/qmckl_mo.c
 if HAVE_OMP_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_memory_omp.c \
   src/qmckl_nucleus_omp.c src/qmckl_point_omp.c \
-  src/qmckl_blas_omp.c src/qmckl_ao_omp.c \
+  src/qmckl_blas_omp.c \
   src/qmckl_mo_omp.c
 endif
 
@@ -40,7 +40,7 @@ endif
 if HAVE_ACC_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_memory_acc.c \
   src/qmckl_nucleus_acc.c src/qmckl_point_acc.c \
-  src/qmckl_blas_acc.c src/qmckl_ao_acc.c \
+  src/qmckl_blas_acc.c \
   src/qmckl_mo_acc.c
 endif
 
