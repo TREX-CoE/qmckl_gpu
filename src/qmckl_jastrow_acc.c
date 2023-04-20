@@ -5,7 +5,7 @@
 //**********
 
 // Finalize computes
-qmckl_exit_code_device qmckl_compute_jastrow_champ_asymp_jasa(
+qmckl_exit_code_device qmckl_compute_jastrow_asymp_jasa_device(
 	const qmckl_context_device context, const int64_t aord_num,
 	const int64_t type_nucl_num, const double *a_vector,
 	const double *rescale_factor_en, double *const asymp_jasa) {
@@ -84,7 +84,24 @@ qmckl_compute_jastrow_value_device(const qmckl_context_device context,
 								   const int64_t walk_num, const double *f_ee,
 								   const double *f_en, const double *f_een,
 								   double *const value) {
-	// TODO
+
+	if (context == QMCKL_NULL_CONTEXT_DEVICE)
+		return QMCKL_INVALID_CONTEXT_DEVICE;
+	if (walk_num <= 0)
+		return QMCKL_INVALID_ARG_2_DEVICE;
+	if (f_ee == NULL)
+		return QMCKL_INVALID_ARG_3_DEVICE;
+	if (f_en == NULL)
+		return QMCKL_INVALID_ARG_4_DEVICE;
+	if (f_een == NULL)
+		return QMCKL_INVALID_ARG_5_DEVICE;
+	if (value == NULL)
+		return QMCKL_INVALID_ARG_6_DEVICE;
+
+	for (int64_t i = 0; i < walk_num; ++i) {
+		value[i] = exp(f_ee[i] + f_en[i] + f_een[i]);
+	}
+
 	return QMCKL_SUCCESS_DEVICE;
 }
 
@@ -94,7 +111,51 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_ee_device(
 	const int64_t elec_num, const int64_t up_num, const int64_t bord_num,
 	const double *b_vector, const double *ee_distance_rescaled,
 	const double *asymp_jasb, double *const factor_ee) {
-	// TODO
+
+	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_INVALID_CONTEXT_DEVICE;
+	}
+
+	if (walk_num <= 0) {
+		return QMCKL_INVALID_ARG_2_DEVICE;
+	}
+
+	if (elec_num <= 0) {
+		return QMCKL_INVALID_ARG_3_DEVICE;
+	}
+
+	if (bord_num < 0) {
+		return QMCKL_INVALID_ARG_4_DEVICE;
+	}
+
+	for (int nw = 0; nw < walk_num; ++nw) {
+		factor_ee[nw] = 0.0; // put init array here.
+		size_t ishift = nw * elec_num * elec_num;
+		for (int i = 0; i < elec_num; ++i) {
+			for (int j = 0; j < i; ++j) {
+				double x = ee_distance_rescaled[j + i * elec_num + ishift];
+				const double x1 = x;
+				double power_ser = 0.0;
+				double spin_fact = 1.0;
+				int ipar = 0; // index of asymp_jasb
+
+				for (int p = 1; p < bord_num; ++p) {
+					x = x * x1;
+					power_ser += b_vector[p + 1] * x;
+				}
+
+				if (i < up_num || j >= up_num) {
+					spin_fact = 0.5;
+					ipar = 1;
+				}
+
+				factor_ee[nw] +=
+					spin_fact * b_vector[0] * x1 / (1.0 + b_vector[1] * x1) -
+					asymp_jasb[ipar] + power_ser;
+			}
+		}
+	}
+
 	return QMCKL_SUCCESS_DEVICE;
 }
 
@@ -105,8 +166,68 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_device(
 	const int64_t *type_nucl_vector, const int64_t aord_num,
 	const double *a_vector, const double *en_distance_rescaled,
 	const double *asymp_jasa, double *const factor_en) {
-	// TODO
-	return QMCKL_SUCCESS_DEVICE;
+
+	int i, a, p, nw;
+	double x, power_ser;
+	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
+
+	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
+		info = QMCKL_INVALID_CONTEXT_DEVICE;
+		return info;
+	}
+
+	if (walk_num <= 0) {
+		info = QMCKL_INVALID_ARG_2_DEVICE;
+		return info;
+	}
+
+	if (elec_num <= 0) {
+		info = QMCKL_INVALID_ARG_3_DEVICE;
+		return info;
+	}
+
+	if (nucl_num <= 0) {
+		info = QMCKL_INVALID_ARG_4_DEVICE;
+		return info;
+	}
+
+	if (type_nucl_num <= 0) {
+		info = QMCKL_INVALID_ARG_4_DEVICE;
+		return info;
+	}
+
+	if (aord_num < 0) {
+		info = QMCKL_INVALID_ARG_7_DEVICE;
+		return info;
+	}
+
+	for (nw = 0; nw < walk_num; nw++) {
+		factor_en[nw] = 0.0;
+		for (a = 0; a < nucl_num; a++) {
+			for (i = 0; i < elec_num; i++) {
+				x = en_distance_rescaled[i + a * elec_num +
+										 nw * elec_num * nucl_num];
+
+				factor_en[nw] =
+					factor_en[nw] +
+					a_vector[0 + type_nucl_vector[a] * (aord_num + 1)] * x /
+						(1.0 +
+						 a_vector[1 + type_nucl_vector[a] * (aord_num + 1)] *
+							 x) -
+					asymp_jasa[type_nucl_vector[a]];
+
+				for (p = 2; p < aord_num; p++) {
+					x = x * en_distance_rescaled[i + a * elec_num +
+												 nw * elec_num * nucl_num];
+					factor_en[nw] =
+						factor_en[nw] +
+						a_vector[p + type_nucl_vector[a] * (aord_num + 1)] * x;
+				}
+			}
+		}
+	}
+
+	return info;
 }
 
 // Electron/electron/nucleus component
@@ -114,10 +235,217 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_device(
 	const qmckl_context_device context, const int64_t walk_num,
 	const int64_t elec_num, const int64_t nucl_num, const int64_t cord_num,
 	const int64_t dim_c_vector, const double *c_vector_full,
-	const int64_t *lkpm_combined_index, const double *een_rescaled_e,
+	const int64_t *lkpm_combined_index, const double *tmp_c,
 	const double *een_rescaled_n, double *const factor_een) {
-	// TODO
-	return QMCKL_SUCCESS_DEVICE;
+
+	int i, a, j, l, k, p, m, n, nw;
+	double accu, accu2, cn;
+
+	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
+
+	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
+		info = QMCKL_INVALID_CONTEXT_DEVICE;
+		return info;
+	}
+
+	if (walk_num <= 0) {
+		info = QMCKL_INVALID_ARG_2_DEVICE;
+		return info;
+	}
+
+	if (elec_num <= 0) {
+		info = QMCKL_INVALID_ARG_3_DEVICE;
+		return info;
+	}
+
+	if (nucl_num <= 0) {
+		info = QMCKL_INVALID_ARG_4_DEVICE;
+		return info;
+	}
+
+	if (cord_num < 0) {
+		info = QMCKL_INVALID_ARG_5_DEVICE;
+		return info;
+	}
+
+	for (nw = 0; nw < walk_num; nw++) {
+		factor_een[nw] = 0.0;
+		for (n = 0; n < dim_c_vector; n++) {
+			l = lkpm_combined_index[n];
+			k = lkpm_combined_index[n + dim_c_vector];
+			p = lkpm_combined_index[n + 2 * dim_c_vector];
+			m = lkpm_combined_index[n + 3 * dim_c_vector];
+
+			for (a = 0; a < nucl_num; a++) {
+				cn = c_vector_full[a + n * nucl_num];
+				if (cn == 0.0)
+					continue;
+
+				accu = 0.0;
+				for (int j = 0; j < elec_num; j++) {
+					accu = accu +
+						   een_rescaled_n[j + a * elec_num +
+										  m * elec_num * nucl_num +
+										  nw * elec_num * nucl_num *
+											  (cord_num + 1)] *
+							   tmp_c[j + a * elec_num +
+									 (m + l) * elec_num * nucl_num +
+									 k * elec_num * nucl_num * (cord_num + 1) +
+									 nw * elec_num * nucl_num * (cord_num + 1) *
+										 cord_num];
+				}
+				factor_een[nw] = factor_een[nw] + accu * cn;
+			}
+		}
+	}
+
+	return info;
+}
+
+// Electron/electron/nucleus deriv
+qmckl_exit_code_device
+qmckl_compute_jastrow_factor_een_rescaled_e_deriv_e_device(
+	const qmckl_context_device context, const int64_t walk_num,
+	const int64_t elec_num, const int64_t cord_num,
+	const double rescale_factor_ee, const double *coord_ee,
+	const double *ee_distance, const double *een_rescaled_e,
+	double *const een_rescaled_e_deriv_e) {
+
+	/*
+	  integer(qmckl_context), intent(in)  :: context
+	  integer*8             , intent(in)  :: walk_num
+	  integer*8             , intent(in)  :: elec_num
+	  integer*8             , intent(in)  :: cord_num
+	  double precision      , intent(in)  :: rescale_factor_ee
+	  double precision      , intent(in)  :: coord_ee(elec_num,3,walk_num)
+	  double precision      , intent(in)  ::
+	  ee_distance(elec_num,elec_num,walk_num) double precision      , intent(in)
+	  :: een_rescaled_e(elec_num,elec_num,0:cord_num,walk_num) double precision
+	  , intent(out) ::
+	  een_rescaled_e_deriv_e(elec_num,4,elec_num,0:cord_num,walk_num) double
+	  precision,dimension(:,:,:),allocatable  :: elec_dist_deriv_e
+	*/
+
+	double x, rij_inv, kappa_l;
+	int i, j, k, l, nw, ii;
+
+	double *elec_dist_deriv_e =
+		qmckl_malloc_device(context, 4 * elec_num * elec_num * sizeof(double));
+
+	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
+
+	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
+		info = QMCKL_INVALID_CONTEXT_DEVICE;
+		return info;
+	}
+
+	if (walk_num <= 0) {
+		info = QMCKL_INVALID_ARG_2_DEVICE;
+		return info;
+	}
+
+	if (elec_num <= 0) {
+		info = QMCKL_INVALID_ARG_3_DEVICE;
+		return info;
+	}
+
+	if (cord_num < 0) {
+		info = QMCKL_INVALID_ARG_4_DEVICE;
+		return info;
+	}
+
+	// Prepare table of exponentiated distances raised to appropriate power
+	for (int i = 0; i < elec_num * 4 * elec_num * (cord_num + 1) * walk_num;
+		 i++) {
+		een_rescaled_e_deriv_e[i] = 0.0;
+	}
+	for (nw = 0; nw < walk_num; nw++) {
+		for (int j = 0; j < elec_num; j++) {
+			for (int i = 0; i < elec_num; i++) {
+				rij_inv =
+					1.0 /
+					ee_distance[i + j * elec_num + nw * elec_num * elec_num];
+				for (int ii = 0; ii < 3; ii++) {
+					elec_dist_deriv_e[ii + i * 4 + j * 4 * elec_num] =
+						(coord_ee[i + ii * elec_num + nw * elec_num * 3] -
+						 coord_ee[j + ii * elec_num + nw * elec_num * 3]) *
+						rij_inv;
+				}
+				elec_dist_deriv_e[3 + i * 4 + j * 4 * elec_num] = 2.0 * rij_inv;
+			}
+
+			for (int ii = 0; ii < 4; ii++) {
+				elec_dist_deriv_e[ii + j * 4 + j * 4 * elec_num] = 0.0;
+			}
+		}
+
+		// prepare the actual een table
+		for (l = 0; l < cord_num; l++) {
+			kappa_l = -l * rescale_factor_ee;
+			for (j = 0; j < elec_num; j++) {
+				for (i = 0; i < elec_num; i++) {
+					een_rescaled_e_deriv_e[i + 0 * elec_num + j * elec_num * 4 +
+										   l * elec_num + nw * elec_num] =
+						kappa_l *
+						elec_dist_deriv_e[0 + i * 4 + j * 4 * elec_num];
+					een_rescaled_e_deriv_e[i + 1 * elec_num + j * elec_num +
+										   l * elec_num + nw * elec_num] =
+						kappa_l *
+						elec_dist_deriv_e[1 + i * 4 + j * 4 * elec_num];
+					een_rescaled_e_deriv_e[i + 2 * elec_num + j * elec_num +
+										   l * elec_num + nw * elec_num] =
+						kappa_l *
+						elec_dist_deriv_e[2 + i * 4 + j * 4 * elec_num];
+					een_rescaled_e_deriv_e[i + 3 * elec_num + j * elec_num +
+										   l * elec_num + nw * elec_num] =
+						kappa_l *
+						elec_dist_deriv_e[3 + i * 4 + j * 4 * elec_num];
+
+					een_rescaled_e_deriv_e[i + 3 * elec_num + j * elec_num +
+										   l * elec_num + nw * elec_num] =
+						een_rescaled_e_deriv_e[i + 3 * elec_num + j * elec_num +
+											   l * elec_num + nw * elec_num] +
+						een_rescaled_e_deriv_e[i + 0 * elec_num + j * elec_num +
+											   l * elec_num + nw * elec_num] *
+							een_rescaled_e_deriv_e[i + 0 * elec_num +
+												   j * elec_num + l * elec_num +
+												   nw * elec_num] +
+						een_rescaled_e_deriv_e[i + 1 * elec_num + j * elec_num +
+											   l * elec_num + nw * elec_num] *
+							een_rescaled_e_deriv_e[i + 1 * elec_num +
+												   j * elec_num + l * elec_num +
+												   nw * elec_num] +
+						een_rescaled_e_deriv_e[i + 2 * elec_num + j * elec_num +
+											   l * elec_num + nw * elec_num] *
+							een_rescaled_e_deriv_e[i + 2 * elec_num +
+												   j * elec_num + l * elec_num +
+												   nw * elec_num];
+
+					een_rescaled_e_deriv_e[i + 0 * elec_num + j * elec_num +
+										   l * elec_num + nw * elec_num] =
+						een_rescaled_e_deriv_e[i + 0 * elec_num + j * elec_num +
+											   l * elec_num + nw * elec_num] *
+						een_rescaled_e[i + j + l + nw];
+					een_rescaled_e_deriv_e[i + 2 * elec_num + j * elec_num +
+										   l * elec_num + nw * elec_num] =
+						een_rescaled_e_deriv_e[i + 1 * elec_num + j * elec_num +
+											   l * elec_num + nw * elec_num] *
+						een_rescaled_e[i + j + l + nw];
+					een_rescaled_e_deriv_e[i + 2 * elec_num + j * elec_num +
+										   l * elec_num + nw * elec_num] =
+						een_rescaled_e_deriv_e[i + 2 * elec_num + j * elec_num +
+											   l * elec_num + nw * elec_num] *
+						een_rescaled_e[i + j + l + nw];
+					een_rescaled_e_deriv_e[i + 3 * elec_num + j * elec_num +
+										   l * elec_num + nw * elec_num] =
+						een_rescaled_e_deriv_e[i + 3 * elec_num + j * elec_num +
+											   l * elec_num + nw * elec_num] *
+						een_rescaled_e[i + j + l + nw];
+				}
+			}
+		}
+	}
+	return info;
 }
 
 // Distances
@@ -126,36 +454,35 @@ qmckl_exit_code_device qmckl_compute_ee_distance_rescaled_device(
 	const double rescale_factor_ee, const int64_t walk_num, const double *coord,
 	double *const ee_distance_rescaled) {
 
-  int k;
+	int k;
 
-  qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
+	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
 
-  if (context == QMCKL_NULL_CONTEXT_DEVICE) {
-     info = QMCKL_INVALID_CONTEXT_DEVICE;
-     return info;
-  }
+	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
+		info = QMCKL_INVALID_CONTEXT_DEVICE;
+		return info;
+	}
 
-  if (elec_num <= 0) {
-     info = QMCKL_INVALID_ARG_2_DEVICE;
-     return info;
-  }
+	if (elec_num <= 0) {
+		info = QMCKL_INVALID_ARG_2_DEVICE;
+		return info;
+	}
 
-  if (walk_num <= 0) {
-     info = QMCKL_INVALID_ARG_3_DEVICE;
-     return info;
-  }
+	if (walk_num <= 0) {
+		info = QMCKL_INVALID_ARG_3_DEVICE;
+		return info;
+	}
 
-  for(int k=0; k<walk_num; k++) {
-     // TODO
-     info = qmckl_distance_rescaled_device(context, 'T', 'T', elec_num, elec_num,
-          coord[k * elec_num], elec_num * walk_num,
-          coord[k * elec_num], elec_num * walk_num,
-          ee_distance_rescaled[k * elec_num * elec_num], elec_num, rescale_factor_ee);
-     if (info != QMCKL_SUCCESS_DEVICE) {
-        return info;
-     }
-  }
-
+	for (int k = 0; k < walk_num; k++) {
+		info = qmckl_distance_rescaled_device(
+			context, 'T', 'T', elec_num, elec_num, coord + (k * elec_num),
+			elec_num * walk_num, coord + (k * elec_num), elec_num * walk_num,
+			ee_distance_rescaled + (k * elec_num * elec_num), elec_num,
+			rescale_factor_ee);
+		if (info != QMCKL_SUCCESS_DEVICE) {
+			return info;
+		}
+	}
 }
 
 qmckl_exit_code_device qmckl_compute_en_distance_rescaled_device(
@@ -489,4 +816,41 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 	}
 
 	return info;
+}
+
+// Misc
+
+qmckl_exit_code_device
+qmckl_compute_dim_c_vector_device(const qmckl_context_device context,
+								  const int64_t cord_num,
+								  int64_t *const dim_c_vector) {
+
+	int lmax;
+
+	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_INVALID_CONTEXT_DEVICE;
+	}
+
+	if (cord_num < 0) {
+		return QMCKL_INVALID_ARG_2_DEVICE;
+	}
+
+	*dim_c_vector = 0;
+
+	for (int p = 2; p <= cord_num; ++p) {
+		for (int k = p - 1; k >= 0; --k) {
+			if (k != 0) {
+				lmax = p - k;
+			} else {
+				lmax = p - k - 2;
+			}
+			for (int l = lmax; l >= 0; --l) {
+				if (((p - k - l) & 1) == 1)
+					continue;
+				*dim_c_vector = *dim_c_vector + 1;
+			}
+		}
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
 }

@@ -1,0 +1,159 @@
+#include "../include/qmckl_distance.h"
+
+qmckl_exit_code_device qmckl_distance_rescaled_device(
+	const qmckl_context_device context, const char transa, const char transb,
+	const int64_t m, const int64_t n, const double *A, const int64_t lda,
+	const double *B, const int64_t ldb, double *const C, const int64_t ldc,
+	const double rescale_factor_kappa) {
+
+	int i, j, transab;
+	double x, y, z, dist, rescale_factor_kappa_inv;
+
+	rescale_factor_kappa_inv = 1.0 / rescale_factor_kappa;
+
+	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
+
+	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
+		info = QMCKL_INVALID_CONTEXT_DEVICE;
+		return info;
+	}
+
+	if (m <= 0) {
+		info = QMCKL_INVALID_ARG_4_DEVICE;
+		return info;
+	}
+
+	if (n <= 0) {
+		info = QMCKL_INVALID_ARG_5_DEVICE;
+		return info;
+	}
+
+	if (transa == 'N' || transa == 'n') {
+		transab = 0;
+	} else if (transa == 'T' || transa == 't') {
+		transab = 1;
+	} else {
+		transab = -100;
+	}
+
+	if (transb == 'N' || transb == 'n') {
+	} else if (transb == 'T' || transb == 't') {
+		transab = transab + 2;
+	} else {
+		transab = -100;
+	}
+
+	// check for LDA
+	if (transab < 0) {
+		info = QMCKL_INVALID_ARG_1_DEVICE;
+		return info;
+	}
+
+	if ((transab & 1) == 0 && lda < 3) {
+		info = QMCKL_INVALID_ARG_7_DEVICE;
+		return info;
+	}
+
+	if ((transab & 1) == 1 && lda < m) {
+		info = QMCKL_INVALID_ARG_7_DEVICE;
+		return info;
+	}
+
+	if ((transab & 2) == 0 && lda < 3) {
+		info = QMCKL_INVALID_ARG_7_DEVICE;
+		return info;
+	}
+
+	if ((transab & 2) == 2 && lda < m) {
+		info = QMCKL_INVALID_ARG_7_DEVICE;
+		return info;
+	}
+
+	// check for LDB
+	if ((transab & 1) == 0 && ldb < 3) {
+		info = QMCKL_INVALID_ARG_9_DEVICE;
+		return info;
+	}
+
+	if ((transab & 1) == 1 && ldb < n) {
+		info = QMCKL_INVALID_ARG_9_DEVICE;
+		return info;
+	}
+
+	if ((transab & 2) == 0 && ldb < 3) {
+		info = QMCKL_INVALID_ARG_9_DEVICE;
+		return info;
+	}
+
+	if ((transab & 2) == 2 && ldb < n) {
+		info = QMCKL_INVALID_ARG_9_DEVICE;
+		return info;
+	}
+
+	// check for LDC
+	if (ldc < m) {
+		info = QMCKL_INVALID_ARG_11_DEVICE;
+		return info;
+	}
+
+	switch (transab) {
+
+	case 0:
+
+		for (j = 0; j < n; j++) {
+			for (i = 0; i < m; i++) {
+				x = A[0 + i * 3] - B[0 + j * 3];
+				y = A[1 + i * 3] - B[1 + j * 3];
+				z = A[2 + i * 3] - B[2 + j * 3];
+				dist = sqrt(x * x + y * y + z * z);
+				C[i + j * m] = (1.0 - exp(-rescale_factor_kappa * dist)) *
+							   rescale_factor_kappa_inv;
+			}
+		}
+		break;
+
+	case 1:
+
+		for (int j = 0; j < n; j++) {
+			for (int i = 0; i < m; i++) {
+				x = A[i + 0 * m] - B[0 + j * 3];
+				y = A[i + 1 * m] - B[1 + j * 3];
+				z = A[i + 2 * m] - B[2 + j * 3];
+				dist = sqrt(x * x + y * y + z * z);
+				C[i + j * m] = (1.0 - exp(-rescale_factor_kappa * dist)) *
+							   rescale_factor_kappa_inv;
+			}
+		}
+		break;
+
+	case 2:
+
+		for (int j = 0; j < n; j++) {
+			for (int i = 0; i < m; i++) {
+				x = A[0 + i * 3] - B[j + 0 * n];
+				y = A[1 + i * 3] - B[j + 1 * n];
+				z = A[2 + i * 3] - B[j + 2 * n];
+				dist = sqrt(x * x + y * y + z * z);
+				C[i + j * m] = (1.0 - exp(-rescale_factor_kappa * dist)) *
+							   rescale_factor_kappa_inv;
+			}
+		}
+		break;
+
+	case 3:
+
+		for (j = 0; j < n; j++) {
+			for (i = 0; i < m; i++) {
+				x = A[i + 0 * m] - B[j + 0 * n];
+				y = A[i + 1 * m] - B[j + 1 * n];
+				z = A[i + 2 * m] - B[j + 2 * n];
+				dist = sqrt(x * x + y * y + z * z);
+				C[i + j] = (1.0 - exp(-rescale_factor_kappa * dist)) *
+						   rescale_factor_kappa_inv;
+			}
+		}
+		break;
+	}
+
+	return info;
+}

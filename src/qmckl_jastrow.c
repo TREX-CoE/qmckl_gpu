@@ -583,7 +583,8 @@ qmckl_set_jastrow_c_vector_device(qmckl_context_device context,
 	}
 
 	if (ctx->jastrow.c_vector != NULL) {
-		qmckl_exit_code_device rc = qmckl_free(context, ctx->jastrow.c_vector);
+		qmckl_exit_code_device rc =
+			qmckl_free_device(context, ctx->jastrow.c_vector);
 		if (rc != QMCKL_SUCCESS_DEVICE) {
 			return qmckl_failwith_device(
 				context, rc, "qmckl_set_jastrow_c_vector",
@@ -1120,7 +1121,7 @@ qmckl_provide_jastrow_value_device(qmckl_context_device context) {
 
 		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
 			if (ctx->jastrow.value != NULL) {
-				rc = qmckl_free(context, ctx->jastrow.value);
+				rc = qmckl_free_device(context, ctx->jastrow.value);
 				if (rc != QMCKL_SUCCESS_DEVICE) {
 					return qmckl_failwith_device(
 						context, rc, "qmckl_provide_jastrow_value",
@@ -1181,18 +1182,12 @@ qmckl_provide_jastrow_factor_ee_device(qmckl_context_device context) {
 	if (rc != QMCKL_SUCCESS_DEVICE)
 		return rc;
 
-	/* Provided in finalize_jastrow */
-	/*
-	rc = qmckl_provide_jastrow_asymp_jasb(context);
-	if(rc != QMCKL_SUCCESS_DEVICE) return rc;
-	*/
-
 	/* Compute if necessary */
 	if (ctx->date > ctx->jastrow.factor_ee_date) {
 
 		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
 			if (ctx->jastrow.factor_ee != NULL) {
-				rc = qmckl_free(context, ctx->jastrow.factor_ee);
+				rc = qmckl_free_device(context, ctx->jastrow.factor_ee);
 				if (rc != QMCKL_SUCCESS_DEVICE) {
 					return qmckl_failwith_device(
 						context, rc, "qmckl_provide_jastrow_factor_ee",
@@ -1263,7 +1258,7 @@ qmckl_provide_jastrow_factor_en_device(qmckl_context_device context) {
 
 		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
 			if (ctx->jastrow.factor_en != NULL) {
-				rc = qmckl_free(context, ctx->jastrow.factor_en);
+				rc = qmckl_free_device(context, ctx->jastrow.factor_en);
 				if (rc != QMCKL_SUCCESS_DEVICE) {
 					return qmckl_failwith_device(
 						context, rc, "qmckl_provide_jastrow_factor_en",
@@ -1348,7 +1343,7 @@ qmckl_provide_jastrow_factor_een_device(qmckl_context_device context) {
 
 		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
 			if (ctx->jastrow.factor_een != NULL) {
-				rc = qmckl_free(context, ctx->jastrow.factor_een);
+				rc = qmckl_free_device(context, ctx->jastrow.factor_een);
 				if (rc != QMCKL_SUCCESS_DEVICE) {
 					return qmckl_failwith_device(
 						context, rc, "qmckl_provide_jastrow_factor_een",
@@ -1409,8 +1404,8 @@ qmckl_provide_ee_distance_rescaled_device(qmckl_context_device context) {
 
 		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
 			if (ctx->jastrow.ee_distance_rescaled != NULL) {
-				qmckl_exit_code_device rc =
-					qmckl_free(context, ctx->jastrow.ee_distance_rescaled);
+				qmckl_exit_code_device rc = qmckl_free_device(
+					context, ctx->jastrow.ee_distance_rescaled);
 				if (rc != QMCKL_SUCCESS_DEVICE) {
 					return qmckl_failwith_device(
 						context, rc, "qmckl_provide_ee_distance_rescaled",
@@ -1473,8 +1468,8 @@ qmckl_provide_en_distance_rescaled_device(qmckl_context_device context) {
 
 		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
 			if (ctx->jastrow.en_distance_rescaled != NULL) {
-				qmckl_exit_code_device rc =
-					qmckl_free(context, ctx->jastrow.en_distance_rescaled);
+				qmckl_exit_code_device rc = qmckl_free_device(
+					context, ctx->jastrow.en_distance_rescaled);
 				if (rc != QMCKL_SUCCESS_DEVICE) {
 					return qmckl_failwith_device(
 						context, rc, "qmckl_provide_en_distance_rescaled",
@@ -1539,8 +1534,8 @@ qmckl_provide_een_rescaled_e_device(qmckl_context_device context) {
 
 		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
 			if (ctx->jastrow.en_distance_rescaled != NULL) {
-				qmckl_exit_code_device rc =
-					qmckl_free(context, ctx->jastrow.en_distance_rescaled);
+				qmckl_exit_code_device rc = qmckl_free_device(
+					context, ctx->jastrow.en_distance_rescaled);
 				if (rc != QMCKL_SUCCESS_DEVICE) {
 					return qmckl_failwith_device(
 						context, rc, "qmckl_provide_en_distance_rescaled",
@@ -1605,7 +1600,7 @@ qmckl_provide_een_rescaled_n_device(qmckl_context_device context) {
 
 		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
 			if (ctx->jastrow.een_rescaled_n != NULL) {
-				rc = qmckl_free(context, ctx->jastrow.een_rescaled_n);
+				rc = qmckl_free_device(context, ctx->jastrow.een_rescaled_n);
 				if (rc != QMCKL_SUCCESS_DEVICE) {
 					return qmckl_failwith_device(
 						context, rc, "qmckl_provide_een_rescaled_n",
@@ -1667,7 +1662,7 @@ qmckl_provide_jastrow_c_vector_full_device(qmckl_context_device context) {
 
 		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
 			if (ctx->jastrow.c_vector_full != NULL) {
-				rc = qmckl_free(context, ctx->jastrow.c_vector_full);
+				rc = qmckl_free_device(context, ctx->jastrow.c_vector_full);
 				if (rc != QMCKL_SUCCESS_DEVICE) {
 					return qmckl_failwith_device(
 						context, rc, "qmckl_provide_jastrow_c_vector_full",
@@ -1727,7 +1722,8 @@ qmckl_provide_lkpm_combined_index_device(qmckl_context_device context) {
 
 		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
 			if (ctx->jastrow.lkpm_combined_index != NULL) {
-				rc = qmckl_free(context, ctx->jastrow.lkpm_combined_index);
+				rc = qmckl_free_device(context,
+									   ctx->jastrow.lkpm_combined_index);
 				if (rc != QMCKL_SUCCESS_DEVICE) {
 					return qmckl_failwith_device(
 						context, rc, "qmckl_provide_jastrow_factor_ee",
@@ -1793,7 +1789,7 @@ qmckl_provide_tmp_c_device(qmckl_context_device context) {
 
 		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
 			if (ctx->jastrow.tmp_c != NULL) {
-				rc = qmckl_free(context, ctx->jastrow.tmp_c);
+				rc = qmckl_free_device(context, ctx->jastrow.tmp_c);
 				if (rc != QMCKL_SUCCESS_DEVICE) {
 					return qmckl_failwith_device(
 						context, rc, "qmckl_provide_tmp_c",

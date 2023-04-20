@@ -12,6 +12,8 @@
 
 #include "qmckl_types.h"
 #include "qmckl_context.h"
+#include "qmckl_distance.h"
+#include "qmckl_memory.h"
 
 /* Init func */
 
@@ -105,6 +107,17 @@ qmckl_get_jastrow_dim_c_vector_device(qmckl_context_device context,
 //**********
 
 // Finalize
+
+qmckl_exit_code_device qmckl_compute_jastrow_asymp_jasa_device(
+	const qmckl_context_device context, const int64_t aord_num,
+	const int64_t type_nucl_num, const double *a_vector,
+	const double *rescale_factor_en, double *const asymp_jasa);
+
+qmckl_exit_code_device qmckl_compute_jastrow_asymp_jasb_device(
+	const qmckl_context_device context, const int64_t bord_num,
+	const double *b_vector, const double rescale_factor_ee,
+	double *const asymp_jasb);
+
 qmckl_exit_code_device
 qmckl_finalize_jastrow_device(qmckl_context_device context);
 
@@ -135,8 +148,17 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_device(
 	const qmckl_context_device context, const int64_t walk_num,
 	const int64_t elec_num, const int64_t nucl_num, const int64_t cord_num,
 	const int64_t dim_c_vector, const double *c_vector_full,
-	const int64_t *lkpm_combined_index, const double *een_rescaled_e,
+	const int64_t *lkpm_combined_index, const double *tmp_c,
 	const double *een_rescaled_n, double *const factor_een);
+
+// Electron/electron/nucleus deriv
+qmckl_exit_code_device
+qmckl_compute_jastrow_factor_een_rescaled_e_deriv_e_device(
+	const qmckl_context_device context, const int64_t walk_num,
+	const int64_t elec_num, const int64_t cord_num,
+	const double rescale_factor_ee, const double *coord_ee,
+	const double *ee_distance, const double *een_rescaled_e,
+	double *const een_rescaled_e_deriv_e);
 
 // Distances
 qmckl_exit_code_device qmckl_compute_ee_distance_rescaled_device(
@@ -180,6 +202,13 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 // PROVIDE
 //**********
 
+// Finalize
+qmckl_exit_code_device
+qmckl_provide_jastrow_asymp_jasa_device(qmckl_context_device context);
+
+qmckl_exit_code_device
+qmckl_provide_jastrow_asymp_jasb_device(qmckl_context_device context);
+
 // Total Jastrow
 qmckl_exit_code_device
 qmckl_provide_jastrow_value_device(qmckl_context_device context);
@@ -211,6 +240,12 @@ qmckl_provide_jastrow_c_vector_full_device(qmckl_context_device context);
 qmckl_exit_code_device
 qmckl_provide_lkpm_combined_index_device(qmckl_context_device context);
 qmckl_exit_code_device qmckl_provide_tmp_c_device(qmckl_context_device context);
+
+// Misc
+qmckl_exit_code_device
+qmckl_compute_dim_c_vector_device(const qmckl_context_device context,
+								  const int64_t cord_num,
+								  int64_t *const dim_c_vector);
 
 // TODO This is not defined in Jastrow in QMCkl : find the file and incorporate
 // this in the GPU lib
