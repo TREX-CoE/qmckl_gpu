@@ -38,7 +38,7 @@ qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_device(
 	
 #pragma acc parallel loop gang worker vector \
             deviceptr(coefficient_t, ao_vgl, mo_vgl)
-#pragma omp target teams distribute parallel for \
+#pragma omp target parallel loop \
             is_device_ptr(coefficient_t, ao_vgl, mo_vgl)
 	for (int64_t j = 0; j < point_num; ++j) {
 
