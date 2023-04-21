@@ -133,12 +133,6 @@ AS_IF([ test "x$have_floatmos" = "xyes" -a "x$have_cublas" = "xno" ], [
 ## Enable OpenMP / OpenACC
 ####
 
-# OpenMP offloading (legacy, kept for now)
-AC_ARG_ENABLE(omp_offload, [AS_HELP_STRING([--enable-omp-offload],[Enable OpenMP offloaded functions])], have_omp_offload=yes, have_omp_offload=no)
-
-# OpenACC offloading (legacy, kept for now)
-AC_ARG_ENABLE(acc_offload, [AS_HELP_STRING([--enable-acc-offload],[Enable OpenACC offloaded functions])], have_acc_offload=yes, have_acc_offload=no)
-
 # OpenMP + device pointers
 AC_ARG_ENABLE(omp, [AS_HELP_STRING([--enable-omp],[Enable OpenMP device pointers functions])], have_omp=yes, have_omp=no)
 
@@ -168,7 +162,7 @@ AC_ARG_ENABLE(fortran-interface, [AS_HELP_STRING([--enable-fortran-interface],[E
 # Fallback solution if nothing is enabled :
 # (probably because no GPU argument have been provided)
 # Enable OpenMP offload by default
-AS_IF([ test "x$have_omp" = "xno" -a "x$have_acc" = "xno" -a "x$have_acc_offload" = "xno" -a "x$have_omp_offload" = "xno"], [
+AS_IF([ test "x$have_omp" = "xno" -a "x$have_acc" = "xno"], [
 	AC_OUTPUT
 	echo \
 	"Warning: Neither OpenMP or OpenACC could be enabled using the passed arguments. Attempting to enable OpenMP as fallback."
@@ -206,23 +200,6 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp" = "xyes"], [
 			echo "Warning : compiler not recognized for OpenMP. Make sure to add necessary offload flags manually."
 	esac
 ])
-AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp_offload" = "xyes"], [
-	case $CC in
-		*gcc*)
-			CFLAGS="$CFLAGS -fopenmp -foffload=-lm"
-			;;
-		*nvc*)
-			CFLAGS="$CFLAGS -mp=gpu,noautopar"
-			;;
-		*clang*)
-			CFLAGS="$CFLAGS -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda"
-			;;
-
-
-		*)
-			echo "Warning : compiler not recognized for OpenMP offload. Make sure to add necessary offload flags manually."
-	esac
-])
 
 
 AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc" = "xyes"], [
@@ -239,20 +216,7 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc" = "xyes"], [
 			echo "Warning : compiler not supported for OpenACC. Make sure to add necessary offload flags manually."
 	esac
 ])
-AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc_offload" = "xyes"], [
-	case $CC in
-		*gcc*)
-			CFLAGS="$CFLAGS -fopenacc -foffload=-lm"
-			LDFLAGS="$LDFLAGS -lm -fopenacc"
-			;;
-		*nvc*)
-			CFLAGS="$CFLAGS -acc=gpu,noautopar -gpu=nordc"
-		;;
 
-		*)
-			echo "Warning : compiler not supported for OpenACC offload. Make sure to add necessary offload flags manually."
-	esac
-])
 
 # If TREXIO or cuBLAS have been enabled, define Automake & preprocessors variables
 AS_IF([test "x$have_trexio" = "xyes"], [

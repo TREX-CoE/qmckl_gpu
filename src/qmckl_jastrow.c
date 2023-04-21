@@ -2160,3 +2160,41 @@ qmckl_get_jastrow_tmp_c_device(qmckl_context_device context,
 	memcpy(tmp_c, ctx->jastrow.tmp_c, sze * sizeof(double));
 	return QMCKL_SUCCESS_DEVICE;
 }
+
+// Misc
+
+// This simply computes a scalar value by side effect
+qmckl_exit_code_device
+qmckl_compute_dim_c_vector_device(const qmckl_context_device context,
+								  const int64_t cord_num,
+								  int64_t *const dim_c_vector) {
+
+	int lmax;
+
+	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_INVALID_CONTEXT_DEVICE;
+	}
+
+	if (cord_num < 0) {
+		return QMCKL_INVALID_ARG_2_DEVICE;
+	}
+
+	*dim_c_vector = 0;
+
+	for (int p = 2; p <= cord_num; ++p) {
+		for (int k = p - 1; k >= 0; --k) {
+			if (k != 0) {
+				lmax = p - k;
+			} else {
+				lmax = p - k - 2;
+			}
+			for (int l = lmax; l >= 0; --l) {
+				if (((p - k - l) & 1) == 1)
+					continue;
+				*dim_c_vector = *dim_c_vector + 1;
+			}
+		}
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}
