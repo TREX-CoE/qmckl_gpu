@@ -852,10 +852,8 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 	int64_t *shell_max_ptr = &shell_max;
 	int64_t *prim_max_ptr = &prim_max;
 
-#pragma omp target map(tofrom                                                  \
-					   : shell_max_ptr[:1], prim_max_ptr                       \
-					   [:1])                                                   \
-	is_device_ptr(nucleus_shell_num, nucleus_index, shell_prim_num,            \
+#pragma omp target map(tofrom : shell_max_ptr[:1], prim_max_ptr[:1]) \
+	is_device_ptr(nucleus_shell_num, nucleus_index, shell_prim_num,  \
 				  prim_num_per_nucleus)
 	{
 
