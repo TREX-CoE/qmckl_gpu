@@ -61,11 +61,16 @@ if HAVE_OMP_DEVICE
 endif
 
 if HAVE_ACC_DEVICE
+  check_PROGRAMS += tests/test_qmckl_jastrow
+
   tests_test_qmckl_ao_SOURCES = tests/test_qmckl_ao_acc.c chbrclf.h
   tests_test_qmckl_ao_LDFLAGS = -lm
 
   tests_test_qmckl_mo_SOURCES = tests/test_qmckl_mo_acc.c chbrclf.h
   tests_test_qmckl_mo_LDFLAGS = -lm
+
+  tests_test_qmckl_jastrow_SOURCES = tests/test_qmckl_jastrow_acc.c chbrclf.h
+  tests_test_qmckl_jastrow_LDFLAGS = -lm
 endif
 
 # This shoud be added whether we use OpenMP or ACC
