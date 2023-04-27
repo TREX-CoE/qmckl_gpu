@@ -145,7 +145,7 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 
 	double *poly_vgl_shared =
 		qmckl_malloc_device(context, sizeof(double) * poly_dim);
-	int64_t *ao_index = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
+	int64_t *ao_index = qmckl_malloc_device(context, sizeof(int64_t) * shell_num);
 	int64_t *lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Specific calling function
@@ -480,7 +480,7 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 
 	double *poly_vgl_shared =
 		qmckl_malloc_device(context, sizeof(double) * poly_dim);
-	int64_t *ao_index = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
+	int64_t *ao_index = qmckl_malloc_device(context, sizeof(int64_t) * shell_num);
 	int64_t *lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Specific calling function
