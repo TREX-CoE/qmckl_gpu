@@ -76,7 +76,8 @@ int main() {
 		qmckl_get_nucleus_coord_device(context, 'T', nucl_coord2, 3 * nucl_num);
 	assert(rc == QMCKL_NOT_PROVIDED_DEVICE);
 
-	rc = qmckl_set_nucleus_coord_device(context, 'T', &(nucl_coord[0]), 3 * nucl_num);
+	rc = qmckl_set_nucleus_coord_device(context, 'T', &(nucl_coord[0]),
+										3 * nucl_num);
 	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	assert(!qmckl_nucleus_provided_device(context));
@@ -134,10 +135,10 @@ int main() {
 	rc = qmckl_set_jastrow_type_nucl_num_device(context, type_nucl_num);
 	assert(rc == QMCKL_SUCCESS_DEVICE);
 	rc = qmckl_set_jastrow_type_nucl_vector_device(context, type_nucl_vector,
-												  nucl_num);
+												   nucl_num);
 	assert(rc == QMCKL_SUCCESS_DEVICE);
 	rc = qmckl_set_jastrow_a_vector_device(context, a_vector,
-										  (aord_num + 1) * type_nucl_num);
+										   (aord_num + 1) * type_nucl_num);
 	assert(rc == QMCKL_SUCCESS_DEVICE);
 	rc = qmckl_set_jastrow_b_vector_device(context, b_vector, (bord_num + 1));
 	assert(rc == QMCKL_SUCCESS_DEVICE);
@@ -149,12 +150,11 @@ int main() {
 
 	double k_ee = 0.;
 	double k_en[2] = {0., 0.};
-	rc = qmckl_set_jastrow_rescale_factor_en_device(
-		context, rescale_factor_en, type_nucl_num);
+	rc = qmckl_set_jastrow_rescale_factor_en_device(context, rescale_factor_en,
+													type_nucl_num);
 	assert(rc == QMCKL_SUCCESS_DEVICE);
 
-	rc = qmckl_set_jastrow_rescale_factor_ee_device(context,
-														  rescale_factor_ee);
+	rc = qmckl_set_jastrow_rescale_factor_ee_device(context, rescale_factor_ee);
 	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_get_jastrow_rescale_factor_ee_device(context, &k_ee);
@@ -162,7 +162,7 @@ int main() {
 	assert(k_ee == rescale_factor_ee);
 
 	rc = qmckl_get_jastrow_rescale_factor_en_device(context, &(k_en[0]),
-														  type_nucl_num);
+													type_nucl_num);
 	assert(rc == QMCKL_SUCCESS_DEVICE);
 	for (int i = 0; i < type_nucl_num; ++i) {
 		assert(k_en[i] == rescale_factor_en[i]);
@@ -184,7 +184,7 @@ int main() {
 	assert(qmckl_jastrow_provided_device(context));
 
 	double factor_ee[walk_num];
-	rc = qmckl_get_jastrow_factor_ee(context, factor_ee, walk_num);
+	rc = qmckl_get_jastrow_factor_ee_device(context, factor_ee, walk_num);
 
 	// calculate factor_ee
 	printf("%e\n%e\n\n", factor_ee[0], -4.282760865958113);
@@ -282,7 +282,7 @@ int main() {
 
 	// calculate factor_en_deriv_e
 	double factor_en_deriv_e[walk_num][4][elec_num];
-	rc = qmckl_get_jastrow_factor_en_deriv_e(
+	rc = qmckl_get_jastrow_factor_en_deriv_e_device(
 		context, &(factor_en_deriv_e[0][0][0]), walk_num * 4 * elec_num);
 
 	// check factor_en_deriv_e
@@ -497,7 +497,7 @@ int main() {
 
 	assert(qmckl_jastrow_provided_device(context));
 
-	rc = qmckl_get_factor_ee_deriv_e_device(
+	rc = qmckl_get_jastrow_factor_ee_deriv_e_device(
 		context, &(factor_ee_deriv_e[0][0][0]), walk_num * elec_num * 4);
 	assert(rc == QMCKL_SUCCESS_DEVICE);
 
@@ -511,7 +511,7 @@ int main() {
 
 	double total_j_deriv[walk_num][4][elec_num];
 	rc = qmckl_get_jastrow_gl_device(context, &(total_j_deriv[0][0][0]),
-										   walk_num * elec_num * 4);
+									 walk_num * elec_num * 4);
 	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_get_jastrow_value_device(context, &(total_j[0]), walk_num);

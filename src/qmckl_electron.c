@@ -15,6 +15,10 @@ bool qmckl_electron_provided_device(qmckl_context_device context) {
 	return ctx->electron.provided;
 }
 
+//**********
+// SETTERS
+//**********
+
 qmckl_exit_code_device
 qmckl_set_electron_num_device(qmckl_context_device context, int64_t up_num,
 							  int64_t down_num) {
@@ -98,6 +102,10 @@ qmckl_set_electron_coord_device(qmckl_context_device context, char transp,
 	return QMCKL_SUCCESS_DEVICE;
 }
 
+//**********
+// GETTERS
+//**********
+
 qmckl_exit_code_device
 qmckl_get_electron_num_device(const qmckl_context_device context,
 							  int64_t *const num) {
@@ -125,4 +133,45 @@ qmckl_get_electron_num_device(const qmckl_context_device context,
 	assert(ctx->electron.num > (int64_t)0);
 	*num = ctx->electron.num;
 	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device
+qmckl_get_electron_coord_device(const qmckl_context_device context,
+								const char transp, double *const coord,
+								const int64_t size_max) {
+	if (transp != 'N' && transp != 'T') {
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
+									 "qmckl_get_electron_coord_device",
+									 "transp should be 'N' or 'T'");
+	}
+
+	if (coord == NULL) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
+									 "qmckl_get_electron_coord_device",
+									 "coord is a null pointer");
+	}
+
+	if (size_max <= 0) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_4_DEVICE,
+									 "qmckl_get_electron_coord_device",
+									 "size_max should be > 0");
+	}
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_INVALID_CONTEXT_DEVICE;
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	if (!ctx->electron.provided) {
+		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
+									 "qmckl_get_electron_coord_device", NULL);
+	}
+
+	assert(ctx->point.num == ctx->electron.walker.point.num);
+	assert(ctx->point.coord.data == ctx->electron.walker.point.coord.data);
+
+	return qmckl_get_point_device(context, transp, coord, size_max);
 }

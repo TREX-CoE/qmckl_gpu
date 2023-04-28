@@ -23,6 +23,21 @@ qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context) {
 	return QMCKL_SUCCESS_DEVICE;
 }
 
+/* Initialized check */
+
+bool qmckl_jastrow_provided_device(qmckl_context_device context) {
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return false;
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	return ctx->jastrow.provided;
+}
+
 //**********
 // FINALIZE
 //**********
@@ -972,6 +987,72 @@ qmckl_get_jastrow_dim_c_vector_device(qmckl_context_device context,
 	return QMCKL_SUCCESS_DEVICE;
 }
 
+qmckl_exit_code_device
+qmckl_get_jastrow_asymp_jasb_device(qmckl_context_device context,
+									double *const asymp_jasb,
+									const int64_t size_max) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
+									 "qmckl_get_jastrow_asymp_jasb_device",
+									 NULL);
+	}
+
+	/* Provided in finalize_jastrow */
+	/*
+	qmckl_exit_code rc;
+	rc = qmckl_provide_jastrow_asymp_jasb(context);
+	if(rc != QMCKL_SUCCESS) return rc;
+	*/
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	int64_t sze = 2;
+	if (size_max < sze) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
+									 "qmckl_get_jastrow_asymp_jasb_device",
+									 "Array too small. Expected 2");
+	}
+	qmckl_memcpy_D2D(context, asymp_jasb, ctx->jastrow.asymp_jasb,
+					 sze * sizeof(double));
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device
+qmckl_get_jastrow_jasa_device(qmckl_context_device context,
+							  double *const asymp_jasa,
+							  const int64_t size_max) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
+									 "qmckl_get_jastrow_asymp_jasa_device",
+									 NULL);
+	}
+
+	/* Provided in finalize_jastrow */
+	/*
+	qmckl_exit_code rc;
+	rc = qmckl_provide_jastrow_asymp_jasa(context);
+	if(rc != QMCKL_SUCCESS) return rc;
+	*/
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	int64_t sze = ctx->jastrow.type_nucl_num;
+	if (size_max < sze) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
+									 "qmckl_get_jastrow_asymp_jasa",
+									 "Array too small. Expected nucleus.num");
+	}
+	qmckl_memcpy_D2D(context, asymp_jasa, ctx->jastrow.asymp_jasa,
+					 sze * sizeof(double));
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
 //**********
 // PROVIDE
 //**********
@@ -1159,6 +1240,82 @@ qmckl_provide_jastrow_value_device(qmckl_context_device context) {
 	return QMCKL_SUCCESS_DEVICE;
 }
 
+qmckl_exit_code_device
+qmckl_provide_jastrow_gl_device(qmckl_context_device context) {
+
+	qmckl_exit_code_device rc;
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
+									 "qmckl_provide_jastrow_gl_device", NULL);
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	if (!ctx->jastrow.provided) {
+		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
+									 "qmckl_provide_jastrow_gl", NULL);
+	}
+
+	rc = qmckl_provide_jastrow_value_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	rc = qmckl_provide_jastrow_factor_ee_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	rc = qmckl_provide_jastrow_factor_en_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	rc = qmckl_provide_jastrow_factor_een_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Compute if necessary */
+	if (ctx->date > ctx->jastrow.gl_date) {
+
+		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
+			if (ctx->jastrow.gl != NULL) {
+				rc = qmckl_free_device(context, ctx->jastrow.gl);
+				if (rc != QMCKL_SUCCESS_DEVICE) {
+					return qmckl_failwith_device(
+						context, rc, "qmckl_provide_jastrow_gl",
+						"Unable to free ctx->jastrow.gl");
+				}
+				ctx->jastrow.gl = NULL;
+			}
+		}
+
+		/* Allocate array */
+		if (ctx->jastrow.gl == NULL) {
+			double *gl = (double *)qmckl_malloc_device(
+				context, ctx->electron.walker.num * ctx->electron.num * 4 *
+							 sizeof(double));
+
+			if (gl == NULL) {
+				return qmckl_failwith_device(
+					context, QMCKL_ALLOCATION_FAILED_DEVICE,
+					"qmckl_provide_jastrow_gl_device", NULL);
+			}
+			ctx->jastrow.gl = gl;
+		}
+
+		rc = qmckl_compute_jastrow_gl_device(
+			context, ctx->electron.walker.num, ctx->electron.num,
+			ctx->jastrow.value, ctx->jastrow.factor_ee_deriv_e,
+			ctx->jastrow.factor_en_deriv_e, ctx->jastrow.factor_een_deriv_e,
+			ctx->jastrow.gl);
+
+		ctx->jastrow.gl_date = ctx->date;
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
 // Electron/electron component
 qmckl_exit_code_device
 qmckl_provide_jastrow_factor_ee_device(qmckl_context_device context) {
@@ -1300,6 +1457,84 @@ qmckl_provide_jastrow_factor_en_device(qmckl_context_device context) {
 	return QMCKL_SUCCESS_DEVICE;
 }
 
+qmckl_exit_code_device
+qmckl_provide_jastrow_factor_en_deriv_e_device(qmckl_context_device context) {
+
+	qmckl_exit_code_device rc;
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(
+			context, QMCKL_INVALID_CONTEXT_DEVICE,
+			"qmckl_provide_jastrow_factor_en_deriv_e_device", NULL);
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	if (!ctx->jastrow.provided) {
+		return qmckl_failwith_device(
+			context, QMCKL_NOT_PROVIDED_DEVICE,
+			"qmckl_provide_jastrow_factor_en_deriv_e_device", NULL);
+	}
+
+	/* Check if en rescaled distance is provided */
+	rc = qmckl_provide_en_distance_rescaled_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Check if en rescaled distance derivatives is provided */
+	rc = qmckl_provide_en_distance_rescaled_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Compute if necessary */
+	if (ctx->date > ctx->jastrow.factor_en_deriv_e_date) {
+
+		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
+			if (ctx->jastrow.factor_en_deriv_e != NULL) {
+				rc = qmckl_free_device(context, ctx->jastrow.factor_en_deriv_e);
+				if (rc != QMCKL_SUCCESS_DEVICE) {
+					return qmckl_failwith_device(
+						context, rc, "qmckl_provide_jastrow_factor_en_deriv_e",
+						"Unable to free ctx->jastrow.factor_en_deriv_e");
+				}
+				ctx->jastrow.factor_en_deriv_e = NULL;
+			}
+		}
+
+		/* Allocate array */
+		if (ctx->jastrow.factor_en_deriv_e == NULL) {
+
+			double *factor_en_deriv_e = (double *)qmckl_malloc_device(
+				context, ctx->electron.walker.num * 4 * ctx->electron.num *
+							 sizeof(double));
+
+			if (factor_en_deriv_e == NULL) {
+				return qmckl_failwith_device(
+					context, QMCKL_ALLOCATION_FAILED_DEVICE,
+					"qmckl_provide_jastrow_factor_en_deriv_e_device", NULL);
+			}
+			ctx->jastrow.factor_en_deriv_e = factor_en_deriv_e;
+		}
+
+		rc = qmckl_compute_jastrow_factor_en_deriv_e_device(
+			context, ctx->electron.walker.num, ctx->electron.num,
+			ctx->nucleus.num, ctx->jastrow.type_nucl_num,
+			ctx->jastrow.type_nucl_vector, ctx->jastrow.aord_num,
+			ctx->jastrow.a_vector, ctx->jastrow.en_distance_rescaled,
+			ctx->jastrow.en_distance_rescaled_deriv_e,
+			ctx->jastrow.factor_en_deriv_e);
+		if (rc != QMCKL_SUCCESS_DEVICE) {
+			return rc;
+		}
+
+		ctx->jastrow.factor_en_deriv_e_date = ctx->date;
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
 // Electron/electron/nucleus component
 qmckl_exit_code_device
 qmckl_provide_jastrow_factor_een_device(qmckl_context_device context) {
@@ -1381,6 +1616,172 @@ qmckl_provide_jastrow_factor_een_device(qmckl_context_device context) {
 		}
 
 		ctx->jastrow.factor_een_date = ctx->date;
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device
+qmckl_provide_jastrow_factor_een_deriv_e_device(qmckl_context_device context) {
+
+	qmckl_exit_code_device rc;
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	/* Check if en rescaled distance is provided */
+	rc = qmckl_provide_een_rescaled_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Check if en rescaled distance derivatives is provided */
+	rc = qmckl_provide_een_rescaled_n_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Check if en rescaled distance is provided */
+	rc = qmckl_provide_een_rescaled_e_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Check if en rescaled distance derivatives is provided */
+	rc = qmckl_provide_een_rescaled_n_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Check if en rescaled distance derivatives is provided */
+	rc = qmckl_provide_jastrow_c_vector_full_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Check if en rescaled distance derivatives is provided */
+	rc = qmckl_provide_lkpm_combined_index_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Check if tmp_c is provided */
+	rc = qmckl_provide_tmp_c_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Check if dtmp_c is provided */
+	rc = qmckl_provide_dtmp_c_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Compute if necessary */
+	if (ctx->date > ctx->jastrow.factor_een_deriv_e_date) {
+
+		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
+			if (ctx->jastrow.factor_een_deriv_e != NULL) {
+				rc =
+					qmckl_free_device(context, ctx->jastrow.factor_een_deriv_e);
+				if (rc != QMCKL_SUCCESS_DEVICE) {
+					return qmckl_failwith_device(
+						context, rc, "qmckl_provide_jastrow_factor_een_deriv_e",
+						"Unable to free ctx->jastrow.factor_een_deriv_e");
+				}
+				ctx->jastrow.factor_een_deriv_e = NULL;
+			}
+		}
+
+		/* Allocate array */
+		if (ctx->jastrow.factor_een_deriv_e == NULL) {
+
+			double *factor_een_deriv_e = (double *)qmckl_malloc_device(
+				context, 4 * ctx->electron.num * ctx->electron.walker.num *
+							 sizeof(double));
+
+			if (factor_een_deriv_e == NULL) {
+				return qmckl_failwith_device(
+					context, QMCKL_ALLOCATION_FAILED_DEVICE,
+					"qmckl_provide_jastrow_factor_een_deriv_e_device", NULL);
+			}
+			ctx->jastrow.factor_een_deriv_e = factor_een_deriv_e;
+		}
+
+		rc = qmckl_compute_jastrow_factor_een_deriv_e_device(
+			context, ctx->electron.walker.num, ctx->electron.num,
+			ctx->nucleus.num, ctx->jastrow.cord_num, ctx->jastrow.dim_c_vector,
+			ctx->jastrow.c_vector_full, ctx->jastrow.lkpm_combined_index,
+			ctx->jastrow.tmp_c, ctx->jastrow.dtmp_c,
+			ctx->jastrow.een_rescaled_n, ctx->jastrow.een_rescaled_n_deriv_e,
+			ctx->jastrow.factor_een_deriv_e);
+		if (rc != QMCKL_SUCCESS_DEVICE) {
+			return rc;
+		}
+
+		ctx->jastrow.factor_een_deriv_e_date = ctx->date;
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device
+qmckl_provide_dtmp_c_device(qmckl_context_device context) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_exit_code_device rc;
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	rc = qmckl_provide_een_rescaled_e_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	rc = qmckl_provide_een_rescaled_n_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Compute if necessary */
+	if (ctx->date > ctx->jastrow.dtmp_c_date) {
+
+		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
+			if (ctx->jastrow.dtmp_c != NULL) {
+				rc = qmckl_free_device(context, ctx->jastrow.dtmp_c);
+				if (rc != QMCKL_SUCCESS_DEVICE) {
+					return qmckl_failwith_device(
+						context, rc, "qmckl_provide_dtmp_c_device",
+						"Unable to free ctx->jastrow.dtmp_c");
+				}
+				ctx->jastrow.dtmp_c = NULL;
+			}
+		}
+
+		/* Allocate array */
+		if (ctx->jastrow.dtmp_c == NULL) {
+
+			double *dtmp_c = (double *)qmckl_malloc_device(
+				context, (ctx->jastrow.cord_num) * (ctx->jastrow.cord_num + 1) *
+							 4 * ctx->electron.num * ctx->nucleus.num *
+							 ctx->electron.walker.num * sizeof(double));
+
+			if (dtmp_c == NULL) {
+				return qmckl_failwith_device(
+					context, QMCKL_ALLOCATION_FAILED_DEVICE,
+					"qmckl_provide_dtmp_c_device", NULL);
+			}
+			ctx->jastrow.dtmp_c = dtmp_c;
+		}
+
+		rc = qmckl_compute_dtmp_c_device(
+			context, ctx->jastrow.cord_num, ctx->electron.num, ctx->nucleus.num,
+			ctx->electron.walker.num, ctx->jastrow.een_rescaled_e_deriv_e,
+			ctx->jastrow.een_rescaled_n, ctx->jastrow.dtmp_c);
+
+		if (rc != QMCKL_SUCCESS_DEVICE) {
+			return rc;
+		}
+
+		ctx->jastrow.dtmp_c_date = ctx->date;
 	}
 
 	return QMCKL_SUCCESS_DEVICE;
@@ -1509,6 +1910,74 @@ qmckl_provide_en_distance_rescaled_device(qmckl_context_device context) {
 		}
 
 		ctx->jastrow.en_distance_rescaled_date = ctx->date;
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device qmckl_provide_en_distance_rescaled_deriv_e_device(
+	qmckl_context_device context) {
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	if (!(ctx->nucleus.provided)) {
+		return QMCKL_NOT_PROVIDED_DEVICE;
+	}
+
+	/* Compute if necessary */
+	if (ctx->electron.walker.point.date >
+		ctx->jastrow.en_distance_rescaled_deriv_e_date) {
+
+		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
+			if (ctx->jastrow.en_distance_rescaled_deriv_e != NULL) {
+				qmckl_exit_code_device rc = qmckl_free_device(
+					context, ctx->jastrow.en_distance_rescaled_deriv_e);
+				if (rc != QMCKL_SUCCESS_DEVICE) {
+					return qmckl_failwith_device(
+						context, rc,
+						"qmckl_provide_en_distance_rescaled_deriv_e",
+						"Unable to free "
+						"ctx->jastrow.en_distance_rescaled_deriv_e");
+				}
+				ctx->jastrow.en_distance_rescaled_deriv_e = NULL;
+			}
+		}
+
+		/* Allocate array */
+		if (ctx->jastrow.en_distance_rescaled_deriv_e == NULL) {
+
+			double *en_distance_rescaled_deriv_e =
+				(double *)qmckl_malloc_device(
+					context, 4 * ctx->electron.num * ctx->nucleus.num *
+								 ctx->electron.walker.num * sizeof(double));
+
+			if (en_distance_rescaled_deriv_e == NULL) {
+				return qmckl_failwith_device(
+					context, QMCKL_ALLOCATION_FAILED_DEVICE,
+					"qmckl_provide_en_distance_rescaled_deriv_e_device", NULL);
+			}
+			ctx->jastrow.en_distance_rescaled_deriv_e =
+				en_distance_rescaled_deriv_e;
+		}
+
+		qmckl_exit_code_device rc =
+			qmckl_compute_en_distance_rescaled_deriv_e_device(
+				context, ctx->electron.num, ctx->nucleus.num,
+				ctx->jastrow.type_nucl_num, ctx->jastrow.type_nucl_vector,
+				ctx->jastrow.rescale_factor_en, ctx->electron.walker.num,
+				ctx->electron.walker.point.coord.data, ctx->nucleus.coord.data,
+				ctx->jastrow.en_distance_rescaled_deriv_e);
+		if (rc != QMCKL_SUCCESS_DEVICE) {
+			return rc;
+		}
+
+		ctx->jastrow.en_distance_rescaled_deriv_e_date = ctx->date;
 	}
 
 	return QMCKL_SUCCESS_DEVICE;
@@ -1896,6 +2365,216 @@ qmckl_provide_een_rescaled_e_deriv_e_device(qmckl_context_device context) {
 	return QMCKL_SUCCESS_DEVICE;
 }
 
+qmckl_exit_code_device
+qmckl_provide_een_rescaled_n_deriv_e_device(qmckl_context_device context) {
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	/* Check if ee distance is provided */
+	qmckl_exit_code_device rc = qmckl_provide_en_distance_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Check if ee distance is provided */
+	rc = qmckl_provide_een_rescaled_n_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Compute if necessary */
+	if (ctx->date > ctx->jastrow.een_rescaled_n_deriv_e_date) {
+
+		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
+			if (ctx->jastrow.een_rescaled_n_deriv_e != NULL) {
+				rc = qmckl_free_device(context,
+									   ctx->jastrow.een_rescaled_n_deriv_e);
+				if (rc != QMCKL_SUCCESS_DEVICE) {
+					return qmckl_failwith_device(
+						context, rc,
+						"qmckl_provide_een_rescaled_n_deriv_e_device",
+						"Unable to free ctx->jastrow.een_rescaled_n_deriv_e");
+				}
+				ctx->jastrow.een_rescaled_n_deriv_e = NULL;
+			}
+		}
+
+		/* Allocate array */
+		if (ctx->jastrow.een_rescaled_n_deriv_e == NULL) {
+
+			double *een_rescaled_n_deriv_e = (double *)qmckl_malloc_device(
+				context, ctx->electron.num * 4 * ctx->nucleus.num *
+							 ctx->electron.walker.num *
+							 (ctx->jastrow.cord_num + 1) * sizeof(double));
+
+			if (een_rescaled_n_deriv_e == NULL) {
+				return qmckl_failwith_device(
+					context, QMCKL_ALLOCATION_FAILED_DEVICE,
+					"qmckl_provide_een_rescaled_n_deriv_e_device", NULL);
+			}
+			ctx->jastrow.een_rescaled_n_deriv_e = een_rescaled_n_deriv_e;
+		}
+
+		rc = qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
+			context, ctx->electron.walker.num, ctx->electron.num,
+			ctx->nucleus.num, ctx->jastrow.type_nucl_num,
+			ctx->jastrow.type_nucl_vector, ctx->jastrow.cord_num,
+			ctx->jastrow.rescale_factor_en,
+			ctx->electron.walker.point.coord.data, ctx->nucleus.coord.data,
+			ctx->electron.en_distance, ctx->jastrow.een_rescaled_n,
+			ctx->jastrow.een_rescaled_n_deriv_e);
+		if (rc != QMCKL_SUCCESS_DEVICE) {
+			return rc;
+		}
+
+		ctx->jastrow.een_rescaled_n_deriv_e_date = ctx->date;
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device
+qmckl_provide_jastrow_factor_ee_deriv_e_device(qmckl_context_device context) {
+
+	qmckl_exit_code_device rc;
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
+									 "qmckl_provide_jastrow_factor_ee_deriv_e",
+									 NULL);
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	if (!ctx->jastrow.provided) {
+		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
+									 "qmckl_provide_jastrow_factor_ee_deriv_e",
+									 NULL);
+	}
+
+	/* Check if ee rescaled distance is provided */
+	rc = qmckl_provide_ee_distance_rescaled_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Check if ee rescaled distance deriv e is provided */
+	rc = qmckl_provide_ee_distance_rescaled_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	/* Compute if necessary */
+	if (ctx->date > ctx->jastrow.factor_ee_deriv_e_date) {
+
+		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
+			if (ctx->jastrow.factor_ee_deriv_e != NULL) {
+				rc = qmckl_free_device(context, ctx->jastrow.factor_ee_deriv_e);
+				if (rc != QMCKL_SUCCESS_DEVICE) {
+					return qmckl_failwith_device(
+						context, rc, "qmckl_provide_jastrow_factor_ee_deriv_e",
+						"Unable to free ctx->jastrow.factor_ee_deriv_e");
+				}
+				ctx->jastrow.factor_ee_deriv_e = NULL;
+			}
+		}
+
+		/* Allocate array */
+		if (ctx->jastrow.factor_ee_deriv_e == NULL) {
+
+			double *factor_ee_deriv_e = (double *)qmckl_malloc_device(
+				context, ctx->electron.walker.num * 4 * ctx->electron.num *
+							 sizeof(double));
+
+			if (factor_ee_deriv_e == NULL) {
+				return qmckl_failwith_device(
+					context, QMCKL_ALLOCATION_FAILED_DEVICE,
+					"qmckl_provide_jastrow_factor_ee_deriv_e", NULL);
+			}
+			ctx->jastrow.factor_ee_deriv_e = factor_ee_deriv_e;
+		}
+
+		rc = qmckl_compute_jastrow_factor_ee_deriv_e_device(
+			context, ctx->electron.walker.num, ctx->electron.num,
+			ctx->electron.up_num, ctx->jastrow.bord_num, ctx->jastrow.b_vector,
+			ctx->jastrow.ee_distance_rescaled,
+			ctx->jastrow.ee_distance_rescaled_deriv_e,
+			ctx->jastrow.factor_ee_deriv_e);
+		if (rc != QMCKL_SUCCESS_DEVICE) {
+			return rc;
+		}
+
+		ctx->jastrow.factor_ee_date = ctx->date;
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device qmckl_provide_ee_distance_rescaled_deriv_e_device(
+	qmckl_context_device context) {
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	/* Compute if necessary */
+	if (ctx->electron.walker.point.date >
+		ctx->jastrow.ee_distance_rescaled_deriv_e_date) {
+
+		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
+			if (ctx->jastrow.ee_distance_rescaled_deriv_e != NULL) {
+				qmckl_exit_code_device rc = qmckl_free_device(
+					context, ctx->jastrow.ee_distance_rescaled_deriv_e);
+				if (rc != QMCKL_SUCCESS_DEVICE) {
+					return qmckl_failwith_device(
+						context, rc,
+						"qmckl_provide_ee_distance_rescaled_deriv_e_device",
+						"Unable to free "
+						"ctx->jastrow.ee_distance_rescaled_deriv_e");
+				}
+				ctx->jastrow.ee_distance_rescaled_deriv_e = NULL;
+			}
+		}
+
+		/* Allocate array */
+		if (ctx->jastrow.ee_distance_rescaled_deriv_e == NULL) {
+			double *ee_distance_rescaled_deriv_e =
+				(double *)qmckl_malloc_device(
+					context, 4 * ctx->electron.num * ctx->electron.num *
+								 ctx->electron.walker.num * sizeof(double));
+
+			if (ee_distance_rescaled_deriv_e == NULL) {
+				return qmckl_failwith_device(
+					context, QMCKL_ALLOCATION_FAILED_DEVICE,
+					"qmckl_provide_ee_distance_rescaled_deriv_e_device", NULL);
+			}
+			ctx->jastrow.ee_distance_rescaled_deriv_e =
+				ee_distance_rescaled_deriv_e;
+		}
+
+		qmckl_exit_code_device rc =
+			qmckl_compute_ee_distance_rescaled_deriv_e_device(
+				context, ctx->electron.num, ctx->jastrow.rescale_factor_ee,
+				ctx->electron.walker.num, ctx->electron.walker.point.coord.data,
+				ctx->jastrow.ee_distance_rescaled_deriv_e);
+		if (rc != QMCKL_SUCCESS_DEVICE) {
+			return rc;
+		}
+
+		ctx->jastrow.ee_distance_rescaled_date = ctx->date;
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
 //**********
 // GETTERS (for computes)
 //**********
@@ -1926,6 +2605,36 @@ qmckl_get_jastrow_value_device(qmckl_context_device context,
 									 "Array too small. Expected walker.num");
 	}
 	memcpy(value, ctx->jastrow.value, sze * sizeof(double));
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device qmckl_get_jastrow_gl_device(qmckl_context_device context,
+												   double *const gl,
+												   const int64_t size_max) {
+	qmckl_exit_code_device rc;
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
+									 "qmckl_get_jastrow_champ_gl_device", NULL);
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	rc = qmckl_provide_jastrow_gl_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	int64_t sze = 4 * ctx->electron.walker.num * ctx->electron.num;
+	if (size_max < sze) {
+		return qmckl_failwith_device(
+			context, QMCKL_INVALID_ARG_3_DEVICE,
+			"qmckl_get_jastrow_champ_gl_device",
+			"Array too small. Expected walker.num * electron.num * 4");
+	}
+	qmckl_memcpy_D2D(context, gl, ctx->jastrow.gl, sze * sizeof(double));
+
 	return QMCKL_SUCCESS_DEVICE;
 }
 
@@ -1989,6 +2698,37 @@ qmckl_get_jastrow_factor_en_device(qmckl_context_device context,
 	return QMCKL_SUCCESS_DEVICE;
 }
 
+qmckl_exit_code_device
+qmckl_get_jastrow_factor_en_deriv_e_device(qmckl_context_device context,
+										   double *const factor_en_deriv_e,
+										   const int64_t size_max) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_exit_code_device rc;
+
+	rc = qmckl_provide_jastrow_factor_en_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	int64_t sze = ctx->electron.walker.num * 4 * ctx->electron.num;
+	if (size_max < sze) {
+		return qmckl_failwith_device(
+			context, QMCKL_INVALID_ARG_3_DEVICE,
+			"qmckl_get_jastrow_factor_en_deriv_e",
+			"Array too small. Expected 4*walker.num*elec_num");
+	}
+	qmckl_memcpy_D2D(context, factor_en_deriv_e, ctx->jastrow.factor_en_deriv_e,
+					 sze * sizeof(double));
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
 // Electron/electron/nucleus component
 qmckl_exit_code_device
 qmckl_get_jastrow_factor_een_device(qmckl_context_device context,
@@ -2018,6 +2758,135 @@ qmckl_get_jastrow_factor_een_device(qmckl_context_device context,
 	return QMCKL_SUCCESS_DEVICE;
 }
 
+qmckl_exit_code_device
+qmckl_get_jastrow_factor_een_deriv_e_device(qmckl_context_device context,
+											double *const factor_een_deriv_e,
+											const int64_t size_max) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_exit_code_device rc;
+
+	rc = qmckl_provide_jastrow_factor_een_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	int64_t sze = ctx->electron.walker.num * 4 * ctx->electron.num;
+	if (size_max < sze) {
+		return qmckl_failwith_device(
+			context, QMCKL_INVALID_ARG_3_DEVICE,
+			"qmckl_get_jastrow_factor_een_deriv_e_device",
+			"Array too small. Expected 4*walk_num*elec_num");
+	}
+	qmckl_memcpy_D2D(context, factor_een_deriv_e,
+					 ctx->jastrow.factor_een_deriv_e, sze * sizeof(double));
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device
+qmckl_get_jastrow_een_rescaled_e_deriv_e_device(qmckl_context_device context,
+												double *const distance_rescaled,
+												const int64_t size_max) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_exit_code_device rc;
+
+	rc = qmckl_provide_een_rescaled_e_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	int64_t sze = ctx->electron.num * 4 * ctx->electron.num *
+				  ctx->electron.walker.num * (ctx->jastrow.cord_num + 1);
+	if (size_max < sze) {
+		return qmckl_failwith_device(
+			context, QMCKL_INVALID_ARG_3_DEVICE,
+			"qmckl_get_jastrow_factor_een_deriv_e",
+			"Array too small. Expected ctx->electron.num * 4 * "
+			"ctx->electron.num * ctx->electron.walker.num * "
+			"(ctx->jastrow.cord_num + 1)");
+	}
+	qmckl_memcpy_D2D(context, distance_rescaled,
+					 ctx->jastrow.een_rescaled_e_deriv_e, sze * sizeof(double));
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device
+qmckl_get_jastrow_een_rescaled_n_deriv_e_device(qmckl_context_device context,
+												double *const distance_rescaled,
+												const int64_t size_max) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_exit_code_device rc;
+
+	rc = qmckl_provide_een_rescaled_n_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	int64_t sze = ctx->electron.num * 4 * ctx->nucleus.num *
+				  ctx->electron.walker.num * (ctx->jastrow.cord_num + 1);
+	if (size_max < sze) {
+		return qmckl_failwith_device(
+			context, QMCKL_INVALID_ARG_3_DEVICE,
+			"qmckl_get_jastrow_factor_een_deriv_e",
+			"Array too small. Expected ctx->electron.num * 4 * "
+			"ctx->nucleus.num * ctx->electron.walker.num * "
+			"(ctx->jastrow.cord_num + 1)");
+	}
+	qmckl_memcpy_D2D(context, distance_rescaled,
+					 ctx->jastrow.een_rescaled_n_deriv_e, sze * sizeof(double));
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device
+qmckl_get_jastrow_dtmp_c_device(qmckl_context_device context,
+								double *const dtmp_c) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_exit_code_device rc;
+
+	rc = qmckl_provide_jastrow_c_vector_full_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	rc = qmckl_provide_dtmp_c_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	size_t sze = (ctx->jastrow.cord_num) * (ctx->jastrow.cord_num + 1) * 4 *
+				 ctx->electron.num * ctx->nucleus.num *
+				 ctx->electron.walker.num;
+	qmckl_memcpy_D2D(context, dtmp_c, ctx->jastrow.dtmp_c,
+					 sze * sizeof(double));
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
 // Distances
 qmckl_exit_code_device
 qmckl_get_jastrow_ee_distance_rescaled_device(qmckl_context_device context,
@@ -2043,6 +2912,31 @@ qmckl_get_jastrow_ee_distance_rescaled_device(qmckl_context_device context,
 	return QMCKL_SUCCESS_DEVICE;
 }
 
+qmckl_exit_code_device qmckl_get_jastrow_ee_distance_rescaled_deriv_e_device(
+	qmckl_context_device context, double *const distance_rescaled_deriv_e) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_exit_code_device rc;
+
+	rc = qmckl_provide_ee_distance_rescaled_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	size_t sze =
+		4 * ctx->electron.num * ctx->electron.num * ctx->electron.walker.num;
+	qmckl_memcpy_D2D(context, distance_rescaled_deriv_e,
+					 ctx->jastrow.ee_distance_rescaled_deriv_e,
+					 sze * sizeof(double));
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
 qmckl_exit_code_device
 qmckl_get_electron_en_distance_rescaled_device(qmckl_context_device context,
 											   double *distance_rescaled) {
@@ -2064,6 +2958,32 @@ qmckl_get_electron_en_distance_rescaled_device(qmckl_context_device context,
 		ctx->electron.num * ctx->nucleus.num * ctx->electron.walker.num;
 	memcpy(distance_rescaled, ctx->jastrow.en_distance_rescaled,
 		   sze * sizeof(double));
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device qmckl_get_electron_en_distance_rescaled_deriv_e_device(
+	qmckl_context_device context, double *distance_rescaled_deriv_e) {
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_exit_code_device rc;
+
+	rc = qmckl_provide_en_distance_rescaled_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	size_t sze =
+		4 * ctx->electron.num * ctx->nucleus.num * ctx->electron.walker.num;
+	qmckl_memcpy_D2D(context, distance_rescaled_deriv_e,
+					 ctx->jastrow.en_distance_rescaled_deriv_e,
+					 sze * sizeof(double));
+
 	return QMCKL_SUCCESS_DEVICE;
 }
 
@@ -2195,6 +3115,38 @@ qmckl_compute_dim_c_vector_device(const qmckl_context_device context,
 			}
 		}
 	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device
+qmckl_get_jastrow_factor_ee_deriv_e_device(qmckl_context_device context,
+										   double *const factor_ee_deriv_e,
+										   const int64_t size_max) {
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_exit_code_device rc;
+
+	rc = qmckl_provide_jastrow_factor_ee_deriv_e_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	int64_t sze = ctx->electron.walker.num * 4 * ctx->electron.num;
+	if (size_max < sze) {
+		return qmckl_failwith_device(
+			context, QMCKL_INVALID_ARG_3_DEVICE,
+			"qmckl_get_jastrow_factor_ee_deriv_e_device",
+			"Array too small. Expected 4*walk_num*elec_num");
+	}
+
+	qmckl_memcpy_D2D(context, factor_ee_deriv_e, ctx->jastrow.factor_ee_deriv_e,
+					 sze * sizeof(double));
 
 	return QMCKL_SUCCESS_DEVICE;
 }
