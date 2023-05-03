@@ -19,7 +19,7 @@ lib_LTLIBRARIES = libqmckl_gpu.la
 libqmckl_gpu_la_SOURCES = ""
 
 
-libqmckl_gpu_la_SOURCES += src/qmckl_context.c src/qmckl_basic_functions.c \
+libqmckl_gpu_la_SOURCES += src/qmckl_context.c src/qmckl_basic_functions.c src/qmckl_point.c \
 src/qmckl_memory.c src/qmckl_blas.c src/qmckl_electron.c src/qmckl_nucleus.c \
 src/qmckl_trexio.c src/qmckl_ao.c src/qmckl_mo.c src/qmckl_jastrow.c
 
@@ -62,6 +62,7 @@ endif
 
 if HAVE_ACC_DEVICE
   check_PROGRAMS += tests/test_qmckl_jastrow
+  tests_test_qmckl_jastrow_LDADD = libqmckl_gpu.la
 
   tests_test_qmckl_ao_SOURCES = tests/test_qmckl_ao_acc.c chbrclf.h
   tests_test_qmckl_ao_LDFLAGS = -lm
@@ -69,7 +70,7 @@ if HAVE_ACC_DEVICE
   tests_test_qmckl_mo_SOURCES = tests/test_qmckl_mo_acc.c chbrclf.h
   tests_test_qmckl_mo_LDFLAGS = -lm
 
-  tests_test_qmckl_jastrow_SOURCES = tests/test_qmckl_jastrow_acc.c chbrclf.h
+  tests_test_qmckl_jastrow_SOURCES = tests/test_qmckl_jastrow_acc.c n2.h
   tests_test_qmckl_jastrow_LDFLAGS = -lm
 endif
 

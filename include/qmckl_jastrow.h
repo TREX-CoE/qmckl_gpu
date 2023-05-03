@@ -102,14 +102,13 @@ qmckl_get_jastrow_dim_c_vector_device(qmckl_context_device context,
 									  int64_t *const dim_c_vector);
 
 qmckl_exit_code_device
-qmckl_get_jastrow_champ_asymp_jasb_device(qmckl_context_device context,
-										  double *const asymp_jasb,
-										  const int64_t size_max);
+qmckl_get_jastrow_asymp_jasb_device(qmckl_context_device context,
+									double *const asymp_jasb,
+									const int64_t size_max);
 
 qmckl_exit_code_device
-qmckl_get_jastrow_champ_jasa_device(qmckl_context_device context,
-									double *const asymp_jasa,
-									const int64_t size_max);
+qmckl_get_jastrow_jasa_device(qmckl_context_device context,
+							  double *const asymp_jasa, const int64_t size_max);
 
 //**********
 // COMPUTES
@@ -136,7 +135,7 @@ qmckl_compute_jastrow_value_device(const qmckl_context_device context,
 								   const int64_t walk_num, const double *f_ee,
 								   const double *f_en, const double *f_een,
 								   double *const value);
-inline qmckl_exit_code_device qmckl_compute_jastrow_gl_device(
+qmckl_exit_code_device qmckl_compute_jastrow_gl_device(
 	const qmckl_context_device context, const int64_t walk_num,
 	const int64_t elec_num, const double *value, const double *gl_ee,
 	const double *gl_en, const double *gl_een, double *const gl);

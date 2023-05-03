@@ -1,28 +1,5 @@
 #include "../include/qmckl_jastrow.h"
 
-/* Init func */
-
-qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context) {
-	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
-		return false;
-	}
-
-	qmckl_context_struct_device *const ctx =
-		(qmckl_context_struct_device *)context;
-	assert(ctx != NULL);
-
-	ctx->jastrow.uninitialized = (1 << 10) - 1;
-
-	/* Default values */
-	ctx->jastrow.aord_num = -1;
-	ctx->jastrow.bord_num = -1;
-	ctx->jastrow.cord_num = -1;
-	ctx->jastrow.type_nucl_num = -1;
-	ctx->jastrow.dim_c_vector = -1;
-
-	return QMCKL_SUCCESS_DEVICE;
-}
-
 /* Initialized check */
 
 bool qmckl_jastrow_provided_device(qmckl_context_device context) {
@@ -1021,9 +998,9 @@ qmckl_get_jastrow_asymp_jasb_device(qmckl_context_device context,
 }
 
 qmckl_exit_code_device
-qmckl_get_jastrow_jasa_device(qmckl_context_device context,
-							  double *const asymp_jasa,
-							  const int64_t size_max) {
+qmckl_get_jastrow_asymp_jasa_device(qmckl_context_device context,
+									double *const asymp_jasa,
+									const int64_t size_max) {
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
 									 "qmckl_get_jastrow_asymp_jasa_device",

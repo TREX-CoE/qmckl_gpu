@@ -114,7 +114,7 @@ qmckl_compute_jastrow_value_device(const qmckl_context_device context,
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-inline qmckl_exit_code_device qmckl_compute_jastrow_gl_device(
+qmckl_exit_code_device qmckl_compute_jastrow_gl_device(
 	const qmckl_context_device context, const int64_t walk_num,
 	const int64_t elec_num, const double *value, const double *gl_ee,
 	const double *gl_en, const double *gl_een, double *const gl) {
