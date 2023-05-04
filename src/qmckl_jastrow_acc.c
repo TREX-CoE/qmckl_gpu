@@ -248,7 +248,8 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_ee_deriv_e_device(
 	}
 
 #pragma acc kernels deviceptr(b_vector, ee_distance_rescaled,                  \
-							  ee_distance_rescaled_deriv_e, factor_ee_deriv_e)
+								  ee_distance_rescaled_deriv_e,                \
+								  factor_ee_deriv_e)
 	{
 
 		for (int nw = 0; nw < walk_num; ++nw) {
@@ -383,7 +384,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_device(
 	}
 
 #pragma acc kernels deviceptr(type_nucl_vector, a_vector,                      \
-							  en_distance_rescaled, asymp_jasa)
+								  en_distance_rescaled, asymp_jasa)
 	{
 		for (nw = 0; nw < walk_num; nw++) {
 			factor_en[nw] = 0.0;
@@ -614,9 +615,9 @@ qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
 		return info;
 	}
 
-#pragma acc kernels deviceptr(type_nucl_vector, a_vector,                      \
-							  en_distance_rescaled,                            \
-							  en_distance_rescaled_deriv_e, factor_en_deriv_e)
+#pragma acc kernels deviceptr(                                                 \
+		type_nucl_vector, a_vector, en_distance_rescaled,                      \
+			en_distance_rescaled_deriv_e, factor_en_deriv_e)
 	{
 		for (i = 0; i < elec_num * 4 * walk_num; i++)
 			factor_en_deriv_e[i] = 0.0;
@@ -741,7 +742,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_device(
 	}
 
 #pragma acc kernels deviceptr(c_vector_full, lkpm_combined_index, tmp_c,       \
-							  een_rescaled_n)
+								  een_rescaled_n)
 	{
 		for (nw = 0; nw < walk_num; nw++) {
 			factor_een[nw] = 0.0;
@@ -802,8 +803,8 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_deriv_e_device(
 
 	double *tmp3 = qmckl_malloc_device(context, elec_num * sizeof(double));
 #pragma acc kernels deviceptr(tmp3, c_vector_full, lkpm_combined_index, tmp_c, \
-							  dtmp_c, een_rescaled_n, een_rescaled_n_deriv_e,  \
-							  factor_een_deriv_e)
+								  dtmp_c, een_rescaled_n,                      \
+								  een_rescaled_n_deriv_e, factor_een_deriv_e)
 	{
 
 		for (int i = 0; i < elec_num * 4 * walk_num; i++) {
@@ -989,7 +990,7 @@ qmckl_compute_jastrow_factor_een_rescaled_e_deriv_e_device(
 	}
 
 #pragma acc kernels deviceptr(coord_ee, ee_distance, een_rescaled_e,           \
-							  een_rescaled_e_deriv_e)
+								  een_rescaled_e_deriv_e)
 	{
 		// Prepare table of exponentiated distances raised to appropriate power
 		for (int i = 0; i < elec_num * 4 * elec_num * (cord_num + 1) * walk_num;
@@ -1318,12 +1319,15 @@ qmckl_exit_code_device qmckl_compute_ee_distance_rescaled_device(
 #pragma acc kernels deviceptr(coord, ee_distance_rescaled)
 	{
 		for (int k = 0; k < walk_num; k++) {
+			// TODO Fix undefined reference
+			/*
 			info = qmckl_distance_rescaled_device(
 				context, 'T', 'T', elec_num, elec_num, coord + (k * elec_num),
 				elec_num * walk_num, coord + (k * elec_num),
 				elec_num * walk_num,
 				ee_distance_rescaled + (k * elec_num * elec_num), elec_num,
 				rescale_factor_ee);
+				*/
 			if (info != QMCKL_SUCCESS_DEVICE) {
 				break;
 			}
@@ -1408,6 +1412,8 @@ qmckl_exit_code_device qmckl_compute_en_distance_rescaled_device(
 			coord[2] = nucl_coord[i + 2 * nucl_num];
 
 			for (k = 0; k < walk_num; k++) {
+				// TODO Fix undefined reference
+				/*
 				info = qmckl_distance_rescaled_device(
 					context, 'T', 'T', elec_num, 1,
 					elec_coord + k * elec_num + elec_num * walk_num,
@@ -1415,6 +1421,7 @@ qmckl_exit_code_device qmckl_compute_en_distance_rescaled_device(
 					en_distance_rescaled + i * elec_num +
 						k * elec_num * nucl_num,
 					elec_num, rescale_factor_en[type_nucl_vector[i]]);
+				*/
 				if (info != QMCKL_SUCCESS_DEVICE) {
 					break;
 				}

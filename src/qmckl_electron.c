@@ -234,7 +234,7 @@ qmckl_provide_en_distance_device(qmckl_context_device context) {
 }
 
 //**********
-// PROVIDES
+// COMPUTES
 //**********
 
 qmckl_exit_code_device qmckl_compute_en_distance_device(

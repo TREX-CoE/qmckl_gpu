@@ -59,16 +59,14 @@ qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_sgemm_device(
 		qmckl_malloc_device(context, sizeof(float) * 5 * mo_num * point_num);
 
 #pragma omp target teams distribute parallel for simd is_device_ptr(           \
-	A, coefficient_t) map(to                                                   \
-						  : ao_num, mo_num)
+		A, coefficient_t) map(to : ao_num, mo_num)
 #pragma acc parallel loop gang vector deviceptr(A, coefficient_t)              \
 	copyin(ao_num, mo_num)
 	for (int ii = 0; ii < ao_num * mo_num; ++ii) {
 		A[ii] = (float)coefficient_t[ii];
 	}
 #pragma omp target teams distribute parallel for simd is_device_ptr(B, ao_vgl) \
-	map(to                                                                     \
-		: ao_num, point_num)
+	map(to : ao_num, point_num)
 #pragma acc parallel loop gang vector deviceptr(B, ao_vgl)                     \
 	copyin(ao_num, point_num)
 	for (int ii = 0; ii < 5 * ao_num * point_num; ++ii) {
@@ -81,8 +79,7 @@ qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_sgemm_device(
 	cublasDestroy(handle);
 
 #pragma omp target teams distribute parallel for simd is_device_ptr(C, mo_vgl) \
-	map(to                                                                     \
-		: mo_num, point_num)
+	map(to : mo_num, point_num)
 #pragma acc parallel loop gang vector deviceptr(C, mo_vgl)                     \
 	copyin(mo_num, point_num)
 	for (int ii = 0; ii < 5 * mo_num * point_num; ++ii) {
@@ -188,16 +185,14 @@ qmckl_exit_code_device qmckl_compute_mo_basis_mo_value_sgemm_device(
 	float *C = qmckl_malloc_device(context, sizeof(float) * mo_num * point_num);
 
 #pragma omp target teams distribute parallel for simd is_device_ptr(           \
-	A, coefficient_t) map(to                                                   \
-						  : ao_num, mo_num)
+		A, coefficient_t) map(to : ao_num, mo_num)
 #pragma acc parallel loop gang vector deviceptr(A, coefficient_t)              \
 	copyin(ao_num, mo_num)
 	for (int ii = 0; ii < ao_num * mo_num; ++ii) {
 		A[ii] = (float)coefficient_t[ii];
 	}
 #pragma omp target teams distribute parallel for simd is_device_ptr(B, ao_vgl) \
-	map(to                                                                     \
-		: ao_num, point_num)
+	map(to : ao_num, point_num)
 #pragma acc parallel loop gang vector deviceptr(B, ao_vgl)                     \
 	copyin(ao_num, point_num)
 	for (int ii = 0; ii < ao_num * point_num; ++ii) {
@@ -210,8 +205,7 @@ qmckl_exit_code_device qmckl_compute_mo_basis_mo_value_sgemm_device(
 	cublasDestroy(handle);
 
 #pragma omp target teams distribute parallel for simd is_device_ptr(C, mo_vgl) \
-	map(to                                                                     \
-		: mo_num, point_num)
+	map(to : mo_num, point_num)
 #pragma acc parallel loop gang vector deviceptr(C, mo_vgl)                     \
 	copyin(mo_num, point_num)
 	for (int ii = 0; ii < mo_num * point_num; ++ii) {

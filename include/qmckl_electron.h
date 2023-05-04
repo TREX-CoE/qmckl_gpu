@@ -4,6 +4,7 @@
 #include "qmckl_memory.h"
 #include "qmckl_blas.h"
 #include "qmckl_point.h"
+#include "qmckl_distance.h"
 
 bool qmckl_electron_provided_device(qmckl_context_device context);
 
@@ -24,3 +25,8 @@ qmckl_exit_code_device
 qmckl_get_electron_coord_device(const qmckl_context_device context,
 								const char transp, double *const coord,
 								const int64_t size_max);
+
+qmckl_exit_code_device qmckl_compute_en_distance_device(
+	const qmckl_context_device context, const int64_t point_num,
+	const int64_t nucl_num, const double *elec_coord, const double *nucl_coord,
+	double *const en_distance);

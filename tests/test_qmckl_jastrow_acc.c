@@ -58,90 +58,97 @@ int main() {
 
 	qmckl_exit_code_device rc;
 
-	assert(!qmckl_electron_provided_device(context));
-
 	rc = qmckl_set_electron_num_device(context, elec_up_num, elec_dn_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
-
-	assert(qmckl_electron_provided_device(context));
 
 	rc = qmckl_set_electron_coord_device(context, 'N', walk_num, elec_coord,
 										 walk_num * 3 * elec_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	double *elec_coord2 =
 		qmckl_malloc_device(context, walk_num * 3 * elec_num * sizeof(double));
 
 	rc = qmckl_get_electron_coord_device(context, 'N', elec_coord2,
 										 walk_num * 3 * elec_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
+	bool wrongval = false;
 #pragma acc kernels deviceptr(elec_coord, elec_coord2)
 	{
 		for (int64_t i = 0; i < 3 * elec_num; ++i) {
-			assert(elec_coord[i] == elec_coord2[i]);
+			if (elec_coord[i] != elec_coord2[i]) {
+				wrongval = true;
+				break;
+			}
 		}
+	}
+	if (wrongval) {
+		return 1;
 	}
 
 	/* Provide Nucleus data */
 
-	assert(!qmckl_nucleus_provided_device(context));
-
 	rc = qmckl_set_nucleus_num_device(context, nucl_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
-	assert(!qmckl_nucleus_provided_device(context));
 
 	double *nucl_coord2 =
 		qmckl_malloc_device(context, 3 * nucl_num * sizeof(double));
 
 	rc =
 		qmckl_get_nucleus_coord_device(context, 'T', nucl_coord2, 3 * nucl_num);
-	assert(rc == QMCKL_NOT_PROVIDED_DEVICE);
 
 	rc = qmckl_set_nucleus_coord_device(context, 'T', nucl_coord, 3 * nucl_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
-
-	assert(!qmckl_nucleus_provided_device(context));
 
 	rc =
 		qmckl_get_nucleus_coord_device(context, 'N', nucl_coord2, nucl_num * 3);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
+
 #pragma acc kernels deviceptr(nucl_coord, nucl_coord2)
 	{
 		for (int64_t k = 0; k < 3; ++k) {
 			for (int64_t i = 0; i < nucl_num; ++i) {
-				assert(nucl_coord[nucl_num * k + i] == nucl_coord2[3 * i + k]);
+				if (nucl_coord[nucl_num * k + i] != nucl_coord2[3 * i + k]) {
+					wrongval = true;
+					break;
+				}
+				if (wrongval) {
+					break;
+				}
 			}
 		}
+	}
+	if (wrongval) {
+		return 1;
 	}
 
 	rc =
 		qmckl_get_nucleus_coord_device(context, 'T', nucl_coord2, nucl_num * 3);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 #pragma acc kernels deviceptr(nucl_coord, nucl_coord2)
 	{
 		for (int64_t i = 0; i < 3 * nucl_num; ++i) {
-			assert(nucl_coord[i] == nucl_coord2[i]);
+			if (nucl_coord[i] != nucl_coord2[i]) {
+				wrongval = true;
+				break;
+			}
 		}
 	}
+	if (wrongval) {
+		return 1;
+	}
 
-	double *nucl_charge2 =
-		qmckl_malloc_device(context, nucl_num * sizeof(double));
+	double *nucl_charge2 = qmckl_malloc_device(context, sizeof(n2_charge));
 
 	rc = qmckl_get_nucleus_charge_device(context, nucl_charge2, nucl_num);
-	assert(rc == QMCKL_NOT_PROVIDED_DEVICE);
 
 	rc = qmckl_set_nucleus_charge_device(context, nucl_charge, nucl_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_get_nucleus_charge_device(context, nucl_charge2, nucl_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 	for (int64_t i = 0; i < nucl_num; ++i) {
-		assert(nucl_charge[i] == nucl_charge2[i]);
+#pragma acc kernels deviceptr(nucl_charge, nucl_charge2)
+		{
+			if (nucl_charge[i] != nucl_charge2[i]) {
+				wrongval = true;
+			}
+		}
 	}
-	assert(qmckl_nucleus_provided_device(context));
-
-	assert(qmckl_electron_provided_device(context));
+	if (wrongval) {
+		return 1;
+	}
 
 	int64_t type_nucl_num = n2_type_nucl_num;
 
@@ -157,40 +164,31 @@ int main() {
 
 	// double *a_vector = &(n2_aord_vector[0][0]);
 	double *a_vector = qmckl_malloc_device(context, sizeof(n2_aord_vector));
-	qmckl_memcpy_D2H(context, a_vector, n2_aord_vector, sizeof(n2_aord_vector));
+	qmckl_memcpy_H2D(context, a_vector, n2_aord_vector, sizeof(n2_aord_vector));
 
 	// double *b_vector = &(n2_bord_vector[0]);
 	double *b_vector = qmckl_malloc_device(context, sizeof(n2_bord_vector));
-	qmckl_memcpy_D2H(context, b_vector, n2_bord_vector, sizeof(n2_bord_vector));
+	qmckl_memcpy_H2D(context, b_vector, n2_bord_vector, sizeof(n2_bord_vector));
 
 	// double *c_vector = &(n2_cord_vector[0][0]);
 	double *c_vector = qmckl_malloc_device(context, sizeof(n2_cord_vector));
-	qmckl_memcpy_D2H(context, c_vector, n2_cord_vector, sizeof(n2_cord_vector));
+	qmckl_memcpy_H2D(context, c_vector, n2_cord_vector, sizeof(n2_cord_vector));
 
 	int64_t dim_c_vector = 0;
-
-	assert(!qmckl_jastrow_provided_device(context));
 
 	/* Set the data */
 	rc = qmckl_set_jastrow_aord_num_device(context, aord_num);
 	rc = qmckl_set_jastrow_bord_num_device(context, bord_num);
 	rc = qmckl_set_jastrow_cord_num_device(context, cord_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 	rc = qmckl_set_jastrow_type_nucl_num_device(context, type_nucl_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 	rc = qmckl_set_jastrow_type_nucl_vector_device(context, type_nucl_vector,
 												   nucl_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 	rc = qmckl_set_jastrow_a_vector_device(context, a_vector,
 										   (aord_num + 1) * type_nucl_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 	rc = qmckl_set_jastrow_b_vector_device(context, b_vector, (bord_num + 1));
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 	rc = qmckl_get_jastrow_dim_c_vector_device(context, &dim_c_vector);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 	rc = qmckl_set_jastrow_c_vector_device(context, c_vector,
 										   dim_c_vector * type_nucl_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	double k_ee = 0.;
 
@@ -203,29 +201,29 @@ int main() {
 
 	rc = qmckl_set_jastrow_rescale_factor_en_device(context, rescale_factor_en,
 													type_nucl_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_set_jastrow_rescale_factor_ee_device(context, rescale_factor_ee);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_get_jastrow_rescale_factor_ee_device(context, &k_ee);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
-	assert(k_ee == rescale_factor_ee);
+	if (k_ee != rescale_factor_ee) {
+		return 1;
+	}
 
 	rc = qmckl_get_jastrow_rescale_factor_en_device(context, k_en,
 													type_nucl_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 #pragma acc kernels deviceptr(k_en, rescale_factor_en)
 	{
 		for (int i = 0; i < type_nucl_num; ++i) {
-			assert(k_en[i] == rescale_factor_en[i]);
+			if (k_en[i] != rescale_factor_en[i]) {
+				wrongval = true;
+				break;
+			}
 		}
 	}
+	return wrongval;
 
 	/* Check if Jastrow is properly initialized */
-
-	assert(qmckl_jastrow_provided_device(context));
 
 	double *asymp_jasb = qmckl_malloc_device(context, 2 * sizeof(double));
 	rc = qmckl_get_jastrow_asymp_jasb_device(context, asymp_jasb, 2);
@@ -233,13 +231,16 @@ int main() {
 // calculate asymp_jasb
 #pragma acc kernels deviceptr(asymp_jasb)
 	{
-		assert(fabs(asymp_jasb[0] - 0.5323750557252571) < 1.e-12);
-		assert(fabs(asymp_jasb[1] - 0.31567342786262853) < 1.e-12);
+		if (fabs(asymp_jasb[0] - 0.5323750557252571) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(asymp_jasb[1] - 0.31567342786262853) > 1.e-12) {
+			wrongval = true;
+		}
 	}
-
-	/* Check if Jastrow is properly initialized */
-
-	assert(qmckl_jastrow_provided_device(context));
+	if (wrongval) {
+		return 1;
+	}
 
 	double *factor_ee = qmckl_malloc_device(context, walk_num * sizeof(double));
 	rc = qmckl_get_jastrow_factor_ee_device(context, factor_ee, walk_num);
@@ -249,12 +250,13 @@ int main() {
 	{
 		printf("1\n");
 		printf("%e\n%e\n\n", factor_ee[0], -4.282760865958113);
-		assert(fabs(factor_ee[0] + 4.282760865958113) < 1.e-12);
+		if (fabs(factor_ee[0] + 4.282760865958113) > 1.e-12) {
+			wrongval = true;
+		}
 	}
-
-	/* Check if Jastrow is properly initialized */
-
-	assert(qmckl_jastrow_provided_device(context));
+	if (wrongval) {
+		return 1;
+	}
 
 	// calculate factor_ee_deriv_e
 	double *factor_ee_deriv_e =
@@ -265,17 +267,26 @@ int main() {
 // check factor_ee_deriv_e
 #pragma acc kernels deviceptr(factor_ee_deriv_e)
 	{
-		assert(fabs(factor_ee_deriv_e[0 + 0 * elec_num + 0] -
-					0.16364894652107934) < 1.e-12);
-		assert(fabs(factor_ee_deriv_e[0 + 1 * elec_num + 0] +
-					0.6927548119830084) < 1.e-12);
-		assert(fabs(factor_ee_deriv_e[0 + 2 * elec_num + 0] -
-					0.073267755223968) < 1.e-12);
-		assert(fabs(factor_ee_deriv_e[0 + 3 * elec_num + 0] -
-					1.5111672803213185) < 1.e-12);
+		if (fabs(factor_ee_deriv_e[0 + 0 * elec_num + 0] -
+				 0.16364894652107934) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(factor_ee_deriv_e[0 + 1 * elec_num + 0] + 0.6927548119830084) >
+			1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(factor_ee_deriv_e[0 + 2 * elec_num + 0] - 0.073267755223968) >
+			1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(factor_ee_deriv_e[0 + 3 * elec_num + 0] - 1.5111672803213185) >
+			1.e-12) {
+			wrongval = true;
+		}
 	}
-
-	assert(qmckl_electron_provided_device(context));
+	if (wrongval) {
+		return 1;
+	}
 
 	double *ee_distance_rescaled = qmckl_malloc_device(
 		context, walk_num * elec_num * elec_num * sizeof(double));
@@ -286,26 +297,40 @@ int main() {
 	{
 		// (e1,e2,w)
 		// (0,0,0) == 0.
-		assert(ee_distance_rescaled[0] == 0.);
+		if (ee_distance_rescaled[0] != 0.) {
+			wrongval = true;
+		}
 
 		// (1,0,0) == (0,1,0)
-		assert(ee_distance_rescaled[1] == ee_distance_rescaled[elec_num]);
+		if (ee_distance_rescaled[1] != ee_distance_rescaled[elec_num]) {
+			wrongval = true;
+		}
 
 		// value of (1,0,0)
-		assert(fabs(ee_distance_rescaled[1] - 0.5502278003524018) < 1.e-12);
+		if (fabs(ee_distance_rescaled[1] - 0.5502278003524018) > 1.e-12) {
+			wrongval = true;
+		}
 
 		// (0,0,1) == 0.
-		assert(ee_distance_rescaled[5 * elec_num + 5] == 0.);
+		if (ee_distance_rescaled[5 * elec_num + 5] != 0.) {
+			wrongval = true;
+		}
 
 		// (1,0,1) == (0,1,1)
-		assert(ee_distance_rescaled[5 * elec_num + 6] ==
-			   ee_distance_rescaled[6 * elec_num + 5]);
+		if (ee_distance_rescaled[5 * elec_num + 6] !=
+			ee_distance_rescaled[6 * elec_num + 5]) {
+			wrongval = true;
+		}
 
 		// value of (1,0,1)
-		assert(fabs(ee_distance_rescaled[5 * elec_num + 6] -
-					0.3622098222364193) < 1.e-12);
+		if (fabs(ee_distance_rescaled[5 * elec_num + 6] - 0.3622098222364193) >
+			1.e-12) {
+			wrongval = true;
+		}
 	}
-	assert(qmckl_electron_provided_device(context));
+	if (wrongval) {
+		return 1;
+	}
 
 	double *ee_distance_rescaled_deriv_e = qmckl_malloc_device(
 		context, 4 * walk_num * elec_num * elec_num * sizeof(double));
@@ -342,10 +367,13 @@ int main() {
 #pragma acc kernels deviceptr(asymp_jasa)
 	{
 		printf("%e %e\n", asymp_jasa[0], -0.548554);
-		assert(fabs(-0.548554 - asymp_jasa[0]) < 1.e-12);
+		if (fabs(-0.548554 - asymp_jasa[0]) > 1.e-12) {
+			wrongval = true;
+		}
 	}
-	/* Check if Jastrow is properly initialized */
-	assert(qmckl_jastrow_provided_device(context));
+	if (wrongval) {
+		return 1;
+	}
 
 	double *factor_en = qmckl_malloc_device(context, walk_num * sizeof(double));
 	rc = qmckl_get_jastrow_factor_en_device(context, factor_en, walk_num);
@@ -353,10 +381,14 @@ int main() {
 	// calculate factor_en
 
 #pragma acc kernels deviceptr(factor_en)
-	{ assert(fabs(5.1052574308112755 - factor_en[0]) < 1.e-12); }
-
-	/* Check if Jastrow is properly initialized */
-	assert(qmckl_jastrow_provided_device(context));
+	{
+		if (fabs(5.1052574308112755 - factor_en[0]) > 1.e-12) {
+			wrongval = true;
+		}
+	}
+	if (wrongval) {
+		return 1;
+	}
 
 	// calculate factor_en_deriv_e
 	double *factor_en_deriv_e =
@@ -367,64 +399,81 @@ int main() {
 // check factor_en_deriv_e
 #pragma acc kernels deviceptr(factor_en_deriv_e)
 	{
-		assert(fabs(factor_en_deriv_e[0 + 0 * elec_num + 0] -
-					0.11609919541763383) < 1.e-12);
-		assert(fabs(factor_en_deriv_e[0 + 1 * elec_num + 0] +
-					0.23301394780804574) < 1.e-12);
-		assert(fabs(factor_en_deriv_e[0 + 2 * elec_num + 0] -
-					0.17548337641865783) < 1.e-12);
-		assert(fabs(factor_en_deriv_e[0 + 3 * elec_num + 0] +
-					0.9667363412285741) < 1.e-12);
+		if (fabs(factor_en_deriv_e[0 + 0 * elec_num + 0] -
+				 0.11609919541763383) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(factor_en_deriv_e[0 + 1 * elec_num + 0] +
+				 0.23301394780804574) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(factor_en_deriv_e[0 + 2 * elec_num + 0] -
+				 0.17548337641865783) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(factor_en_deriv_e[0 + 3 * elec_num + 0] + 0.9667363412285741) >
+			1.e-12) {
+			wrongval = true;
+		}
 	}
-
-	assert(qmckl_electron_provided_device(context));
-	assert(qmckl_nucleus_provided_device(context));
+	if (wrongval) {
+		return 1;
+	}
 
 	double *en_distance_rescaled = qmckl_malloc_device(
 		context, walk_num * nucl_num * elec_num * sizeof(double));
 
 	rc = qmckl_get_electron_en_distance_rescaled_device(context,
 														en_distance_rescaled);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 #pragma acc kernels deviceptr(en_distance_rescaled)
 	{
 		// (e,n,w) in Fortran notation
 		// (1,1,1)
-		assert(fabs(en_distance_rescaled[0 + 0 + 0] - 0.4435709484118112) <
-			   1.e-12);
+		if (fabs(en_distance_rescaled[0 + 0 + 0] - 0.4435709484118112) >
+			1.e-12) {
+			wrongval = true;
+		}
 
 		// (1,2,1)
-		assert(fabs(en_distance_rescaled[0 + 1 * elec_num + 0] +
-					-0.8993601506374442) < 1.e-12);
+		if (fabs(en_distance_rescaled[0 + 1 * elec_num + 0] +
+				 -0.8993601506374442) > 1.e-12) {
+			wrongval = true;
+		}
 
 		// (2,1,1)
-		assert(fabs(en_distance_rescaled[0 + 0 + 1] - 0.46760219699910477) <
-			   1.e-12);
+		if (fabs(en_distance_rescaled[0 + 0 + 1] - 0.46760219699910477) >
+			1.e-12) {
+			wrongval = true;
+		}
 
 		// (1,1,2)
-		assert(fabs(en_distance_rescaled[0 + 0 + 5] - 0.1875631834682101) <
-			   1.e-12);
+		if (fabs(en_distance_rescaled[0 + 0 + 5] - 0.1875631834682101) >
+			1.e-12) {
+			wrongval = true;
+		}
 
 		// (1,2,2)
-		assert(fabs(en_distance_rescaled[0 + 1 * elec_num + 5] -
-					0.8840716589810682) < 1.e-12);
+		if (fabs(en_distance_rescaled[0 + 1 * elec_num + 5] -
+				 0.8840716589810682) > 1.e-12) {
+			wrongval = true;
+		}
 
 		// (2,1,2)
-		assert(fabs(en_distance_rescaled[0 + 0 + 6] - 0.42640469987268914) <
-			   1.e-12);
+		if (fabs(en_distance_rescaled[0 + 0 + 6] - 0.42640469987268914) >
+			1.e-12) {
+			wrongval = true;
+		}
 	}
-
-	assert(qmckl_electron_provided_device(context));
-
-	assert(qmckl_nucleus_provided_device(context));
+	if (wrongval) {
+		return 1;
+	}
 
 	double *en_distance_rescaled_deriv_e = qmckl_malloc_device(
 		context, walk_num * 4 * nucl_num * elec_num * sizeof(double));
 
 	rc = qmckl_get_electron_en_distance_rescaled_deriv_e_device(
 		context, en_distance_rescaled_deriv_e);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	// TODO: check exact values
 	//// (e,n,w) in Fortran notation
@@ -447,8 +496,6 @@ int main() {
 	// assert(fabs(en_distance_rescaled[1][0][1] - 3.1804527583077356)
 	// < 1.e-12);
 
-	assert(qmckl_electron_provided_device(context));
-
 	double *een_rescaled_e =
 		qmckl_malloc_device(context, walk_num * (cord_num + 1) * elec_num *
 										 elec_num * sizeof(double));
@@ -459,30 +506,39 @@ int main() {
 #pragma acc kernels deviceptr(een_rescaled_e)
 	{
 		// value of (0,2,1)
-		assert(
-			fabs(een_rescaled_e[0 + 1 * elec_num * elec_num * (cord_num + 1) +
+		if (fabs(een_rescaled_e[0 + 1 * elec_num * elec_num * (cord_num + 1) +
 								0 * elec_num * elec_num + 2 * elec_num] -
-				 0.08084493981483197) < 1.e-12);
-		assert(
-			fabs(een_rescaled_e[0 + 1 * elec_num * elec_num * (cord_num + 1) +
+				 0.08084493981483197) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_e[0 + 1 * elec_num * elec_num * (cord_num + 1) +
 								0 * elec_num * elec_num + 3 * elec_num] -
-				 0.1066745707571846) < 1.e-12);
-		assert(
-			fabs(een_rescaled_e[0 + 1 * elec_num * elec_num * (cord_num + 1) +
+				 0.1066745707571846) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_e[0 + 1 * elec_num * elec_num * (cord_num + 1) +
 								0 * elec_num * elec_num + 4 * elec_num] -
-				 0.01754273169464735) < 1.e-12);
-		assert(
-			fabs(een_rescaled_e[0 + 2 * elec_num * elec_num * (cord_num + 1) +
+				 0.01754273169464735) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_e[0 + 2 * elec_num * elec_num * (cord_num + 1) +
 								1 * elec_num * elec_num + 3 * elec_num] -
-				 0.02214680362033448) < 1.e-12);
-		assert(
-			fabs(een_rescaled_e[0 + 2 * elec_num * elec_num * (cord_num + 1) +
+				 0.02214680362033448) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_e[0 + 2 * elec_num * elec_num * (cord_num + 1) +
 								1 * elec_num * elec_num + 4 * elec_num] -
-				 0.0005700154999202759) < 1.e-12);
-		assert(
-			fabs(een_rescaled_e[0 + 2 * elec_num * elec_num * (cord_num + 1) +
+				 0.0005700154999202759) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_e[0 + 2 * elec_num * elec_num * (cord_num + 1) +
 								1 * elec_num * elec_num + 5 * elec_num] -
-				 0.3424402276009091) < 1.e-12);
+				 0.3424402276009091) > 1.e-12) {
+			wrongval = true;
+		}
+	}
+	if (wrongval) {
+		return 1;
 	}
 
 	double *een_rescaled_e_deriv_e =
@@ -495,33 +551,40 @@ int main() {
 #pragma acc kernels deviceptr(een_rescaled_e_deriv_e)
 	{
 		// value of (0,0,0,2,1)
-		assert(
-			fabs(een_rescaled_e_deriv_e[0 + 1 * elec_num * 4 * elec_num +
+		if (fabs(een_rescaled_e_deriv_e[0 + 1 * elec_num * 4 * elec_num +
 										0 * elec_num * 4 + 0 * elec_num + 2] +
-				 0.05991352796887283) < 1.e-12);
-		assert(
-			fabs(een_rescaled_e_deriv_e[0 + 1 * elec_num * 4 * elec_num +
+				 0.05991352796887283) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_e_deriv_e[0 + 1 * elec_num * 4 * elec_num +
 										0 * elec_num * 4 + 0 * elec_num + 3] +
-				 0.011714035071545248) < 1.e-12);
-		assert(
-			fabs(een_rescaled_e_deriv_e[0 + 1 * elec_num * 4 * elec_num +
+				 0.011714035071545248) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_e_deriv_e[0 + 1 * elec_num * 4 * elec_num +
 										0 * elec_num * 4 + 0 * elec_num + 4] +
-				 0.00441398875758468) < 1.e-12);
-		assert(
-			fabs(een_rescaled_e_deriv_e[0 + 2 * elec_num * 4 * elec_num +
+				 0.00441398875758468) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_e_deriv_e[0 + 2 * elec_num * 4 * elec_num +
 										1 * elec_num * 4 + 0 * elec_num + 3] +
-				 0.013553180060167595) < 1.e-12);
-		assert(
-			fabs(een_rescaled_e_deriv_e[0 + 2 * elec_num * 4 * elec_num +
+				 0.013553180060167595) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_e_deriv_e[0 + 2 * elec_num * 4 * elec_num +
 										1 * elec_num * 4 + 0 * elec_num + 4] +
-				 0.00041342909359870457) < 1.e-12);
-		assert(
-			fabs(een_rescaled_e_deriv_e[0 + 2 * elec_num * 4 * elec_num +
+				 0.00041342909359870457) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_e_deriv_e[0 + 2 * elec_num * 4 * elec_num +
 										1 * elec_num * 4 + 0 * elec_num + 5] +
-				 0.5880599146214673) < 1.e-12);
+				 0.5880599146214673) > 1.e-12) {
+			wrongval = true;
+		}
 	}
-
-	assert(qmckl_electron_provided_device(context));
+	if (wrongval) {
+		return 1;
+	}
 
 	double *een_rescaled_n =
 		qmckl_malloc_device(context, walk_num * (cord_num + 1) * nucl_num *
@@ -533,33 +596,40 @@ int main() {
 #pragma acc kernels deviceptr(een_rescaled_n)
 	{
 		// value of (0,2,1)
-		assert(
-			fabs(
+		if (fabs(
 				een_rescaled_n[0 + 1 * elec_num * nucl_num + 0 * elec_num + 2] -
-				0.10612983920006765) < 1.e-12);
-		assert(
-			fabs(
+				0.10612983920006765) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(
 				een_rescaled_n[0 + 1 * elec_num * nucl_num + 0 * elec_num + 3] -
-				0.135652809635553) < 1.e-12);
-		assert(
-			fabs(
+				0.135652809635553) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(
 				een_rescaled_n[0 + 1 * elec_num * nucl_num + 0 * elec_num + 4] -
-				0.023391817607642338) < 1.e-12);
-		assert(
-			fabs(
+				0.023391817607642338) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(
 				een_rescaled_n[0 + 2 * elec_num * nucl_num + 1 * elec_num + 3] -
-				0.880957224822116) < 1.e-12);
-		assert(
-			fabs(
+				0.880957224822116) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(
 				een_rescaled_n[0 + 2 * elec_num * nucl_num + 1 * elec_num + 4] -
-				0.027185942659395074) < 1.e-12);
-		assert(
-			fabs(
+				0.027185942659395074) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(
 				een_rescaled_n[0 + 2 * elec_num * nucl_num + 1 * elec_num + 5] -
-				0.01343938025140174) < 1.e-12);
+				0.01343938025140174) > 1.e-12) {
+			wrongval = true;
+		}
 	}
-
-	assert(qmckl_electron_provided_device(context));
+	if (wrongval) {
+		return 1;
+	}
 
 	double *een_rescaled_n_deriv_e =
 		qmckl_malloc_device(context, walk_num * (cord_num + 1) * nucl_num * 4 *
@@ -571,26 +641,40 @@ int main() {
 // value of (0,2,1)
 #pragma acc kernels deviceptr(een_rescaled_n_deriv_e)
 	{
-		assert(fabs(een_rescaled_n_deriv_e[0 + 1 * 4 * elec_num * nucl_num +
-										   0 * 4 * elec_num + 0 + 2] +
-					0.07633444246999128) < 1.e-12);
-		assert(fabs(een_rescaled_n_deriv_e[0 + 1 * 4 * elec_num * nucl_num +
-										   0 * 4 * elec_num + 0 + 3] -
-					0.00033282346259738276) < 1.e-12);
-		assert(fabs(een_rescaled_n_deriv_e[0 + 1 * 4 * elec_num * nucl_num +
-										   0 * 4 * elec_num + 0 + 4] +
-					0.004775370547333061) < 1.e-12);
-		assert(fabs(een_rescaled_n_deriv_e[0 + 2 * 4 * elec_num * nucl_num +
-										   1 * 4 * elec_num + 0 + 3] -
-					0.1362654644223866) < 1.e-12);
-		assert(fabs(een_rescaled_n_deriv_e[0 + 2 * 4 * elec_num * nucl_num +
-										   1 * 4 * elec_num + 0 + 3] +
-					0.0231253431662794) < 1.e-12);
-		assert(fabs(een_rescaled_n_deriv_e[0 + 2 * 4 * elec_num * nucl_num +
-										   1 * 4 * elec_num + 0 + 5] -
-					0.001593334817691633) < 1.e-12);
+		if (fabs(een_rescaled_n_deriv_e[0 + 1 * 4 * elec_num * nucl_num +
+										0 * 4 * elec_num + 0 + 2] +
+				 0.07633444246999128) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_n_deriv_e[0 + 1 * 4 * elec_num * nucl_num +
+										0 * 4 * elec_num + 0 + 3] -
+				 0.00033282346259738276) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_n_deriv_e[0 + 1 * 4 * elec_num * nucl_num +
+										0 * 4 * elec_num + 0 + 4] +
+				 0.004775370547333061) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_n_deriv_e[0 + 2 * 4 * elec_num * nucl_num +
+										1 * 4 * elec_num + 0 + 3] -
+				 0.1362654644223866) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_n_deriv_e[0 + 2 * 4 * elec_num * nucl_num +
+										1 * 4 * elec_num + 0 + 3] +
+				 0.0231253431662794) > 1.e-12) {
+			wrongval = true;
+		}
+		if (fabs(een_rescaled_n_deriv_e[0 + 2 * 4 * elec_num * nucl_num +
+										1 * 4 * elec_num + 0 + 5] -
+				 0.001593334817691633) > 1.e-12) {
+			wrongval = true;
+		}
 	}
-	assert(qmckl_electron_provided_device(context));
+	if (wrongval) {
+		return 1;
+	}
 
 	double *tmp_c =
 		qmckl_malloc_device(context, walk_num * cord_num * (cord_num + 1) *
@@ -606,30 +690,38 @@ int main() {
 	{
 		printf("%e\n%e\n", tmp_c[0 + 0 + 1 * nucl_num * elec_num + 0 + 0],
 			   2.7083473948352403);
-		assert(fabs(tmp_c[0 + 0 + 1 * nucl_num * elec_num + 0 + 0] -
-					2.7083473948352403) < 1e-12);
+		if (fabs(tmp_c[0 + 0 + 1 * nucl_num * elec_num + 0 + 0] -
+				 2.7083473948352403) > 1e-12) {
+			wrongval = true;
+		}
 
 		printf("%e\n%e\n",
 			   dtmp_c[0 + 1 * (cord_num + 1) * nucl_num * 4 * elec_num + 0 + 0 +
 					  0 + 0],
 			   0.237440520852232);
-		assert(fabs(dtmp_c[0 + 1 * (cord_num + 1) * nucl_num * 4 * elec_num +
-						   0 + 0 + 0 + 0] -
-					0.237440520852232) < 1e-12);
+		if (fabs(dtmp_c[0 + 1 * (cord_num + 1) * nucl_num * 4 * elec_num + 0 +
+						0 + 0 + 0] -
+				 0.237440520852232) > 1e-12) {
+			wrongval = true;
+		}
 	}
-
-	/* Check if Jastrow is properly initialized */
-	assert(qmckl_jastrow_provided_device(context));
+	if (wrongval) {
+		return 1;
+	}
 
 	double *factor_een =
 		qmckl_malloc_device(context, walk_num * sizeof(double));
 	rc = qmckl_get_jastrow_factor_een_device(context, factor_een, walk_num);
 
 #pragma acc kernels deviceptr(factor_een)
-	{ assert(fabs(factor_een[0] + 0.37407972141304213) < 1e-12); }
-
-	/* Check if Jastrow is properly initialized */
-	assert(qmckl_jastrow_provided_device(context));
+	{
+		if (fabs(factor_een[0] + 0.37407972141304213) > 1e-12) {
+			wrongval = true;
+		}
+	}
+	if (wrongval) {
+		return 1;
+	}
 
 	double *factor_een_deriv_e =
 		qmckl_malloc_device(context, 4 * walk_num * elec_num * sizeof(double));
@@ -639,103 +731,112 @@ int main() {
 #pragma acc kernels deviceptr(factor_een_deriv_e)
 	{
 		printf("%20.15e\n", factor_een_deriv_e[0 + 0 + 0]);
-		assert(fabs(factor_een_deriv_e[0 + 0 + 0] - (-5.481671107220383e-04)) <
-			   1e-12);
+		if (fabs(factor_een_deriv_e[0 + 0 + 0] - (-5.481671107220383e-04)) >
+			1e-12) {
+			wrongval = true;
+		}
 
 		printf("%20.15e\n",
 			   factor_een_deriv_e[1 * walk_num * elec_num + 0 + 1]);
-		assert(fabs(factor_een_deriv_e[1 * walk_num * elec_num + 0 + 1] -
-					(-5.402107832095666e-02)) < 1e-12);
+		if (fabs(factor_een_deriv_e[1 * walk_num * elec_num + 0 + 1] -
+				 (-5.402107832095666e-02)) > 1e-12) {
+			wrongval = true;
+		}
 
 		printf("%20.15e\n",
 			   factor_een_deriv_e[2 * walk_num * elec_num + 0 + 2]);
-		assert(fabs(factor_een_deriv_e[2 * walk_num * elec_num + 0 + 2] -
-					(-1.648945927082279e-01)) < 1e-12);
+		if (fabs(factor_een_deriv_e[2 * walk_num * elec_num + 0 + 2] -
+				 (-1.648945927082279e-01)) > 1e-12) {
+			wrongval = true;
+		}
 
 		printf("%20.15e\n",
 			   factor_een_deriv_e[3 * walk_num * elec_num + 0 + 3]);
-		assert(fabs(factor_een_deriv_e[3 * walk_num * elec_num + 0 + 3] -
-					(-1.269746119491287e+00)) < 1e-12);
+		if (fabs(factor_een_deriv_e[3 * walk_num * elec_num + 0 + 3] -
+				 (-1.269746119491287e+00)) > 1e-12) {
+			wrongval = true;
+		}
+	}
+	if (wrongval) {
+		return 1;
 	}
 
 	printf("Total Jastrow value\n");
-	/* Check if Jastrow is properly initialized */
-	assert(qmckl_jastrow_provided_device(context));
 
 	rc = qmckl_get_jastrow_factor_ee_device(context, factor_ee, walk_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_get_jastrow_factor_en_device(context, factor_en, walk_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_get_jastrow_factor_een_device(context, factor_een, walk_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	double *total_j = qmckl_malloc_device(context, walk_num * sizeof(double));
 	rc = qmckl_get_jastrow_value_device(context, total_j, walk_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 #pragma acc kernels deviceptr(total_j, factor_en, factor_een)
 	{
 		for (int64_t i = 0; i < walk_num; ++i) {
-			assert(total_j[i] -
-					   exp(factor_ee[i] + factor_en[i] + factor_een[i]) <
-				   1.e-12);
+			if (total_j[i] - exp(factor_ee[i] + factor_en[i] + factor_een[i]) >
+				1.e-12) {
+				wrongval = true;
+			}
 		}
+	}
+	if (wrongval) {
+		return 1;
 	}
 
 	printf("Total Jastrow derivatives\n");
 
-	/* Check if Jastrow is properly initialized */
-
-	assert(qmckl_jastrow_provided_device(context));
-
 	rc = qmckl_get_jastrow_factor_ee_deriv_e_device(context, factor_ee_deriv_e,
 													walk_num * elec_num * 4);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_get_jastrow_factor_en_deriv_e_device(context, factor_en_deriv_e,
 													walk_num * elec_num * 4);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_get_jastrow_factor_een_deriv_e_device(
 		context, factor_een_deriv_e, walk_num * elec_num * 4);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	double *total_j_deriv =
 		qmckl_malloc_device(context, walk_num * 4 * elec_num * sizeof(double));
 	rc = qmckl_get_jastrow_gl_device(context, total_j_deriv,
 									 walk_num * elec_num * 4);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_get_jastrow_value_device(context, total_j, walk_num);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 #pragma acc kernels deviceptr(total_j_deriv, total_j, factor_ee_deriv_e,       \
-							  factor_en_deriv_e, factor_een_deriv_e)
+								  factor_en_deriv_e, factor_een_deriv_e)
 	{
 		for (int64_t k = 0; k < walk_num; ++k) {
 			for (int64_t m = 0; m < 4; ++m) {
 				for (int64_t e = 0; e < elec_num; ++e) {
 					if (m < 3) { /* test only gradients */
-						assert(
-							total_j_deriv[k * elec_num * 4 + m * elec_num + e] /
+						if (total_j_deriv[k * elec_num * 4 + m * elec_num + e] /
 									total_j[k] -
 								(factor_ee_deriv_e[k + m * 4 * elec_num +
 												   e * 4] +
 								 factor_en_deriv_e[k + m * 4 * elec_num +
 												   e * 4] +
 								 factor_een_deriv_e[k + m * 4 * elec_num +
-													e * 4]) <
-							1.e-12);
+													e * 4]) >
+							1.e-12) {
+							wrongval = true;
+						}
+					}
+					if (wrongval) {
+						break;
 					}
 				}
 			}
+			if (wrongval) {
+				break;
+			}
 		}
+	}
+	if (wrongval) {
+		return 1;
 	}
 
 	rc = qmckl_context_destroy_device(context);
-	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	return 0;
 }

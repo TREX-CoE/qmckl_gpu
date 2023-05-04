@@ -12,8 +12,8 @@
 
 #include "qmckl_types.h"
 #include "qmckl_context.h"
-#include "qmckl_distance.h"
 #include "qmckl_memory.h"
+#include "qmckl_distance.h"
 
 qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context);
 bool qmckl_jastrow_provided_device(qmckl_context_device context);

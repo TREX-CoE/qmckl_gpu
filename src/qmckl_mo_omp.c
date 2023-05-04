@@ -81,7 +81,7 @@ qmckl_exit_code_device qmckl_compute_mo_basis_mo_value_device(
 		qmckl_malloc_device(context, point_num * ao_num * sizeof(int64_t));
 
 #pragma omp target is_device_ptr(coefficient_t, ao_value, mo_value,            \
-								 idx_shared, av1_shared)
+									 idx_shared, av1_shared)
 	{
 #pragma omp teams distribute parallel for
 		for (int64_t ipoint = 0; ipoint < point_num; ++ipoint) {
