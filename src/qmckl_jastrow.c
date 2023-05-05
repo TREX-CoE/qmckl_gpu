@@ -21,6 +21,7 @@ bool qmckl_jastrow_provided_device(qmckl_context_device context) {
 
 qmckl_exit_code_device
 qmckl_finalize_jastrow_device(qmckl_context_device context) {
+	printf("Finalizing (jasa/jasb) \n");
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return QMCKL_INVALID_CONTEXT_DEVICE;
 	}
@@ -34,11 +35,13 @@ qmckl_finalize_jastrow_device(qmckl_context_device context) {
 	/* ----------------------------------- */
 
 	if (!(ctx->electron.provided)) {
+		printf("Ah\n");
 		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
 									 "qmckl_electron", NULL);
 	}
 
 	if (!(ctx->nucleus.provided)) {
+		printf("Bh\n");
 		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
 									 "qmckl_nucleus", NULL);
 	}
@@ -83,74 +86,6 @@ qmckl_set_jastrow_rescale_factor_ee_device(qmckl_context_device context,
 	}
 
 	ctx->jastrow.rescale_factor_ee = rescale_factor_ee;
-
-	ctx->jastrow.uninitialized &= ~mask;
-	ctx->jastrow.provided = (ctx->jastrow.uninitialized == 0);
-	if (ctx->jastrow.provided) {
-		qmckl_exit_code_device rc_ = qmckl_finalize_jastrow_device(context);
-		if (rc_ != QMCKL_SUCCESS_DEVICE)
-			return rc_;
-	}
-
-	return QMCKL_SUCCESS_DEVICE;
-}
-
-qmckl_exit_code_device
-qmckl_set_jastrow_rescale_factor_en_device(qmckl_context_device context,
-										   const double *rescale_factor_en,
-										   const int64_t size_max) {
-	int32_t mask = 1 << 9;
-
-	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
-		return QMCKL_NULL_CONTEXT_DEVICE;
-	}
-
-	qmckl_context_struct_device *const ctx =
-		(qmckl_context_struct_device *)context;
-
-	if (mask != 0 && !(ctx->jastrow.uninitialized & mask)) {
-		return qmckl_failwith_device(context, QMCKL_ALREADY_SET_DEVICE,
-									 "qmckl_set_jastrow_*", NULL);
-	}
-
-	if (ctx->jastrow.type_nucl_num <= 0) {
-		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
-									 "qmckl_set_jastrow_rescale_factor_en",
-									 "type_nucl_num not set");
-	}
-
-	if (rescale_factor_en == NULL) {
-		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
-									 "qmckl_set_jastrow_rescale_factor_en",
-									 "Null pointer");
-	}
-
-	if (size_max < ctx->jastrow.type_nucl_num) {
-		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
-									 "qmckl_set_jastrow_rescale_factor_en",
-									 "Array too small");
-	}
-
-	if (ctx->jastrow.rescale_factor_en != NULL) {
-		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
-									 "qmckl_set_jastrow_rescale_factor_en",
-									 "Already set");
-	}
-
-	qmckl_memory_info_struct_device mem_info =
-		qmckl_memory_info_struct_zero_device;
-	mem_info.size = ctx->jastrow.type_nucl_num * sizeof(double);
-	ctx->jastrow.rescale_factor_en =
-		(double *)qmckl_malloc_device(context, mem_info.size);
-
-	for (int64_t i = 0; i < ctx->jastrow.type_nucl_num; ++i) {
-		if (rescale_factor_en[i] <= 0.0) {
-			return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
-										 "qmckl_set_jastrow_rescale_factor_en",
-										 "rescale_factor_en <= 0.0");
-		}
-		ctx->jastrow.rescale_factor_en[i] = rescale_factor_en[i];
-	}
 
 	ctx->jastrow.uninitialized &= ~mask;
 	ctx->jastrow.provided = (ctx->jastrow.uninitialized == 0);
@@ -355,10 +290,7 @@ qmckl_set_jastrow_type_nucl_vector_device(qmckl_context_device context,
 		}
 	}
 
-	qmckl_memory_info_struct_device mem_info =
-		qmckl_memory_info_struct_zero_device;
-	mem_info.size = nucl_num * sizeof(int64_t);
-	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, mem_info.size);
+	int64_t *new_array = (int64_t *)qmckl_malloc_device(context, nucl_num * sizeof(int64_t));
 
 	if (new_array == NULL) {
 		return qmckl_failwith_device(context, QMCKL_ALLOCATION_FAILED_DEVICE,
@@ -366,7 +298,7 @@ qmckl_set_jastrow_type_nucl_vector_device(qmckl_context_device context,
 									 NULL);
 	}
 
-	memcpy(new_array, type_nucl_vector, nucl_num * sizeof(int64_t));
+	qmckl_memcpy_D2D(context, new_array, type_nucl_vector, nucl_num * sizeof(int64_t));
 
 	ctx->jastrow.type_nucl_vector = new_array;
 
@@ -447,7 +379,7 @@ qmckl_set_jastrow_a_vector_device(qmckl_context_device context,
 									 "qmckl_set_jastrow_coefficient", NULL);
 	}
 
-	memcpy(new_array, a_vector,
+	qmckl_memcpy_D2D(context, new_array, a_vector,
 		   (aord_num + 1) * type_nucl_num * sizeof(double));
 
 	ctx->jastrow.a_vector = new_array;
@@ -521,7 +453,7 @@ qmckl_set_jastrow_b_vector_device(qmckl_context_device context,
 									 "qmckl_set_jastrow_coefficient", NULL);
 	}
 
-	memcpy(new_array, b_vector, (bord_num + 1) * sizeof(double));
+	qmckl_memcpy_D2D(context, new_array, b_vector, (bord_num + 1) * sizeof(double));
 
 	ctx->jastrow.b_vector = new_array;
 
@@ -601,7 +533,7 @@ qmckl_set_jastrow_c_vector_device(qmckl_context_device context,
 									 "qmckl_set_jastrow_coefficient", NULL);
 	}
 
-	memcpy(new_array, c_vector, dim_c_vector * type_nucl_num * sizeof(double));
+	qmckl_memcpy_D2D(context, new_array, c_vector, dim_c_vector * type_nucl_num * sizeof(double));
 
 	ctx->jastrow.c_vector = new_array;
 
@@ -764,7 +696,7 @@ qmckl_get_jastrow_type_nucl_vector_device(qmckl_context_device context,
 			"Array too small. Expected jastrow.type_nucl_num");
 	}
 
-	memcpy(type_nucl_vector, ctx->jastrow.type_nucl_vector,
+	qmckl_memcpy_D2D(context, type_nucl_vector, ctx->jastrow.type_nucl_vector,
 		   ctx->jastrow.type_nucl_num * sizeof(int64_t));
 	return QMCKL_SUCCESS_DEVICE;
 }
@@ -801,7 +733,7 @@ qmckl_get_jastrow_a_vector_device(qmckl_context_device context,
 			"Array too small. Expected (ctx->jastrow.aord_num + "
 			"1)*ctx->jastrow.type_nucl_num");
 	}
-	memcpy(a_vector, ctx->jastrow.a_vector, sze * sizeof(double));
+	qmckl_memcpy_D2D(context, a_vector, ctx->jastrow.a_vector, sze * sizeof(double));
 	return QMCKL_SUCCESS_DEVICE;
 }
 
@@ -836,7 +768,7 @@ qmckl_get_jastrow_b_vector_device(qmckl_context_device context,
 			context, QMCKL_INVALID_ARG_3_DEVICE, "qmckl_get_jastrow_b_vector",
 			"Array too small. Expected (ctx->jastrow.bord_num + 1)");
 	}
-	memcpy(b_vector, ctx->jastrow.b_vector, sze * sizeof(double));
+	qmckl_memcpy_D2D(context, b_vector, ctx->jastrow.b_vector, sze * sizeof(double));
 	return QMCKL_SUCCESS_DEVICE;
 }
 
@@ -879,7 +811,7 @@ qmckl_get_jastrow_c_vector_device(qmckl_context_device context,
 									 "Array too small. Expected dim_c_vector * "
 									 "jastrow.type_nucl_num");
 	}
-	memcpy(c_vector, ctx->jastrow.c_vector, sze * sizeof(double));
+	qmckl_memcpy_D2D(context, c_vector, ctx->jastrow.c_vector, sze * sizeof(double));
 	return QMCKL_SUCCESS_DEVICE;
 }
 
@@ -942,9 +874,13 @@ qmckl_get_jastrow_rescale_factor_en_device(const qmckl_context_device context,
 	}
 
 	assert(ctx->jastrow.rescale_factor_en != NULL);
+	// Originally :
+	/*
 	for (int64_t i = 0; i < ctx->jastrow.type_nucl_num; ++i) {
 		rescale_factor_en[i] = ctx->jastrow.rescale_factor_en[i];
 	}
+	*/
+	qmckl_memcpy_D2D(context, rescale_factor_en, ctx->jastrow.rescale_factor_en, ctx->jastrow.type_nucl_num * sizeof(int64_t));
 	return QMCKL_SUCCESS_DEVICE;
 }
 
@@ -1038,7 +974,7 @@ qmckl_get_jastrow_asymp_jasa_device(qmckl_context_device context,
 
 qmckl_exit_code_device
 qmckl_provide_jastrow_asymp_jasa_device(qmckl_context_device context) {
-
+	printf("Provide jasa\n");
 	qmckl_exit_code_device rc;
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
@@ -1093,6 +1029,7 @@ qmckl_provide_jastrow_asymp_jasa_device(qmckl_context_device context) {
 qmckl_exit_code_device
 qmckl_provide_jastrow_asymp_jasb_device(qmckl_context_device context) {
 
+	printf("Provide jasb\n");
 	qmckl_exit_code_device rc;
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
@@ -2581,7 +2518,7 @@ qmckl_get_jastrow_value_device(qmckl_context_device context,
 									 "qmckl_get_jastrow_value",
 									 "Array too small. Expected walker.num");
 	}
-	memcpy(value, ctx->jastrow.value, sze * sizeof(double));
+	qmckl_memcpy_D2D(context, value, ctx->jastrow.value, sze * sizeof(double));
 	return QMCKL_SUCCESS_DEVICE;
 }
 
@@ -2641,7 +2578,7 @@ qmckl_get_jastrow_factor_ee_device(qmckl_context_device context,
 									 "qmckl_get_jastrow_factor_ee",
 									 "Array too small. Expected walker.num");
 	}
-	memcpy(factor_ee, ctx->jastrow.factor_ee, sze * sizeof(double));
+	qmckl_memcpy_D2D(context, factor_ee, ctx->jastrow.factor_ee, sze * sizeof(double));
 	return QMCKL_SUCCESS_DEVICE;
 }
 
@@ -2671,7 +2608,7 @@ qmckl_get_jastrow_factor_en_device(qmckl_context_device context,
 									 "qmckl_get_jastrow_factor_en",
 									 "Array too small. Expected walker.num");
 	}
-	memcpy(factor_en, ctx->jastrow.factor_en, sze * sizeof(double));
+	qmckl_memcpy_D2D(context, factor_en, ctx->jastrow.factor_en, sze * sizeof(double));
 	return QMCKL_SUCCESS_DEVICE;
 }
 
@@ -2731,7 +2668,7 @@ qmckl_get_jastrow_factor_een_device(qmckl_context_device context,
 									 "qmckl_get_jastrow_factor_een",
 									 "Array too small. Expected walk_num");
 	}
-	memcpy(factor_een, ctx->jastrow.factor_een, sze * sizeof(double));
+	qmckl_memcpy_D2D(context, factor_een, ctx->jastrow.factor_een, sze * sizeof(double));
 	return QMCKL_SUCCESS_DEVICE;
 }
 
@@ -2884,7 +2821,7 @@ qmckl_get_jastrow_ee_distance_rescaled_device(qmckl_context_device context,
 
 	size_t sze =
 		ctx->electron.num * ctx->electron.num * ctx->electron.walker.num;
-	memcpy(distance_rescaled, ctx->jastrow.ee_distance_rescaled,
+	qmckl_memcpy_D2D(context, distance_rescaled, ctx->jastrow.ee_distance_rescaled,
 		   sze * sizeof(double));
 	return QMCKL_SUCCESS_DEVICE;
 }
@@ -2933,7 +2870,7 @@ qmckl_get_electron_en_distance_rescaled_device(qmckl_context_device context,
 
 	size_t sze =
 		ctx->electron.num * ctx->nucleus.num * ctx->electron.walker.num;
-	memcpy(distance_rescaled, ctx->jastrow.en_distance_rescaled,
+	qmckl_memcpy_D2D(context, distance_rescaled, ctx->jastrow.en_distance_rescaled,
 		   sze * sizeof(double));
 	return QMCKL_SUCCESS_DEVICE;
 }
@@ -2992,7 +2929,7 @@ qmckl_get_jastrow_een_rescaled_e_device(qmckl_context_device context,
 			"ctx->electron.num * ctx->electron.walker.num * "
 			"(ctx->jastrow.cord_num + 1)");
 	}
-	memcpy(distance_rescaled, ctx->jastrow.een_rescaled_e_deriv_e,
+	qmckl_memcpy_D2D(context, distance_rescaled, ctx->jastrow.een_rescaled_e_deriv_e,
 		   sze * sizeof(double));
 	return QMCKL_SUCCESS_DEVICE;
 }
@@ -3025,7 +2962,7 @@ qmckl_get_jastrow_een_rescaled_n_device(qmckl_context_device context,
 			"ctx->nucleus.num * ctx->electron.walker.num * "
 			"(ctx->jastrow.cord_num + 1)");
 	}
-	memcpy(distance_rescaled, ctx->jastrow.een_rescaled_n,
+	qmckl_memcpy_D2D(context, distance_rescaled, ctx->jastrow.een_rescaled_n,
 		   sze * sizeof(double));
 	return QMCKL_SUCCESS_DEVICE;
 }
@@ -3054,7 +2991,7 @@ qmckl_get_jastrow_tmp_c_device(qmckl_context_device context,
 	size_t sze = (ctx->jastrow.cord_num) * (ctx->jastrow.cord_num + 1) *
 				 ctx->electron.num * ctx->nucleus.num *
 				 ctx->electron.walker.num;
-	memcpy(tmp_c, ctx->jastrow.tmp_c, sze * sizeof(double));
+	qmckl_memcpy_D2D(context, tmp_c, ctx->jastrow.tmp_c, sze * sizeof(double));
 	return QMCKL_SUCCESS_DEVICE;
 }
 

@@ -1825,3 +1825,88 @@ qmckl_exit_code_device qmckl_compute_dtmp_c_device(
 
 	return info;
 }
+
+
+//**********
+// SETTERS (requiring offload)
+//**********
+
+
+qmckl_exit_code_device
+qmckl_set_jastrow_rescale_factor_en_device(qmckl_context_device context,
+										   const double *rescale_factor_en,
+										   const int64_t size_max) {
+	int32_t mask = 1 << 9;
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+
+	if (mask != 0 && !(ctx->jastrow.uninitialized & mask)) {
+		return qmckl_failwith_device(context, QMCKL_ALREADY_SET_DEVICE,
+									 "qmckl_set_jastrow_*", NULL);
+	}
+
+	if (ctx->jastrow.type_nucl_num <= 0) {
+		return qmckl_failwith_device(context, QMCKL_NOT_PROVIDED_DEVICE,
+									 "qmckl_set_jastrow_rescale_factor_en",
+									 "type_nucl_num not set");
+	}
+
+	if (rescale_factor_en == NULL) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
+									 "qmckl_set_jastrow_rescale_factor_en",
+									 "Null pointer");
+	}
+
+	if (size_max < ctx->jastrow.type_nucl_num) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
+									 "qmckl_set_jastrow_rescale_factor_en",
+									 "Array too small");
+	}
+
+	if (ctx->jastrow.rescale_factor_en != NULL) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
+									 "qmckl_set_jastrow_rescale_factor_en",
+									 "Already set");
+	}
+
+	qmckl_memory_info_struct_device mem_info =
+		qmckl_memory_info_struct_zero_device;
+	mem_info.size = ctx->jastrow.type_nucl_num * sizeof(double);
+	ctx->jastrow.rescale_factor_en =
+		(double *)qmckl_malloc_device(context, mem_info.size);
+
+	double * ctx_rescale_factor_en = ctx->jastrow.rescale_factor_en;
+	bool wrongval = false;
+	int64_t ctx_type_nucl_num = ctx->jastrow.type_nucl_num;
+#pragma acc kernels deviceptr(ctx_rescale_factor_en, rescale_factor_en)
+	{
+	for (int64_t i = 0; i < ctx_type_nucl_num; ++i) {
+		if (rescale_factor_en[i] <= 0.0) {
+			wrongval = true;
+			break;
+		}
+		ctx_rescale_factor_en[i] = rescale_factor_en[i];
+	}
+	}
+	if(wrongval) {
+			return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
+										 "qmckl_set_jastrow_rescale_factor_en",
+										 "rescale_factor_en <= 0.0");
+
+	}
+
+	ctx->jastrow.uninitialized &= ~mask;
+	ctx->jastrow.provided = (ctx->jastrow.uninitialized == 0);
+	if (ctx->jastrow.provided) {
+		qmckl_exit_code_device rc_ = qmckl_finalize_jastrow_device(context);
+		if (rc_ != QMCKL_SUCCESS_DEVICE)
+			return rc_;
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}

@@ -205,30 +205,35 @@ int main() {
 	rc = qmckl_set_jastrow_rescale_factor_ee_device(context, rescale_factor_ee);
 
 	rc = qmckl_get_jastrow_rescale_factor_ee_device(context, &k_ee);
+	printf("1.4\n");
 	if (k_ee != rescale_factor_ee) {
 		return 1;
 	}
 
 	rc = qmckl_get_jastrow_rescale_factor_en_device(context, k_en,
 													type_nucl_num);
+	printf("1.5\n");
 
 #pragma acc kernels deviceptr(k_en, rescale_factor_en)
 	{
 		for (int i = 0; i < type_nucl_num; ++i) {
-			if (k_en[i] != rescale_factor_en[i]) {
+			if (fabs(k_en[i] - rescale_factor_en[i]) > 1e-12) {
 				wrongval = true;
 				break;
 			}
 		}
 	}
-	return wrongval;
-
-	/* Check if Jastrow is properly initialized */
+	if(wrongval) {
+		return 1;
+	}
 
 	double *asymp_jasb = qmckl_malloc_device(context, 2 * sizeof(double));
-	rc = qmckl_get_jastrow_asymp_jasb_device(context, asymp_jasb, 2);
+
 
 // calculate asymp_jasb
+	printf("2\n");
+	rc = qmckl_get_jastrow_asymp_jasb_device(context, asymp_jasb, 2);
+	printf("3\n");
 #pragma acc kernels deviceptr(asymp_jasb)
 	{
 		if (fabs(asymp_jasb[0] - 0.5323750557252571) > 1.e-12) {
@@ -245,10 +250,11 @@ int main() {
 	double *factor_ee = qmckl_malloc_device(context, walk_num * sizeof(double));
 	rc = qmckl_get_jastrow_factor_ee_device(context, factor_ee, walk_num);
 
-// calculate factor_ee
+	// calculate factor_ee
+	printf("3\n");
+	rc = qmckl_get_jastrow_factor_ee_device(context, factor_ee, walk_num);
 #pragma acc kernels deviceptr(factor_ee)
 	{
-		printf("1\n");
 		printf("%e\n%e\n\n", factor_ee[0], -4.282760865958113);
 		if (fabs(factor_ee[0] + 4.282760865958113) > 1.e-12) {
 			wrongval = true;
@@ -261,10 +267,12 @@ int main() {
 	// calculate factor_ee_deriv_e
 	double *factor_ee_deriv_e =
 		qmckl_malloc_device(context, walk_num * 4 * elec_num * sizeof(double));
+
+	// check factor_ee_deriv_e
+	printf("4\n");
 	rc = qmckl_get_jastrow_factor_ee_deriv_e_device(context, factor_ee_deriv_e,
 													walk_num * 4 * elec_num);
 
-// check factor_ee_deriv_e
 #pragma acc kernels deviceptr(factor_ee_deriv_e)
 	{
 		if (fabs(factor_ee_deriv_e[0 + 0 * elec_num + 0] -
