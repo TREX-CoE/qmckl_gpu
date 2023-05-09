@@ -20,10 +20,9 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 
 	int *shell_to_nucl = qmckl_malloc_device(context, sizeof(int) * shell_num);
 
-#pragma acc parallel loop \
-            deviceptr(shell_to_nucl, nucleus_index, nucleus_shell_num)
-#pragma omp target teams distribute parallel for \
-            is_device_ptr(shell_to_nucl, nucleus_index, nucleus_shell_num)
+#define DEV_PTRS_K01 shell_to_nucl, nucleus_index, nucleus_shell_num
+#pragma acc parallel loop deviceptr( DEV_PTRS_K01 )
+#pragma omp target teams distribute parallel for is_device_ptr( DEV_PTRS_K01 )
 	for (int inucl = 0; inucl < nucl_num; inucl++) {
 		int ishell_start = nucleus_index[inucl];
 		int ishell_end = nucleus_index[inucl] + nucleus_shell_num[inucl] - 1;
@@ -32,16 +31,12 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 		}
 	}
 	
-#pragma acc parallel loop collapse(2) \
-            deviceptr(nucleus_shell_num, nucleus_index, nucleus_range, \
-            		  shell_prim_index, shell_prim_num, coord,         \
-            		  nucl_coord, expo, coef_normalized, shell_vgl,    \
-            		  shell_to_nucl)
-#pragma omp target teams loop collapse(2) \
-            is_device_ptr(nucleus_shell_num, nucleus_index, nucleus_range, \
-            		      shell_prim_index, shell_prim_num, coord,         \
-            		      nucl_coord, expo, coef_normalized, shell_vgl,    \
-            		      shell_to_nucl)
+#define DEV_PTRS_K02 nucleus_shell_num, nucleus_index, nucleus_range, \
+                     shell_prim_index, shell_prim_num, coord,         \
+                     nucl_coord, expo, coef_normalized, shell_vgl,    \
+                     shell_to_nucl
+#pragma acc parallel loop collapse(2) deviceptr( DEV_PTRS_K02 )
+#pragma omp target teams loop collapse(2) is_device_ptr( DEV_PTRS_K02 )
 	for (int ipoint = 0; ipoint < point_num; ipoint++) {
 		for (int ishell = 0; ishell < shell_num; ishell++) {
 
@@ -158,12 +153,10 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 	
 	int k = 1;
 	int *shell_to_nucl = qmckl_malloc_device(context, sizeof(int) * shell_num);
-#pragma acc kernels \
-            deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom, \
-				      ao_index, lstart, shell_to_nucl) copy(k)
-#pragma omp target \
-            is_device_ptr(nucleus_index, nucleus_shell_num, shell_ang_mom, \
-                          ao_index, lstart, shell_to_nucl) map(tofrom : k)
+#define DEV_PTRS_K03 nucleus_index, nucleus_shell_num, shell_ang_mom, \
+                     ao_index, lstart, shell_to_nucl
+#pragma acc kernels deviceptr( DEV_PTRS_K03 ) copy(k)
+#pragma omp target is_device_ptr( DEV_PTRS_K03 ) map(tofrom : k)
 {
 	for (int inucl = 0; inucl < nucl_num; inucl++){
 		int ishell_start = nucleus_index[inucl];
@@ -182,16 +175,12 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 
 	for (int sub_iter = 0; sub_iter < num_sub_iters; sub_iter++) {
 
-#pragma acc parallel loop gang worker vector async(1) \
-            deviceptr( ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom, \
-        	           nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,    \
-                       poly_vgl, nucl_coord, pows_shared, pows, shell_ang_mom,          \
-                       nucleus_range, shell_to_nucl)
-#pragma omp target teams distribute parallel for \
-            is_device_ptr( ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom, \
-	                       nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,    \
-                           poly_vgl, nucl_coord, pows_shared, pows, shell_ang_mom,          \
-                           nucleus_range, shell_to_nucl)
+#define DEV_PTRS_K04 ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom, \
+                     nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,    \
+                     poly_vgl, nucl_coord, pows_shared, pows, shell_ang_mom,          \
+                     nucleus_range, shell_to_nucl
+#pragma acc parallel loop gang worker vector async(1) deviceptr( DEV_PTRS_K04 )
+#pragma omp target teams distribute parallel for is_device_ptr( DEV_PTRS_K04 ) 
 		for (int iter = 0; iter < chunk_size; iter++) {
 
 			int step = iter + sub_iter * chunk_size;
@@ -331,16 +320,12 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 			// poly_vgl is now set from here
 		}
 
-#pragma acc parallel loop collapse(2) async(1) \
-            deviceptr( ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom, \
-        	           nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,    \
-                       poly_vgl, nucl_coord, pows_shared, pows, shell_ang_mom,          \
-                       nucleus_range, shell_to_nucl)
-#pragma omp target teams loop collapse(2) \
-            is_device_ptr( ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom, \
-	                       nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,    \
-                           poly_vgl, nucl_coord, pows_shared, pows, shell_ang_mom,          \
-                           nucleus_range, shell_to_nucl)
+#define DEV_PTRS_K05 ao_vgl, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom, \
+                     nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,    \
+                     poly_vgl, nucl_coord, pows_shared, pows, shell_ang_mom,          \
+                     nucleus_range, shell_to_nucl
+#pragma acc parallel loop collapse(2) async(1) deviceptr( DEV_PTRS_K05 ) 
+#pragma omp target teams loop collapse(2) is_device_ptr( DEV_PTRS_K05 )
 		for (int iter_new = 0; iter_new < chunk_size / nucl_num; iter_new++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
 
@@ -498,12 +483,10 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 
 	int k = 1;
 	int *shell_to_nucl = qmckl_malloc_device(context, sizeof(int) * shell_num);
-#pragma acc kernels \
-            deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom, \
-				      ao_index, lstart, shell_to_nucl) copy(k)
-#pragma omp target \
-            is_device_ptr(nucleus_index, nucleus_shell_num, shell_ang_mom, \
-                          ao_index, lstart, shell_to_nucl) map(tofrom : k)
+#define DEV_PTRS_K06 nucleus_index, nucleus_shell_num, shell_ang_mom, \
+                     ao_index, lstart, shell_to_nucl
+#pragma acc kernels deviceptr( DEV_PTRS_K06 ) copy(k)
+#pragma omp target is_device_ptr( DEV_PTRS_K06 ) map(tofrom : k)
 {
 	for (int inucl = 0; inucl < nucl_num; inucl++) {
 		int ishell_start = nucleus_index[inucl];
@@ -523,16 +506,12 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 
 	for (int sub_iter = 0; sub_iter < num_sub_iters; sub_iter++) {
 
-#pragma acc parallel loop gang worker vector async(1) \
-            deviceptr( ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom, \
-        	           nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,    \
-                       poly_vgl, nucl_coord, pows_shared, pows, shell_ang_mom,          \
-                       nucleus_range, shell_to_nucl)
-#pragma omp target teams distribute parallel for \
-            is_device_ptr( ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom, \
-	                       nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,    \
-                           poly_vgl, nucl_coord, pows_shared, pows, shell_ang_mom,          \
-                           nucleus_range, shell_to_nucl)
+#define DEV_PTRS_K07 ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom, \
+                     nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,    \
+                     poly_vgl, nucl_coord, pows_shared, pows, shell_ang_mom,          \
+                     nucleus_range, shell_to_nucl
+#pragma acc parallel loop gang worker vector async(1) deviceptr( DEV_PTRS_K07 )
+#pragma omp target teams distribute parallel for is_device_ptr( DEV_PTRS_K07 ) 
 		for (int iter = 0; iter < chunk_size; iter++) {
 
 			int step = iter + sub_iter * chunk_size;
@@ -672,16 +651,12 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 			// End of ao_polynomial computation (now inlined)
 			// poly_vgl is now set from here
 		
-#pragma acc parallel loop collapse(2) async(1) \
-            deviceptr( ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom, \
-        	           nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,    \
-                       poly_vgl, nucl_coord, pows_shared, pows, shell_ang_mom,          \
-                       nucleus_range, shell_to_nucl)
-#pragma omp target teams loop collapse(2) \
-            is_device_ptr( ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom, \
-	                       nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,    \
-                           poly_vgl, nucl_coord, pows_shared, pows, shell_ang_mom,          \
-                           nucleus_range, shell_to_nucl)
+#define DEV_PTRS_K08 ao_value, lstart, ao_index, ao_factor, coord, nucleus_max_ang_mom, \
+                     nucleus_index, nucleus_shell_num, shell_vgl, poly_vgl_shared,    \
+                     poly_vgl, nucl_coord, pows_shared, pows, shell_ang_mom,          \
+                     nucleus_range, shell_to_nucl
+#pragma acc parallel loop collapse(2) async(1) deviceptr( DEV_PTRS_K08 )
+#pragma omp target teams loop collapse(2) is_device_ptr( DEV_PTRS_K08 )
 		for (int iter_new = 0; iter_new < chunk_size / nucl_num; iter_new++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
 
@@ -871,12 +846,10 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 
 	// TODO Specify OpenACC clauses manually
 
-#pragma acc kernels copy(shell_max_ptr[:1], prim_max_ptr[:1]) \
-			deviceptr( nucleus_shell_num, nucleus_index, shell_prim_num, \
-                       prim_num_per_nucleus)
-#pragma omp target map(tofrom : shell_max_ptr[:1], prim_max_ptr[:1]) \
-			is_device_ptr( nucleus_shell_num, nucleus_index, shell_prim_num, \
-			           	   prim_num_per_nucleus)
+#define DEV_PTRS_K09 nucleus_shell_num, nucleus_index, shell_prim_num, \
+                     prim_num_per_nucleus
+#pragma acc kernels copy(shell_max_ptr[:1], prim_max_ptr[:1]) deviceptr( DEV_PTRS_K09 )
+#pragma omp target map(tofrom : shell_max_ptr[:1], prim_max_ptr[:1]) is_device_ptr( DEV_PTRS_K09 )
 {
 	for (int inucl = 0; inucl < nucl_num; ++inucl) {
 		shell_max_ptr[0] = nucleus_shell_num[inucl] > shell_max_ptr[0]
@@ -933,18 +906,13 @@ qmckl_finalize_ao_basis_hpc_device(qmckl_context_device context) {
 
 	// TODO Manually write OpenACC clauses
 
-#pragma acc kernels \
-			deviceptr( expo_expo, expo_index, coef, newcoef,               \
-				       nucleus_index, shell_prim_index, nucleus_shell_num, \
-					   exponent, coefficient_normalized, shell_prim_num,   \
-					   expo_per_nucleus_data, coef_per_nucleus_data,       \
-					   prim_num_per_nucleus, newidx)
-#pragma omp target \
-			is_device_ptr( expo_expo, expo_index, coef, newcoef,               \
-                           nucleus_index, shell_prim_index, nucleus_shell_num, \
-                           exponent, coefficient_normalized, shell_prim_num,   \
-						   expo_per_nucleus_data, coef_per_nucleus_data,       \
-                           prim_num_per_nucleus, newidx)
+#define DEV_PTRS_K10 expo_expo, expo_index, coef, newcoef,               \
+                     nucleus_index, shell_prim_index, nucleus_shell_num, \
+                     exponent, coefficient_normalized, shell_prim_num,   \
+                     expo_per_nucleus_data, coef_per_nucleus_data,       \
+                     prim_num_per_nucleus, newidx
+#pragma acc kernels deviceptr( DEV_PTRS_K10 )
+#pragma omp target is_device_ptr( DEV_PTRS_K10 )
 {
 	for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
 		for (int i = 0; i < prim_max; i++) {
@@ -1113,10 +1081,9 @@ qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 		int prim_num = ctx->ao_basis.prim_num;
 
 // TODO Manually add OpenACC clauses
-#pragma acc kernels \
-			deviceptr( nucleus_index, nucleus_prim_index, shell_prim_index)
-#pragma omp target \
-			is_device_ptr(nucleus_index, nucleus_prim_index, shell_prim_index)
+#define DEV_PTRS_K11 nucleus_index, nucleus_prim_index, shell_prim_index
+#pragma acc kernels deviceptr( DEV_PTRS_K11 )
+#pragma omp target is_device_ptr( DEV_PTRS_K11 )
 {
 		#pragma omp parallel for
 		for (int64_t i = 0; i < nucl_num; ++i) {
@@ -1149,12 +1116,10 @@ qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 
 		int shell_num = ctx->ao_basis.shell_num;
 
-#pragma acc kernels \
-			deviceptr( shell_prim_index, shell_prim_num, coefficient_normalized, \
-					   coefficient, prim_factor, shell_factor)
-#pragma omp target \
-			is_device_ptr( shell_prim_index, shell_prim_num, coefficient_normalized, \
-					       coefficient, prim_factor, shell_factor)
+#define DEV_PTRS_K12 shell_prim_index, shell_prim_num, coefficient_normalized, \
+                     coefficient, prim_factor, shell_factor
+#pragma acc kernels deviceptr( DEV_PTRS_K12 )
+#pragma omp target is_device_ptr( DEV_PTRS_K12 ) 
 {
 			
 		for (int64_t ishell = 0; ishell < shell_num; ++ishell) {
@@ -1188,12 +1153,10 @@ qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 		int64_t *nucleus_shell_num = ctx->ao_basis.nucleus_shell_num;
 		int32_t *shell_ang_mom = ctx->ao_basis.shell_ang_mom;
 
-#pragma acc kernels \
-			deviceptr( nucleus_max_ang_mom, nucleus_index, \
-					   nucleus_shell_num, shell_ang_mom)
-#pragma omp target \
-			is_device_ptr( nucleus_max_ang_mom, nucleus_index, \
-						   nucleus_shell_num, shell_ang_mom)
+#define DEV_PTRS_K13 nucleus_max_ang_mom, nucleus_index, \
+                     nucleus_shell_num, shell_ang_mom
+#pragma acc kernels deviceptr( DEV_PTRS_K13 )
+#pragma omp target is_device_ptr( DEV_PTRS_K13 ) 
 {
 		#pragma omp parallel for
 		for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
@@ -1235,12 +1198,10 @@ qmckl_finalize_ao_basis_device(qmckl_context_device context) {
 
 			int nucleus_num = ctx->nucleus.num;
 
-#pragma acc kernels \
-			deviceptr( nucleus_range, nucleus_index, nucleus_shell_num,  \
-					   shell_prim_index, shell_prim_num, exponent)
-#pragma omp target \
-			is_device_ptr( nucleus_range, nucleus_index, nucleus_shell_num, \
-                           shell_prim_index, shell_prim_num, exponent)
+#define DEV_PTRS_K14 nucleus_range, nucleus_index, nucleus_shell_num,  \
+                     shell_prim_index, shell_prim_num, exponent
+#pragma acc kernels deviceptr( DEV_PTRS_K14 )
+#pragma omp target is_device_ptr( DEV_PTRS_K14 ) 
 {
 			for (int64_t inucl = 0; inucl < nucleus_num; ++inucl) {
 				nucleus_range[inucl] = 0.;
