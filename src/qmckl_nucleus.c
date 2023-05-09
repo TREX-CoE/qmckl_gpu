@@ -29,16 +29,16 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 
 	// TODO Manually specify OpenACC clauses
 
+#define DEV_PTRS_K01 nucleus_shell_num, nucleus_index, \
+                     shell_prim_num, prim_num_per_nucleus
+
 #pragma acc kernels \
             copy(shell_max_ptr[:1], prim_max_ptr[:1]) \
-			deviceptr( nucleus_shell_num, nucleus_index, \
-                       shell_prim_num, prim_num_per_nucleus)
+			deviceptr( DEV_PTRS_K01 ) 
 #pragma omp target \
             map(tofrom : shell_max_ptr[:1], prim_max_ptr[:1])    \
-	        is_device_ptr( nucleus_shell_num, nucleus_index, \
-            shell_prim_num, prim_num_per_nucleus)
+	        is_device_ptr( DEV_PTRS_K01 )
 {
-	
 
 	for (int inucl = 0; inucl < nucl_num; ++inucl) {
 		shell_max_ptr[0] = nucleus_shell_num[inucl] > shell_max_ptr[0]
@@ -97,16 +97,14 @@ qmckl_finalize_nucleus_basis_hpc_device(qmckl_context_device context) {
 
 	// TODO Manually specify OpenACC clauses
 
-#pragma acc kernels deviceptr(expo_expo, expo_index, coef, newcoef,            \
-						   nucleus_index, shell_prim_index, nucleus_shell_num, \
-						   exponent, coefficient_normalized, shell_prim_num,   \
-						   expo_per_nucleus_data, coef_per_nucleus_data,       \
-						   prim_num_per_nucleus, newidx)
-#pragma omp target is_device_ptr( expo_expo, expo_index, coef, newcoef,        \
-						   nucleus_index, shell_prim_index, nucleus_shell_num, \
-						   exponent, coefficient_normalized, shell_prim_num,   \
-						   expo_per_nucleus_data, coef_per_nucleus_data,       \
-						   prim_num_per_nucleus, newidx)
+#define DEV_PTRS_K02 expo_expo, expo_index, coef, newcoef,            \
+                     nucleus_index, shell_prim_index, nucleus_shell_num, \
+                     exponent, coefficient_normalized, shell_prim_num,   \
+                     expo_per_nucleus_data, coef_per_nucleus_data,       \
+                     prim_num_per_nucleus, newidx
+
+#pragma acc kernels deviceptr( DEV_PTRS_K02 )
+#pragma omp target is_device_ptr( DEV_PTRS_K02 )
 {
 	for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
 		for (int i = 0; i < prim_max; i++) {
@@ -281,11 +279,11 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 		int prim_num = ctx->ao_basis.prim_num;
 
 		// TODO Manually specify OpenACC clauses
+		
+#define DEV_PTRS_K03 nucleus_index, nucleus_prim_index, shell_prim_index
 
-#pragma acc kernels \
-            deviceptr(nucleus_index, nucleus_prim_index, shell_prim_index)
-#pragma omp target  \
-            is_device_ptr(nucleus_index, nucleus_prim_index, shell_prim_index)
+#pragma acc kernels deviceptr( DEV_PTRS_K03 )
+#pragma omp target is_device_ptr( DEV_PTRS_K03 )
 {
 			#pragma omp parallel for
 			for (int64_t i = 0; i < nucl_num; ++i) {
@@ -320,12 +318,12 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 
 		int shell_num = ctx->ao_basis.shell_num;
 
-#pragma acc kernels deviceptr(shell_prim_index, shell_prim_num,                   \
-					     	  coefficient_normalized, coefficient, prim_factor,   \
-					     	  shell_factor)
-#pragma omp target is_device_ptr(shell_prim_index, shell_prim_num,             \
-								 coefficient_normalized, coefficient,          \
-								 prim_factor, shell_factor)
+#define DEV_PTRS_K04 shell_prim_index, shell_prim_num,                   \
+                     coefficient_normalized, coefficient, prim_factor,   \
+                     shell_factor
+
+#pragma acc kernels deviceptr( DEV_PTRS_K04 )
+#pragma omp target is_device_ptr( DEV_PTRS_K04 )
 {
 		for (int64_t ishell = 0; ishell < shell_num; ++ishell) {
 			for (int64_t iprim = shell_prim_index[ishell];
@@ -357,10 +355,11 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 		int64_t *nucleus_shell_num = ctx->ao_basis.nucleus_shell_num;
 		int32_t *shell_ang_mom = ctx->ao_basis.shell_ang_mom;
 
-#pragma acc kernels deviceptr( nucleus_max_ang_mom, nucleus_index, \
-						       nucleus_shell_num, shell_ang_mom)
-#pragma omp target is_device_ptr( nucleus_max_ang_mom, nucleus_index, \
-								  nucleus_shell_num, shell_ang_mom)
+#define DEV_PTRS_K05 nucleus_max_ang_mom, nucleus_index, \
+                     nucleus_shell_num, shell_ang_mom
+
+#pragma acc kernels deviceptr( DEV_PTRS_K05 ) 
+#pragma omp target is_device_ptr( DEV_PTRS_K05 )
 {
 		#pragma omp parallel for
 		for (int64_t inucl = 0; inucl < nucl_num; ++inucl) {
@@ -401,12 +400,12 @@ qmckl_finalize_nucleus_basis_device(qmckl_context_device context) {
 
 			int nucleus_num = ctx->nucleus.num;
 
-#pragma acc kernels deviceptr( nucleus_range, nucleus_index,        \
-                               nucleus_shell_num, shell_prim_index, \
-                               shell_prim_num, exponent)
-#pragma omp target is_device_ptr( nucleus_range, nucleus_index,        \
-								  nucleus_shell_num, shell_prim_index, \
-						    	  shell_prim_num, exponent)
+#define DEV_PTRS_K06 nucleus_range, nucleus_index,        \
+                     nucleus_shell_num, shell_prim_index, \
+                     shell_prim_num, exponent
+
+#pragma acc kernels deviceptr( DEV_PTRS_K06 ) 
+#pragma omp target is_device_ptr( DEV_PTRS_K06 )
 {
 			for (int64_t inucl = 0; inucl < nucleus_num; ++inucl) {
 				nucleus_range[inucl] = 0.;
