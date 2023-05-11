@@ -205,14 +205,12 @@ int main() {
 	rc = qmckl_set_jastrow_rescale_factor_ee_device(context, rescale_factor_ee);
 
 	rc = qmckl_get_jastrow_rescale_factor_ee_device(context, &k_ee);
-	printf("1.4\n");
 	if (k_ee != rescale_factor_ee) {
 		return 1;
 	}
 
 	rc = qmckl_get_jastrow_rescale_factor_en_device(context, k_en,
 													type_nucl_num);
-	printf("1.5\n");
 
 #pragma acc kernels deviceptr(k_en, rescale_factor_en)
 	{
@@ -223,17 +221,14 @@ int main() {
 			}
 		}
 	}
-	if(wrongval) {
+	if (wrongval) {
 		return 1;
 	}
 
 	double *asymp_jasb = qmckl_malloc_device(context, 2 * sizeof(double));
 
-
-// calculate asymp_jasb
-	printf("2\n");
+	// calculate asymp_jasb
 	rc = qmckl_get_jastrow_asymp_jasb_device(context, asymp_jasb, 2);
-	printf("3\n");
 #pragma acc kernels deviceptr(asymp_jasb)
 	{
 		if (fabs(asymp_jasb[0] - 0.5323750557252571) > 1.e-12) {
@@ -251,11 +246,9 @@ int main() {
 	rc = qmckl_get_jastrow_factor_ee_device(context, factor_ee, walk_num);
 
 	// calculate factor_ee
-	printf("3\n");
 	rc = qmckl_get_jastrow_factor_ee_device(context, factor_ee, walk_num);
 #pragma acc kernels deviceptr(factor_ee)
 	{
-		printf("%e\n%e\n\n", factor_ee[0], -4.282760865958113);
 		if (fabs(factor_ee[0] + 4.282760865958113) > 1.e-12) {
 			wrongval = true;
 		}
@@ -296,10 +289,12 @@ int main() {
 		return 1;
 	}
 
+	printf("5\n");
 	double *ee_distance_rescaled = qmckl_malloc_device(
 		context, walk_num * elec_num * elec_num * sizeof(double));
 	rc = qmckl_get_jastrow_ee_distance_rescaled_device(context,
 													   ee_distance_rescaled);
+	printf("5.1\n");
 
 #pragma acc kernels deviceptr(ee_distance_rescaled)
 	{
@@ -367,9 +362,11 @@ int main() {
 	// assert(fabs(ee_distance[elec_num*elec_num+1]-6.5517646321055665)
 	// < 1.e-12);
 
+	printf("6\n");
 	double *asymp_jasa = qmckl_malloc_device(context, 2 * sizeof(double));
 	rc =
 		qmckl_get_jastrow_asymp_jasa_device(context, asymp_jasa, type_nucl_num);
+	printf("6.1\n");
 
 // calculate asymp_jasb
 #pragma acc kernels deviceptr(asymp_jasa)
@@ -383,8 +380,10 @@ int main() {
 		return 1;
 	}
 
+	printf("7\n");
 	double *factor_en = qmckl_malloc_device(context, walk_num * sizeof(double));
 	rc = qmckl_get_jastrow_factor_en_device(context, factor_en, walk_num);
+	printf("7.1\n");
 
 	// calculate factor_en
 
@@ -399,10 +398,12 @@ int main() {
 	}
 
 	// calculate factor_en_deriv_e
+	printf("8\n");
 	double *factor_en_deriv_e =
 		qmckl_malloc_device(context, walk_num * 4 * elec_num * sizeof(double));
 	rc = qmckl_get_jastrow_factor_en_deriv_e_device(context, factor_en_deriv_e,
 													walk_num * 4 * elec_num);
+	printf("8.1\n");
 
 // check factor_en_deriv_e
 #pragma acc kernels deviceptr(factor_en_deriv_e)
@@ -431,8 +432,10 @@ int main() {
 	double *en_distance_rescaled = qmckl_malloc_device(
 		context, walk_num * nucl_num * elec_num * sizeof(double));
 
+	printf("9\n");
 	rc = qmckl_get_electron_en_distance_rescaled_device(context,
 														en_distance_rescaled);
+	printf("9.1\n");
 
 #pragma acc kernels deviceptr(en_distance_rescaled)
 	{
@@ -504,43 +507,51 @@ int main() {
 	// assert(fabs(en_distance_rescaled[1][0][1] - 3.1804527583077356)
 	// < 1.e-12);
 
+	printf("10\n");
 	double *een_rescaled_e =
 		qmckl_malloc_device(context, walk_num * (cord_num + 1) * elec_num *
 										 elec_num * sizeof(double));
 	rc = qmckl_get_jastrow_een_rescaled_e_device(context, een_rescaled_e,
 												 elec_num * elec_num *
 													 (cord_num + 1) * walk_num);
+	printf("10.1\n");
 
 #pragma acc kernels deviceptr(een_rescaled_e)
 	{
-		// value of (0,2,1)
-		if (fabs(een_rescaled_e[0 + 1 * elec_num * elec_num * (cord_num + 1) +
-								0 * elec_num * elec_num + 2 * elec_num] -
+
+		// value of (0,1,0,2)
+		if (fabs(een_rescaled_e[0 * elec_num * elec_num * (cord_num + 1) +
+								1 * elec_num * elec_num + 0 * elec_num + 2] -
 				 0.08084493981483197) > 1.e-12) {
 			wrongval = true;
 		}
-		if (fabs(een_rescaled_e[0 + 1 * elec_num * elec_num * (cord_num + 1) +
-								0 * elec_num * elec_num + 3 * elec_num] -
+		// value of (0,1,0,3)
+		if (fabs(een_rescaled_e[0 * elec_num * elec_num * (cord_num + 1) +
+								1 * elec_num * elec_num + 0 * elec_num + 3] -
 				 0.1066745707571846) > 1.e-12) {
 			wrongval = true;
 		}
-		if (fabs(een_rescaled_e[0 + 1 * elec_num * elec_num * (cord_num + 1) +
-								0 * elec_num * elec_num + 4 * elec_num] -
+		// value of (0,1,0,4)
+		if (fabs(een_rescaled_e[0 * elec_num * elec_num * (cord_num + 1) +
+								1 * elec_num * elec_num + 0 * elec_num + 4] -
 				 0.01754273169464735) > 1.e-12) {
 			wrongval = true;
 		}
-		if (fabs(een_rescaled_e[0 + 2 * elec_num * elec_num * (cord_num + 1) +
-								1 * elec_num * elec_num + 3 * elec_num] -
+		// value of (0,2,1,3)
+		if (fabs(een_rescaled_e[0 * elec_num * elec_num * (cord_num + 1) +
+								2 * elec_num * elec_num + 1 * elec_num + 3] -
 				 0.02214680362033448) > 1.e-12) {
 			wrongval = true;
 		}
-		if (fabs(een_rescaled_e[0 + 2 * elec_num * elec_num * (cord_num + 1) +
-								1 * elec_num * elec_num + 4 * elec_num] -
+		// value of (0,2,1,4)
+		if (fabs(een_rescaled_e[0 * elec_num * elec_num * (cord_num + 1) +
+								2 * elec_num * elec_num + 1 * elec_num + 4] -
 				 0.0005700154999202759) > 1.e-12) {
 			wrongval = true;
 		}
-		if (fabs(een_rescaled_e[0 + 2 * elec_num * elec_num * (cord_num + 1) +
-								1 * elec_num * elec_num + 5 * elec_num] -
+		// value of (0,2,1,5)
+		if (fabs(een_rescaled_e[0 * elec_num * elec_num * (cord_num + 1) +
+								2 * elec_num * elec_num + 1 * elec_num + 5] -
 				 0.3424402276009091) > 1.e-12) {
 			wrongval = true;
 		}
@@ -549,44 +560,64 @@ int main() {
 		return 1;
 	}
 
+	printf("11\n");
 	double *een_rescaled_e_deriv_e =
 		qmckl_malloc_device(context, walk_num * (cord_num + 1) * elec_num * 4 *
 										 sizeof(double) * elec_num);
 	size_max = walk_num * (cord_num + 1) * elec_num * 4 * elec_num;
 	rc = qmckl_get_jastrow_een_rescaled_e_deriv_e_device(
 		context, een_rescaled_e_deriv_e, size_max);
+	printf("11.1\n");
 
 #pragma acc kernels deviceptr(een_rescaled_e_deriv_e)
 	{
 		// value of (0,0,0,2,1)
-		if (fabs(een_rescaled_e_deriv_e[0 + 1 * elec_num * 4 * elec_num +
+		if (fabs(een_rescaled_e_deriv_e[0 * elec_num * 4 * elec_num *
+											(cord_num + 1) +
+										1 * elec_num * 4 * elec_num +
 										0 * elec_num * 4 + 0 * elec_num + 2] +
 				 0.05991352796887283) > 1.e-12) {
+			printf("Err 1\n");
 			wrongval = true;
 		}
-		if (fabs(een_rescaled_e_deriv_e[0 + 1 * elec_num * 4 * elec_num +
+		if (fabs(een_rescaled_e_deriv_e[0 * elec_num * 4 * elec_num *
+											(cord_num + 1) +
+										1 * elec_num * 4 * elec_num +
 										0 * elec_num * 4 + 0 * elec_num + 3] +
 				 0.011714035071545248) > 1.e-12) {
+			printf("Err 2\n");
 			wrongval = true;
 		}
-		if (fabs(een_rescaled_e_deriv_e[0 + 1 * elec_num * 4 * elec_num +
+		if (fabs(een_rescaled_e_deriv_e[0 * elec_num * 4 * elec_num *
+											(cord_num + 1) +
+										1 * elec_num * 4 * elec_num +
 										0 * elec_num * 4 + 0 * elec_num + 4] +
 				 0.00441398875758468) > 1.e-12) {
+			printf("Err 3\n");
 			wrongval = true;
 		}
-		if (fabs(een_rescaled_e_deriv_e[0 + 2 * elec_num * 4 * elec_num +
+		if (fabs(een_rescaled_e_deriv_e[0 * elec_num * 4 * elec_num *
+											(cord_num + 1) +
+										2 * elec_num * 4 * elec_num +
 										1 * elec_num * 4 + 0 * elec_num + 3] +
 				 0.013553180060167595) > 1.e-12) {
+			printf("Err 4\n");
 			wrongval = true;
 		}
-		if (fabs(een_rescaled_e_deriv_e[0 + 2 * elec_num * 4 * elec_num +
+		if (fabs(een_rescaled_e_deriv_e[0 * elec_num * 4 * elec_num *
+											(cord_num + 1) +
+										2 * elec_num * 4 * elec_num +
 										1 * elec_num * 4 + 0 * elec_num + 4] +
 				 0.00041342909359870457) > 1.e-12) {
+			printf("Err 5\n");
 			wrongval = true;
 		}
-		if (fabs(een_rescaled_e_deriv_e[0 + 2 * elec_num * 4 * elec_num +
+		if (fabs(een_rescaled_e_deriv_e[0 * elec_num * 4 * elec_num *
+											(cord_num + 1) +
+										2 * elec_num * 4 * elec_num +
 										1 * elec_num * 4 + 0 * elec_num + 5] +
 				 0.5880599146214673) > 1.e-12) {
+			printf("Err 6\n");
 			wrongval = true;
 		}
 	}
@@ -594,12 +625,14 @@ int main() {
 		return 1;
 	}
 
+	printf("12\n");
 	double *een_rescaled_n =
 		qmckl_malloc_device(context, walk_num * (cord_num + 1) * nucl_num *
 										 elec_num * sizeof(double));
 	size_max = walk_num * (cord_num + 1) * nucl_num * elec_num;
 	rc = qmckl_get_jastrow_een_rescaled_n_device(context, een_rescaled_n,
 												 size_max);
+	printf("12.1\n");
 
 #pragma acc kernels deviceptr(een_rescaled_n)
 	{
@@ -639,12 +672,14 @@ int main() {
 		return 1;
 	}
 
+	printf("13\n");
 	double *een_rescaled_n_deriv_e =
 		qmckl_malloc_device(context, walk_num * (cord_num + 1) * nucl_num * 4 *
 										 elec_num * sizeof(double));
 	size_max = walk_num * (cord_num + 1) * nucl_num * 4 * elec_num;
 	rc = qmckl_get_jastrow_een_rescaled_n_deriv_e_device(
 		context, een_rescaled_n_deriv_e, size_max);
+	printf("13.1\n");
 
 // value of (0,2,1)
 #pragma acc kernels deviceptr(een_rescaled_n_deriv_e)
@@ -684,6 +719,7 @@ int main() {
 		return 1;
 	}
 
+	printf("14\n");
 	double *tmp_c =
 		qmckl_malloc_device(context, walk_num * cord_num * (cord_num + 1) *
 										 nucl_num * elec_num * sizeof(double));
@@ -693,6 +729,7 @@ int main() {
 		context, walk_num * cord_num * (cord_num + 1) * nucl_num * 4 *
 					 elec_num * sizeof(double));
 	rc = qmckl_get_jastrow_dtmp_c_device(context, dtmp_c);
+	printf("14.1\n");
 
 #pragma acc kernels deviceptr(tmp_c, dtmp_c)
 	{
@@ -717,9 +754,11 @@ int main() {
 		return 1;
 	}
 
+	printf("15\n");
 	double *factor_een =
 		qmckl_malloc_device(context, walk_num * sizeof(double));
 	rc = qmckl_get_jastrow_factor_een_device(context, factor_een, walk_num);
+	printf("15.1\n");
 
 #pragma acc kernels deviceptr(factor_een)
 	{
@@ -731,10 +770,12 @@ int main() {
 		return 1;
 	}
 
+	printf("16\n");
 	double *factor_een_deriv_e =
 		qmckl_malloc_device(context, 4 * walk_num * elec_num * sizeof(double));
 	rc = qmckl_get_jastrow_factor_een_deriv_e_device(
 		context, factor_een_deriv_e, 4 * walk_num * elec_num);
+	printf("16.1\n");
 
 #pragma acc kernels deviceptr(factor_een_deriv_e)
 	{
@@ -812,7 +853,7 @@ int main() {
 	rc = qmckl_get_jastrow_value_device(context, total_j, walk_num);
 
 #pragma acc kernels deviceptr(total_j_deriv, total_j, factor_ee_deriv_e,       \
-								  factor_en_deriv_e, factor_een_deriv_e)
+							  factor_en_deriv_e, factor_een_deriv_e)
 	{
 		for (int64_t k = 0; k < walk_num; ++k) {
 			for (int64_t m = 0; m < 4; ++m) {

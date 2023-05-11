@@ -181,6 +181,53 @@ qmckl_get_electron_coord_device(const qmckl_context_device context,
 //**********
 
 qmckl_exit_code_device
+qmckl_provide_ee_distance_device(qmckl_context_device context) {
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	/* Compute if necessary */
+	if (ctx->point.date > ctx->electron.ee_distance_date) {
+
+		if (ctx->electron.walker.num > ctx->electron.walker_old.num) {
+			free(ctx->electron.ee_distance);
+			ctx->electron.ee_distance = NULL;
+		}
+
+		/* Allocate array */
+		if (ctx->electron.ee_distance == NULL) {
+
+			double *ee_distance = (double *)qmckl_malloc_device(
+				context, ctx->electron.num * ctx->electron.num *
+							 ctx->electron.walker.num * sizeof(double));
+
+			if (ee_distance == NULL) {
+				return qmckl_failwith_device(context,
+											 QMCKL_ALLOCATION_FAILED_DEVICE,
+											 "qmckl_ee_distance_device", NULL);
+			}
+			ctx->electron.ee_distance = ee_distance;
+		}
+
+		qmckl_exit_code_device rc = qmckl_compute_ee_distance_device(
+			context, ctx->electron.num, ctx->electron.walker.num,
+			ctx->electron.walker.point.coord.data, ctx->electron.ee_distance);
+		if (rc != QMCKL_SUCCESS_DEVICE) {
+			return rc;
+		}
+
+		ctx->electron.ee_distance_date = ctx->date;
+	}
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+qmckl_exit_code_device
 qmckl_provide_en_distance_device(qmckl_context_device context) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
@@ -236,6 +283,42 @@ qmckl_provide_en_distance_device(qmckl_context_device context) {
 //**********
 // COMPUTES
 //**********
+
+qmckl_exit_code_device qmckl_compute_ee_distance_device(
+	const qmckl_context_device context, const int64_t elec_num,
+	const int64_t walk_num, const double *coord, double *const ee_distance) {
+
+	int k, i, j;
+	double x, y, z;
+
+	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
+
+	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
+		info = QMCKL_INVALID_CONTEXT_DEVICE;
+		return info;
+	}
+	if (elec_num <= 0) {
+		info = QMCKL_INVALID_ARG_2_DEVICE;
+		return info;
+	}
+
+	if (walk_num <= 0) {
+		info = QMCKL_INVALID_ARG_3_DEVICE;
+		return info;
+	}
+
+	for (k = 0; k < walk_num; k++) {
+		info = qmckl_distance_device(
+			context, 'T', 'T', elec_num, elec_num, coord + k * elec_num,
+			elec_num * walk_num, coord + k * elec_num, elec_num * walk_num,
+			ee_distance + k * elec_num * elec_num, elec_num);
+		if (info != QMCKL_SUCCESS_DEVICE) {
+			return info;
+		}
+	}
+
+	return info;
+}
 
 qmckl_exit_code_device qmckl_compute_en_distance_device(
 	const qmckl_context_device context, const int64_t point_num,

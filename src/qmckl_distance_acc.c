@@ -1,4 +1,5 @@
 #include "../include/qmckl_distance.h"
+#include <openacc.h>
 
 qmckl_exit_code_device
 qmckl_distance_device(const qmckl_context_device context, const char transa,
@@ -94,63 +95,67 @@ qmckl_distance_device(const qmckl_context_device context, const char transa,
 		return info;
 	}
 
-	switch (transab) {
+#pragma acc kernels deviceptr(A, B, C)
+	{
+		switch (transab) {
 
-	case 0:
+		case 0:
 
-		for (int j = 0; j < n; j++) {
-			for (int i = 0; i < m; i++) {
-				x = A[0 + i * lda] - B[0 + j * ldb];
-				y = A[1 + i * lda] - B[1 + j * ldb];
-				z = A[2 + i * lda] - B[2 + j * ldb];
-				C[i + j * ldc] = x * x + y * y + z * z;
+			for (int j = 0; j < n; j++) {
+				for (int i = 0; i < m; i++) {
+					x = A[0 + i * lda] - B[0 + j * ldb];
+					y = A[1 + i * lda] - B[1 + j * ldb];
+					z = A[2 + i * lda] - B[2 + j * ldb];
+					C[i + j * ldc] = x * x + y * y + z * z;
+				}
+				for (int i = 0; i < ldc; i++)
+					C[i + j * ldc] = sqrt(C[i + j * ldc]);
 			}
-			for (int i = 0; i < ldc; i++)
-				C[i + j * ldc] = sqrt(C[i + j * ldc]);
-		}
-		break;
+			break;
 
-	case 1:
+		case 1:
 
-		for (int j = 0; j < n; j++) {
-			for (int i = 0; i < m; i++) {
-				x = A[i + 0 * lda] - B[0 + j * ldb];
-				y = A[i + 1 * lda] - B[1 + j * ldb];
-				z = A[i + 2 * lda] - B[2 + j * ldb];
-				C[i + j * ldc] = x * x + y * y + z * z;
+			for (int j = 0; j < n; j++) {
+				for (int i = 0; i < m; i++) {
+					x = A[i + 0 * lda] - B[0 + j * ldb];
+					y = A[i + 1 * lda] - B[1 + j * ldb];
+					z = A[i + 2 * lda] - B[2 + j * ldb];
+					C[i + j * ldc] = x * x + y * y + z * z;
+				}
+				for (int i = 0; i < j; i++)
+					C[i + j * ldc] = sqrt(C[i + j * ldc]);
 			}
-			for (int i = 0; i < j; i++)
-				C[i + j * ldc] = sqrt(C[i + j * ldc]);
-		}
-		break;
+			break;
 
-	case 2:
+		case 2:
 
-		for (int j = 0; j < n; j++) {
-			for (int i = 0; i < m; i++) {
-				x = A[0 + i * lda] - B[j + 0 * ldb];
-				y = A[1 + i * lda] - B[j + 1 * ldb];
-				z = A[2 + i * lda] - B[j + 2 * ldb];
-				C[i + j * ldc] = x * x + y * y + z * z;
+			for (int j = 0; j < n; j++) {
+				for (int i = 0; i < m; i++) {
+					x = A[0 + i * lda] - B[j + 0 * ldb];
+					y = A[1 + i * lda] - B[j + 1 * ldb];
+					z = A[2 + i * lda] - B[j + 2 * ldb];
+					C[i + j * ldc] = x * x + y * y + z * z;
+				}
+				for (int i = 0; i < ldc; i++)
+					C[i + j * ldc] = sqrt(C[i + j * ldc]);
 			}
-			for (int i = 0; i < ldc; i++)
-				C[i + j * ldc] = sqrt(C[i + j * ldc]);
-		}
-		break;
+			break;
 
-	case 3:
+		case 3:
 
-		for (int j = 0; j < n; j++) {
-			for (int i = 0; i < m; i++) {
-				x = A[i + 0 * lda] - B[j + 0 * ldb];
-				y = A[i + 1 * lda] - B[j + 1 * ldb];
-				z = A[i + 2 * lda] - B[j + 2 * ldb];
-				C[i + j * ldc] = x * x + y * y + z * z;
+			for (int j = 0; j < n; j++) {
+				for (int i = 0; i < m; i++) {
+					x = A[i + 0 * lda] - B[j + 0 * ldb];
+					y = A[i + 1 * lda] - B[j + 1 * ldb];
+					z = A[i + 2 * lda] - B[j + 2 * ldb];
+
+					C[i + j * ldc] = x * x + y * y + z * z;
+				}
+				for (int i = 0; i < ldc; i++)
+					C[i + j * ldc] = sqrt(C[i + j * ldc]);
 			}
-			for (int i = 0; i < ldc; i++)
-				C[i + j * ldc] = sqrt(C[i + j * ldc]);
+			break;
 		}
-		break;
 	}
 
 	return info;
@@ -252,63 +257,66 @@ qmckl_exit_code_device qmckl_distance_rescaled_device(
 		return info;
 	}
 
-	switch (transab) {
+#pragma acc kernels deviceptr(A, B, C)
+	{
+		switch (transab) {
 
-	case 0:
+		case 0:
 
-		for (j = 0; j < n; j++) {
-			for (i = 0; i < m; i++) {
-				x = A[0 + i * 3] - B[0 + j * 3];
-				y = A[1 + i * 3] - B[1 + j * 3];
-				z = A[2 + i * 3] - B[2 + j * 3];
-				dist = sqrt(x * x + y * y + z * z);
-				C[i + j * m] = (1.0 - exp(-rescale_factor_kappa * dist)) *
-							   rescale_factor_kappa_inv;
+			for (j = 0; j < n; j++) {
+				for (i = 0; i < m; i++) {
+					x = A[0 + i * lda] - B[0 + j * ldb];
+					y = A[1 + i * lda] - B[1 + j * ldb];
+					z = A[2 + i * lda] - B[2 + j * ldb];
+					dist = sqrt(x * x + y * y + z * z);
+					C[i + j * ldc] = (1.0 - exp(-rescale_factor_kappa * dist)) *
+									 rescale_factor_kappa_inv;
+				}
 			}
-		}
-		break;
+			break;
 
-	case 1:
+		case 1:
 
-		for (int j = 0; j < n; j++) {
-			for (int i = 0; i < m; i++) {
-				x = A[i + 0 * m] - B[0 + j * 3];
-				y = A[i + 1 * m] - B[1 + j * 3];
-				z = A[i + 2 * m] - B[2 + j * 3];
-				dist = sqrt(x * x + y * y + z * z);
-				C[i + j * m] = (1.0 - exp(-rescale_factor_kappa * dist)) *
-							   rescale_factor_kappa_inv;
+			for (int j = 0; j < n; j++) {
+				for (int i = 0; i < m; i++) {
+					x = A[i + 0 * lda] - B[0 + j * ldb];
+					y = A[i + 1 * lda] - B[1 + j * ldb];
+					z = A[i + 2 * lda] - B[2 + j * ldb];
+					dist = sqrt(x * x + y * y + z * z);
+					C[i + j * ldc] = (1.0 - exp(-rescale_factor_kappa * dist)) *
+									 rescale_factor_kappa_inv;
+				}
 			}
-		}
-		break;
+			break;
 
-	case 2:
+		case 2:
 
-		for (int j = 0; j < n; j++) {
-			for (int i = 0; i < m; i++) {
-				x = A[0 + i * 3] - B[j + 0 * n];
-				y = A[1 + i * 3] - B[j + 1 * n];
-				z = A[2 + i * 3] - B[j + 2 * n];
-				dist = sqrt(x * x + y * y + z * z);
-				C[i + j * m] = (1.0 - exp(-rescale_factor_kappa * dist)) *
-							   rescale_factor_kappa_inv;
+			for (int j = 0; j < n; j++) {
+				for (int i = 0; i < m; i++) {
+					x = A[0 + i * lda] - B[j + 0 * ldb];
+					y = A[1 + i * lda] - B[j + 1 * ldb];
+					z = A[2 + i * lda] - B[j + 2 * ldb];
+					dist = sqrt(x * x + y * y + z * z);
+					C[i + j * ldc] = (1.0 - exp(-rescale_factor_kappa * dist)) *
+									 rescale_factor_kappa_inv;
+				}
 			}
-		}
-		break;
+			break;
 
-	case 3:
+		case 3:
 
-		for (j = 0; j < n; j++) {
-			for (i = 0; i < m; i++) {
-				x = A[i + 0 * m] - B[j + 0 * n];
-				y = A[i + 1 * m] - B[j + 1 * n];
-				z = A[i + 2 * m] - B[j + 2 * n];
-				dist = sqrt(x * x + y * y + z * z);
-				C[i + j] = (1.0 - exp(-rescale_factor_kappa * dist)) *
-						   rescale_factor_kappa_inv;
+			for (j = 0; j < n; j++) {
+				for (i = 0; i < m; i++) {
+					x = A[i + 0 * lda] - B[j + 0 * ldb];
+					y = A[i + 1 * lda] - B[j + 1 * ldb];
+					z = A[i + 2 * lda] - B[j + 2 * ldb];
+					dist = sqrt(x * x + y * y + z * z);
+					C[i + j * ldc] = (1.0 - exp(-rescale_factor_kappa * dist)) *
+									 rescale_factor_kappa_inv;
+				}
 			}
+			break;
 		}
-		break;
 	}
 
 	return info;
@@ -410,98 +418,101 @@ qmckl_exit_code_device qmckl_distance_rescaled_deriv_e_device(
 		return info;
 	}
 
-	switch (transab) {
+#pragma acc kernels deviceptr(A, B, C)
+	{
+		switch (transab) {
 
-	case 0:
-		for (int j = 0; j < n; j++) {
-			for (int i = 0; i < m; i++) {
-				x = A[0 + i * lda] - B[0 + j * ldb];
-				y = A[1 + i * lda] - B[1 + j * ldb];
-				z = A[2 + i * lda] - B[2 + j * ldb];
-				dist = sqrt(x * x + y * y + z * z);
-				dist_inv = 1.0 / dist;
-				rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
-					  rescale_factor_kappa_inv;
-				C[0 + i * 4 + j * 4 * ldc] =
-					x * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-				C[1 + i * 4 + j * 4 * ldc] =
-					y * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-				C[2 + i * 4 + j * 4 * ldc] =
-					z * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-				C[3 + i * 4 + j * 4 * ldc] =
-					(2.0 * dist_inv - rescale_factor_kappa_inv) *
-					(1.0 - rescale_factor_kappa_inv * rij);
+		case 0:
+			for (int j = 0; j < n; j++) {
+				for (int i = 0; i < m; i++) {
+					x = A[0 + i * lda] - B[0 + j * ldb];
+					y = A[1 + i * lda] - B[1 + j * ldb];
+					z = A[2 + i * lda] - B[2 + j * ldb];
+					dist = sqrt(x * x + y * y + z * z);
+					dist_inv = 1.0 / dist;
+					rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
+						  rescale_factor_kappa_inv;
+					C[0 + i * 4 + j * 4 * ldc] =
+						x * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					C[1 + i * 4 + j * 4 * ldc] =
+						y * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					C[2 + i * 4 + j * 4 * ldc] =
+						z * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					C[3 + i * 4 + j * 4 * ldc] =
+						(2.0 * dist_inv - rescale_factor_kappa_inv) *
+						(1.0 - rescale_factor_kappa_inv * rij);
+				}
 			}
-		}
-		break;
+			break;
 
-	case 1:
-		for (int j = 0; j < n; j++) {
-			for (int i = 0; i < m; i++) {
-				x = A[i + 0 * lda] - B[0 + j * ldb];
-				y = A[i + 1 * lda] - B[1 + j * ldb];
-				z = A[i + 2 * lda] - B[2 + j * ldb];
-				dist = sqrt(x * x + y * y + z * z);
-				dist_inv = 1.0 / dist;
-				rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
-					  rescale_factor_kappa_inv;
-				C[0 + i + j] =
-					x * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-				C[1 + i + j] =
-					y * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-				C[2 + i + j] =
-					z * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-				C[3 + i + j] = (2.0 * dist_inv - rescale_factor_kappa_inv) *
-							   (1.0 - rescale_factor_kappa_inv * rij);
+		case 1:
+			for (int j = 0; j < n; j++) {
+				for (int i = 0; i < m; i++) {
+					x = A[i + 0 * lda] - B[0 + j * ldb];
+					y = A[i + 1 * lda] - B[1 + j * ldb];
+					z = A[i + 2 * lda] - B[2 + j * ldb];
+					dist = sqrt(x * x + y * y + z * z);
+					dist_inv = 1.0 / dist;
+					rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
+						  rescale_factor_kappa_inv;
+					C[0 + i + j] =
+						x * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					C[1 + i + j] =
+						y * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					C[2 + i + j] =
+						z * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					C[3 + i + j] = (2.0 * dist_inv - rescale_factor_kappa_inv) *
+								   (1.0 - rescale_factor_kappa_inv * rij);
+				}
 			}
-		}
-		break;
+			break;
 
-	case 2:
-		for (int j = 0; j < n; j++) {
-			for (int i = 0; i < m; i++) {
-				x = A[0 + i * lda] - B[j + 0 * ldb];
-				y = A[1 + i * lda] - B[j + 1 * ldb];
-				z = A[2 + i * lda] - B[j + 2 * ldb];
-				dist = sqrt(x * x + y * y + z * z);
-				dist_inv = 1.0 / dist;
-				rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
-					  rescale_factor_kappa_inv;
-				C[0 + i * 4 + j * 4 * ldc] =
-					x * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-				C[1 + i * 4 + j * 4 * ldc] =
-					y * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-				C[2 + i * 4 + j * 4 * ldc] =
-					z * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-				C[3 + i * 4 + j * ldc] =
-					(2.0 * dist_inv - rescale_factor_kappa_inv) *
-					(1.0 - rescale_factor_kappa_inv * rij);
+		case 2:
+			for (int j = 0; j < n; j++) {
+				for (int i = 0; i < m; i++) {
+					x = A[0 + i * lda] - B[j + 0 * ldb];
+					y = A[1 + i * lda] - B[j + 1 * ldb];
+					z = A[2 + i * lda] - B[j + 2 * ldb];
+					dist = sqrt(x * x + y * y + z * z);
+					dist_inv = 1.0 / dist;
+					rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
+						  rescale_factor_kappa_inv;
+					C[0 + i * 4 + j * 4 * ldc] =
+						x * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					C[1 + i * 4 + j * 4 * ldc] =
+						y * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					C[2 + i * 4 + j * 4 * ldc] =
+						z * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					C[3 + i * 4 + j * ldc] =
+						(2.0 * dist_inv - rescale_factor_kappa_inv) *
+						(1.0 - rescale_factor_kappa_inv * rij);
+				}
 			}
-		}
-		break;
+			break;
 
-	case 3:
-		for (int j = 0; j < n; j++) {
-			for (int i = 0; i < m; i++) {
-				x = A[i + 0 * lda] - B[j + 0 * ldb];
-				y = A[i + 1 * lda] - B[j + 1 * ldb];
-				z = A[i * 2 * lda] - B[j + 2 * ldb];
-				dist = sqrt(x * x + y * y + z * z);
-				dist_inv = 1.0 / dist;
-				rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
-					  rescale_factor_kappa_inv;
-				C[0 + i * 4 + j * 4 * ldc] =
-					x * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-				C[1 + i * 4 + j * 4 * ldc] =
-					y * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-				C[2 + i * 4 + j * 4 * ldc] =
-					z * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-				C[3 + i * 4 + j * 4 * ldc] =
-					(2.0 * dist_inv - rescale_factor_kappa_inv) *
-					(1.0 - rescale_factor_kappa_inv * rij);
+		case 3:
+			for (int j = 0; j < n; j++) {
+				for (int i = 0; i < m; i++) {
+					x = A[i + 0 * lda] - B[j + 0 * ldb];
+					y = A[i + 1 * lda] - B[j + 1 * ldb];
+					z = A[i + 2 * lda] - B[j + 2 * ldb];
+					dist = sqrt(x * x + y * y + z * z);
+					dist_inv = 1.0 / dist;
+					rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
+						  rescale_factor_kappa_inv;
+					C[0 + i * 4 + j * 4 * ldc] =
+						x * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					C[1 + i * 4 + j * 4 * ldc] =
+						y * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					C[2 + i * 4 + j * 4 * ldc] =
+						z * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					C[3 + i * 4 + j * 4 * ldc] =
+						(2.0 * dist_inv - rescale_factor_kappa_inv) *
+						(1.0 - rescale_factor_kappa_inv * rij);
+				}
 			}
+			break;
 		}
-		break;
 	}
 
 	return info;

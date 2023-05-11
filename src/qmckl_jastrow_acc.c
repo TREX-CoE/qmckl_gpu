@@ -190,7 +190,8 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_ee_device(
 		return QMCKL_INVALID_ARG_4_DEVICE;
 	}
 
-#pragma acc kernels deviceptr(ee_distance_rescaled, factor_ee, b_vector)
+#pragma acc kernels deviceptr(ee_distance_rescaled, factor_ee, b_vector,       \
+							  asymp_jasb)
 	{
 		for (int nw = 0; nw < walk_num; ++nw) {
 			factor_ee[nw] = 0.0; // put init array here.
@@ -248,8 +249,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_ee_deriv_e_device(
 	}
 
 #pragma acc kernels deviceptr(b_vector, ee_distance_rescaled,                  \
-								  ee_distance_rescaled_deriv_e,                \
-								  factor_ee_deriv_e)
+							  ee_distance_rescaled_deriv_e, factor_ee_deriv_e)
 	{
 
 		for (int nw = 0; nw < walk_num; ++nw) {
@@ -384,7 +384,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_device(
 	}
 
 #pragma acc kernels deviceptr(type_nucl_vector, a_vector,                      \
-								  en_distance_rescaled, asymp_jasa)
+							  en_distance_rescaled, asymp_jasa, factor_en)
 	{
 		for (nw = 0; nw < walk_num; nw++) {
 			factor_en[nw] = 0.0;
@@ -395,19 +395,22 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_device(
 
 					factor_en[nw] =
 						factor_en[nw] +
-						a_vector[0 + type_nucl_vector[a] * (aord_num + 1)] * x /
-							(1.0 + a_vector[1 + type_nucl_vector[a] *
+						a_vector[0 +
+								 (type_nucl_vector[a] - 1) * (aord_num + 1)] *
+							x /
+							(1.0 + a_vector[1 + (type_nucl_vector[a] - 1) *
 													(aord_num + 1)] *
 									   x) -
-						asymp_jasa[type_nucl_vector[a]];
+						asymp_jasa[type_nucl_vector[a] - 1];
 
-					for (p = 2; p < aord_num; p++) {
+					for (p = 1; p < aord_num; p++) {
 						x = x * en_distance_rescaled[i + a * elec_num +
 													 nw * elec_num * nucl_num];
 						factor_en[nw] =
-							factor_en[nw] +
-							a_vector[p + type_nucl_vector[a] * (aord_num + 1)] *
-								x;
+							factor_en[nw] + a_vector[p + 1 +
+													 (type_nucl_vector[a] - 1) *
+														 (aord_num + 1)] *
+												x;
 					}
 				}
 			}
@@ -456,73 +459,92 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_deriv_e_device(
 	double x, den, invden, invden2, invden3, xinv;
 	double y, lap1, lap2, lap3, third;
 
-	double power_ser_g[3];
-	double dx[4];
+#pragma acc kernels deviceptr(type_nucl_vector, a_vector,                      \
+							  en_distance_rescaled,                            \
+							  en_distance_rescaled_deriv_e, factor_en_deriv_e)
+	{
+		double power_ser_g[3];
+		double dx[4];
 
-	for (int i = 0; i < elec_num * 4 * walk_num; i++)
-		factor_en_deriv_e[i] = 0.0;
-	third = 1.0 / 3.0;
+		for (int i = 0; i < elec_num * 4 * walk_num; i++)
+			factor_en_deriv_e[i] = 0.0;
+		third = 1.0 / 3.0;
 
-	for (nw = 0; nw < walk_num; nw++) {
-		for (a = 0; a < nucl_num; a++) {
-			for (i = 0; i < elec_num; i++) {
-				x = en_distance_rescaled[i + a * elec_num +
-										 nw * elec_num * nucl_num];
-				if (abs(x) < 1.0e-18)
-					continue;
-				power_ser_g[0] = 0.0;
-				power_ser_g[1] = 0.0;
-				power_ser_g[2] = 0.0;
-				den = 1.0 +
-					  a_vector[1 + type_nucl_vector[a] * (aord_num + 1)] * x;
-				invden = 1.0 / den;
-				invden2 = invden * invden;
-				invden3 = invden2 * invden;
-				xinv = 1.0 / x;
-
-				for (ii = 0; ii < 4; ii++) {
-					dx[ii] = en_distance_rescaled_deriv_e[ii + i * 4 +
-														  a * 4 * elec_num +
-														  nw * 4 * elec_num *
-															  nucl_num];
-				}
-
-				lap1 = 0.0;
-				lap2 = 0.0;
-				lap3 = 0.0;
-				for (ii = 0; ii < 3; ii++) {
+		for (nw = 0; nw < walk_num; nw++) {
+			for (a = 0; a < nucl_num; a++) {
+				for (i = 0; i < elec_num; i++) {
 					x = en_distance_rescaled[i + a * elec_num +
 											 nw * elec_num * nucl_num];
-					for (p = 1; p < aord_num; p++) {
-						y = p *
-							a_vector[(p + 1) +
-									 type_nucl_vector[a] * (aord_num + 1)] *
-							x;
-						power_ser_g[ii] = power_ser_g[ii] + y * dx[ii];
-						lap1 = lap1 + p * y * xinv * dx[ii] * dx[ii];
-						lap2 = lap2 + y;
-						x = x * en_distance_rescaled[i + a * elec_num +
-													 nw * elec_num * nucl_num];
+					if (fabs(x) < 1.0e-18) {
+						continue;
+					}
+					power_ser_g[0] = 0.0;
+					power_ser_g[1] = 0.0;
+					power_ser_g[2] = 0.0;
+					den =
+						1.0 +
+						a_vector[1 + type_nucl_vector[a] * (aord_num + 1)] * x;
+					invden = 1.0 / den;
+					invden2 = invden * invden;
+					invden3 = invden2 * invden;
+					xinv = 1.0 / x;
+
+					for (ii = 0; ii < 4; ii++) {
+						dx[ii] =
+							en_distance_rescaled_deriv_e[ii + i * 4 +
+														 a * 4 * elec_num +
+														 nw * 4 * elec_num *
+															 nucl_num];
 					}
 
-					lap3 = lap3 - 2.0 * a_vector[2 + type_nucl_vector[a]] *
-									  dx[ii] * dx[ii];
+					lap1 = 0.0;
+					lap2 = 0.0;
+					lap3 = 0.0;
+					for (ii = 0; ii < 3; ii++) {
+						x = en_distance_rescaled[i + a * elec_num +
+												 nw * elec_num * nucl_num];
 
+						for (p = 1; p < aord_num; p++) {
+							y = (p + 1) *
+								a_vector[(p + 1) + (type_nucl_vector[a] - 1) *
+													   (aord_num + 1)] *
+								x;
+							power_ser_g[ii] = power_ser_g[ii] + y * dx[ii];
+							lap1 = lap1 + p * y * xinv * dx[ii] * dx[ii];
+							lap2 = lap2 + y;
+							x = x *
+								en_distance_rescaled[i + a * elec_num +
+													 nw * elec_num * nucl_num];
+						}
+
+						lap3 =
+							lap3 - 2.0 *
+									   a_vector[1 + (type_nucl_vector[a] - 1) *
+														(aord_num + 1)] *
+									   dx[ii] * dx[ii];
+
+						factor_en_deriv_e[i + ii * elec_num +
+										  nw * elec_num * 4] =
+							factor_en_deriv_e[i + ii * elec_num +
+											  nw * elec_num * 4] +
+							a_vector[0 + (type_nucl_vector[a] - 1) *
+											 (aord_num + 1)] *
+								dx[ii] * invden2 +
+							power_ser_g[ii];
+					}
+
+					ii = 3;
+					lap2 = lap2 * dx[ii] * third;
+					lap3 = lap3 + den * dx[ii];
+					lap3 = lap3 *
+						   a_vector[0 + (type_nucl_vector[a] - 1) *
+											(aord_num + 1)] *
+						   invden3;
 					factor_en_deriv_e[i + ii * elec_num + nw * elec_num * 4] =
 						factor_en_deriv_e[i + ii * elec_num +
 										  nw * elec_num * 4] +
-						a_vector[0 + type_nucl_vector[a] * (aord_num + 1)] *
-							dx[ii] * invden2 +
-						power_ser_g[ii];
+						lap1 + lap2 + lap3;
 				}
-
-				ii = 4;
-				lap2 = lap2 * dx[ii] * third;
-				lap3 = lap3 + den * dx[ii];
-				lap3 = lap3 * a_vector[0 + type_nucl_vector[a]] * invden3;
-				factor_en_deriv_e[i + ii * elec_num + nw * elec_num * 4] =
-					factor_en_deriv_e[i + ii * elec_num + nw * elec_num * 4] +
-					lap1 + lap2 + lap3;
 			}
 		}
 	}
@@ -536,6 +558,14 @@ qmckl_exit_code_device qmckl_compute_en_distance_rescaled_deriv_e_device(
 	double *const en_distance_rescaled_deriv_e) {
 	int i, k;
 	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
+
+	int64_t *type_nucl_vector_h = malloc(nucl_num * sizeof(int64_t));
+	qmckl_memcpy_D2H(context, type_nucl_vector_h, type_nucl_vector,
+					 nucl_num * sizeof(int64_t));
+
+	double *rescale_factor_en_h = malloc(nucl_num * sizeof(int64_t));
+	qmckl_memcpy_D2H(context, rescale_factor_en_h, rescale_factor_en,
+					 type_nucl_num * sizeof(double));
 
 	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
 		info = QMCKL_INVALID_CONTEXT_DEVICE;
@@ -557,23 +587,31 @@ qmckl_exit_code_device qmckl_compute_en_distance_rescaled_deriv_e_device(
 		return info;
 	}
 
-	double coord[3];
+	double *coord = qmckl_malloc_device(context, 3 * sizeof(double));
 	for (int i = 0; i < nucl_num; i++) {
-		coord[0] = nucl_coord[i + 0];
-		coord[1] = nucl_coord[i + 1];
-		coord[2] = nucl_coord[i + 2];
+#pragma acc kernels deviceptr(coord, nucl_coord)
+		{
+			coord[0] = nucl_coord[i + nucl_num * 0];
+			coord[1] = nucl_coord[i + nucl_num * 1];
+			coord[2] = nucl_coord[i + nucl_num * 2];
+		}
 		for (k = 0; k < walk_num; k++) {
 			info = qmckl_distance_rescaled_deriv_e_device(
 				context, 'T', 'T', elec_num, 1, elec_coord + (k * elec_num),
 				elec_num * walk_num, coord, 1,
 				en_distance_rescaled_deriv_e + (0 + 0 * 4 + i * 4 * elec_num +
 												k * 4 * elec_num * nucl_num),
-				elec_num, rescale_factor_en[type_nucl_vector[i]]);
+				elec_num, rescale_factor_en_h[type_nucl_vector_h[i] - 1]);
 			if (info != QMCKL_SUCCESS_DEVICE) {
+				qmckl_free_device(context, coord);
 				return info;
 			}
 		}
 	}
+
+	free(type_nucl_vector_h);
+	free(rescale_factor_en_h);
+	qmckl_free_device(context, coord);
 }
 
 qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
@@ -615,9 +653,9 @@ qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
 		return info;
 	}
 
-#pragma acc kernels deviceptr(                                                 \
-		type_nucl_vector, a_vector, en_distance_rescaled,                      \
-			en_distance_rescaled_deriv_e, factor_en_deriv_e)
+#pragma acc kernels deviceptr(type_nucl_vector, a_vector,                      \
+							  en_distance_rescaled,                            \
+							  en_distance_rescaled_deriv_e, factor_en_deriv_e)
 	{
 		for (i = 0; i < elec_num * 4 * walk_num; i++)
 			factor_en_deriv_e[i] = 0.0;
@@ -742,7 +780,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_device(
 	}
 
 #pragma acc kernels deviceptr(c_vector_full, lkpm_combined_index, tmp_c,       \
-								  een_rescaled_n)
+							  een_rescaled_n)
 	{
 		for (nw = 0; nw < walk_num; nw++) {
 			factor_een[nw] = 0.0;
@@ -803,8 +841,8 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_deriv_e_device(
 
 	double *tmp3 = qmckl_malloc_device(context, elec_num * sizeof(double));
 #pragma acc kernels deviceptr(tmp3, c_vector_full, lkpm_combined_index, tmp_c, \
-								  dtmp_c, een_rescaled_n,                      \
-								  een_rescaled_n_deriv_e, factor_een_deriv_e)
+							  dtmp_c, een_rescaled_n, een_rescaled_n_deriv_e,  \
+							  factor_een_deriv_e)
 	{
 
 		for (int i = 0; i < elec_num * 4 * walk_num; i++) {
@@ -990,7 +1028,7 @@ qmckl_compute_jastrow_factor_een_rescaled_e_deriv_e_device(
 	}
 
 #pragma acc kernels deviceptr(coord_ee, ee_distance, een_rescaled_e,           \
-								  een_rescaled_e_deriv_e)
+							  een_rescaled_e_deriv_e, elec_dist_deriv_e)
 	{
 		// Prepare table of exponentiated distances raised to appropriate power
 		for (int i = 0; i < elec_num * 4 * elec_num * (cord_num + 1) * walk_num;
@@ -1316,21 +1354,14 @@ qmckl_exit_code_device qmckl_compute_ee_distance_rescaled_device(
 		return info;
 	}
 
-#pragma acc kernels deviceptr(coord, ee_distance_rescaled)
-	{
-		for (int k = 0; k < walk_num; k++) {
-			// TODO Fix undefined reference
-			/*
-			info = qmckl_distance_rescaled_device(
-				context, 'T', 'T', elec_num, elec_num, coord + (k * elec_num),
-				elec_num * walk_num, coord + (k * elec_num),
-				elec_num * walk_num,
-				ee_distance_rescaled + (k * elec_num * elec_num), elec_num,
-				rescale_factor_ee);
-				*/
-			if (info != QMCKL_SUCCESS_DEVICE) {
-				break;
-			}
+	for (int k = 0; k < walk_num; k++) {
+		info = qmckl_distance_rescaled_device(
+			context, 'T', 'T', elec_num, elec_num, coord + (k * elec_num),
+			elec_num * walk_num, coord + (k * elec_num), elec_num * walk_num,
+			ee_distance_rescaled + (k * elec_num * elec_num), elec_num,
+			rescale_factor_ee);
+		if (info != QMCKL_SUCCESS_DEVICE) {
+			break;
 		}
 	}
 	return info;
@@ -1364,6 +1395,7 @@ qmckl_exit_code_device qmckl_compute_ee_distance_rescaled_deriv_e_device(
 			elec_num * walk_num, coord + (k * elec_num), elec_num * walk_num,
 			ee_distance_rescaled_deriv_e + (k * 4 * elec_num * elec_num),
 			elec_num, rescale_factor_ee);
+
 		if (info != QMCKL_SUCCESS_DEVICE)
 			break;
 	}
@@ -1379,7 +1411,15 @@ qmckl_exit_code_device qmckl_compute_en_distance_rescaled_device(
 	double *const en_distance_rescaled) {
 
 	int i, k;
-	double *coord = qmckl_malloc_device(context, 3 * sizeof(double));
+	double *coord = qmckl_malloc_device(context, 3 * nucl_num * sizeof(double));
+
+	int64_t *type_nucl_vector_h = malloc(nucl_num * sizeof(int64_t));
+	qmckl_memcpy_D2H(context, type_nucl_vector_h, type_nucl_vector,
+					 nucl_num * sizeof(int64_t));
+
+	double *rescale_factor_en_h = malloc(nucl_num * sizeof(int64_t));
+	qmckl_memcpy_D2H(context, rescale_factor_en_h, rescale_factor_en,
+					 type_nucl_num * sizeof(double));
 
 	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
 
@@ -1403,33 +1443,29 @@ qmckl_exit_code_device qmckl_compute_en_distance_rescaled_device(
 		return info;
 	}
 
+	for (i = 0; i < nucl_num; i++) {
 #pragma acc kernels deviceptr(coord, nucl_coord)
-	{
-		for (i = 0; i < nucl_num; i++) {
-
+		{
 			coord[0] = nucl_coord[i + 0 * nucl_num];
 			coord[1] = nucl_coord[i + 1 * nucl_num];
 			coord[2] = nucl_coord[i + 2 * nucl_num];
+		}
 
-			for (k = 0; k < walk_num; k++) {
-				// TODO Fix undefined reference
-				/*
-				info = qmckl_distance_rescaled_device(
-					context, 'T', 'T', elec_num, 1,
-					elec_coord + k * elec_num + elec_num * walk_num,
-					elec_num * walk_num, coord, 1,
-					en_distance_rescaled + i * elec_num +
-						k * elec_num * nucl_num,
-					elec_num, rescale_factor_en[type_nucl_vector[i]]);
-				*/
-				if (info != QMCKL_SUCCESS_DEVICE) {
-					break;
-				}
+		for (k = 0; k < walk_num; k++) {
+			info = qmckl_distance_rescaled_device(
+				context, 'T', 'T', elec_num, 1, elec_coord + k * elec_num,
+				elec_num * walk_num, coord, 1,
+				en_distance_rescaled + i * elec_num + k * elec_num * nucl_num,
+				elec_num, rescale_factor_en_h[type_nucl_vector_h[i] - 1]);
+			if (info != QMCKL_SUCCESS_DEVICE) {
+				break;
 			}
 		}
 	}
 
 	qmckl_free_device(context, coord);
+	free(type_nucl_vector_h);
+	free(rescale_factor_en_h);
 	return info;
 }
 
@@ -1458,6 +1494,13 @@ qmckl_exit_code_device qmckl_compute_een_rescaled_e_device(
 	const size_t len_een_ij = (size_t)elec_pairs * (cord_num + 1);
 	double *een_rescaled_e_ij =
 		qmckl_malloc_device(context, len_een_ij * sizeof(double));
+
+	// number of elements for the een_rescaled_e_ij[N_e*(N_e-1)/2][cord+1]
+	// probably in C is better [cord+1, Ne*(Ne-1)/2]
+	// elec_pairs = (elec_num * (elec_num - 1)) / 2;
+	// len_een_ij = elec_pairs * (cord_num + 1);
+	const size_t e2 = elec_num * elec_num;
+
 #pragma acc kernels deviceptr(ee_distance, een_rescaled_e, een_rescaled_e_ij)
 	{
 		// Prepare table of exponentiated distances raised to appropriate power
@@ -1465,12 +1508,6 @@ qmckl_exit_code_device qmckl_compute_een_rescaled_e_device(
 		for (int i = 0; i < walk_num * (cord_num + 1) * elec_num * elec_num;
 			 i++)
 			een_rescaled_e[i] = 0;
-
-		// number of elements for the een_rescaled_e_ij[N_e*(N_e-1)/2][cord+1]
-		// probably in C is better [cord+1, Ne*(Ne-1)/2]
-		// elec_pairs = (elec_num * (elec_num - 1)) / 2;
-		// len_een_ij = elec_pairs * (cord_num + 1);
-		const size_t e2 = elec_num * elec_num;
 
 		for (size_t nw = 0; nw < (size_t)walk_num; ++nw) {
 
@@ -1745,7 +1782,7 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 	const int64_t bf = elec_num * nucl_num * (cord_num + 1);
 	const int64_t cf = bf;
 
-#pragma acc kernels deviceptr(een_rescaled_e, een_rescaled_n)
+#pragma acc kernels deviceptr(een_rescaled_e, een_rescaled_n, tmp_c)
 	{
 		for (int64_t nw = 0; nw < walk_num; ++nw) {
 			for (int64_t i = 0; i < cord_num; ++i) {
@@ -1756,8 +1793,27 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 				1))]), LDA, &(een_rescaled_n[bf * nw]), LDB, beta,
 								&(tmp_c[cf * (i + nw * cord_num)]), LDC);
 				 */
+				double *A = een_rescaled_e + (af * (i + nw * (cord_num + 1)));
+				double *B = een_rescaled_n + (bf * nw);
+				double *C = tmp_c + (cf * (i + nw * cord_num));
+
+				// Row of A
+				for (int i = 0; i < LDA; i++) {
+					// Cols of B
+					for (int j = 0; j < LDB; j++) {
+
+						// Compute C(i,j)
+						C[i + LDC * j] = 0;
+						for (int k = 0; k < LDC; k++) {
+							C[i + LDC * j] = A[i + k * LDA] * B[k + j * LDB];
+						}
+					}
+				}
 			}
 		}
+		printf("tmp_c[0]=%lf\n", tmp_c[0]);
+		printf("tmp_c[1]=%lf\n", tmp_c[1]);
+		printf("tmp_c[2]=%lf\n", tmp_c[2]);
 	}
 	return info;
 }
@@ -1826,11 +1882,9 @@ qmckl_exit_code_device qmckl_compute_dtmp_c_device(
 	return info;
 }
 
-
 //**********
 // SETTERS (requiring offload)
 //**********
-
 
 qmckl_exit_code_device
 qmckl_set_jastrow_rescale_factor_en_device(qmckl_context_device context,
@@ -1880,24 +1934,23 @@ qmckl_set_jastrow_rescale_factor_en_device(qmckl_context_device context,
 	ctx->jastrow.rescale_factor_en =
 		(double *)qmckl_malloc_device(context, mem_info.size);
 
-	double * ctx_rescale_factor_en = ctx->jastrow.rescale_factor_en;
+	double *ctx_rescale_factor_en = ctx->jastrow.rescale_factor_en;
 	bool wrongval = false;
 	int64_t ctx_type_nucl_num = ctx->jastrow.type_nucl_num;
 #pragma acc kernels deviceptr(ctx_rescale_factor_en, rescale_factor_en)
 	{
-	for (int64_t i = 0; i < ctx_type_nucl_num; ++i) {
-		if (rescale_factor_en[i] <= 0.0) {
-			wrongval = true;
-			break;
+		for (int64_t i = 0; i < ctx_type_nucl_num; ++i) {
+			if (rescale_factor_en[i] <= 0.0) {
+				wrongval = true;
+				break;
+			}
+			ctx_rescale_factor_en[i] = rescale_factor_en[i];
 		}
-		ctx_rescale_factor_en[i] = rescale_factor_en[i];
 	}
-	}
-	if(wrongval) {
-			return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
-										 "qmckl_set_jastrow_rescale_factor_en",
-										 "rescale_factor_en <= 0.0");
-
+	if (wrongval) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
+									 "qmckl_set_jastrow_rescale_factor_en",
+									 "rescale_factor_en <= 0.0");
 	}
 
 	ctx->jastrow.uninitialized &= ~mask;
