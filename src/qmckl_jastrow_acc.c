@@ -138,27 +138,32 @@ qmckl_exit_code_device qmckl_compute_jastrow_gl_device(
 
 #pragma acc kernels deviceptr(value, gl_ee, gl_en, gl_een, gl)
 	{
-		for (int64_t k = 0; k < walk_num; ++k) {
-			for (int64_t j = 0; j < 4; ++j) {
-				for (int64_t i = 0; i < elec_num; ++i) {
-					gl[i + elec_num * (j + k * 4)] =
-						gl_ee[i + elec_num * (j + k * 4)] +
-						gl_en[i + elec_num * (j + k * 4)] +
-						gl_een[i + elec_num * (j + k * 4)];
+
+		for (int k = 0; k < walk_num; k++) {
+			for (int j = 0; j < 4; j++) {
+				for (int i = 0; i < elec_num; i++) {
+					gl[i + j * elec_num + k * elec_num * 4] =
+						gl_ee[i + j * elec_num + k * elec_num * 4] +
+						gl_en[i + j * elec_num + k * elec_num * 4] +
+						gl_een[i + j * elec_num + k * elec_num * 4];
 				}
 			}
-			for (int64_t i = 0; i < elec_num; ++i) {
-				gl[i + elec_num * (3 + walk_num * 4)] +=
-					gl_ee[i + elec_num * (0 + k * 4)] *
-						gl_ee[i + elec_num * (0 + k * 4)] +
-					gl_ee[i + elec_num * (1 + k * 4)] *
-						gl_ee[i + elec_num * (1 + k * 4)] +
-					gl_ee[i + elec_num * (2 + k * 4)] *
-						gl_ee[i + elec_num * (2 + k * 4)];
+
+			for (int i = 0; i < elec_num; i++) {
+				gl[i + 3 * elec_num + k * elec_num * 4] =
+					gl[i + 3 * elec_num + k * elec_num * 4] +
+					gl[i + 0 * elec_num + k * elec_num * 4] *
+						gl[i + 0 * elec_num + k * elec_num * 4] +
+					gl[i + 1 * elec_num + k * elec_num * 4] *
+						gl[i + 1 * elec_num + k * elec_num * 4] +
+					gl[i + 2 * elec_num + k * elec_num * 4] *
+						gl[i + 2 * elec_num + k * elec_num * 4];
 			}
-			for (int64_t j = 0; j < 4; ++j) {
-				for (int64_t i = 0; i < elec_num; ++i) {
-					gl[i + elec_num * (j + k * 4)] *= value[k];
+
+			for (int j = 0; j < 4; j++) {
+				for (int i = 0; i < elec_num; i++) {
+					gl[i + j * elec_num + k * elec_num * 4] =
+						gl[i + j * elec_num + k * elec_num * 4] * value[k];
 				}
 			}
 		}
@@ -868,18 +873,19 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_deriv_e_device(
 				const size_t addr0 = en * (m + c1 * (k + cn));
 				const size_t addr1 = en * (m + cn);
 
-				const double *restrict tmp_c_mkn = &(tmp_c[addr0]);
+				const double *restrict tmp_c_mkn = tmp_c + addr0;
 				const double *restrict tmp_c_mlkn = tmp_c_mkn + len;
 				const double *restrict een_rescaled_n_mnw =
-					&(een_rescaled_n[addr1]);
+					een_rescaled_n + addr1;
 				const double *restrict een_rescaled_n_mlnw =
 					een_rescaled_n_mnw + len;
 				const double *restrict dtmp_c_mknw = &(dtmp_c[addr0 << 2]);
 				const double *restrict dtmp_c_mlknw = dtmp_c_mknw + len4;
 				const double *restrict een_rescaled_n_deriv_e_mnw =
-					&(een_rescaled_n_deriv_e[addr1 << 2]);
+					een_rescaled_n_deriv_e + (addr1 << 2);
 				const double *restrict een_rescaled_n_deriv_e_mlnw =
 					een_rescaled_n_deriv_e_mnw + len4;
+
 				for (size_t a = 0; a < (size_t)nucl_num; a++) {
 					double cn = c_vector_full[a + n * nucl_num];
 					if (cn == 0.0)
@@ -985,6 +991,19 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_deriv_e_device(
 				}
 			}
 		}
+
+		/*
+		printf("\n");
+		for(int i=0; i<elec_num; i++) {
+			for(int j=0;j<4;j++) {
+				for(int k=0; k<walk_num; k++) {
+					printf("[i=%d][j=%d][k=%d] %lf\n", i, j, k,
+		factor_een_deriv_e[i + j*elec_num + k*elec_num*4]);
+				}
+			}
+		}
+		*/
+		printf("\n");
 	}
 	qmckl_free_device(context, tmp3);
 	return info;
@@ -1061,74 +1080,144 @@ qmckl_compute_jastrow_factor_een_rescaled_e_deriv_e_device(
 				for (j = 0; j < elec_num; j++) {
 					for (i = 0; i < elec_num; i++) {
 						een_rescaled_e_deriv_e[i + 0 * elec_num +
-											   j * elec_num * 4 + l * elec_num +
-											   nw * elec_num] =
+											   j * elec_num * 4 +
+											   l * elec_num * 4 * elec_num +
+											   nw * elec_num * 4 * elec_num *
+												   (cord_num + 1)] =
 							kappa_l *
 							elec_dist_deriv_e[0 + i * 4 + j * 4 * elec_num];
-						een_rescaled_e_deriv_e[i + 1 * elec_num + j * elec_num +
-											   l * elec_num + nw * elec_num] =
+						een_rescaled_e_deriv_e[i + 1 * elec_num +
+											   j * elec_num * 4 +
+											   l * elec_num * 4 * elec_num +
+											   nw * elec_num * 4 * elec_num *
+												   (cord_num + 1)] =
 							kappa_l *
 							elec_dist_deriv_e[1 + i * 4 + j * 4 * elec_num];
-						een_rescaled_e_deriv_e[i + 2 * elec_num + j * elec_num +
-											   l * elec_num + nw * elec_num] =
+
+						een_rescaled_e_deriv_e[i + 2 * elec_num +
+											   j * elec_num * 4 +
+											   l * elec_num * 4 * elec_num +
+											   nw * elec_num * 4 * elec_num *
+												   (cord_num + 1)] =
 							kappa_l *
 							elec_dist_deriv_e[2 + i * 4 + j * 4 * elec_num];
-						een_rescaled_e_deriv_e[i + 3 * elec_num + j * elec_num +
-											   l * elec_num + nw * elec_num] =
+
+						een_rescaled_e_deriv_e[i + 3 * elec_num +
+											   j * elec_num * 4 +
+											   l * elec_num * 4 * elec_num +
+											   nw * elec_num * 4 * elec_num *
+												   (cord_num + 1)] =
 							kappa_l *
 							elec_dist_deriv_e[3 + i * 4 + j * 4 * elec_num];
 
-						een_rescaled_e_deriv_e[i + 3 * elec_num + j * elec_num +
-											   l * elec_num + nw * elec_num] =
+						een_rescaled_e_deriv_e[i + 3 * elec_num +
+											   j * elec_num * 4 +
+											   l * elec_num * 4 * elec_num +
+											   nw * elec_num * 4 * elec_num *
+												   (cord_num + 1)] =
 							een_rescaled_e_deriv_e[i + 3 * elec_num +
-												   j * elec_num + l * elec_num +
-												   nw * elec_num] +
+												   j * elec_num * 4 +
+												   l * elec_num * 4 * elec_num +
+												   nw * elec_num * 4 *
+													   elec_num *
+													   (cord_num + 1)] +
 							een_rescaled_e_deriv_e[i + 0 * elec_num +
-												   j * elec_num + l * elec_num +
-												   nw * elec_num] *
-								een_rescaled_e_deriv_e[i + 0 * elec_num +
-													   j * elec_num +
-													   l * elec_num +
-													   nw * elec_num] +
+												   j * elec_num * 4 +
+												   l * elec_num * 4 * elec_num +
+												   nw * elec_num * 4 *
+													   elec_num *
+													   (cord_num + 1)] *
+								een_rescaled_e_deriv_e
+									[i + 0 * elec_num + j * elec_num * 4 +
+									 l * elec_num * 4 * elec_num +
+									 nw * elec_num * 4 * elec_num *
+										 (cord_num + 1)] +
 							een_rescaled_e_deriv_e[i + 1 * elec_num +
-												   j * elec_num + l * elec_num +
-												   nw * elec_num] *
-								een_rescaled_e_deriv_e[i + 1 * elec_num +
-													   j * elec_num +
-													   l * elec_num +
-													   nw * elec_num] +
+												   j * elec_num * 4 +
+												   l * elec_num * 4 * elec_num +
+												   nw * elec_num * 4 *
+													   elec_num *
+													   (cord_num + 1)] *
+								een_rescaled_e_deriv_e
+									[i + 1 * elec_num + j * elec_num * 4 +
+									 l * elec_num * 4 * elec_num +
+									 nw * elec_num * 4 * elec_num *
+										 (cord_num + 1)] +
 							een_rescaled_e_deriv_e[i + 2 * elec_num +
-												   j * elec_num + l * elec_num +
-												   nw * elec_num] *
-								een_rescaled_e_deriv_e[i + 2 * elec_num +
-													   j * elec_num +
-													   l * elec_num +
-													   nw * elec_num];
+												   j * elec_num * 4 +
+												   l * elec_num * 4 * elec_num +
+												   nw * elec_num * 4 *
+													   elec_num *
+													   (cord_num + 1)] *
+								een_rescaled_e_deriv_e
+									[i + 2 * elec_num + j * elec_num * 4 +
+									 l * elec_num * 4 * elec_num +
+									 nw * elec_num * 4 * elec_num *
+										 (cord_num + 1)];
 
-						een_rescaled_e_deriv_e[i + 0 * elec_num + j * elec_num +
-											   l * elec_num + nw * elec_num] =
+						een_rescaled_e_deriv_e[i + 0 * elec_num +
+											   j * elec_num * 4 +
+											   l * elec_num * 4 * elec_num +
+											   nw * elec_num * 4 * elec_num *
+												   (cord_num + 1)] =
 							een_rescaled_e_deriv_e[i + 0 * elec_num +
-												   j * elec_num + l * elec_num +
-												   nw * elec_num] *
-							een_rescaled_e[i + j + l + nw];
-						een_rescaled_e_deriv_e[i + 2 * elec_num + j * elec_num +
-											   l * elec_num + nw * elec_num] =
+												   j * elec_num * 4 +
+												   l * elec_num * 4 * elec_num +
+												   nw * elec_num * 4 *
+													   elec_num *
+													   (cord_num + 1)] *
+							een_rescaled_e[i + j * elec_num +
+										   l * elec_num * elec_num +
+										   nw * elec_num * elec_num *
+											   (cord_num + 1)];
+
+						een_rescaled_e_deriv_e[i + 2 * elec_num +
+											   j * elec_num * 4 +
+											   l * elec_num * 4 * elec_num +
+											   nw * elec_num * 4 * elec_num *
+												   (cord_num + 1)] =
 							een_rescaled_e_deriv_e[i + 1 * elec_num +
-												   j * elec_num + l * elec_num +
-												   nw * elec_num] *
-							een_rescaled_e[i + j + l + nw];
-						een_rescaled_e_deriv_e[i + 2 * elec_num + j * elec_num +
-											   l * elec_num + nw * elec_num] =
+												   j * elec_num * 4 +
+												   l * elec_num * 4 * elec_num +
+												   nw * elec_num * 4 *
+													   elec_num *
+													   (cord_num + 1)] *
+							een_rescaled_e[i + j * elec_num +
+										   l * elec_num * elec_num +
+										   nw * elec_num * elec_num *
+											   (cord_num + 1)];
+
+						een_rescaled_e_deriv_e[i + 2 * elec_num +
+											   j * elec_num * 4 +
+											   l * elec_num * 4 * elec_num +
+											   nw * elec_num * 4 * elec_num *
+												   (cord_num + 1)] =
 							een_rescaled_e_deriv_e[i + 2 * elec_num +
-												   j * elec_num + l * elec_num +
-												   nw * elec_num] *
-							een_rescaled_e[i + j + l + nw];
-						een_rescaled_e_deriv_e[i + 3 * elec_num + j * elec_num +
-											   l * elec_num + nw * elec_num] =
+												   j * elec_num * 4 +
+												   l * elec_num * 4 * elec_num +
+												   nw * elec_num * 4 *
+													   elec_num *
+													   (cord_num + 1)] *
+							een_rescaled_e[i + j * elec_num +
+										   l * elec_num * elec_num +
+										   nw * elec_num * elec_num *
+											   (cord_num + 1)];
+
+						een_rescaled_e_deriv_e[i + 3 * elec_num +
+											   j * elec_num * 4 +
+											   l * elec_num * 4 * elec_num +
+											   nw * elec_num * 4 * elec_num *
+												   (cord_num + 1)] =
 							een_rescaled_e_deriv_e[i + 3 * elec_num +
-												   j * elec_num + l * elec_num +
-												   nw * elec_num] *
-							een_rescaled_e[i + j + l + nw];
+												   j * elec_num * 4 +
+												   l * elec_num * 4 * elec_num +
+												   nw * elec_num * 4 *
+													   elec_num *
+													   (cord_num + 1)] *
+							een_rescaled_e[i + j * elec_num +
+										   l * elec_num * elec_num +
+										   nw * elec_num * elec_num *
+											   (cord_num + 1)];
 					}
 				}
 			}
@@ -1180,147 +1269,163 @@ qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
 		return info;
 	}
 
-	// Prepare table of exponentiated distances raised to appropriate power
-	for (int i = 0; i < elec_num * 4 * nucl_num * (cord_num + 1) * walk_num;
-		 i++)
-		een_rescaled_n_deriv_e[i] = 0.0;
+#pragma acc kernels deviceptr(rescale_factor_en, coord_ee, coord_en,           \
+							  en_distance, een_rescaled_n,                     \
+							  een_rescaled_n_deriv_e, elnuc_dist_deriv_e)
+	{
+		// Prepare table of exponentiated distances raised to appropriate power
+		for (int i = 0; i < elec_num * 4 * nucl_num * (cord_num + 1) * walk_num;
+			 i++)
+			een_rescaled_n_deriv_e[i] = 0.0;
 
-	for (int nw = 0; nw < walk_num; nw++) {
+		for (int nw = 0; nw < walk_num; nw++) {
 
-		// Prepare the actual een table
-		for (int a = 0; a < nucl_num; a++) {
-			for (int i = 0; i < elec_num; i++) {
-				ria_inv =
-					1.0 /
-					en_distance[a + i * nucl_num + nw * nucl_num * elec_num];
-				for (int ii = 0; ii < 3; ii++) {
-					elnuc_dist_deriv_e[ii + i + a] =
-						(coord_ee[i + ii * elec_num + nw * elec_num * 4] -
-						 coord_en[a + ii * nucl_num]) *
-						ria_inv;
-				}
-				elnuc_dist_deriv_e[3 + i + a] = 2.0 * ria_inv;
-			}
-		}
-
-		for (int l = 0; l < cord_num; l++) {
-			for (int a = 0; a < (nucl_num + 1); a++) {
-				kappa_l = -((double)l) * rescale_factor_en[type_nucl_vector[a]];
+			// Prepare the actual een table
+			for (int a = 0; a < nucl_num; a++) {
 				for (int i = 0; i < elec_num; i++) {
-					een_rescaled_n_deriv_e[i + 0 * elec_num + a * elec_num * 4 +
-										   l * elec_num * 4 * nucl_num +
-										   nw * elec_num * 4 * nucl_num *
-											   (cord_num + 1)] =
-						kappa_l * elnuc_dist_deriv_e[0 + i + a];
-					een_rescaled_n_deriv_e[i + 1 * elec_num + a * elec_num * 4 +
-										   l * elec_num * 4 * nucl_num +
-										   nw * elec_num * 4 * nucl_num *
-											   (cord_num + 1)] =
-						kappa_l * elnuc_dist_deriv_e[1 + i + a];
-					een_rescaled_n_deriv_e[i + 2 * elec_num + a * elec_num * 4 +
-										   l * elec_num * 4 * nucl_num +
-										   nw * elec_num * 4 * nucl_num *
-											   (cord_num + 1)] =
-						kappa_l * elnuc_dist_deriv_e[2 + i + a];
-					een_rescaled_n_deriv_e[i + 3 * elec_num + a * elec_num * 4 +
-										   l * elec_num * 4 * nucl_num +
-										   nw * elec_num * 4 * nucl_num *
-											   (cord_num + 1)] =
-						kappa_l * elnuc_dist_deriv_e[3 + i + a];
+					ria_inv = 1.0 / en_distance[a + i * nucl_num +
+												nw * nucl_num * elec_num];
+					for (int ii = 0; ii < 3; ii++) {
+						elnuc_dist_deriv_e[ii * nucl_num * elec_num +
+										   i * nucl_num + a] =
+							(coord_ee[i + ii * elec_num + nw * elec_num * 4] -
+							 coord_en[a + ii * nucl_num]) *
+							ria_inv;
+					}
+					elnuc_dist_deriv_e[3 * nucl_num * elec_num + i * nucl_num +
+									   a] = 2.0 * ria_inv;
+				}
+			}
 
-					een_rescaled_n_deriv_e[i + 3 * elec_num + a * elec_num * 4 +
-										   l * elec_num * 4 * nucl_num +
-										   nw * elec_num * 4 * nucl_num *
-											   (cord_num + 1)] =
-						een_rescaled_n_deriv_e[i + 3 * elec_num +
-											   a * elec_num * 4 +
-											   l * elec_num * 4 * nucl_num +
-											   nw * elec_num * 4 * nucl_num *
-												   (cord_num + 1)] +
+			for (int l = 0; l < cord_num; l++) {
+				for (int a = 0; a < (nucl_num + 1); a++) {
+					kappa_l = -((double)l) *
+							  rescale_factor_en[type_nucl_vector[a] - 1];
+					for (int i = 0; i < elec_num; i++) {
+
 						een_rescaled_n_deriv_e[i + 0 * elec_num +
 											   a * elec_num * 4 +
 											   l * elec_num * 4 * nucl_num +
 											   nw * elec_num * 4 * nucl_num *
-												   (cord_num + 1)] *
+												   (cord_num + 1)] =
+							kappa_l *
+							elnuc_dist_deriv_e[0 * nucl_num * elec_num +
+											   i * nucl_num + a];
+						een_rescaled_n_deriv_e[i + 1 * elec_num +
+											   a * elec_num * 4 +
+											   l * elec_num * 4 * nucl_num +
+											   nw * elec_num * 4 * nucl_num *
+												   (cord_num + 1)] =
+							kappa_l *
+							elnuc_dist_deriv_e[1 * nucl_num * elec_num +
+											   i * nucl_num + a];
+						een_rescaled_n_deriv_e[i + 2 * elec_num +
+											   a * elec_num * 4 +
+											   l * elec_num * 4 * nucl_num +
+											   nw * elec_num * 4 * nucl_num *
+												   (cord_num + 1)] =
+							kappa_l *
+							elnuc_dist_deriv_e[2 * nucl_num * elec_num +
+											   i * nucl_num + a];
+						een_rescaled_n_deriv_e[i + 3 * elec_num +
+											   a * elec_num * 4 +
+											   l * elec_num * 4 * nucl_num +
+											   nw * elec_num * 4 * nucl_num *
+												   (cord_num + 1)] =
+							kappa_l *
+							elnuc_dist_deriv_e[3 * nucl_num * elec_num +
+											   i * nucl_num + a];
+
+						double een_1_squared = een_rescaled_n_deriv_e
+							[i + 0 * elec_num + a * elec_num * 4 +
+							 l * elec_num * 4 * nucl_num +
+							 nw * elec_num * 4 * nucl_num * (cord_num + 1)];
+						een_1_squared = een_1_squared * een_1_squared;
+						double een_2_squared = een_rescaled_n_deriv_e
+							[i + 1 * elec_num + a * elec_num * 4 +
+							 l * elec_num * 4 * nucl_num +
+							 nw * elec_num * 4 * nucl_num * (cord_num + 1)];
+						een_2_squared = een_2_squared * een_2_squared;
+						double een_3_squared = een_rescaled_n_deriv_e
+							[i + 2 * elec_num + a * elec_num * 4 +
+							 l * elec_num * 4 * nucl_num +
+							 nw * elec_num * 4 * nucl_num * (cord_num + 1)];
+						een_3_squared = een_3_squared * een_3_squared;
+
+						een_rescaled_n_deriv_e[i + 3 * elec_num +
+											   a * elec_num * 4 +
+											   l * elec_num * 4 * nucl_num +
+											   nw * elec_num * 4 * nucl_num *
+												   (cord_num + 1)] =
+							een_rescaled_n_deriv_e[i + 3 * elec_num +
+												   a * elec_num * 4 +
+												   l * elec_num * 4 * nucl_num +
+												   nw * elec_num * 4 *
+													   nucl_num *
+													   (cord_num + 1)] +
+							een_1_squared + een_2_squared + een_3_squared;
+
+						een_rescaled_n_deriv_e[i + 0 * elec_num +
+											   a * elec_num * 4 +
+											   l * elec_num * 4 * nucl_num +
+											   nw * elec_num * 4 * nucl_num *
+												   (cord_num + 1)] =
+							een_rescaled_n_deriv_e[i + 0 * elec_num +
+												   a * elec_num * 4 +
+												   l * elec_num * 4 * nucl_num +
+												   nw * elec_num * 4 *
+													   nucl_num *
+													   (cord_num + 1)] *
+							een_rescaled_n[i + a * elec_num +
+										   l * elec_num * nucl_num +
+										   nw * elec_num * nucl_num *
+											   (cord_num + 1)];
+						een_rescaled_n_deriv_e[i + 1 * elec_num +
+											   a * elec_num * 4 +
+											   l * elec_num * 4 * nucl_num +
+											   nw * elec_num * 4 * nucl_num *
+												   (cord_num + 1)] =
 							een_rescaled_n_deriv_e[i + 1 * elec_num +
 												   a * elec_num * 4 +
 												   l * elec_num * 4 * nucl_num +
 												   nw * elec_num * 4 *
 													   nucl_num *
-													   (cord_num + 1)] +
-						een_rescaled_n_deriv_e[i + 1 * elec_num +
+													   (cord_num + 1)] *
+							een_rescaled_n[i + a * elec_num +
+										   l * elec_num * nucl_num +
+										   nw * elec_num * nucl_num *
+											   (cord_num + 1)];
+						een_rescaled_n_deriv_e[i + 2 * elec_num +
 											   a * elec_num * 4 +
 											   l * elec_num * 4 * nucl_num +
 											   nw * elec_num * 4 * nucl_num *
-												   (cord_num + 1)] *
+												   (cord_num + 1)] =
 							een_rescaled_n_deriv_e[i + 2 * elec_num +
 												   a * elec_num * 4 +
 												   l * elec_num * 4 * nucl_num +
 												   nw * elec_num * 4 *
 													   nucl_num *
-													   (cord_num + 1)] +
-						een_rescaled_n_deriv_e[i + 2 * elec_num +
-											   a * elec_num * 4 +
-											   l * elec_num * 4 * nucl_num +
-											   nw * elec_num * 4 * nucl_num *
-												   (cord_num + 1)] *
-							een_rescaled_n_deriv_e
-								[i + 3 * elec_num + a * elec_num * 4 +
-								 l * elec_num * 4 * nucl_num +
-								 nw * elec_num * 4 * nucl_num * (cord_num + 1)];
-
-					een_rescaled_n_deriv_e[i + 0 * elec_num + a * elec_num * 4 +
-										   l * elec_num * 4 * nucl_num +
-										   nw * elec_num * 4 * nucl_num *
-											   (cord_num + 1)] =
-						een_rescaled_n_deriv_e[i + 0 * elec_num +
-											   a * elec_num * 4 +
-											   l * elec_num * 4 * nucl_num +
-											   nw * elec_num * 4 * nucl_num *
-												   (cord_num + 1)] *
-						een_rescaled_n[i + a * elec_num +
-									   l * elec_num * nucl_num +
-									   nw * elec_num * nucl_num *
-										   (cord_num + 1)];
-					een_rescaled_n_deriv_e[i + 1 * elec_num + a * elec_num * 4 +
-										   l * elec_num * 4 * nucl_num +
-										   nw * elec_num * 4 * nucl_num *
-											   (cord_num + 1)] =
-						een_rescaled_n_deriv_e[i + 1 * elec_num +
-											   a * elec_num * 4 +
-											   l * elec_num * 4 * nucl_num +
-											   nw * elec_num * 4 * nucl_num *
-												   (cord_num + 1)] *
-						een_rescaled_n[i + a * elec_num +
-									   l * elec_num * nucl_num +
-									   nw * elec_num * nucl_num *
-										   (cord_num + 1)];
-					een_rescaled_n_deriv_e[i + 2 * elec_num + a * elec_num * 4 +
-										   l * elec_num * 4 * nucl_num +
-										   nw * elec_num * 4 * nucl_num *
-											   (cord_num + 1)] =
-						een_rescaled_n_deriv_e[i + 2 * elec_num +
-											   a * elec_num * 4 +
-											   l * elec_num * 4 * nucl_num +
-											   nw * elec_num * 4 * nucl_num *
-												   (cord_num + 1)] *
-						een_rescaled_n[i + a * elec_num +
-									   l * elec_num * nucl_num +
-									   nw * elec_num * nucl_num *
-										   (cord_num + 1)];
-					een_rescaled_n_deriv_e[i + 3 * elec_num + a * elec_num * 4 +
-										   l * elec_num * 4 * nucl_num +
-										   nw * elec_num * 4 * nucl_num *
-											   (cord_num + 1)] =
+													   (cord_num + 1)] *
+							een_rescaled_n[i + a * elec_num +
+										   l * elec_num * nucl_num +
+										   nw * elec_num * nucl_num *
+											   (cord_num + 1)];
 						een_rescaled_n_deriv_e[i + 3 * elec_num +
 											   a * elec_num * 4 +
 											   l * elec_num * 4 * nucl_num +
 											   nw * elec_num * 4 * nucl_num *
-												   (cord_num + 1)] *
-						een_rescaled_n[i + a * elec_num +
-									   l * elec_num * nucl_num +
-									   nw * elec_num * nucl_num *
-										   (cord_num + 1)];
+												   (cord_num + 1)] =
+							een_rescaled_n_deriv_e[i + 3 * elec_num +
+												   a * elec_num * 4 +
+												   l * elec_num * 4 * nucl_num +
+												   nw * elec_num * 4 *
+													   nucl_num *
+													   (cord_num + 1)] *
+							een_rescaled_n[i + a * elec_num +
+										   l * elec_num * nucl_num +
+										   nw * elec_num * nucl_num *
+											   (cord_num + 1)];
+					}
 				}
 			}
 		}
@@ -1604,15 +1709,19 @@ qmckl_exit_code_device qmckl_compute_een_rescaled_n_device(
 		return QMCKL_INVALID_ARG_5_DEVICE;
 	}
 
-#pragma acc kernels deviceptr(type_nucl_vector, rescale_factor_en, en_distance)
+#pragma acc kernels deviceptr(een_rescaled_n, type_nucl_vector,                \
+							  rescale_factor_en, en_distance)
 	{
+
 		// Prepare table of exponentiated distances raised to appropriate power
-		for (int i = 0; i < (walk_num * (cord_num + 1) * nucl_num * elec_num);
-			 ++i) {
-			een_rescaled_n[i] = 1.0;
+		for (int i = 0; i < walk_num * (cord_num + 1) * nucl_num * elec_num;
+			 i++) {
+			een_rescaled_n[i] = 0.0;
 		}
 
 		for (int nw = 0; nw < walk_num; ++nw) {
+
+			// prepare the actual een table
 			for (int a = 0; a < nucl_num; ++a) {
 				for (int i = 0; i < elec_num; ++i) {
 					een_rescaled_n[i + a * elec_num +
@@ -1620,7 +1729,7 @@ qmckl_exit_code_device qmckl_compute_een_rescaled_n_device(
 						1.0;
 					een_rescaled_n[i + a * elec_num + elec_num * nucl_num +
 								   nw * elec_num * nucl_num * (cord_num + 1)] =
-						exp(-rescale_factor_en[type_nucl_vector[a]] *
+						exp(-rescale_factor_en[type_nucl_vector[a] - 1] *
 							en_distance[a + i * nucl_num +
 										nw * elec_num * nucl_num]);
 				}
@@ -1712,22 +1821,22 @@ qmckl_exit_code_device qmckl_compute_lkpm_combined_index_device(
 
 #pragma acc kernels deviceptr(lkpm_combined_index)
 	{
-		for (p = 1; p < cord_num; p++) {
-			for (k = p - 1 - 2; k >= 0; k--) {
+		for (int p = 2; p <= cord_num; ++p) {
+			for (int k = (p - 1); k >= 0; --k) {
 				if (k != 0) {
 					lmax = p - k;
 				} else {
 					lmax = p - k - 2;
 				}
-				for (l = lmax - 1; lmax >= 0; l--) {
-					if ((p - k - l) & 1 == 1)
+				for (int l = lmax; l >= 0; --l) {
+					if (((p - k - l) & 1) == 1)
 						continue;
 					m = (p - k - l) / 2;
-					kk = kk + 1;
 					lkpm_combined_index[kk] = l;
 					lkpm_combined_index[kk + dim_c_vector] = k;
 					lkpm_combined_index[kk + 2 * dim_c_vector] = p;
 					lkpm_combined_index[kk + 3 * dim_c_vector] = m;
+					kk = kk + 1;
 				}
 			}
 		}
@@ -1784,36 +1893,29 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 
 #pragma acc kernels deviceptr(een_rescaled_e, een_rescaled_n, tmp_c)
 	{
+
 		for (int64_t nw = 0; nw < walk_num; ++nw) {
 			for (int64_t i = 0; i < cord_num; ++i) {
-				/* TODO Replace by a device BLAS call or write a temporary
-				manual DGEMM info = qmckl_dgemm(context, TransA, TransB, M, N,
-				K, alpha,
-								&(een_rescaled_e[af * (i + nw * (cord_num +
-				1))]), LDA, &(een_rescaled_n[bf * nw]), LDB, beta,
-								&(tmp_c[cf * (i + nw * cord_num)]), LDC);
-				 */
+
+				// Single DGEMM
 				double *A = een_rescaled_e + (af * (i + nw * (cord_num + 1)));
 				double *B = een_rescaled_n + (bf * nw);
 				double *C = tmp_c + (cf * (i + nw * cord_num));
 
 				// Row of A
-				for (int i = 0; i < LDA; i++) {
+				for (int i = 0; i < M; i++) {
 					// Cols of B
-					for (int j = 0; j < LDB; j++) {
+					for (int j = 0; j < N; j++) {
 
 						// Compute C(i,j)
-						C[i + LDC * j] = 0;
-						for (int k = 0; k < LDC; k++) {
-							C[i + LDC * j] = A[i + k * LDA] * B[k + j * LDB];
+						C[i + LDC * j] = 0.;
+						for (int k = 0; k < K; k++) {
+							C[i + LDC * j] += A[i + k * LDA] * B[k + j * LDB];
 						}
 					}
 				}
 			}
 		}
-		printf("tmp_c[0]=%lf\n", tmp_c[0]);
-		printf("tmp_c[1]=%lf\n", tmp_c[1]);
-		printf("tmp_c[2]=%lf\n", tmp_c[2]);
 	}
 	return info;
 }
@@ -1863,18 +1965,31 @@ qmckl_exit_code_device qmckl_compute_dtmp_c_device(
 	const int64_t bf = elec_num * nucl_num * (cord_num + 1);
 	const int64_t cf = elec_num * 4 * nucl_num * (cord_num + 1);
 
+	// TODO Alternative versions with call to DGEMM / batched DGEMM ?
+
 #pragma acc kernels deviceptr(een_rescaled_e_deriv_e, een_rescaled_n, dtmp_c)
 	{
 		for (int64_t nw = 0; nw < walk_num; ++nw) {
 			for (int64_t i = 0; i < cord_num; ++i) {
-				/* TODO Replace by a device BLAS call or write a temporary
-				  manual DGEMM info = qmckl_dgemm(context, TransA, TransB, M, N,
-				  K, alpha,
-									 &(een_rescaled_e_deriv_e[af*(i+nw*(cord_num+1))]),
-				  LDA,
-									 &(een_rescaled_n[bf*nw]), LDB, beta,
-									 &(dtmp_c[cf*(i+nw*cord_num)]), LDC);
-							   */
+
+				// Single DGEMM
+				double *A =
+					een_rescaled_e_deriv_e + (af * (i + nw * (cord_num + 1)));
+				double *B = een_rescaled_n + (bf * nw);
+				double *C = dtmp_c + (cf * (i + nw * cord_num));
+
+				// Row of A
+				for (int i = 0; i < M; i++) {
+					// Cols of B
+					for (int j = 0; j < N; j++) {
+
+						// Compute C(i,j)
+						C[i + LDC * j] = 0.;
+						for (int k = 0; k < K; k++) {
+							C[i + LDC * j] += A[i + k * LDA] * B[k + j * LDB];
+						}
+					}
+				}
 			}
 		}
 	}

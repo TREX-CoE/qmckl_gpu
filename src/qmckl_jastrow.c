@@ -2151,7 +2151,6 @@ qmckl_provide_tmp_c_device(qmckl_context_device context) {
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return QMCKL_NULL_CONTEXT_DEVICE;
 	}
-	printf("[provide_tmp_c] In\n");
 
 	qmckl_context_struct_device *const ctx =
 		(qmckl_context_struct_device *)context;
@@ -2226,8 +2225,9 @@ qmckl_provide_een_rescaled_e_deriv_e_device(qmckl_context_device context) {
 
 	/* Check if ee distance is provided */
 	qmckl_exit_code_device rc = qmckl_provide_een_rescaled_e_device(context);
-	if (rc != QMCKL_SUCCESS_DEVICE)
+	if (rc != QMCKL_SUCCESS_DEVICE) {
 		return rc;
+	}
 
 	/* Compute if necessary */
 	if (ctx->date > ctx->jastrow.een_rescaled_e_deriv_e_date) {
