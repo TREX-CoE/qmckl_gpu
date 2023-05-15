@@ -18,16 +18,16 @@ lib_LTLIBRARIES = libqmckl_gpu.la
 
 libqmckl_gpu_la_SOURCES = ""
 
-libqmckl_gpu_la_SOURCES += src/qmckl_context.c src/qmckl_basic_functions.c \
+libqmckl_gpu_la_SOURCES += src/qmckl_context.c src/qmckl_basic_functions.c src/qmckl_point.c \
 src/qmckl_memory.c src/qmckl_blas.c src/qmckl_electron.c src/qmckl_nucleus.c \
-src/qmckl_trexio.c src/qmckl_ao.c src/qmckl_mo.c
+src/qmckl_trexio.c src/qmckl_ao.c src/qmckl_mo.c src/qmckl_jastrow.c
 
 # Enable OpenMP-specific device functions
 if HAVE_OMP_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_memory_omp.c \
   src/qmckl_nucleus_omp.c src/qmckl_point_omp.c \
-  src/qmckl_blas_omp.c src/qmckl_ao_omp.c \
-  src/qmckl_mo_omp.c
+  src/qmckl_blas_omp.c stc/qmckl_distance_omp.c \
+  src/qmckl_ao_omp.c src/qmckl_mo_omp.c src/qmckl_jastrow_omp.c
 endif
 
 if HAVE_OMP_DEVICE
@@ -40,8 +40,8 @@ endif
 if HAVE_ACC_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_memory_acc.c \
   src/qmckl_nucleus_acc.c src/qmckl_point_acc.c \
-  src/qmckl_blas_acc.c src/qmckl_ao_acc.c \
-  src/qmckl_mo_acc.c
+  src/qmckl_blas_acc.c src/qmckl_distance_acc.c \
+  src/qmckl_ao_acc.c src/qmckl_mo_acc.c src/qmckl_jastrow_acc.c
 endif
 
 
@@ -60,11 +60,17 @@ if HAVE_OMP_DEVICE
 endif
 
 if HAVE_ACC_DEVICE
+  check_PROGRAMS += tests/test_qmckl_jastrow
+  tests_test_qmckl_jastrow_LDADD = libqmckl_gpu.la
+
   tests_test_qmckl_ao_SOURCES = tests/test_qmckl_ao_acc.c chbrclf.h
   tests_test_qmckl_ao_LDFLAGS = -lm
 
   tests_test_qmckl_mo_SOURCES = tests/test_qmckl_mo_acc.c chbrclf.h
   tests_test_qmckl_mo_LDFLAGS = -lm
+
+  tests_test_qmckl_jastrow_SOURCES = tests/test_qmckl_jastrow_acc.c n2.h
+  tests_test_qmckl_jastrow_LDFLAGS = -lm
 endif
 
 # This shoud be added whether we use OpenMP or ACC

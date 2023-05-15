@@ -162,7 +162,8 @@ AC_ARG_ENABLE(fortran-interface, [AS_HELP_STRING([--enable-fortran-interface],[E
 # Fallback solution if nothing is enabled :
 # (probably because no GPU argument have been provided)
 # Enable OpenMP offload by default
-AS_IF([ test "x$have_omp" = "xno" -a "x$have_acc" = "xno" ], [
+
+AS_IF([ test "x$have_omp" = "xno" -a "x$have_acc" = "xno"], [
 	AC_OUTPUT
 	echo \
 	"Warning: Neither OpenMP or OpenACC could be enabled using the passed arguments. Attempting to enable OpenMP as fallback."
@@ -200,6 +201,7 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp" = "xyes"], [
 			echo "Warning : compiler not recognized for OpenMP. Make sure to add necessary offload flags manually."
 	esac
 ])
+
 AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc" = "xyes"], [
 	case $CC in
 		*gcc*)

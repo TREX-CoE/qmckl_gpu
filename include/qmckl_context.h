@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <omp.h>
 
 #include "qmckl_types.h"
 #include "qmckl_basic_functions.h"

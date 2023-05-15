@@ -38,19 +38,7 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 				}
 			}
 		}
-		/*
-		 * BUG As of now, "acc parallel" caused the following internal compiler
-		 * error on  gcc (Spack GCC) 12.1.0 :
-		 *
-		 * ../src/qmckl_ao_acc.c: In function
-		 * 'qmckl_compute_ao_basis_shell_gaussian_vgl_device._omp_fn.0':
-		 * ../src/qmckl_ao_acc.c:31:9: internal compiler error: in
-		 * expand_UNIQUE, at internal-fn.cc:2996 31 | #pragma acc parallel loop
-		 * gang worker vector
-		 *
-		 *  TODO Until this error is fixed, we might want to wrap desired
-		 * pragmas in #ifdefs depending on the compiler
-		 * */
+
 #pragma acc parallel loop collapse(2)
 		for (int ipoint = 0; ipoint < point_num; ipoint++) {
 			for (int ishell = 0; ishell < shell_num; ishell++) {
@@ -178,6 +166,7 @@ int *shell_to_nucl = qmckl_malloc_device(context, sizeof(int) * shell_num);
 #pragma acc data deviceptr(nucleus_index, nucleus_shell_num, shell_ang_mom,    \
 						   ao_index, lstart, shell_to_nucl) copyin(k_p [0:1])
 {
+
 #pragma acc kernels
 	{for (int inucl = 0; inucl < nucl_num;
 		  inucl++){int ishell_start = nucleus_index[inucl];
