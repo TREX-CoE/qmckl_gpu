@@ -20,7 +20,7 @@ qmckl_exit_code_device qmckl_compute_ao_basis_shell_gaussian_vgl_device(
 
 	int *shell_to_nucl = qmckl_malloc_device(context, sizeof(int) * shell_num);
 
-#pragma omp target is_device_ptr(shell_to_nucl)
+#pragma omp target is_device_ptr(shell_to_nucl, nucleus_index, nucleus_shell_num)
 	{
 #pragma omp teams distribute parallel for
 		for (int inucl = 0; inucl < nucl_num; inucl++) {
@@ -135,7 +135,7 @@ qmckl_exit_code_device qmckl_compute_ao_vgl_gaussian_device(
 
 	double *poly_vgl_shared =
 		qmckl_malloc_device(context, sizeof(double) * poly_dim);
-	int64_t *ao_index = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
+	int64_t *ao_index = qmckl_malloc_device(context, sizeof(int64_t) * shell_num);
 	int64_t *lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Specific calling function
@@ -469,7 +469,7 @@ qmckl_exit_code_device qmckl_compute_ao_value_gaussian_device(
 
 	double *poly_vgl_shared =
 		qmckl_malloc_device(context, sizeof(double) * poly_dim);
-	int64_t *ao_index = qmckl_malloc_device(context, sizeof(int64_t) * ao_num);
+	int64_t *ao_index = qmckl_malloc_device(context, sizeof(int64_t) * shell_num);
 	int64_t *lstart = qmckl_malloc_device(context, sizeof(int64_t) * 21);
 
 	// Specific calling function

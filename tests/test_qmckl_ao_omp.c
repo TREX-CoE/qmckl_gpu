@@ -1,4 +1,3 @@
-#include "qmckl.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -6,6 +5,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "chbrclf.h"
 #include "../include/qmckl_gpu.h"
@@ -41,18 +41,18 @@ int main() {
 					 3 * nucl_num * sizeof(double));
 
 	// Set nucleus stuff in context
-	qmckl_exit_code rc;
+	qmckl_exit_code_device rc;
 	rc = qmckl_set_nucleus_num_device(context, nucl_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc = qmckl_set_nucleus_coord_device(context, 'T', nucl_coord_d,
 										3 * nucl_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc = qmckl_set_nucleus_charge_device(context, nucl_charge_d, nucl_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	if (!qmckl_nucleus_provided_device(context))
@@ -117,67 +117,67 @@ int main() {
 	char typ = 'G';
 
 	rc = qmckl_set_ao_basis_type_device(context, typ);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc = qmckl_set_ao_basis_shell_num_device(context, shell_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc = qmckl_set_ao_basis_prim_num_device(context, prim_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc = qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index_d,
 												 nucl_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc = qmckl_set_ao_basis_nucleus_shell_num_device(
 		context, nucleus_shell_num_d, nucl_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc = qmckl_set_ao_basis_shell_ang_mom_device(context, shell_ang_mom_d,
 												 shell_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc = qmckl_set_ao_basis_shell_factor_device(context, shell_factor_d,
 												shell_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc = qmckl_set_ao_basis_shell_prim_num_device(context, shell_prim_num_d,
 												  shell_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc = qmckl_set_ao_basis_shell_prim_index_device(context, shell_prim_index_d,
 													shell_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc = qmckl_set_ao_basis_exponent_device(context, exponent_d, prim_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc =
 		qmckl_set_ao_basis_coefficient_device(context, coefficient_d, prim_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc =
 		qmckl_set_ao_basis_prim_factor_device(context, prim_factor_d, prim_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc = qmckl_set_ao_basis_ao_num_device(context, ao_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	rc = qmckl_set_ao_basis_ao_factor_device(context, ao_factor_d, ao_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	if (!qmckl_ao_basis_provided_device(context))
@@ -201,19 +201,19 @@ int main() {
 	char typ_test;
 
 	rc = qmckl_get_ao_basis_type_device(context, &typ_test);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 	if (typ != typ_test)
 		return 1;
 
 	rc = qmckl_get_ao_basis_shell_num_device(context, &shell_num_test);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 	if (shell_num != shell_num_test)
 		return 1;
 
 	rc = qmckl_get_ao_basis_prim_num_device(context, &prim_num_test);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 	if (prim_num != prim_num_test)
 		return 1;
@@ -222,7 +222,7 @@ int main() {
 		(int64_t *)qmckl_malloc_device(context, nucl_num * sizeof(int64_t));
 	rc = qmckl_get_ao_basis_nucleus_index_device(context, nucleus_index_test,
 												 nucl_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	bool wrong_val = false;
@@ -241,7 +241,7 @@ int main() {
 		(int64_t *)qmckl_malloc_device(context, nucl_num * sizeof(int64_t));
 	rc = qmckl_get_ao_basis_nucleus_shell_num_device(
 		context, nucleus_shell_num_test, nucl_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 #pragma omp target parallel for is_device_ptr(nucleus_shell_num_d,             \
@@ -258,7 +258,7 @@ int main() {
 		(int32_t *)qmckl_malloc_device(context, shell_num * sizeof(int32_t));
 	rc = qmckl_get_ao_basis_shell_ang_mom_device(context, shell_ang_mom_test,
 												 shell_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 #pragma omp target parallel for is_device_ptr(shell_ang_mom_d,                 \
@@ -275,7 +275,7 @@ int main() {
 		(double *)qmckl_malloc_device(context, shell_num * sizeof(double));
 	rc = qmckl_get_ao_basis_shell_factor_device(context, shell_factor_test,
 												shell_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 #pragma omp target parallel for is_device_ptr(shell_factor_d, shell_factor_test)
@@ -291,14 +291,14 @@ int main() {
 		(int64_t *)qmckl_malloc_device(context, shell_num * sizeof(int64_t));
 	rc = qmckl_get_ao_basis_shell_prim_num_device(context, shell_prim_num_test,
 												  shell_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	shell_prim_index_test =
 		(int64_t *)qmckl_malloc_device(context, shell_num * sizeof(int64_t));
 	rc = qmckl_get_ao_basis_shell_prim_index_device(
 		context, shell_prim_index_test, shell_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 #pragma omp target parallel for is_device_ptr(shell_prim_index_d,              \
@@ -314,7 +314,7 @@ int main() {
 	exponent_test =
 		(double *)qmckl_malloc_device(context, prim_num * sizeof(double));
 	rc = qmckl_get_ao_basis_exponent_device(context, exponent_test, prim_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 #pragma omp target parallel for is_device_ptr(exponent_d, exponent_test)
@@ -331,7 +331,7 @@ int main() {
 		(double *)qmckl_malloc_device(context, prim_num * sizeof(double));
 	rc = qmckl_get_ao_basis_coefficient_device(context, coefficient_test,
 											   prim_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 #pragma omp target parallel for is_device_ptr(coefficient_d, coefficient_test)
@@ -347,7 +347,7 @@ int main() {
 		(double *)qmckl_malloc_device(context, prim_num * sizeof(double));
 	rc = qmckl_get_ao_basis_prim_factor_device(context, prim_factor_test,
 											   prim_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 #pragma omp target parallel for is_device_ptr(prim_factor_d, prim_factor_test)
@@ -366,7 +366,7 @@ int main() {
 	ao_factor_test =
 		(double *)qmckl_malloc_device(context, ao_num * sizeof(double));
 	rc = qmckl_get_ao_basis_ao_factor_device(context, ao_factor_test, ao_num);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 #pragma omp target parallel for is_device_ptr(ao_factor_d, ao_factor_test)
@@ -397,7 +397,7 @@ int main() {
 
 	rc = qmckl_set_point_device(context, 'N', point_num, elec_coord_d,
 								point_num * 3);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	// Get & test ao_value values
@@ -405,6 +405,7 @@ int main() {
 		qmckl_malloc_device(context, point_num * ao_num * sizeof(double));
 	double *ao_value = malloc(point_num * ao_num * sizeof(double));
 
+	printf("About to get values\n");
 	rc = qmckl_get_ao_basis_ao_value_device(context, ao_value_d,
 											(int64_t)(point_num * ao_num));
 
@@ -436,11 +437,12 @@ int main() {
 		qmckl_malloc_device(context, point_num * 5 * ao_num * sizeof(double));
 	double *ao_vgl = malloc(point_num * 5 * ao_num * sizeof(double));
 
+	printf("About to get vgl\n");
 	rc = qmckl_get_ao_basis_ao_vgl_device(context, ao_vgl_d,
 										  (int64_t)5 * point_num * ao_num);
 	qmckl_memcpy_D2H(context, ao_vgl, ao_vgl_d,
 					 point_num * 5 * ao_num * sizeof(double));
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	printf("\n");
@@ -530,9 +532,8 @@ int main() {
 		}
 	}
 
-	// TODO Fix this
 	rc = qmckl_context_destroy_device(context);
-	if (rc != QMCKL_SUCCESS)
+	if (rc != QMCKL_SUCCESS_DEVICE)
 		return 1;
 
 	return 0;

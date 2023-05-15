@@ -162,6 +162,7 @@ AC_ARG_ENABLE(fortran-interface, [AS_HELP_STRING([--enable-fortran-interface],[E
 # Fallback solution if nothing is enabled :
 # (probably because no GPU argument have been provided)
 # Enable OpenMP offload by default
+
 AS_IF([ test "x$have_omp" = "xno" -a "x$have_acc" = "xno"], [
 	AC_OUTPUT
 	echo \
@@ -201,7 +202,6 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp" = "xyes"], [
 	esac
 ])
 
-
 AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc" = "xyes"], [
 	case $CC in
 		*gcc*)
@@ -216,7 +216,6 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc" = "xyes"], [
 			echo "Warning : compiler not supported for OpenACC. Make sure to add necessary offload flags manually."
 	esac
 ])
-
 
 # If TREXIO or cuBLAS have been enabled, define Automake & preprocessors variables
 AS_IF([test "x$have_trexio" = "xyes"], [
@@ -264,8 +263,6 @@ AS_CASE([$FC],
 ## Define Makefile variables from configure flags
 ####
 
-AM_CONDITIONAL([HAVE_OMP_OFFLOAD], [test "x$have_omp_offload"  = "xyes"])
-AM_CONDITIONAL([HAVE_ACC_OFFLOAD], [test "x$have_acc_offload" = "xyes"])
 AM_CONDITIONAL([HAVE_OMP_DEVICE],  [test "x$have_omp"  = "xyes"])
 AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc"  = "xyes"])
 AM_CONDITIONAL([HAVE_FORTRAN_INTERFACE],  [test "x$have_fortran_interface"  = "xyes"])

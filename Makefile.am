@@ -18,7 +18,6 @@ lib_LTLIBRARIES = libqmckl_gpu.la
 
 libqmckl_gpu_la_SOURCES = ""
 
-
 libqmckl_gpu_la_SOURCES += src/qmckl_context.c src/qmckl_basic_functions.c src/qmckl_point.c \
 src/qmckl_memory.c src/qmckl_blas.c src/qmckl_electron.c src/qmckl_nucleus.c \
 src/qmckl_trexio.c src/qmckl_ao.c src/qmckl_mo.c src/qmckl_jastrow.c
