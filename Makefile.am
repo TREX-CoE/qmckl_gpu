@@ -26,7 +26,7 @@ src/qmckl_trexio.c src/qmckl_ao.c src/qmckl_mo.c src/qmckl_jastrow.c
 if HAVE_OMP_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_memory_omp.c \
   src/qmckl_nucleus_omp.c src/qmckl_point_omp.c \
-  src/qmckl_blas_omp.c stc/qmckl_distance_omp.c \
+  src/qmckl_blas_omp.c src/qmckl_distance_omp.c \
   src/qmckl_ao_omp.c src/qmckl_mo_omp.c src/qmckl_jastrow_omp.c
 endif
 

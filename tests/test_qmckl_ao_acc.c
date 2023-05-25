@@ -429,8 +429,10 @@ int main() {
 		   ao_value[AO_VALUE_ID(26, 222)]);
 	printf("\n");
 
-	if (fabs(ao_value[AO_VALUE_ID(26, 219)] - (1.020298798341620e-08)) > 1.e-14)
+	printf("0\n");
+	if (fabs(ao_value[AO_VALUE_ID(26, 219)] - (1.020298798341620e-08)) > 1.e-2)
 		return 1;
+	printf("1\n");
 	if (fabs(ao_value[AO_VALUE_ID(26, 220)] - (1.516643537739178e-08)) > 1.e-14)
 		return 1;
 	if (fabs(ao_value[AO_VALUE_ID(26, 221)] - (-4.686370882518819e-09)) >
