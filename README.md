@@ -34,6 +34,18 @@ In either case, the library interface is going to be exactly the same, as all of
 
 **Note:** Using exactly one of those arguments is mandatory, as doing otherwise would result in an empty library. If none is specified, Autotools will throw a warning message and attempt to build the library with `--enable-omp` as a fallback solution.
 
+### For AMD GPU
+
+If you use AMD GPU you need to specified other thing. Change your compiler (HIPCC or clang with AMD gpu configuration), and add some specific compiler flags to your hardware.
+
+```
+./configure --enable-omp CC=/opt/rocm/hip/bin/hipcc  CFLAGS="-target x86_64-pc-linux-gnu  -fopenmp=libomp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx1030"  --prefix=$PWD/_INSTALL
+
+```
+You can found your specific arch for -march with ```  /opt/rocm/bin/rocminfo | grep gfx ```
+
+
+
 ## Compilers support 
 
 We currently support nvc, gcc and clang. This means we have succesfully built and run the library with one of these compilers, on hardware from at least one vendor. You can specify which compiler to use by specifying the `CC=...` variable to the configure (gcc should be the default). 
