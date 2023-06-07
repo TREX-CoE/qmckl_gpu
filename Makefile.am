@@ -49,7 +49,7 @@ endif
 # Build test programs
 ###
 
-check_PROGRAMS = tests/test_qmckl_ao tests/test_qmckl_mo
+check_PROGRAMS = tests/test_qmckl_ao tests/test_qmckl_mo tests/test_qmckl_jastrow
 
 if HAVE_OMP_DEVICE
   tests_test_qmckl_ao_SOURCES = tests/test_qmckl_ao_omp.c chbrclf.h
@@ -57,12 +57,12 @@ if HAVE_OMP_DEVICE
 
   tests_test_qmckl_mo_SOURCES = tests/test_qmckl_mo_omp.c chbrclf.h
   tests_test_qmckl_mo_LDFLAGS = -lm
+
+  tests_test_qmckl_jastrow_SOURCES = tests/test_qmckl_jastrow_omp.c n2.h
+  tests_test_qmckl_jastrow_LDFLAGS = -lm
 endif
 
 if HAVE_ACC_DEVICE
-  check_PROGRAMS += tests/test_qmckl_jastrow
-  tests_test_qmckl_jastrow_LDADD = libqmckl_gpu.la
-
   tests_test_qmckl_ao_SOURCES = tests/test_qmckl_ao_acc.c chbrclf.h
   tests_test_qmckl_ao_LDFLAGS = -lm
 
@@ -76,6 +76,7 @@ endif
 # This shoud be added whether we use OpenMP or ACC
 tests_test_qmckl_ao_LDADD = libqmckl_gpu.la
 tests_test_qmckl_mo_LDADD = libqmckl_gpu.la
+tests_test_qmckl_jastrow_LDADD = libqmckl_gpu.la
 
 if HAVE_FORTRAN_INTERFACE
   check_PROGRAMS += tests/test_qmckl_fortran_interface
