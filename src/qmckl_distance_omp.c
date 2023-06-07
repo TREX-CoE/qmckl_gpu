@@ -99,7 +99,7 @@ qmckl_distance_device(const qmckl_context_device context, const char transa,
 	case 0:
 #pragma omp target is_device_ptr(A, B, C)
 	{
-#pragma omp teams loop
+#pragma omp teams distribute parallel for simd
 		for (int j = 0; j < n; j++) {
 			for (int i = 0; i < m; i++) {
 				x = A[0 + i * lda] - B[0 + j * ldb];
@@ -115,7 +115,7 @@ qmckl_distance_device(const qmckl_context_device context, const char transa,
 	case 1:
 #pragma omp target is_device_ptr(A, B, C)
 	{
-#pragma omp teams loop
+#pragma omp teams distribute parallel for simd
 		for (int j = 0; j < n; j++) {
 			for (int i = 0; i < m; i++) {
 				x = A[i + 0 * lda] - B[0 + j * ldb];
@@ -131,7 +131,7 @@ qmckl_distance_device(const qmckl_context_device context, const char transa,
 	case 2:
 #pragma omp target is_device_ptr(A, B, C)
 	{
-#pragma omp teams loop
+#pragma omp teams distribute parallel for simd
 		for (int j = 0; j < n; j++) {
 			for (int i = 0; i < m; i++) {
 				x = A[0 + i * lda] - B[j + 0 * ldb];
@@ -147,7 +147,7 @@ qmckl_distance_device(const qmckl_context_device context, const char transa,
 	case 3:
 #pragma omp target is_device_ptr(A, B, C)
 	{
-#pragma omp teams loop
+#pragma omp teams distribute parallel for simd
 		for (int j = 0; j < n; j++) {
 			for (int i = 0; i < m; i++) {
 				x = A[i + 0 * lda] - B[j + 0 * ldb];
@@ -266,7 +266,7 @@ qmckl_exit_code_device qmckl_distance_rescaled_device(
 	case 0:
 #pragma omp target is_device_ptr(A, B, C)
 	{
-#pragma omp teams loop
+#pragma omp teams distribute parallel for simd collapse(2)
 		for (j = 0; j < n; j++) {
 			for (i = 0; i < m; i++) {
 				x = A[0 + i * lda] - B[0 + j * ldb];
@@ -282,7 +282,7 @@ qmckl_exit_code_device qmckl_distance_rescaled_device(
 	case 1:
 #pragma omp target is_device_ptr(A, B, C)
 	{
-#pragma omp teams loop
+#pragma omp teams distribute parallel for simd collapse(2)
 		for (int j = 0; j < n; j++) {
 			for (int i = 0; i < m; i++) {
 				x = A[i + 0 * lda] - B[0 + j * ldb];
@@ -298,7 +298,7 @@ qmckl_exit_code_device qmckl_distance_rescaled_device(
 	case 2:
 #pragma omp target is_device_ptr(A, B, C)
 	{
-#pragma omp teams loop
+#pragma omp teams distribute parallel for simd collapse(2)
 		for (int j = 0; j < n; j++) {
 			for (int i = 0; i < m; i++) {
 				x = A[0 + i * lda] - B[j + 0 * ldb];
@@ -314,7 +314,7 @@ qmckl_exit_code_device qmckl_distance_rescaled_device(
 	case 3:
 #pragma omp target is_device_ptr(A, B, C)
 	{
-#pragma omp teams loop
+#pragma omp teams distribute parallel for simd collapse(2)
 		for (j = 0; j < n; j++) {
 			for (i = 0; i < m; i++) {
 				x = A[i + 0 * lda] - B[j + 0 * ldb];
@@ -432,7 +432,7 @@ qmckl_exit_code_device qmckl_distance_rescaled_deriv_e_device(
 	case 0:
 #pragma omp target is_device_ptr(A, B, C)
 	{
-#pragma omp teams loop collapse(2)
+#pragma omp teams distribute parallel for simd collapse(2)
 		for (int j = 0; j < n; j++) {
 			for (int i = 0; i < m; i++) {
 				x = A[0 + i * lda] - B[0 + j * ldb];
@@ -458,7 +458,7 @@ qmckl_exit_code_device qmckl_distance_rescaled_deriv_e_device(
 	case 1:
 #pragma omp target is_device_ptr(A, B, C)
 	{
-#pragma omp teams loop collapse(2)
+#pragma omp teams distribute parallel for simd collapse(2)
 		for (int j = 0; j < n; j++) {
 			for (int i = 0; i < m; i++) {
 				x = A[i + 0 * lda] - B[0 + j * ldb];
@@ -483,7 +483,7 @@ qmckl_exit_code_device qmckl_distance_rescaled_deriv_e_device(
 	case 2:
 #pragma omp target is_device_ptr(A, B, C)
 	{
-#pragma omp teams loop collapse(2)
+#pragma omp teams distribute parallel for simd collapse(2)
 		for (int j = 0; j < n; j++) {
 			for (int i = 0; i < m; i++) {
 				x = A[0 + i * lda] - B[j + 0 * ldb];
@@ -509,7 +509,7 @@ qmckl_exit_code_device qmckl_distance_rescaled_deriv_e_device(
 	case 3:
 #pragma omp target is_device_ptr(A, B, C)
 	{
-#pragma omp teams loop collapse(2)
+#pragma omp teams distribute parallel for simd collapse(2)
 		for (int j = 0; j < n; j++) {
 			for (int i = 0; i < m; i++) {
 				x = A[i + 0 * lda] - B[j + 0 * ldb];
