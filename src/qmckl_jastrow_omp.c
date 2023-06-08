@@ -821,9 +821,10 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_device(
 		return info;
 	}
 
-#pragma omp target is_device_ptr(c_vector_full, lkpm_combined_index, tmp_c, een_rescaled_n, factor_een)
+#pragma omp target is_device_ptr(c_vector_full, lkpm_combined_index, tmp_c,    \
+								 een_rescaled_n, factor_een)
 	{
-		#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for simd
 		for (nw = 0; nw < walk_num; nw++) {
 			factor_een[nw] = 0.0;
 			for (n = 0; n < dim_c_vector; n++) {
@@ -1314,10 +1315,9 @@ qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
 			een_rescaled_n_deriv_e[i] = 0.0;
 	}
 
-#pragma omp target is_device_ptr(rescale_factor_en, coord_ee, coord_en,        \
-								 en_distance, een_rescaled_n,                  \
-								 een_rescaled_n_deriv_e, elnuc_dist_deriv_e, \
-								 type_nucl_vector)
+#pragma omp target is_device_ptr(                                              \
+	rescale_factor_en, coord_ee, coord_en, en_distance, een_rescaled_n,        \
+	een_rescaled_n_deriv_e, elnuc_dist_deriv_e, type_nucl_vector)
 	{
 #pragma omp teams distribute parallel for simd
 		for (int nw = 0; nw < walk_num; nw++) {
@@ -1478,78 +1478,6 @@ qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
 }
 
 // Distances
-qmckl_exit_code_device qmckl_compute_ee_distance_rescaled_device(
-	const qmckl_context_device context, const int64_t elec_num,
-	const double rescale_factor_ee, const int64_t walk_num, const double *coord,
-	double *const ee_distance_rescaled) {
-
-	int k;
-
-	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
-
-	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
-		info = QMCKL_INVALID_CONTEXT_DEVICE;
-		return info;
-	}
-
-	if (elec_num <= 0) {
-		info = QMCKL_INVALID_ARG_2_DEVICE;
-		return info;
-	}
-
-	if (walk_num <= 0) {
-		info = QMCKL_INVALID_ARG_3_DEVICE;
-		return info;
-	}
-
-	for (int k = 0; k < walk_num; k++) {
-		info = qmckl_distance_rescaled_device(
-			context, 'T', 'T', elec_num, elec_num, coord + (k * elec_num),
-			elec_num * walk_num, coord + (k * elec_num), elec_num * walk_num,
-			ee_distance_rescaled + (k * elec_num * elec_num), elec_num,
-			rescale_factor_ee);
-		if (info != QMCKL_SUCCESS_DEVICE) {
-			break;
-		}
-	}
-	return info;
-}
-
-qmckl_exit_code_device qmckl_compute_ee_distance_rescaled_deriv_e_device(
-	const qmckl_context_device context, const int64_t elec_num,
-	const double rescale_factor_ee, const int64_t walk_num, const double *coord,
-	double *const ee_distance_rescaled_deriv_e) {
-
-	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
-
-	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
-		info = QMCKL_INVALID_CONTEXT_DEVICE;
-		return info;
-	}
-
-	if (elec_num <= 0) {
-		info = QMCKL_INVALID_ARG_2_DEVICE;
-		return info;
-	}
-
-	if (walk_num <= 0) {
-		info = QMCKL_INVALID_ARG_3_DEVICE;
-		return info;
-	}
-
-	for (int k = 0; k < walk_num; k++) {
-		info = qmckl_distance_rescaled_deriv_e_device(
-			context, 'T', 'T', elec_num, elec_num, coord + (k * elec_num),
-			elec_num * walk_num, coord + (k * elec_num), elec_num * walk_num,
-			ee_distance_rescaled_deriv_e + (k * 4 * elec_num * elec_num),
-			elec_num, rescale_factor_ee);
-
-		if (info != QMCKL_SUCCESS_DEVICE)
-			break;
-	}
-
-	return info;
-}
 
 qmckl_exit_code_device qmckl_compute_en_distance_rescaled_device(
 	const qmckl_context_device context, const int64_t elec_num,
@@ -2023,9 +1951,9 @@ qmckl_exit_code_device qmckl_compute_dtmp_c_device(
 
 	// TODO Alternative versions with call to DGEMM / batched DGEMM ?
 
-	#pragma omp target is_device_ptr(een_rescaled_e_deriv_e, een_rescaled_n, dtmp_c)
+#pragma omp target is_device_ptr(een_rescaled_e_deriv_e, een_rescaled_n, dtmp_c)
 	{
-		#pragma omp teams distribute parallel for simd collapse(2)
+#pragma omp teams distribute parallel for simd collapse(2)
 		for (int64_t nw = 0; nw < walk_num; ++nw) {
 			for (int64_t i = 0; i < cord_num; ++i) {
 				// Single DGEMM

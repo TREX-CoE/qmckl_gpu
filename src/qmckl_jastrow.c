@@ -56,6 +56,83 @@ qmckl_finalize_jastrow_device(qmckl_context_device context) {
 }
 
 //**********
+// FINALIZE
+//**********
+
+qmckl_exit_code_device qmckl_compute_ee_distance_rescaled_device(
+	const qmckl_context_device context, const int64_t elec_num,
+	const double rescale_factor_ee, const int64_t walk_num, const double *coord,
+	double *const ee_distance_rescaled) {
+
+	int k;
+
+	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
+
+	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
+		info = QMCKL_INVALID_CONTEXT_DEVICE;
+		return info;
+	}
+
+	if (elec_num <= 0) {
+		info = QMCKL_INVALID_ARG_2_DEVICE;
+		return info;
+	}
+
+	if (walk_num <= 0) {
+		info = QMCKL_INVALID_ARG_3_DEVICE;
+		return info;
+	}
+
+	for (int k = 0; k < walk_num; k++) {
+		info = qmckl_distance_rescaled_device(
+			context, 'T', 'T', elec_num, elec_num, coord + (k * elec_num),
+			elec_num * walk_num, coord + (k * elec_num), elec_num * walk_num,
+			ee_distance_rescaled + (k * elec_num * elec_num), elec_num,
+			rescale_factor_ee);
+		if (info != QMCKL_SUCCESS_DEVICE) {
+			break;
+		}
+	}
+	return info;
+}
+
+qmckl_exit_code_device qmckl_compute_ee_distance_rescaled_deriv_e_device(
+	const qmckl_context_device context, const int64_t elec_num,
+	const double rescale_factor_ee, const int64_t walk_num, const double *coord,
+	double *const ee_distance_rescaled_deriv_e) {
+
+	qmckl_exit_code_device info = QMCKL_SUCCESS_DEVICE;
+
+	if (context == QMCKL_NULL_CONTEXT_DEVICE) {
+		info = QMCKL_INVALID_CONTEXT_DEVICE;
+		return info;
+	}
+
+	if (elec_num <= 0) {
+		info = QMCKL_INVALID_ARG_2_DEVICE;
+		return info;
+	}
+
+	if (walk_num <= 0) {
+		info = QMCKL_INVALID_ARG_3_DEVICE;
+		return info;
+	}
+
+	for (int k = 0; k < walk_num; k++) {
+		info = qmckl_distance_rescaled_deriv_e_device(
+			context, 'T', 'T', elec_num, elec_num, coord + (k * elec_num),
+			elec_num * walk_num, coord + (k * elec_num), elec_num * walk_num,
+			ee_distance_rescaled_deriv_e + (k * 4 * elec_num * elec_num),
+			elec_num, rescale_factor_ee);
+
+		if (info != QMCKL_SUCCESS_DEVICE)
+			break;
+	}
+
+	return info;
+}
+
+//**********
 // SETTERS
 //**********
 

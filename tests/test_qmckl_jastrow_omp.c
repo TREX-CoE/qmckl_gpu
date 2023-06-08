@@ -829,8 +829,8 @@ int main() {
 
 	rc = qmckl_get_jastrow_value_device(context, total_j, walk_num);
 
-#pragma omp target is_device_ptr(total_j_deriv, total_j, factor_ee_deriv_e,       \
-							  factor_en_deriv_e, factor_een_deriv_e)
+#pragma omp target is_device_ptr(total_j_deriv, total_j, factor_ee_deriv_e,    \
+								 factor_en_deriv_e, factor_een_deriv_e)
 	{
 		for (int64_t k = 0; k < walk_num; ++k) {
 			for (int64_t m = 0; m < 4; ++m) {
