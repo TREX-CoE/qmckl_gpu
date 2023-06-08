@@ -821,9 +821,9 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_device(
 		return info;
 	}
 
-#pragma omp target teams distribute parallel for simd is_device_ptr(           \
-	c_vector_full, lkpm_combined_index, tmp_c, een_rescaled_n)
+#pragma omp target is_device_ptr(c_vector_full, lkpm_combined_index, tmp_c, een_rescaled_n, factor_een)
 	{
+		#pragma omp teams distribute parallel for simd
 		for (nw = 0; nw < walk_num; nw++) {
 			factor_een[nw] = 0.0;
 			for (n = 0; n < dim_c_vector; n++) {
@@ -1305,9 +1305,7 @@ qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
 		return info;
 	}
 
-#pragma omp target is_device_ptr(rescale_factor_en, coord_ee, coord_en,        \
-								 en_distance, een_rescaled_n,                  \
-								 een_rescaled_n_deriv_e, elnuc_dist_deriv_e)
+#pragma omp target is_device_ptr(een_rescaled_n_deriv_e)
 	{
 // Prepare table of exponentiated distances raised to appropriate power
 #pragma omp teams distribute parallel for simd
@@ -1318,11 +1316,11 @@ qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
 
 #pragma omp target is_device_ptr(rescale_factor_en, coord_ee, coord_en,        \
 								 en_distance, een_rescaled_n,                  \
-								 een_rescaled_n_deriv_e, elnuc_dist_deriv_e)
+								 een_rescaled_n_deriv_e, elnuc_dist_deriv_e, \
+								 type_nucl_vector)
 	{
 #pragma omp teams distribute parallel for simd
 		for (int nw = 0; nw < walk_num; nw++) {
-
 			// Prepare the actual een table
 			for (int a = 0; a < nucl_num; a++) {
 				for (int i = 0; i < elec_num; i++) {
@@ -1341,7 +1339,8 @@ qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
 			}
 
 			for (int l = 0; l < cord_num; l++) {
-				for (int a = 0; a < (nucl_num + 1); a++) {
+				// NOTE In CPU, bound is up to (nucl_num+1), but seems
+				for (int a = 0; a < nucl_num; a++) {
 					kappa_l = -((double)l) *
 							  rescale_factor_en[type_nucl_vector[a] - 1];
 					for (int i = 0; i < elec_num; i++) {
@@ -1475,6 +1474,7 @@ qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
 	}
 
 	qmckl_free_device(context, elnuc_dist_deriv_e);
+	return QMCKL_SUCCESS_DEVICE;
 }
 
 // Distances
@@ -2023,12 +2023,11 @@ qmckl_exit_code_device qmckl_compute_dtmp_c_device(
 
 	// TODO Alternative versions with call to DGEMM / batched DGEMM ?
 
-#pragma omp target teams distriute simd collapse(2)                            \
-	is_device_ptr(een_rescaled_e_deriv_e, een_rescaled_n, dtmp_c)
+	#pragma omp target is_device_ptr(een_rescaled_e_deriv_e, een_rescaled_n, dtmp_c)
 	{
+		#pragma omp teams distribute parallel for simd collapse(2)
 		for (int64_t nw = 0; nw < walk_num; ++nw) {
 			for (int64_t i = 0; i < cord_num; ++i) {
-
 				// Single DGEMM
 				double *A =
 					een_rescaled_e_deriv_e + (af * (i + nw * (cord_num + 1)));
