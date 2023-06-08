@@ -991,19 +991,6 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_deriv_e_device(
 				}
 			}
 		}
-
-		/*
-		printf("\n");
-		for(int i=0; i<elec_num; i++) {
-			for(int j=0;j<4;j++) {
-				for(int k=0; k<walk_num; k++) {
-					printf("[i=%d][j=%d][k=%d] %lf\n", i, j, k,
-		factor_een_deriv_e[i + j*elec_num + k*elec_num*4]);
-				}
-			}
-		}
-		*/
-		printf("\n");
 	}
 	qmckl_free_device(context, tmp3);
 	return info;
