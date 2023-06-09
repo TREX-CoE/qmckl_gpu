@@ -111,6 +111,12 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_trexio_read_device
 
+    !!!!!!!!!!!
+        ! NUCLEUS
+    !!!!!!!!!!!
+
+        ! Setters
+
         integer(qmckl_exit_code) function qmckl_set_nucleus_num_device(context, num) &
             bind(C, name="qmckl_set_nucleus_num_device")
             use, intrinsic :: iso_c_binding
@@ -120,53 +126,6 @@ module qmckl_gpu
             integer(qmckl_context_device), intent(in), value :: context
             integer(c_int64_t), intent(in), value :: num
         end function qmckl_set_nucleus_num_device
-
-        integer(qmckl_exit_code) function qmckl_set_electron_num_device(context, elec_up_num, elec_dn_num) &
-            bind(C, name="qmckl_set_electron_num_device")
-            use, intrinsic :: iso_c_binding
-            import
-            implicit none
-
-            integer(qmckl_context_device), intent(in), value :: context
-            integer(c_int64_t), intent(in), value :: elec_up_num
-            integer(c_int64_t), intent(in), value :: elec_dn_num
-        end function qmckl_set_electron_num_device
-
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_ao_num_device(context, num) &
-            bind(C, name="qmckl_set_ao_basis_ao_num_device")
-            use, intrinsic :: iso_c_binding
-            import
-            implicit none
-
-            integer(qmckl_context_device), intent(in), value :: context
-            integer(c_int64_t), intent(in), value :: num
-        end function qmckl_set_ao_basis_ao_num_device
-
-        integer(qmckl_exit_code) function qmckl_set_electron_coord_device(context, transp, walk_num, coord, size_max) &
-            bind(C, name="qmckl_set_electron_coord_device")
-            use, intrinsic :: iso_c_binding
-            import
-            implicit none
-
-            integer(qmckl_context_device), intent(in), value :: context
-            character, intent(in), value :: transp
-            integer(c_int64_t), intent(in), value :: walk_num
-            type(c_ptr), intent(in), value :: coord
-            integer(c_int64_t), intent(in), value :: size_max
-        end function qmckl_set_electron_coord_device
-
-        integer(qmckl_exit_code) function qmckl_set_point_device(context, transp, num, coord, size_max) &
-            bind(C, name="qmckl_set_point_device")
-            use, intrinsic :: iso_c_binding
-            import
-            implicit none
-
-            integer(qmckl_context_device), intent(in), value :: context
-            character(c_char), intent(in), value :: transp
-            integer(c_int64_t), intent(in), value :: num
-            type(c_ptr), intent(in), value :: coord ! Elements of type double
-            integer(c_int64_t), intent(in), value :: size_max
-        end function qmckl_set_point_device
 
         integer(qmckl_exit_code) function qmckl_set_nucleus_coord_device(context, transp, nucl_coord, size_max) &
             bind(C, name="qmckl_set_nucleus_coord_device")
@@ -190,6 +149,129 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: nucl_charge
             integer(c_int64_t), intent(in), value :: nucl_num
         end function qmckl_set_nucleus_charge_device
+
+        ! Getters
+
+        integer(qmckl_exit_code) function qmckl_get_nucleus_num_device(context, num) &
+            bind(C, name="qmckl_get_nucleus_num_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: num ! Elements of type int64_t
+        end function qmckl_set_nucleus_num_device
+
+        integer(qmckl_exit_code) function qmckl_get_nucleus_coord_device(context, transp, nucl_coord, size_max) &
+            bind(C, name="qmckl_get_nucleus_coord_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            character(c_char), intent(in), value :: transp
+            type(c_ptr), intent(in), value :: nucl_coord ! Elements of type double*
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_set_nucleus_coord_device
+
+        integer(qmckl_exit_code) function qmckl_get_nucleus_charge_device(context, nucl_charge, nucl_num) &
+            bind(C, name="qmckl_get_nucleus_charge_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: charge ! Elements of type double
+            integer(c_int64_t), intent(in), value :: nucl_num
+        end function qmckl_set_nucleus_charge_device
+
+    !!!!!!!!!!!
+        ! POINT
+    !!!!!!!!!!!
+
+        integer(qmckl_exit_code) function qmckl_set_point_device(context, transp, num, coord, size_max) &
+            bind(C, name="qmckl_set_point_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            character(c_char), intent(in), value :: transp
+            integer(c_int64_t), intent(in), value :: num
+            type(c_ptr), intent(in), value :: coord ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_set_point_device
+
+        integer(qmckl_exit_code) function qmckl_get_point_device(context, transp, num, coord, size_max) &
+            bind(C, name="qmckl_get_point_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            character(c_char), intent(in), value :: transp
+            type(c_ptr), intent(in), value :: coord ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_set_point_device
+
+    !!!!!!!!!!!
+        ! ELECTRON
+    !!!!!!!!!!!
+
+        ! Setters
+        integer(qmckl_exit_code) function qmckl_set_electron_num_device(context, elec_up_num, elec_dn_num) &
+            bind(C, name="qmckl_set_electron_num_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_int64_t), intent(in), value :: elec_up_num
+            integer(c_int64_t), intent(in), value :: elec_dn_num
+        end function qmckl_set_electron_num_device
+
+        integer(qmckl_exit_code) function qmckl_set_electron_coord_device(context, transp, walk_num, coord, size_max) &
+            bind(C, name="qmckl_set_electron_coord_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            character, intent(in), value :: transp
+            integer(c_int64_t), intent(in), value :: walk_num
+            type(c_ptr), intent(in), value :: coord
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_set_electron_coord_device
+
+        ! Getters
+
+        integer(qmckl_exit_code) function qmckl_get_electron_coord_device(context, transp, walk_num, coord, size_max) &
+            bind(C, name="qmckl_get_electron_coord_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            character, intent(in), value :: transp
+            type(c_ptr), intent(in), value :: coord ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_set_electron_coord_device
+
+    !!!!!!!!!!!
+        ! AO
+    !!!!!!!!!!!
+
+        ! Basis setters
+
+        integer(qmckl_exit_code) function qmckl_set_ao_basis_ao_num_device(context, num) &
+            bind(C, name="qmckl_set_ao_basis_ao_num_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_int64_t), intent(in), value :: num
+        end function qmckl_set_ao_basis_ao_num_device
 
         integer(qmckl_exit_code) function qmckl_set_ao_basis_type_device(context, type) &
             bind(C, name="qmckl_set_ao_basis_type_device")
@@ -331,9 +413,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: ao_num
         end function qmckl_set_ao_basis_ao_factor_device
 
-    !!!!!!!!!!!
-        ! AO
-    !!!!!!!!!!!
+        ! Getters (calling compute)
 
         integer(qmckl_exit_code) function qmckl_get_ao_basis_ao_vgl_device(context, ao_vgl, size_max) &
             bind(C, name="qmckl_get_ao_basis_ao_vgl_device")
@@ -361,6 +441,8 @@ module qmckl_gpu
         ! MO
     !!!!!!!!!!!
 
+        ! Basis setters
+
         integer(qmckl_exit_code) function qmckl_set_mo_basis_mo_num_device(context, num) &
             bind(C, name="qmckl_set_mo_basis_mo_num_device")
             use, intrinsic :: iso_c_binding
@@ -380,6 +462,20 @@ module qmckl_gpu
             integer(qmckl_context_device), intent(in), value :: context
             integer(c_int32_t), intent(in), value :: mo_coefficient ! Elements of type double
         end function qmckl_set_mo_basis_coefficient_device
+
+        ! Basis getters
+
+        integer(qmckl_exit_code) function qmckl_get_mo_basis_mo_num_device(context, mo_num) &
+            bind(C, name="qmckl_get_mo_basis_mo_num_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_int64_t), intent(in), value :: mo_num
+        end function qmckl_get_mo_basis_mo_num_device
+
+        ! Getters (triggering computes)
 
         integer(qmckl_exit_code) function qmckl_get_mo_basis_mo_vgl_device(context, mo_vgl, size_max) &
             bind(C, name="qmckl_get_mo_basis_mo_vgl_device")
@@ -425,16 +521,6 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_value_inplace_device
 
-        integer(qmckl_exit_code) function qmckl_get_mo_basis_mo_num_device(context, mo_num) &
-            bind(C, name="qmckl_get_mo_basis_mo_num_device")
-            use, intrinsic :: iso_c_binding
-            import
-            implicit none
-
-            integer(qmckl_context_device), intent(in), value :: context
-            integer(c_int64_t), intent(in), value :: mo_num
-        end function qmckl_get_mo_basis_mo_num_device
-
         integer(qmckl_exit_code) function qmckl_mo_basis_select_mo_device(context, keep, size_max) &
             bind(C, name="qmckl_get_mo_basis_mo_num_device")
             use, intrinsic :: iso_c_binding
@@ -445,10 +531,6 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: keep
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_mo_basis_select_mo_device
-
-    !!!!!!!!!!!
-        ! ELECTRON
-    !!!!!!!!!!!
 
     end interface
 end module qmckl_gpu

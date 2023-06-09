@@ -9,11 +9,6 @@ bool qmckl_nucleus_provided_device(qmckl_context_device context);
 
 qmckl_exit_code_device
 qmckl_get_nucleus_num_device(qmckl_context_device context, int64_t *num);
-qmckl_exit_code_device
-qmckl_get_nucleus_num_device(qmckl_context_device context, int64_t *num);
-
-qmckl_exit_code_device
-qmckl_set_nucleus_num_device(qmckl_context_device context, int64_t num);
 
 qmckl_exit_code_device
 qmckl_set_nucleus_num_device(qmckl_context_device context, int64_t num);
