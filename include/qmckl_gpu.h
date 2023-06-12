@@ -388,6 +388,14 @@ qmckl_failwith_device(qmckl_context_device context,
 					  const char *function, const char *message);
 
 //**********
+// BASIC FUNCS
+//**********
+
+qmckl_exit_code_device qmckl_trexio_read_device(qmckl_context_device context,
+												char *file_name,
+												int64_t size_max);
+
+//**********
 // MEMORY
 //**********
 
