@@ -24,9 +24,9 @@ qmckl_exit_code_device qmckl_compute_jastrow_asymp_jasa_device(
 		return info;
 	}
 
-#pragma omp target teams distribute parallel for simd is_device_ptr(           \
-	asymp_jasa, a_vector, rescale_factor_en)
-	{
+#pragma omp target is_device_ptr(asymp_jasa, a_vector, rescale_factor_en)
+{
+#pragma omp parallel for 
 		for (int i = 0; i < type_nucl_num; i++) {
 
 			kappa_inv = 1.0 / rescale_factor_en[i];
@@ -36,14 +36,14 @@ qmckl_exit_code_device qmckl_compute_jastrow_asymp_jasa_device(
 				(1.0 + a_vector[1 + i * (aord_num + 1)] * kappa_inv);
 
 			x = kappa_inv;
+#pragma omp parallel for
 			for (int p = 1; p < aord_num; p++) {
 				x = x * kappa_inv;
 				asymp_jasa[i] =
 					asymp_jasa[i] + a_vector[p + 1 + i * (aord_num + 1)] * x;
 			}
 		}
-	}
-
+}
 	return QMCKL_SUCCESS_DEVICE;
 }
 
@@ -76,7 +76,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_asymp_jasb_device(
 
 #pragma omp target is_device_ptr(asymp_jasb, b_vector)
 	{
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (int i = 0; i < 2; i++) {
 			x = kappa_inv;
 			for (int p = 1; p < bord_num; p++) {
@@ -109,7 +109,7 @@ qmckl_compute_jastrow_value_device(const qmckl_context_device context,
 	if (value == NULL)
 		return QMCKL_INVALID_ARG_6_DEVICE;
 
-#pragma omp target teams distribute parallel for simd is_device_ptr(           \
+#pragma omp target teams distribute parallel for is_device_ptr(           \
 	value, f_ee, f_en, f_een)
 	{
 		for (int64_t i = 0; i < walk_num; ++i) {
@@ -142,7 +142,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_gl_device(
 	if (gl == NULL)
 		return QMCKL_INVALID_ARG_8_DEVICE;
 
-#pragma omp target teams distribute parallel for simd is_device_ptr(           \
+#pragma omp target teams distribute parallel for is_device_ptr(           \
 	value, gl_ee, gl_en, gl_een, gl)
 	{
 
@@ -202,7 +202,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_ee_device(
 		return QMCKL_INVALID_ARG_4_DEVICE;
 	}
 
-#pragma omp target teams distribute parallel for simd is_device_ptr(           \
+#pragma omp target teams distribute parallel for is_device_ptr(           \
 	ee_distance_rescaled, factor_ee, b_vector, asymp_jasb)
 	{
 		for (int nw = 0; nw < walk_num; ++nw) {
@@ -282,7 +282,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_ee_deriv_e_device(
 								 ee_distance_rescaled_deriv_e,                 \
 								 factor_ee_deriv_e)
 	{
-#pragma omp teams distribute parallel for simd collapse(3)
+#pragma omp teams distribute parallel for collapse(3)
 		for (int nw = 0; nw < walk_num; ++nw) {
 			for (int i = 0; i < elec_num; ++i) {
 				for (int j = 0; j < elec_num; ++j) {
@@ -406,7 +406,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_device(
 #pragma omp target is_device_ptr(type_nucl_vector, a_vector,                   \
 								 en_distance_rescaled, asymp_jasa, factor_en)
 	{
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (nw = 0; nw < walk_num; nw++) {
 			factor_en[nw] = 0.0;
 			for (a = 0; a < nucl_num; a++) {
@@ -485,7 +485,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_deriv_e_device(
 	en_distance_rescaled_deriv_e, factor_en_deriv_e)
 	{
 
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (int i = 0; i < elec_num * 4 * walk_num; i++)
 			factor_en_deriv_e[i] = 0.0;
 	}
@@ -497,7 +497,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_deriv_e_device(
 	en_distance_rescaled_deriv_e, factor_en_deriv_e)
 	{
 
-#pragma omp teams distribute parallel for simd collapse(3)
+#pragma omp teams distribute parallel for collapse(3)
 		for (nw = 0; nw < walk_num; nw++) {
 			for (a = 0; a < nucl_num; a++) {
 				for (i = 0; i < elec_num; i++) {
@@ -692,7 +692,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
 	type_nucl_vector, a_vector, en_distance_rescaled,                          \
 	en_distance_rescaled_deriv_e, factor_en_deriv_e)
 	{
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (i = 0; i < elec_num * 4 * walk_num; i++)
 			factor_en_deriv_e[i] = 0.0;
 	}
@@ -702,7 +702,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
 	type_nucl_vector, a_vector, en_distance_rescaled,                          \
 	en_distance_rescaled_deriv_e, factor_en_deriv_e)
 	{
-#pragma omp teams distribute parallel for simd collapse(3)
+#pragma omp teams distribute parallel for collapse(3)
 		for (nw = 0; nw < walk_num; nw++) {
 			for (a = 0; a < nucl_num; a++) {
 				for (i = 0; i < elec_num; i++) {
@@ -824,7 +824,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_device(
 #pragma omp target is_device_ptr(c_vector_full, lkpm_combined_index, tmp_c,    \
 								 een_rescaled_n, factor_een)
 	{
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (nw = 0; nw < walk_num; nw++) {
 			factor_een[nw] = 0.0;
 			for (n = 0; n < dim_c_vector; n++) {
@@ -887,7 +887,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_deriv_e_device(
 								 tmp_c, dtmp_c, een_rescaled_n,                \
 								 een_rescaled_n_deriv_e, factor_een_deriv_e)
 	{
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (int i = 0; i < elec_num * 4 * walk_num; i++) {
 			factor_een_deriv_e[i] = 0.;
 		}
@@ -899,7 +899,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_deriv_e_device(
 								 tmp_c, dtmp_c, een_rescaled_n,                \
 								 een_rescaled_n_deriv_e, factor_een_deriv_e)
 	{
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (size_t nw = 0; nw < (size_t)walk_num; ++nw) {
 			double *const restrict factor_een_deriv_e_0nw =
 				&(factor_een_deriv_e[elec_num * 4 * nw]);
@@ -1080,7 +1080,7 @@ qmckl_compute_jastrow_factor_een_rescaled_e_deriv_e_device(
 								 een_rescaled_e_deriv_e, elec_dist_deriv_e)
 	{
 // Prepare table of exponentiated distances raised to appropriate power
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (int i = 0; i < elec_num * 4 * elec_num * (cord_num + 1) * walk_num;
 			 i++) {
 			een_rescaled_e_deriv_e[i] = 0.0;
@@ -1090,7 +1090,7 @@ qmckl_compute_jastrow_factor_een_rescaled_e_deriv_e_device(
 #pragma omp target is_device_ptr(coord_ee, ee_distance, een_rescaled_e,        \
 								 een_rescaled_e_deriv_e, elec_dist_deriv_e)
 	{
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (int nw = 0; nw < walk_num; nw++) {
 			for (int j = 0; j < elec_num; j++) {
 				for (int i = 0; i < elec_num; i++) {
@@ -1309,7 +1309,7 @@ qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
 #pragma omp target is_device_ptr(een_rescaled_n_deriv_e)
 	{
 // Prepare table of exponentiated distances raised to appropriate power
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (int i = 0; i < elec_num * 4 * nucl_num * (cord_num + 1) * walk_num;
 			 i++)
 			een_rescaled_n_deriv_e[i] = 0.0;
@@ -1319,7 +1319,7 @@ qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
 	rescale_factor_en, coord_ee, coord_en, en_distance, een_rescaled_n,        \
 	een_rescaled_n_deriv_e, elnuc_dist_deriv_e, type_nucl_vector)
 	{
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (int nw = 0; nw < walk_num; nw++) {
 			// Prepare the actual een table
 			for (int a = 0; a < nucl_num; a++) {
@@ -1581,7 +1581,7 @@ qmckl_exit_code_device qmckl_compute_een_rescaled_e_device(
 	{
 // Prepare table of exponentiated distances raised to appropriate power
 // init
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (int i = 0; i < walk_num * (cord_num + 1) * elec_num * elec_num;
 			 i++)
 			een_rescaled_e[i] = 0;
@@ -1589,7 +1589,7 @@ qmckl_exit_code_device qmckl_compute_een_rescaled_e_device(
 
 #pragma omp target is_device_ptr(ee_distance, een_rescaled_e, een_rescaled_e_ij)
 	{
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (size_t nw = 0; nw < (size_t)walk_num; ++nw) {
 
 			for (size_t kk = 0; kk < len_een_ij; ++kk) {
@@ -1690,7 +1690,7 @@ qmckl_exit_code_device qmckl_compute_een_rescaled_n_device(
 	{
 
 // Prepare table of exponentiated distances raised to appropriate power
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (int i = 0; i < walk_num * (cord_num + 1) * nucl_num * elec_num;
 			 i++) {
 			een_rescaled_n[i] = 0.0;
@@ -1700,7 +1700,7 @@ qmckl_exit_code_device qmckl_compute_een_rescaled_n_device(
 #pragma omp target is_device_ptr(een_rescaled_n, type_nucl_vector,             \
 								 rescale_factor_en, en_distance)
 	{
-#pragma omp teams distribute parallel for simd
+#pragma omp teams distribute parallel for 
 		for (int nw = 0; nw < walk_num; ++nw) {
 
 			// prepare the actual een table
@@ -1764,7 +1764,7 @@ qmckl_exit_code_device qmckl_compute_c_vector_full_device(
 
 #pragma omp target is_device_ptr(type_nucl_vector, c_vector, c_vector_full)
 	{
-#pragma omp teams distribute parallel for simd collapse(2)
+#pragma omp teams distribute parallel for collapse(2)
 		for (int i = 0; i < dim_c_vector; ++i) {
 			for (int a = 0; a < nucl_num; ++a) {
 				c_vector_full[a + i * nucl_num] =
@@ -1877,7 +1877,7 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 #pragma omp target is_device_ptr(een_rescaled_e, een_rescaled_n, tmp_c)
 	{
 
-#pragma omp teams distribute simd collapse(2)
+#pragma omp teams distribute collapse(2)
 		for (int64_t nw = 0; nw < walk_num; ++nw) {
 			for (int64_t i = 0; i < cord_num; ++i) {
 
@@ -1953,7 +1953,7 @@ qmckl_exit_code_device qmckl_compute_dtmp_c_device(
 
 #pragma omp target is_device_ptr(een_rescaled_e_deriv_e, een_rescaled_n, dtmp_c)
 	{
-#pragma omp teams distribute parallel for simd collapse(2)
+#pragma omp teams distribute parallel for collapse(2)
 		for (int64_t nw = 0; nw < walk_num; ++nw) {
 			for (int64_t i = 0; i < cord_num; ++i) {
 				// Single DGEMM
@@ -2036,7 +2036,7 @@ qmckl_set_jastrow_rescale_factor_en_device(qmckl_context_device context,
 	double *ctx_rescale_factor_en = ctx->jastrow.rescale_factor_en;
 	bool wrongval = false;
 	int64_t ctx_type_nucl_num = ctx->jastrow.type_nucl_num;
-#pragma omp target teams distribute simd is_device_ptr(ctx_rescale_factor_en,  \
+#pragma omp target teams distribute parallel for is_device_ptr(ctx_rescale_factor_en,  \
 													   rescale_factor_en)
 	{
 		for (int64_t i = 0; i < ctx_type_nucl_num; ++i) {
