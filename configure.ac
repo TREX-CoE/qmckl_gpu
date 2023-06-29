@@ -130,6 +130,20 @@ AS_IF([ test "x$have_floatmos" = "xyes" -a "x$have_cublas" = "xno" ], [
 
 
 ####
+## Enable rocblas
+####
+
+
+
+AC_ARG_ENABLE([rocblas],
+	      [AS_HELP_STRING([--enable-rocblas]
+	      		     [Enable compilation of kernels that use rocblas])]
+	      [have_rocblas=yes],
+	      [have_roblas=no])
+
+
+
+####
 ## Enable OpenMP / OpenACC
 ####
 
@@ -258,7 +272,16 @@ AS_CASE([$FC],
  [*pgf77*], [FCFLAGS="$FCFLAGS -fPIC -Mnomain"],
  [])
 
-
+# If rocblas have been anable, define Automake and preprocessor variables
+AS_IF([test "x$have_rocblas" = "xyes"], [
+       AC_DEFINE([HAVE_ROCBLAS], [1], [Enable compilation of rocblas functions])
+       case $CC in
+	       *hipcc*)
+			CFLAGS="$CFLAGS -lrocblas"
+		;;
+		*)
+	esac
+])
 ####
 ## Define Makefile variables from configure flags
 ####
@@ -268,6 +291,7 @@ AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc"  = "xyes"])
 AM_CONDITIONAL([HAVE_FORTRAN_INTERFACE],  [test "x$have_fortran_interface"  = "xyes"])
 AM_CONDITIONAL([HAVE_DEVICE_POINTERS], [test "x$have_omp"  = "xyes" -o "x$have_acc"  = "xyes"])
 AM_CONDITIONAL([HAVE_CUBLAS], [test "x$have_cublas"  = "xyes"])
+AM_CONDITIONAL([HAVE_ROCBLAS], [test "x$have_rocblas"  = "xyes"])
 
 ####
 # Print configure status
@@ -291,6 +315,7 @@ Fortran interface .: ${have_fortran_interface}
 
 TREXIO ............: ${have_trexio}
 cuBLAS ............: ${have_cublas}
+rocblas ...........: ${have_rocblas}
 cuSPARSE ..........: ${have_cusparse}
 
 OpenMP ............: ${have_omp}
