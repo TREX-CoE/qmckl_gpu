@@ -1,4 +1,5 @@
 #include "../include/qmckl_jastrow.h"
+#include "../include/qmckl_blas.h"
 
 //**********
 // COMPUTES
@@ -1877,6 +1878,8 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 #pragma omp target is_device_ptr(een_rescaled_e, een_rescaled_n, tmp_c)
 	{
 
+	qmckl_gpu_dgemm(context, TransA, TransB, M, N, K, alpha, een_rescaled_e, LDA, een_rescaled_n, LDB, beta, tmp_c, LDC);	
+/*
 #pragma omp teams distribute collapse(2)
 		for (int64_t nw = 0; nw < walk_num; ++nw) {
 			for (int64_t i = 0; i < cord_num; ++i) {
@@ -1899,8 +1902,9 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 					}
 				}
 			}
-		}
-	}
+		} */
+
+	} 
 	return info;
 }
 

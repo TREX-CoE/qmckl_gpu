@@ -54,3 +54,7 @@ qmckl_exit_code_device qmckl_tensor_free_device(qmckl_context_device context,
 
 qmckl_tensor_device qmckl_tensor_set_device(qmckl_tensor_device tensor,
 											double value);
+
+
+qmckl_exit_code_device qmckl_gpu_dgemm(qmckl_context_device context, char transA, char transB, int64_t m, int64_t n, int64_t k, double alpha, double* A, int64_t lda, double* B, int64_t ldb,\
+								 double beta, double* C, int64_t ldc);

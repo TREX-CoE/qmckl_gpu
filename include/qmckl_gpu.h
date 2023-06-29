@@ -1144,3 +1144,10 @@ qmckl_exit_code_device qmckl_woodbury_kxk(
 	const uint64_t *__restrict Updates_index, const double breakdown,
 	double *__restrict Slater_inv, double *__restrict determinant);
 #endif
+
+
+
+// BLAS LIB CALL QMCKL
+
+
+qmckl_exit_code_device gpu_dgemm(qmckl_context_device context, char transA, char transB, int64_t m, int64_t n, int64_t k, double alpha, double* A, int64_t lda, double* B, int64_t ldb, double beta, double* C, int64_t ldc);
