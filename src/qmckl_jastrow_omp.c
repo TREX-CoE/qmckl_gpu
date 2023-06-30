@@ -37,7 +37,6 @@ qmckl_exit_code_device qmckl_compute_jastrow_asymp_jasa_device(
 				(1.0 + a_vector[1 + i * (aord_num + 1)] * kappa_inv);
 
 			x = kappa_inv;
-#pragma omp parallel for
 			for (int p = 1; p < aord_num; p++) {
 				x = x * kappa_inv;
 				asymp_jasa[i] =
@@ -112,11 +111,9 @@ qmckl_compute_jastrow_value_device(const qmckl_context_device context,
 
 #pragma omp target teams distribute parallel for is_device_ptr(           \
 	value, f_ee, f_en, f_een)
-	{
 		for (int64_t i = 0; i < walk_num; ++i) {
 			value[i] = exp(f_ee[i] + f_en[i] + f_een[i]);
 		}
-	}
 
 	return QMCKL_SUCCESS_DEVICE;
 }
@@ -145,7 +142,6 @@ qmckl_exit_code_device qmckl_compute_jastrow_gl_device(
 
 #pragma omp target teams distribute parallel for is_device_ptr(           \
 	value, gl_ee, gl_en, gl_een, gl)
-	{
 
 		for (int k = 0; k < walk_num; k++) {
 			for (int j = 0; j < 4; j++) {
@@ -175,7 +171,6 @@ qmckl_exit_code_device qmckl_compute_jastrow_gl_device(
 				}
 			}
 		}
-	}
 
 	return QMCKL_SUCCESS_DEVICE;
 }
@@ -205,7 +200,6 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_ee_device(
 
 #pragma omp target teams distribute parallel for is_device_ptr(           \
 	ee_distance_rescaled, factor_ee, b_vector, asymp_jasb)
-	{
 		for (int nw = 0; nw < walk_num; ++nw) {
 			factor_ee[nw] = 0.0; // put init array here.
 			size_t ishift = nw * elec_num * elec_num;
@@ -232,7 +226,6 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_ee_device(
 									 asymp_jasb[ipar] + power_ser;
 				}
 			}
-		}
 	}
 
 	return QMCKL_SUCCESS_DEVICE;
@@ -2042,7 +2035,6 @@ qmckl_set_jastrow_rescale_factor_en_device(qmckl_context_device context,
 	int64_t ctx_type_nucl_num = ctx->jastrow.type_nucl_num;
 #pragma omp target teams distribute parallel for is_device_ptr(ctx_rescale_factor_en,  \
 													   rescale_factor_en)
-	{
 		for (int64_t i = 0; i < ctx_type_nucl_num; ++i) {
 			if (rescale_factor_en[i] <= 0.0) {
 				wrongval = true;
@@ -2050,7 +2042,6 @@ qmckl_set_jastrow_rescale_factor_en_device(qmckl_context_device context,
 			}
 			ctx_rescale_factor_en[i] = rescale_factor_en[i];
 		}
-	}
 	if (wrongval) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
 									 "qmckl_set_jastrow_rescale_factor_en",
