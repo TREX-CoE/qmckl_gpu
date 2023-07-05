@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <trexio.h>
 #include <stdlib.h>
 
 #include "qmckl_types.h"

@@ -1972,7 +1972,6 @@ qmckl_set_jastrow_rescale_factor_en_device(qmckl_context_device context,
 		for (int64_t i = 0; i < ctx_type_nucl_num; ++i) {
 			if (rescale_factor_en[i] <= 0.0) {
 				wrongval = true;
-				break;
 			}
 			ctx_rescale_factor_en[i] = rescale_factor_en[i];
 		}

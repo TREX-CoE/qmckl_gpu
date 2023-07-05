@@ -61,35 +61,55 @@ FCFLAGS="-Iinclude ${FCFLAGS}"
 # TREXIO
 ###
 
+# Get TREXIO path if any
 AC_ARG_ENABLE([trexio],
-            [AS_HELP_STRING([--disable-trexio],
-                            [disable support for TREXIO])],
+            [AS_HELP_STRING([--[enable|disable]-trexio],
+                            [enable or disable support for TREXIO (configure will try to enable it by default)])],
             [have_trexio=$enableval],
             [have_trexio=yes])
 
 AS_CASE([$have_trexio],
-  [no], [],
+
+  # Explicitely disabled
+  [no], [
+    AC_OUTPUT
+    echo \
+    "Note: TREXIO explicitely disabled, skipping it."
+  ],
+
+  # Implicitely enabled (not mandatory)
   [yes],
   [AC_CHECK_LIB([trexio], [trexio_open], [],
                 [PKG_CHECK_MODULES([TREXIO], [trexio]) ])
-   CFLAGS="$CFLAGS $TREXIO_CFLAGS"
-   LIBS="$LIBS $TREXIO_LIBS"
-   AC_CHECK_HEADERS([trexio.h], [],
-                    [AC_MSG_ERROR("trexio.h not found")])
-   AC_DEFINE([HAVE_TREXIO], [1], [Define if TREXIO support is available])
-   ARGS="${ARGS} trexio"],
-  [AS_IF([test ! -d "$enableval"],
-         [AC_MSG_ERROR([--with-trexio=$enableval: argument is not a directory])])
-   TREXIO_LIBS="-L$with_trexio/lib -ltrexio"
-   TREXIO_CFLAGS="-I$with_trexio/include"
-   CFLAGS="$CFLAGS $TREXIO_CFLAGS"
-   LIBS="$LIBS $TREXIO_LIBS"
-   AC_CHECK_HEADERS([trexio.h], [],
-                    [AC_MSG_ERROR("trexio.h not found")])
-   AC_DEFINE([HAVE_TREXIO], [1], [Define if TREXIO support is available])
-   ARGS="${ARGS} trexio"
+  CFLAGS="$CFLAGS $TREXIO_CFLAGS"
+  LIBS="$LIBS $TREXIO_LIBS"
+  AC_CHECK_HEADERS([trexio.h], [
+      ARGS="${ARGS} trexio"
+      have_trexio=yes
+  ], [
+    AC_OUTPUT
+    echo \
+    "Warning: TREXIO not found. Library will be built without it."
+    have_trexio=no
   ])
+  ARGS="${ARGS} trexio"],
 
+  # Default case : explicitely enabled with specified path (mandatory)
+  [AS_IF([test ! -d "$enableval"], [
+
+    AC_MSG_ERROR([--enable-trexio=$enableval: argument is not a directory])])
+    AC_CHECK_HEADERS([trexio.h], [
+      TREXIO_LIBS="-L$have_trexio/lib -ltrexio"
+      TREXIO_CFLAGS="-I$have_trexio/include"
+      CFLAGS="$CFLAGS $TREXIO_CFLAGS"
+      LIBS="$LIBS $TREXIO_LIBS"
+      ARGS="${ARGS} trexio"
+      have_trexio=yes
+    ],
+    [
+      AC_MSG_ERROR("trexio.h not found")
+    ])
+])
 ###
 # cuBLAS / cuSolver (optional, enables additional kernels)
 # TODO We should probably add compilation flags to link cuBLAS / solver automatically
@@ -263,6 +283,7 @@ AS_CASE([$FC],
 ## Define Makefile variables from configure flags
 ####
 
+AM_CONDITIONAL([HAVE_TREXIO], [test "x$have_trexio"  = "xyes"])
 AM_CONDITIONAL([HAVE_OMP_DEVICE],  [test "x$have_omp"  = "xyes"])
 AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc"  = "xyes"])
 AM_CONDITIONAL([HAVE_FORTRAN_INTERFACE],  [test "x$have_fortran_interface"  = "xyes"])

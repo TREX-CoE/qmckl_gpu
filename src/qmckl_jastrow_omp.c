@@ -26,21 +26,18 @@ qmckl_exit_code_device qmckl_compute_jastrow_asymp_jasa_device(
 
 #pragma omp target teams distribute parallel for simd is_device_ptr(           \
 	asymp_jasa, a_vector, rescale_factor_en)
-	{
-		for (int i = 0; i < type_nucl_num; i++) {
+	for (int i = 0; i < type_nucl_num; i++) {
 
-			kappa_inv = 1.0 / rescale_factor_en[i];
+		kappa_inv = 1.0 / rescale_factor_en[i];
 
+		asymp_jasa[i] = a_vector[0 + i * (aord_num + 1)] * kappa_inv /
+						(1.0 + a_vector[1 + i * (aord_num + 1)] * kappa_inv);
+
+		x = kappa_inv;
+		for (int p = 1; p < aord_num; p++) {
+			x = x * kappa_inv;
 			asymp_jasa[i] =
-				a_vector[0 + i * (aord_num + 1)] * kappa_inv /
-				(1.0 + a_vector[1 + i * (aord_num + 1)] * kappa_inv);
-
-			x = kappa_inv;
-			for (int p = 1; p < aord_num; p++) {
-				x = x * kappa_inv;
-				asymp_jasa[i] =
-					asymp_jasa[i] + a_vector[p + 1 + i * (aord_num + 1)] * x;
-			}
+				asymp_jasa[i] + a_vector[p + 1 + i * (aord_num + 1)] * x;
 		}
 	}
 
@@ -111,10 +108,8 @@ qmckl_compute_jastrow_value_device(const qmckl_context_device context,
 
 #pragma omp target teams distribute parallel for simd is_device_ptr(           \
 	value, f_ee, f_en, f_een)
-	{
-		for (int64_t i = 0; i < walk_num; ++i) {
-			value[i] = exp(f_ee[i] + f_en[i] + f_een[i]);
-		}
+	for (int64_t i = 0; i < walk_num; ++i) {
+		value[i] = exp(f_ee[i] + f_en[i] + f_een[i]);
 	}
 
 	return QMCKL_SUCCESS_DEVICE;
@@ -144,34 +139,31 @@ qmckl_exit_code_device qmckl_compute_jastrow_gl_device(
 
 #pragma omp target teams distribute parallel for simd is_device_ptr(           \
 	value, gl_ee, gl_en, gl_een, gl)
-	{
-
-		for (int k = 0; k < walk_num; k++) {
-			for (int j = 0; j < 4; j++) {
-				for (int i = 0; i < elec_num; i++) {
-					gl[i + j * elec_num + k * elec_num * 4] =
-						gl_ee[i + j * elec_num + k * elec_num * 4] +
-						gl_en[i + j * elec_num + k * elec_num * 4] +
-						gl_een[i + j * elec_num + k * elec_num * 4];
-				}
-			}
-
+	for (int k = 0; k < walk_num; k++) {
+		for (int j = 0; j < 4; j++) {
 			for (int i = 0; i < elec_num; i++) {
-				gl[i + 3 * elec_num + k * elec_num * 4] =
-					gl[i + 3 * elec_num + k * elec_num * 4] +
-					gl[i + 0 * elec_num + k * elec_num * 4] *
-						gl[i + 0 * elec_num + k * elec_num * 4] +
-					gl[i + 1 * elec_num + k * elec_num * 4] *
-						gl[i + 1 * elec_num + k * elec_num * 4] +
-					gl[i + 2 * elec_num + k * elec_num * 4] *
-						gl[i + 2 * elec_num + k * elec_num * 4];
+				gl[i + j * elec_num + k * elec_num * 4] =
+					gl_ee[i + j * elec_num + k * elec_num * 4] +
+					gl_en[i + j * elec_num + k * elec_num * 4] +
+					gl_een[i + j * elec_num + k * elec_num * 4];
 			}
+		}
 
-			for (int j = 0; j < 4; j++) {
-				for (int i = 0; i < elec_num; i++) {
-					gl[i + j * elec_num + k * elec_num * 4] =
-						gl[i + j * elec_num + k * elec_num * 4] * value[k];
-				}
+		for (int i = 0; i < elec_num; i++) {
+			gl[i + 3 * elec_num + k * elec_num * 4] =
+				gl[i + 3 * elec_num + k * elec_num * 4] +
+				gl[i + 0 * elec_num + k * elec_num * 4] *
+					gl[i + 0 * elec_num + k * elec_num * 4] +
+				gl[i + 1 * elec_num + k * elec_num * 4] *
+					gl[i + 1 * elec_num + k * elec_num * 4] +
+				gl[i + 2 * elec_num + k * elec_num * 4] *
+					gl[i + 2 * elec_num + k * elec_num * 4];
+		}
+
+		for (int j = 0; j < 4; j++) {
+			for (int i = 0; i < elec_num; i++) {
+				gl[i + j * elec_num + k * elec_num * 4] =
+					gl[i + j * elec_num + k * elec_num * 4] * value[k];
 			}
 		}
 	}
@@ -204,32 +196,30 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_ee_device(
 
 #pragma omp target teams distribute parallel for simd is_device_ptr(           \
 	ee_distance_rescaled, factor_ee, b_vector, asymp_jasb)
-	{
-		for (int nw = 0; nw < walk_num; ++nw) {
-			factor_ee[nw] = 0.0; // put init array here.
-			size_t ishift = nw * elec_num * elec_num;
-			for (int i = 0; i < elec_num; ++i) {
-				for (int j = 0; j < i; ++j) {
-					double x = ee_distance_rescaled[j + i * elec_num + ishift];
-					const double x1 = x;
-					double power_ser = 0.0;
-					double spin_fact = 1.0;
-					int ipar = 0; // index of asymp_jasb
+	for (int nw = 0; nw < walk_num; ++nw) {
+		factor_ee[nw] = 0.0; // put init array here.
+		size_t ishift = nw * elec_num * elec_num;
+		for (int i = 0; i < elec_num; ++i) {
+			for (int j = 0; j < i; ++j) {
+				double x = ee_distance_rescaled[j + i * elec_num + ishift];
+				const double x1 = x;
+				double power_ser = 0.0;
+				double spin_fact = 1.0;
+				int ipar = 0; // index of asymp_jasb
 
-					for (int p = 1; p < bord_num; ++p) {
-						x = x * x1;
-						power_ser += b_vector[p + 1] * x;
-					}
-
-					if (i < up_num || j >= up_num) {
-						spin_fact = 0.5;
-						ipar = 1;
-					}
-
-					factor_ee[nw] += spin_fact * b_vector[0] * x1 /
-										 (1.0 + b_vector[1] * x1) -
-									 asymp_jasb[ipar] + power_ser;
+				for (int p = 1; p < bord_num; ++p) {
+					x = x * x1;
+					power_ser += b_vector[p + 1] * x;
 				}
+
+				if (i < up_num || j >= up_num) {
+					spin_fact = 0.5;
+					ipar = 1;
+				}
+
+				factor_ee[nw] +=
+					spin_fact * b_vector[0] * x1 / (1.0 + b_vector[1] * x1) -
+					asymp_jasb[ipar] + power_ser;
 			}
 		}
 	}
@@ -2038,14 +2028,11 @@ qmckl_set_jastrow_rescale_factor_en_device(qmckl_context_device context,
 	int64_t ctx_type_nucl_num = ctx->jastrow.type_nucl_num;
 #pragma omp target teams distribute simd is_device_ptr(ctx_rescale_factor_en,  \
 													   rescale_factor_en)
-	{
-		for (int64_t i = 0; i < ctx_type_nucl_num; ++i) {
-			if (rescale_factor_en[i] <= 0.0) {
-				wrongval = true;
-				break;
-			}
-			ctx_rescale_factor_en[i] = rescale_factor_en[i];
+	for (int64_t i = 0; i < ctx_type_nucl_num; ++i) {
+		if (rescale_factor_en[i] <= 0.0) {
+			wrongval = true;
 		}
+		ctx_rescale_factor_en[i] = rescale_factor_en[i];
 	}
 	if (wrongval) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
