@@ -160,7 +160,7 @@ module qmckl_gpu
 
             integer(qmckl_context_device), intent(in), value :: context
             type(c_ptr), intent(in), value :: num ! Elements of type int64_t
-        end function qmckl_set_nucleus_num_device
+        end function qmckl_get_nucleus_num_device
 
         integer(qmckl_exit_code) function qmckl_get_nucleus_coord_device(context, transp, nucl_coord, size_max) &
             bind(C, name="qmckl_get_nucleus_coord_device")
@@ -172,7 +172,7 @@ module qmckl_gpu
             character(c_char), intent(in), value :: transp
             type(c_ptr), intent(in), value :: nucl_coord ! Elements of type double*
             integer(c_int64_t), intent(in), value :: size_max
-        end function qmckl_set_nucleus_coord_device
+        end function qmckl_get_nucleus_coord_device
 
         integer(qmckl_exit_code) function qmckl_get_nucleus_charge_device(context, nucl_charge, nucl_num) &
             bind(C, name="qmckl_get_nucleus_charge_device")
@@ -181,9 +181,9 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: charge ! Elements of type double
+            type(c_ptr), intent(in), value :: nucl_charge ! Elements of type double
             integer(c_int64_t), intent(in), value :: nucl_num
-        end function qmckl_set_nucleus_charge_device
+        end function qmckl_get_nucleus_charge_device
 
     !!!!!!!!!!!
         ! POINT
@@ -202,7 +202,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_point_device
 
-        integer(qmckl_exit_code) function qmckl_get_point_device(context, transp, num, coord, size_max) &
+        integer(qmckl_exit_code) function qmckl_get_point_device(context, transp, coord, size_max) &
             bind(C, name="qmckl_get_point_device")
             use, intrinsic :: iso_c_binding
             import
@@ -212,7 +212,7 @@ module qmckl_gpu
             character(c_char), intent(in), value :: transp
             type(c_ptr), intent(in), value :: coord ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
-        end function qmckl_set_point_device
+        end function qmckl_get_point_device
 
     !!!!!!!!!!!
         ! ELECTRON
@@ -245,7 +245,7 @@ module qmckl_gpu
 
         ! Getters
 
-        integer(qmckl_exit_code) function qmckl_get_electron_coord_device(context, transp, walk_num, coord, size_max) &
+        integer(qmckl_exit_code) function qmckl_get_electron_coord_device(context, transp, coord, size_max) &
             bind(C, name="qmckl_get_electron_coord_device")
             use, intrinsic :: iso_c_binding
             import
@@ -255,7 +255,7 @@ module qmckl_gpu
             character, intent(in), value :: transp
             type(c_ptr), intent(in), value :: coord ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
-        end function qmckl_set_electron_coord_device
+        end function qmckl_get_electron_coord_device
 
     !!!!!!!!!!!
         ! AO
@@ -522,7 +522,7 @@ module qmckl_gpu
         end function qmckl_get_mo_basis_mo_value_inplace_device
 
         integer(qmckl_exit_code) function qmckl_mo_basis_select_mo_device(context, keep, size_max) &
-            bind(C, name="qmckl_get_mo_basis_mo_num_device")
+            bind(C, name="qmckl_mo_basis_select_mo_device")
             use, intrinsic :: iso_c_binding
             import
             implicit none
