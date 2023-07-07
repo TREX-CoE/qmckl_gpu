@@ -532,5 +532,467 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_mo_basis_select_mo_device
 
+    !!!!!!!!!!!
+        ! MO
+    !!!!!!!!!!!
+
+        ! Setters
+
+        integer(qmckl_exit_code) function qmckl_set_jastrow_rescale_factor_ee_device(context, kappa_ee) &
+            bind(C, name="qmckl_set_jastrow_rescale_factor_ee_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            real(c_double), intent(in), value :: kappa_ee
+        end function qmckl_set_jastrow_rescale_factor_ee_device
+
+        integer(qmckl_exit_code) function qmckl_set_jastrow_rescale_factor_en_device(context, kappa_ee, size_max) &
+            bind(C, name="qmckl_set_jastrow_rescale_factor_en_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: kappa_en ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_set_jastrow_rescale_factor_en_device
+
+        integer(qmckl_exit_code) function qmckl_set_jastrow_aord_num_device(context, aord_num) &
+            bind(C, name="qmckl_set_jastrow_aord_num_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_int64_t), intent(in), value :: aord_num
+        end function qmckl_set_jastrow_aord_num_device
+
+        integer(qmckl_exit_code) function qmckl_set_jastrow_bord_num_device(context, bord_num) &
+            bind(C, name="qmckl_set_jastrow_bord_num_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_int64_t), intent(in), value :: bord_num
+        end function qmckl_set_jastrow_bord_num_device
+
+        integer(qmckl_exit_code) function qmckl_set_jastrow_aord_num_device(context, cord_num) &
+            bind(C, name="qmckl_set_jastrow_cord_num_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_int64_t), intent(in), value :: cord_num
+        end function qmckl_set_jastrow_cord_num_device
+
+        integer(qmckl_exit_code) function qmckl_set_jastrow_type_nucl_num_device(context, type_nucl_num) &
+            bind(C, name="qmckl_set_jastrow_type_nucl_num_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_int64_t), intent(in), value :: type_nucl_num
+        end function qmckl_set_jastrow_type_nucl_num_device
+
+        integer(qmckl_exit_code) function qmckl_set_jastrow_type_nucl_vector_device(context, type_nucl_vector, nucl_num) &
+            bind(C, name="qmckl_set_jastrow_type_nucl_vector_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: type_nucl_vector ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: nucl_num
+        end function qmckl_set_jastrow_type_nucl_vector_device
+
+        integer(qmckl_exit_code) function qmckl_set_jastrow_a_vector_device(context, a_vector, size_max) &
+            bind(C, name="qmckl_set_jastrow_a_vector_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: a_vector ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_set_jastrow_a_vector_device
+
+        integer(qmckl_exit_code) function qmckl_set_jastrow_b_vector_device(context, b_vector, size_max) &
+            bind(C, name="qmckl_set_jastrow_b_vector_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: b_vector ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_set_jastrow_b_vector_device
+
+        integer(qmckl_exit_code) function qmckl_set_jastrow_c_vector_device(context, c_vector, size_max) &
+            bind(C, name="qmckl_set_jastrow_c_vector_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: c_vector ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_set_jastrow_c_vector_device
+
+        ! Getters (basic)
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_aord_num_device(context, aord_num) &
+            bind(C, name="qmckl_get_jastrow_aord_num_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: aord_num ! Type int64_t
+        end function qmckl_get_jastrow_aord_num_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_bord_num_device(context, bord_num) &
+            bind(C, name="qmckl_get_jastrow_bord_num_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: bord_num ! Type int64_t
+        end function qmckl_get_jastrow_bord_num_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_cord_num_device(context, cord_num) &
+            bind(C, name="qmckl_get_jastrow_cord_num_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: cord_num ! Type int64_t
+        end function qmckl_get_jastrow_cord_num_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_type_nucl_num_device(context, type_nucl_num) &
+            bind(C, name="qmckl_get_jastrow_type_nucl_num_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: type_nucl_num ! Type int64_t
+        end function qmckl_get_jastrow_type_nucl_num_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_type_nucl_vector_device(context, type_nucl_vector) &
+            bind(C, name="qmckl_get_jastrow_type_nucl_vector_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: type_nucl_vector ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_type_nucl_vector_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_a_vector_device(context, a_vector) &
+            bind(C, name="qmckl_get_jastrow_a_vector_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: a_vector ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_a_vector_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_b_vector_device(context, b_vector) &
+            bind(C, name="qmckl_get_jastrow_b_vector_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: b_vector ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_b_vector_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_c_vector_device(context, c_vector) &
+            bind(C, name="qmckl_get_jastrow_c_vector_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: c_vector ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_c_vector_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_rescale_factor_ee_device(context, rescale_factor_ee) &
+            bind(C, name="qmckl_get_jastrow_rescale_factor_ee_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: rescale_factor_ee ! Elements of type double
+        end function qmckl_get_jastrow_rescale_factor_ee_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_rescale_factor_en_device(context, rescale_factor_en, size_max) &
+            bind(C, name="qmckl_get_jastrow_rescale_factor_en_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: rescale_factor_en ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_rescale_factor_en_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_dim_c_vector_device(context, rescale_factor_en) &
+            bind(C, name="qmckl_get_jastrow_dim_c_vector_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: rescale_factor_en ! Elements of type int64_t
+        end function qmckl_get_jastrow_dim_c_vector_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_asymp_jasa_device(context, asymp_jasa, size_max) &
+            bind(C, name="qmckl_get_jastrow_asymp_jasa_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: asymp_jasa ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_asymp_jasa_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_asymp_jasb_device(context, asymp_jasb, size_max) &
+            bind(C, name="qmckl_get_jastrow_asymp_jasb_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: asymp_jasb ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_asymp_jasb_device
+
+        ! Getters (for compute)
+
+        ! Total Jastrow
+        integer(qmckl_exit_code) function qmckl_get_jastrow_value_device(context, jastrow_value, size_max) &
+            bind(C, name="qmckl_get_jastrow_value_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: jastrow_value ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_value_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_gl_device(context, jastrow_value, size_max) &
+            bind(C, name="qmckl_get_jastrow_gl_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: jastrow_value ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_gl_device
+
+        ! Electron/nucleus component
+        integer(qmckl_exit_code) function qmckl_get_jastrow_factor_ee_device(context, factor_ee, size_max) &
+            bind(C, name="qmckl_get_jastrow_factor_ee_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: factor_ee ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_factor_ee_device
+
+        ! Electron/nucleus component
+        integer(qmckl_exit_code) function qmckl_get_jastrow_factor_en_device(context, factor_en, size_max) &
+            bind(C, name="qmckl_get_jastrow_factor_en_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: factor_en ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_factor_en_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_factor_en_deriv_e_device(context, facotr_en_deriv_e, size_max) &
+            bind(C, name="qmckl_get_jastrow_factor_en_deriv_e_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: factor_en_deriv_e ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_factor_en_deriv_edevice
+
+        ! Electron/electron/nucleus component
+        integer(qmckl_exit_code) function qmckl_get_jastrow_factor_een_device(context, factor_een, size_max) &
+            bind(C, name="qmckl_get_jastrow_factor_een_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: factor_een ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_factor_een_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_factor_een_deriv_e_device(context, factor_een_deriv_e, size_max) &
+            bind(C, name="qmckl_get_jastrow_factor_een_deriv_e_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: factor_een_deriv_e ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_factor_een_deriv_e_device
+
+        ! Distances
+        integer(qmckl_exit_code) function qmckl_get_jastrow_ee_distance_rescaled_device(context, distance_rescaled) &
+            bind(C, name="qmckl_get_jastrow_ee_distance_rescaled_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
+        end function qmckl_get_jastrow_ee_distance_rescaled_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_ee_distance_rescaled_deriv_e_device &
+            (context, distance_rescaled_deriv_e) &
+            bind(C, name="qmckl_get_jastrow_ee_distance_rescaled_deriv_e_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: distance_rescaled_deriv_e ! Elements of type double
+        end function qmckl_get_jastrow_ee_distance_rescaled_deriv_e_device
+
+        integer(qmckl_exit_code) function qmckl_get_electron_en_distance_rescaled_device(context, distance_rescaled) &
+            bind(C, name="qmckl_get_electron_en_distance_rescaled_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
+        end function qmckl_get_electron_en_distance_rescaled_device
+
+        integer(qmckl_exit_code) function qmckl_get_electron_en_distance_rescaled_deriv_e_device &
+            (context, distance_rescaled_deriv_e) &
+            bind(C, name="qmckl_get_electron_en_distance_rescaled_deriv_e_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: distance_rescaled_deriv_e ! Elements of type double
+        end function qmckl_get_electron_en_distance_rescaled_deriv_e_device
+
+        integer(qmckl_exit_code) function qmckl_get_electron_en_distance_rescaled_deriv_e_device &
+            (context, distance_rescaled_deriv_e) &
+            bind(C, name="qmckl_get_electron_en_distance_rescaled_deriv_e_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: distance_rescaled_deriv_e ! Elements of type double
+        end function qmckl_get_electron_en_distance_rescaled_deriv_e_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_een_rescaled_e_device(context, distance_rescaled, size_max) &
+            bind(C, name="qmckl_get_jastrow_een_rescaled_e_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_een_rescaled_e_deriv_e_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_een_rescaled_e_deriv_e_device(context, distance_rescaled, size_max) &
+            bind(C, name="qmckl_get_jastrow_een_rescaled_e_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_een_rescaled_e_deriv_e_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_een_rescaled_n_device(context, distance_rescaled, size_max) &
+            bind(C, name="qmckl_get_jastrow_een_rescaled_n_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_een_rescaled_n_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_een_rescaled_n_deriv_e_device(context, distance_rescaled, size_max) &
+            bind(C, name="qmckl_get_jastrow_een_rescaled_n_deriv_e_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_een_rescaled_n_deriv_e_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_tmp_c_device(context, tmp_c) &
+            bind(C, name="qmckl_get_jastrow_tmp_c_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: tmp_c ! Elements of type double
+        end function qmckl_get_jastrow_tmp_c_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_dtmp_c_device(context, dtmp_c) &
+            bind(C, name="qmckl_get_jastrow_dtmp_c_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: dtmp_c ! Elements of type double
+        end function qmckl_get_jastrow_dtmp_c_device
+
+        integer(qmckl_exit_code) function qmckl_get_jastrow_factor_ee_deriv_e_device(context, factor_ee_deriv_e, size_max) &
+            bind(C, name="qmckl_get_jastrow_factor_ee_deriv_e_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            type(c_ptr), intent(in), value :: factor_ee_deriv_e ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_factor_ee_deriv_e_device
+
     end interface
 end module qmckl_gpu
