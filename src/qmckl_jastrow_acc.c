@@ -785,7 +785,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_device(
 	}
 
 #pragma acc kernels deviceptr(c_vector_full, lkpm_combined_index, tmp_c,       \
-							  een_rescaled_n)
+							  een_rescaled_n, factor_een)
 	{
 		for (nw = 0; nw < walk_num; nw++) {
 			factor_een[nw] = 0.0;
