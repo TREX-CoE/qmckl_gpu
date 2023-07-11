@@ -1965,18 +1965,17 @@ qmckl_set_jastrow_rescale_factor_en_device(qmckl_context_device context,
 		(double *)qmckl_malloc_device(context, mem_info.size);
 
 	double *ctx_rescale_factor_en = ctx->jastrow.rescale_factor_en;
-	bool wrongval = false;
+	bool ok = true;
 	int64_t ctx_type_nucl_num = ctx->jastrow.type_nucl_num;
-#pragma acc kernels deviceptr(ctx_rescale_factor_en, rescale_factor_en)
-	{
-		for (int64_t i = 0; i < ctx_type_nucl_num; ++i) {
-			if (rescale_factor_en[i] <= 0.0) {
-				wrongval = true;
-			}
-			ctx_rescale_factor_en[i] = rescale_factor_en[i];
+#pragma acc parallel loop deviceptr(ctx_rescale_factor_en, rescale_factor_en) \
+            reduction(*:ok)
+	for (int64_t i = 0; i < ctx_type_nucl_num; ++i) {
+		if (rescale_factor_en[i] <= 0.0) {
+			ok = false;
 		}
+		ctx_rescale_factor_en[i] = rescale_factor_en[i];
 	}
-	if (wrongval) {
+	if (!ok) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_2_DEVICE,
 									 "qmckl_set_jastrow_rescale_factor_en",
 									 "rescale_factor_en <= 0.0");
