@@ -1258,7 +1258,7 @@ qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
 
 #pragma acc kernels deviceptr(rescale_factor_en, coord_ee, coord_en,           \
 							  en_distance, een_rescaled_n,                     \
-							  een_rescaled_n_deriv_e, elnuc_dist_deriv_e)
+							  een_rescaled_n_deriv_e, elnuc_dist_deriv_e, type_nucl_vector)
 	{
 		// Prepare table of exponentiated distances raised to appropriate power
 		for (int i = 0; i < elec_num * 4 * nucl_num * (cord_num + 1) * walk_num;
