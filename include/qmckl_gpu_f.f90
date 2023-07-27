@@ -1,7 +1,7 @@
 module qmckl_gpu
     use, intrinsic :: iso_c_binding
     integer, parameter :: qmckl_context_device = c_int64_t
-    integer, parameter :: qmckl_exit_code = c_int32_t
+    integer, parameter :: qmckl_exit_code_device = c_int32_t
     interface
 
     !!!!!!!!!!!
@@ -26,7 +26,7 @@ module qmckl_gpu
             integer(c_int32_t), intent(in), value :: device_id
         end function qmckl_context_create_device
 
-        integer(qmckl_exit_code) function qmckl_context_destroy_device(context) &
+        integer(qmckl_exit_code_device) function qmckl_context_destroy_device(context) &
             bind(C, name="qmckl_context_destroy_device")
             use, intrinsic :: iso_c_binding
             import
@@ -49,7 +49,18 @@ module qmckl_gpu
             integer(c_size_t), intent(in), value :: size
         end function qmckl_malloc_device
 
-        integer(qmckl_exit_code) function qmckl_free_device(context, ptr) &
+        type(c_ptr) function qmckl_malloc_host(context, size) &
+            bind(C, name="qmckl_malloc_host")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_size_t), intent(in), value :: size
+        end function qmckl_malloc_host
+
+
+        integer(qmckl_exit_code_device) function qmckl_free_device(context, ptr) &
             bind(C, name="qmckl_free_device")
             use, intrinsic :: iso_c_binding
             import
@@ -59,7 +70,7 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: ptr
         end function qmckl_free_device
 
-        integer(qmckl_exit_code) function qmckl_memcpy_H2D(context, dest, src, size) &
+        integer(qmckl_exit_code_device) function qmckl_memcpy_H2D(context, dest, src, size) &
             bind(C, name="qmckl_memcpy_H2D")
             use, intrinsic :: iso_c_binding
             import
@@ -71,7 +82,7 @@ module qmckl_gpu
             integer(c_size_t), intent(in), value :: size
         end function qmckl_memcpy_H2D
 
-        integer(qmckl_exit_code) function qmckl_memcpy_D2H(context, dest, src, size) &
+        integer(qmckl_exit_code_device) function qmckl_memcpy_D2H(context, dest, src, size) &
             bind(C, name="qmckl_memcpy_D2H")
             use, intrinsic :: iso_c_binding
             import
@@ -83,7 +94,7 @@ module qmckl_gpu
             integer(c_size_t), intent(in), value :: size
         end function qmckl_memcpy_D2H
 
-        integer(qmckl_exit_code) function qmckl_memcpy_D2D(context, dest, src, size) &
+        integer(qmckl_exit_code_device) function qmckl_memcpy_D2D(context, dest, src, size) &
             bind(C, name="qmckl_memcpy_D2D")
             use, intrinsic :: iso_c_binding
             import
@@ -99,7 +110,7 @@ module qmckl_gpu
         ! TREXIO
     !!!!!!!!!!!
 
-        integer(qmckl_exit_code) function qmckl_trexio_read_device &
+        integer(qmckl_exit_code_device) function qmckl_trexio_read_device &
             (context, file_name, size_max) &
             bind(C, name="qmckl_trexio_read_device")
             use, intrinsic :: iso_c_binding
@@ -117,7 +128,7 @@ module qmckl_gpu
 
         ! Setters
 
-        integer(qmckl_exit_code) function qmckl_set_nucleus_num_device(context, num) &
+        integer(qmckl_exit_code_device) function qmckl_set_nucleus_num_device(context, num) &
             bind(C, name="qmckl_set_nucleus_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -127,7 +138,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: num
         end function qmckl_set_nucleus_num_device
 
-        integer(qmckl_exit_code) function qmckl_set_nucleus_coord_device(context, transp, nucl_coord, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_set_nucleus_coord_device(context, transp, nucl_coord, size_max) &
             bind(C, name="qmckl_set_nucleus_coord_device")
             use, intrinsic :: iso_c_binding
             import
@@ -139,7 +150,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_nucleus_coord_device
 
-        integer(qmckl_exit_code) function qmckl_set_nucleus_charge_device(context, nucl_charge, nucl_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_nucleus_charge_device(context, nucl_charge, nucl_num) &
             bind(C, name="qmckl_set_nucleus_charge_device")
             use, intrinsic :: iso_c_binding
             import
@@ -152,7 +163,7 @@ module qmckl_gpu
 
         ! Getters
 
-        integer(qmckl_exit_code) function qmckl_get_nucleus_num_device(context, num) &
+        integer(qmckl_exit_code_device) function qmckl_get_nucleus_num_device(context, num) &
             bind(C, name="qmckl_get_nucleus_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -162,7 +173,7 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: num ! Elements of type int64_t
         end function qmckl_get_nucleus_num_device
 
-        integer(qmckl_exit_code) function qmckl_get_nucleus_coord_device(context, transp, nucl_coord, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_nucleus_coord_device(context, transp, nucl_coord, size_max) &
             bind(C, name="qmckl_get_nucleus_coord_device")
             use, intrinsic :: iso_c_binding
             import
@@ -174,7 +185,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_nucleus_coord_device
 
-        integer(qmckl_exit_code) function qmckl_get_nucleus_charge_device(context, nucl_charge, nucl_num) &
+        integer(qmckl_exit_code_device) function qmckl_get_nucleus_charge_device(context, nucl_charge, nucl_num) &
             bind(C, name="qmckl_get_nucleus_charge_device")
             use, intrinsic :: iso_c_binding
             import
@@ -189,7 +200,7 @@ module qmckl_gpu
         ! POINT
     !!!!!!!!!!!
 
-        integer(qmckl_exit_code) function qmckl_set_point_device(context, transp, num, coord, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_set_point_device(context, transp, num, coord, size_max) &
             bind(C, name="qmckl_set_point_device")
             use, intrinsic :: iso_c_binding
             import
@@ -202,7 +213,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_point_device
 
-        integer(qmckl_exit_code) function qmckl_get_point_device(context, transp, coord, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_point_device(context, transp, coord, size_max) &
             bind(C, name="qmckl_get_point_device")
             use, intrinsic :: iso_c_binding
             import
@@ -219,7 +230,7 @@ module qmckl_gpu
     !!!!!!!!!!!
 
         ! Setters
-        integer(qmckl_exit_code) function qmckl_set_electron_num_device(context, elec_up_num, elec_dn_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_electron_num_device(context, elec_up_num, elec_dn_num) &
             bind(C, name="qmckl_set_electron_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -230,7 +241,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: elec_dn_num
         end function qmckl_set_electron_num_device
 
-        integer(qmckl_exit_code) function qmckl_set_electron_coord_device(context, transp, walk_num, coord, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_set_electron_coord_device(context, transp, walk_num, coord, size_max) &
             bind(C, name="qmckl_set_electron_coord_device")
             use, intrinsic :: iso_c_binding
             import
@@ -245,7 +256,7 @@ module qmckl_gpu
 
         ! Getters
 
-        integer(qmckl_exit_code) function qmckl_get_electron_coord_device(context, transp, coord, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_electron_coord_device(context, transp, coord, size_max) &
             bind(C, name="qmckl_get_electron_coord_device")
             use, intrinsic :: iso_c_binding
             import
@@ -263,7 +274,7 @@ module qmckl_gpu
 
         ! Basis setters
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_ao_num_device(context, num) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_ao_num_device(context, num) &
             bind(C, name="qmckl_set_ao_basis_ao_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -273,7 +284,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: num
         end function qmckl_set_ao_basis_ao_num_device
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_type_device(context, type) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_type_device(context, type) &
             bind(C, name="qmckl_set_ao_basis_type_device")
             use, intrinsic :: iso_c_binding
             import
@@ -283,7 +294,7 @@ module qmckl_gpu
             character(c_signed_char), intent(in), value :: type
         end function qmckl_set_ao_basis_type_device
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_shell_num_device(context, shell_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_shell_num_device(context, shell_num) &
             bind(C, name="qmckl_set_ao_basis_shell_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -293,7 +304,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_num_device
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_prim_num_device(context, prim_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_prim_num_device(context, prim_num) &
             bind(C, name="qmckl_set_ao_basis_prim_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -303,7 +314,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: prim_num
         end function qmckl_set_ao_basis_prim_num_device
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index, size_max) &
             bind(C, name="qmckl_set_ao_basis_nucleus_index_device")
             use, intrinsic :: iso_c_binding
             import
@@ -314,7 +325,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_ao_basis_nucleus_index_device
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_nucleus_shell_num_device(context, nucleus_shell_num, nucl_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_nucleus_shell_num_device(context, nucleus_shell_num, nucl_num) &
             bind(C, name="qmckl_set_ao_basis_nucleus_shell_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -325,7 +336,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: nucl_num
         end function qmckl_set_ao_basis_nucleus_shell_num_device
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_shell_ang_mom_device(context, shell_ang_mom, shell_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_shell_ang_mom_device(context, shell_ang_mom, shell_num) &
             bind(C, name="qmckl_set_ao_basis_shell_ang_mom_device")
             use, intrinsic :: iso_c_binding
             import
@@ -336,7 +347,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_ang_mom_device
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_shell_factor_device(context, shell_factor, shell_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_shell_factor_device(context, shell_factor, shell_num) &
             bind(C, name="qmckl_set_ao_basis_shell_factor_device")
             use, intrinsic :: iso_c_binding
             import
@@ -347,7 +358,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_factor_device
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_shell_prim_num_device(context, shell_prim_num, shell_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_shell_prim_num_device(context, shell_prim_num, shell_num) &
             bind(C, name="qmckl_set_ao_basis_shell_prim_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -358,7 +369,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_prim_num_device
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_shell_prim_index_device(context, shell_prim_index, shell_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_shell_prim_index_device(context, shell_prim_index, shell_num) &
             bind(C, name="qmckl_set_ao_basis_shell_prim_index_device")
             use, intrinsic :: iso_c_binding
             import
@@ -369,7 +380,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_prim_index_device
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_exponent_device(context, exponent, prim_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_exponent_device(context, exponent, prim_num) &
             bind(C, name="qmckl_set_ao_basis_exponent_device")
             use, intrinsic :: iso_c_binding
             import
@@ -380,7 +391,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: prim_num
         end function qmckl_set_ao_basis_exponent_device
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_coefficient_device(context, coefficient, prim_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_coefficient_device(context, coefficient, prim_num) &
             bind(C, name="qmckl_set_ao_basis_coefficient_device")
             use, intrinsic :: iso_c_binding
             import
@@ -391,7 +402,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: prim_num
         end function qmckl_set_ao_basis_coefficient_device
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_prim_factor_device(context, prim_factor, prim_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_prim_factor_device(context, prim_factor, prim_num) &
             bind(C, name="qmckl_set_ao_basis_prim_factor_device")
             use, intrinsic :: iso_c_binding
             import
@@ -402,7 +413,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: prim_num
         end function qmckl_set_ao_basis_prim_factor_device
 
-        integer(qmckl_exit_code) function qmckl_set_ao_basis_ao_factor_device(context, ao_factor, ao_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_ao_basis_ao_factor_device(context, ao_factor, ao_num) &
             bind(C, name="qmckl_set_ao_basis_ao_factor_device")
             use, intrinsic :: iso_c_binding
             import
@@ -415,7 +426,7 @@ module qmckl_gpu
 
         ! Getters (calling compute)
 
-        integer(qmckl_exit_code) function qmckl_get_ao_basis_ao_vgl_device(context, ao_vgl, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_ao_basis_ao_vgl_device(context, ao_vgl, size_max) &
             bind(C, name="qmckl_get_ao_basis_ao_vgl_device")
             use, intrinsic :: iso_c_binding
             import
@@ -426,7 +437,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_ao_basis_ao_vgl_device
 
-        integer(qmckl_exit_code) function qmckl_get_ao_basis_ao_value_device(context, ao_value, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_ao_basis_ao_value_device(context, ao_value, size_max) &
             bind(C, name="qmckl_get_ao_basis_ao_value_device")
             use, intrinsic :: iso_c_binding
             import
@@ -443,7 +454,7 @@ module qmckl_gpu
 
         ! Basis setters
 
-        integer(qmckl_exit_code) function qmckl_set_mo_basis_mo_num_device(context, num) &
+        integer(qmckl_exit_code_device) function qmckl_set_mo_basis_mo_num_device(context, num) &
             bind(C, name="qmckl_set_mo_basis_mo_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -453,7 +464,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: num
         end function qmckl_set_mo_basis_mo_num_device
 
-        integer(qmckl_exit_code) function qmckl_set_mo_basis_coefficient_device(context, mo_coefficient) &
+        integer(qmckl_exit_code_device) function qmckl_set_mo_basis_coefficient_device(context, mo_coefficient) &
             bind(C, name="qmckl_set_mo_basis_coefficient_device")
             use, intrinsic :: iso_c_binding
             import
@@ -465,7 +476,7 @@ module qmckl_gpu
 
         ! Basis getters
 
-        integer(qmckl_exit_code) function qmckl_get_mo_basis_mo_num_device(context, mo_num) &
+        integer(qmckl_exit_code_device) function qmckl_get_mo_basis_mo_num_device(context, mo_num) &
             bind(C, name="qmckl_get_mo_basis_mo_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -477,7 +488,7 @@ module qmckl_gpu
 
         ! Getters (triggering computes)
 
-        integer(qmckl_exit_code) function qmckl_get_mo_basis_mo_vgl_device(context, mo_vgl, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_mo_basis_mo_vgl_device(context, mo_vgl, size_max) &
             bind(C, name="qmckl_get_mo_basis_mo_vgl_device")
             use, intrinsic :: iso_c_binding
             import
@@ -488,7 +499,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_vgl_device
 
-        integer(qmckl_exit_code) function qmckl_get_mo_basis_mo_value_device(context, mo_value, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_mo_basis_mo_value_device(context, mo_value, size_max) &
             bind(C, name="qmckl_get_mo_basis_mo_value_device")
             use, intrinsic :: iso_c_binding
             import
@@ -499,7 +510,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_value_device
 
-        integer(qmckl_exit_code) function qmckl_get_mo_basis_mo_vgl_inplace_device(context, mo_vgl, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_mo_basis_mo_vgl_inplace_device(context, mo_vgl, size_max) &
             bind(C, name="qmckl_get_mo_basis_mo_vgl_inplace_device")
             use, intrinsic :: iso_c_binding
             import
@@ -510,7 +521,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_vgl_inplace_device
 
-        integer(qmckl_exit_code) function qmckl_get_mo_basis_mo_value_inplace_device(context, mo_value, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_mo_basis_mo_value_inplace_device(context, mo_value, size_max) &
             bind(C, name="qmckl_get_mo_basis_mo_value_inplace_device")
             use, intrinsic :: iso_c_binding
             import
@@ -521,7 +532,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_value_inplace_device
 
-        integer(qmckl_exit_code) function qmckl_mo_basis_select_mo_device(context, keep, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_mo_basis_select_mo_device(context, keep, size_max) &
             bind(C, name="qmckl_mo_basis_select_mo_device")
             use, intrinsic :: iso_c_binding
             import
@@ -538,7 +549,7 @@ module qmckl_gpu
 
         ! Setters
 
-        integer(qmckl_exit_code) function qmckl_set_jastrow_rescale_factor_ee_device(context, kappa_ee) &
+        integer(qmckl_exit_code_device) function qmckl_set_jastrow_rescale_factor_ee_device(context, kappa_ee) &
             bind(C, name="qmckl_set_jastrow_rescale_factor_ee_device")
             use, intrinsic :: iso_c_binding
             import
@@ -548,7 +559,7 @@ module qmckl_gpu
             real(c_double), intent(in), value :: kappa_ee
         end function qmckl_set_jastrow_rescale_factor_ee_device
 
-        integer(qmckl_exit_code) function qmckl_set_jastrow_rescale_factor_en_device(context, kappa_ee, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_set_jastrow_rescale_factor_en_device(context, kappa_en, size_max) &
             bind(C, name="qmckl_set_jastrow_rescale_factor_en_device")
             use, intrinsic :: iso_c_binding
             import
@@ -559,7 +570,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_jastrow_rescale_factor_en_device
 
-        integer(qmckl_exit_code) function qmckl_set_jastrow_aord_num_device(context, aord_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_jastrow_aord_num_device(context, aord_num) &
             bind(C, name="qmckl_set_jastrow_aord_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -569,7 +580,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: aord_num
         end function qmckl_set_jastrow_aord_num_device
 
-        integer(qmckl_exit_code) function qmckl_set_jastrow_bord_num_device(context, bord_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_jastrow_bord_num_device(context, bord_num) &
             bind(C, name="qmckl_set_jastrow_bord_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -579,7 +590,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: bord_num
         end function qmckl_set_jastrow_bord_num_device
 
-        integer(qmckl_exit_code) function qmckl_set_jastrow_aord_num_device(context, cord_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_jastrow_cord_num_device(context, cord_num) &
             bind(C, name="qmckl_set_jastrow_cord_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -589,7 +600,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: cord_num
         end function qmckl_set_jastrow_cord_num_device
 
-        integer(qmckl_exit_code) function qmckl_set_jastrow_type_nucl_num_device(context, type_nucl_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_jastrow_type_nucl_num_device(context, type_nucl_num) &
             bind(C, name="qmckl_set_jastrow_type_nucl_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -599,7 +610,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: type_nucl_num
         end function qmckl_set_jastrow_type_nucl_num_device
 
-        integer(qmckl_exit_code) function qmckl_set_jastrow_type_nucl_vector_device(context, type_nucl_vector, nucl_num) &
+        integer(qmckl_exit_code_device) function qmckl_set_jastrow_type_nucl_vector_device(context, type_nucl_vector, nucl_num) &
             bind(C, name="qmckl_set_jastrow_type_nucl_vector_device")
             use, intrinsic :: iso_c_binding
             import
@@ -610,7 +621,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: nucl_num
         end function qmckl_set_jastrow_type_nucl_vector_device
 
-        integer(qmckl_exit_code) function qmckl_set_jastrow_a_vector_device(context, a_vector, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_set_jastrow_a_vector_device(context, a_vector, size_max) &
             bind(C, name="qmckl_set_jastrow_a_vector_device")
             use, intrinsic :: iso_c_binding
             import
@@ -621,7 +632,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_jastrow_a_vector_device
 
-        integer(qmckl_exit_code) function qmckl_set_jastrow_b_vector_device(context, b_vector, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_set_jastrow_b_vector_device(context, b_vector, size_max) &
             bind(C, name="qmckl_set_jastrow_b_vector_device")
             use, intrinsic :: iso_c_binding
             import
@@ -632,7 +643,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_jastrow_b_vector_device
 
-        integer(qmckl_exit_code) function qmckl_set_jastrow_c_vector_device(context, c_vector, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_set_jastrow_c_vector_device(context, c_vector, size_max) &
             bind(C, name="qmckl_set_jastrow_c_vector_device")
             use, intrinsic :: iso_c_binding
             import
@@ -645,7 +656,7 @@ module qmckl_gpu
 
         ! Getters (basic)
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_aord_num_device(context, aord_num) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_aord_num_device(context, aord_num) &
             bind(C, name="qmckl_get_jastrow_aord_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -655,7 +666,7 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: aord_num ! Type int64_t
         end function qmckl_get_jastrow_aord_num_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_bord_num_device(context, bord_num) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_bord_num_device(context, bord_num) &
             bind(C, name="qmckl_get_jastrow_bord_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -665,7 +676,7 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: bord_num ! Type int64_t
         end function qmckl_get_jastrow_bord_num_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_cord_num_device(context, cord_num) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_cord_num_device(context, cord_num) &
             bind(C, name="qmckl_get_jastrow_cord_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -675,7 +686,7 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: cord_num ! Type int64_t
         end function qmckl_get_jastrow_cord_num_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_type_nucl_num_device(context, type_nucl_num) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_type_nucl_num_device(context, type_nucl_num) &
             bind(C, name="qmckl_get_jastrow_type_nucl_num_device")
             use, intrinsic :: iso_c_binding
             import
@@ -685,7 +696,7 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: type_nucl_num ! Type int64_t
         end function qmckl_get_jastrow_type_nucl_num_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_type_nucl_vector_device(context, type_nucl_vector) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_type_nucl_vector_device(context, type_nucl_vector, size_max) &
             bind(C, name="qmckl_get_jastrow_type_nucl_vector_device")
             use, intrinsic :: iso_c_binding
             import
@@ -696,7 +707,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_type_nucl_vector_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_a_vector_device(context, a_vector) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_a_vector_device(context, a_vector, size_max) &
             bind(C, name="qmckl_get_jastrow_a_vector_device")
             use, intrinsic :: iso_c_binding
             import
@@ -707,7 +718,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_a_vector_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_b_vector_device(context, b_vector) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_b_vector_device(context, b_vector, size_max) &
             bind(C, name="qmckl_get_jastrow_b_vector_device")
             use, intrinsic :: iso_c_binding
             import
@@ -718,7 +729,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_b_vector_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_c_vector_device(context, c_vector) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_c_vector_device(context, c_vector, size_max) &
             bind(C, name="qmckl_get_jastrow_c_vector_device")
             use, intrinsic :: iso_c_binding
             import
@@ -729,7 +740,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_c_vector_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_rescale_factor_ee_device(context, rescale_factor_ee) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_rescale_factor_ee_device(context, rescale_factor_ee) &
             bind(C, name="qmckl_get_jastrow_rescale_factor_ee_device")
             use, intrinsic :: iso_c_binding
             import
@@ -739,7 +750,7 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: rescale_factor_ee ! Elements of type double
         end function qmckl_get_jastrow_rescale_factor_ee_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_rescale_factor_en_device(context, rescale_factor_en, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_rescale_factor_en_device(context, rescale_factor_en, size_max) &
             bind(C, name="qmckl_get_jastrow_rescale_factor_en_device")
             use, intrinsic :: iso_c_binding
             import
@@ -750,7 +761,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_rescale_factor_en_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_dim_c_vector_device(context, rescale_factor_en) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_dim_c_vector_device(context, rescale_factor_en) &
             bind(C, name="qmckl_get_jastrow_dim_c_vector_device")
             use, intrinsic :: iso_c_binding
             import
@@ -760,7 +771,7 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: rescale_factor_en ! Elements of type int64_t
         end function qmckl_get_jastrow_dim_c_vector_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_asymp_jasa_device(context, asymp_jasa, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_asymp_jasa_device(context, asymp_jasa, size_max) &
             bind(C, name="qmckl_get_jastrow_asymp_jasa_device")
             use, intrinsic :: iso_c_binding
             import
@@ -771,7 +782,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_asymp_jasa_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_asymp_jasb_device(context, asymp_jasb, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_asymp_jasb_device(context, asymp_jasb, size_max) &
             bind(C, name="qmckl_get_jastrow_asymp_jasb_device")
             use, intrinsic :: iso_c_binding
             import
@@ -785,7 +796,7 @@ module qmckl_gpu
         ! Getters (for compute)
 
         ! Total Jastrow
-        integer(qmckl_exit_code) function qmckl_get_jastrow_value_device(context, jastrow_value, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_value_device(context, jastrow_value, size_max) &
             bind(C, name="qmckl_get_jastrow_value_device")
             use, intrinsic :: iso_c_binding
             import
@@ -796,7 +807,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_value_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_gl_device(context, jastrow_value, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_gl_device(context, jastrow_value, size_max) &
             bind(C, name="qmckl_get_jastrow_gl_device")
             use, intrinsic :: iso_c_binding
             import
@@ -808,7 +819,7 @@ module qmckl_gpu
         end function qmckl_get_jastrow_gl_device
 
         ! Electron/nucleus component
-        integer(qmckl_exit_code) function qmckl_get_jastrow_factor_ee_device(context, factor_ee, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_factor_ee_device(context, factor_ee, size_max) &
             bind(C, name="qmckl_get_jastrow_factor_ee_device")
             use, intrinsic :: iso_c_binding
             import
@@ -820,7 +831,7 @@ module qmckl_gpu
         end function qmckl_get_jastrow_factor_ee_device
 
         ! Electron/nucleus component
-        integer(qmckl_exit_code) function qmckl_get_jastrow_factor_en_device(context, factor_en, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_factor_en_device(context, factor_en, size_max) &
             bind(C, name="qmckl_get_jastrow_factor_en_device")
             use, intrinsic :: iso_c_binding
             import
@@ -831,7 +842,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_factor_en_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_factor_en_deriv_e_device(context, facotr_en_deriv_e, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_factor_en_deriv_e_device(context, factor_en_deriv_e, size_max) &
             bind(C, name="qmckl_get_jastrow_factor_en_deriv_e_device")
             use, intrinsic :: iso_c_binding
             import
@@ -840,10 +851,10 @@ module qmckl_gpu
             integer(qmckl_context_device), intent(in), value :: context
             type(c_ptr), intent(in), value :: factor_en_deriv_e ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
-        end function qmckl_get_jastrow_factor_en_deriv_edevice
+        end function qmckl_get_jastrow_factor_en_deriv_e_device
 
         ! Electron/electron/nucleus component
-        integer(qmckl_exit_code) function qmckl_get_jastrow_factor_een_device(context, factor_een, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_factor_een_device(context, factor_een, size_max) &
             bind(C, name="qmckl_get_jastrow_factor_een_device")
             use, intrinsic :: iso_c_binding
             import
@@ -854,7 +865,8 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_factor_een_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_factor_een_deriv_e_device(context, factor_een_deriv_e, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_factor_een_deriv_e_device &
+        (context, factor_een_deriv_e, size_max) &
             bind(C, name="qmckl_get_jastrow_factor_een_deriv_e_device")
             use, intrinsic :: iso_c_binding
             import
@@ -866,7 +878,7 @@ module qmckl_gpu
         end function qmckl_get_jastrow_factor_een_deriv_e_device
 
         ! Distances
-        integer(qmckl_exit_code) function qmckl_get_jastrow_ee_distance_rescaled_device(context, distance_rescaled) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_ee_distance_rescaled_device(context, distance_rescaled) &
             bind(C, name="qmckl_get_jastrow_ee_distance_rescaled_device")
             use, intrinsic :: iso_c_binding
             import
@@ -876,7 +888,7 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
         end function qmckl_get_jastrow_ee_distance_rescaled_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_ee_distance_rescaled_deriv_e_device &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_ee_distance_rescaled_deriv_e_device &
             (context, distance_rescaled_deriv_e) &
             bind(C, name="qmckl_get_jastrow_ee_distance_rescaled_deriv_e_device")
             use, intrinsic :: iso_c_binding
@@ -887,7 +899,7 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: distance_rescaled_deriv_e ! Elements of type double
         end function qmckl_get_jastrow_ee_distance_rescaled_deriv_e_device
 
-        integer(qmckl_exit_code) function qmckl_get_electron_en_distance_rescaled_device(context, distance_rescaled) &
+        integer(qmckl_exit_code_device) function qmckl_get_electron_en_distance_rescaled_device(context, distance_rescaled) &
             bind(C, name="qmckl_get_electron_en_distance_rescaled_device")
             use, intrinsic :: iso_c_binding
             import
@@ -897,7 +909,7 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
         end function qmckl_get_electron_en_distance_rescaled_device
 
-        integer(qmckl_exit_code) function qmckl_get_electron_en_distance_rescaled_deriv_e_device &
+        integer(qmckl_exit_code_device) function qmckl_get_electron_en_distance_rescaled_deriv_e_device &
             (context, distance_rescaled_deriv_e) &
             bind(C, name="qmckl_get_electron_en_distance_rescaled_deriv_e_device")
             use, intrinsic :: iso_c_binding
@@ -908,18 +920,19 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: distance_rescaled_deriv_e ! Elements of type double
         end function qmckl_get_electron_en_distance_rescaled_deriv_e_device
 
-        integer(qmckl_exit_code) function qmckl_get_electron_en_distance_rescaled_deriv_e_device &
-            (context, distance_rescaled_deriv_e) &
-            bind(C, name="qmckl_get_electron_en_distance_rescaled_deriv_e_device")
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_een_rescaled_e_device(context, distance_rescaled, size_max) &
+            bind(C, name="qmckl_get_jastrow_een_rescaled_e_device")
             use, intrinsic :: iso_c_binding
             import
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: distance_rescaled_deriv_e ! Elements of type double
-        end function qmckl_get_electron_en_distance_rescaled_deriv_e_device
+            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_get_jastrow_een_rescaled_e_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_een_rescaled_e_device(context, distance_rescaled, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_een_rescaled_e_deriv_e_device &
+        (context, distance_rescaled, size_max) &
             bind(C, name="qmckl_get_jastrow_een_rescaled_e_device")
             use, intrinsic :: iso_c_binding
             import
@@ -930,18 +943,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_een_rescaled_e_deriv_e_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_een_rescaled_e_deriv_e_device(context, distance_rescaled, size_max) &
-            bind(C, name="qmckl_get_jastrow_een_rescaled_e_device")
-            use, intrinsic :: iso_c_binding
-            import
-            implicit none
-
-            integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
-            integer(c_int64_t), intent(in), value :: size_max
-        end function qmckl_get_jastrow_een_rescaled_e_deriv_e_device
-
-        integer(qmckl_exit_code) function qmckl_get_jastrow_een_rescaled_n_device(context, distance_rescaled, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_een_rescaled_n_device(context, distance_rescaled, size_max) &
             bind(C, name="qmckl_get_jastrow_een_rescaled_n_device")
             use, intrinsic :: iso_c_binding
             import
@@ -952,7 +954,8 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_een_rescaled_n_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_een_rescaled_n_deriv_e_device(context, distance_rescaled, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_een_rescaled_n_deriv_e_device &
+        (context, distance_rescaled, size_max) &
             bind(C, name="qmckl_get_jastrow_een_rescaled_n_deriv_e_device")
             use, intrinsic :: iso_c_binding
             import
@@ -963,7 +966,7 @@ module qmckl_gpu
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_een_rescaled_n_deriv_e_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_tmp_c_device(context, tmp_c) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_tmp_c_device(context, tmp_c) &
             bind(C, name="qmckl_get_jastrow_tmp_c_device")
             use, intrinsic :: iso_c_binding
             import
@@ -973,7 +976,7 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: tmp_c ! Elements of type double
         end function qmckl_get_jastrow_tmp_c_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_dtmp_c_device(context, dtmp_c) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_dtmp_c_device(context, dtmp_c) &
             bind(C, name="qmckl_get_jastrow_dtmp_c_device")
             use, intrinsic :: iso_c_binding
             import
@@ -983,7 +986,7 @@ module qmckl_gpu
             type(c_ptr), intent(in), value :: dtmp_c ! Elements of type double
         end function qmckl_get_jastrow_dtmp_c_device
 
-        integer(qmckl_exit_code) function qmckl_get_jastrow_factor_ee_deriv_e_device(context, factor_ee_deriv_e, size_max) &
+        integer(qmckl_exit_code_device) function qmckl_get_jastrow_factor_ee_deriv_e_device(context, factor_ee_deriv_e, size_max) &
             bind(C, name="qmckl_get_jastrow_factor_ee_deriv_e_device")
             use, intrinsic :: iso_c_binding
             import

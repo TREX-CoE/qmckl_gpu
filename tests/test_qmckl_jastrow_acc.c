@@ -75,7 +75,6 @@ int main() {
 		for (int64_t i = 0; i < 3 * elec_num; ++i) {
 			if (elec_coord[i] != elec_coord2[i]) {
 				wrongval = true;
-				break;
 			}
 		}
 	}
@@ -104,10 +103,6 @@ int main() {
 			for (int64_t i = 0; i < nucl_num; ++i) {
 				if (nucl_coord[nucl_num * k + i] != nucl_coord2[3 * i + k]) {
 					wrongval = true;
-					break;
-				}
-				if (wrongval) {
-					break;
 				}
 			}
 		}
@@ -123,7 +118,6 @@ int main() {
 		for (int64_t i = 0; i < 3 * nucl_num; ++i) {
 			if (nucl_coord[i] != nucl_coord2[i]) {
 				wrongval = true;
-				break;
 			}
 		}
 	}
@@ -217,7 +211,6 @@ int main() {
 		for (int i = 0; i < type_nucl_num; ++i) {
 			if (fabs(k_en[i] - rescale_factor_en[i]) > 1e-12) {
 				wrongval = true;
-				break;
 			}
 		}
 	}
@@ -850,9 +843,6 @@ int main() {
 						}
 					}
 				}
-			}
-			if (wrongval) {
-				break;
 			}
 		}
 	}

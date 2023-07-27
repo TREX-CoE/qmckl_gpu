@@ -193,7 +193,7 @@ program qmckl_test_fortran_interface
     !!!
 
     integer(qmckl_context_device) context
-    integer(qmckl_exit_code) rc
+    integer(qmckl_exit_code_device) rc
 
     character(c_signed_char) :: typ
 
@@ -236,10 +236,11 @@ program qmckl_test_fortran_interface
     type(c_ptr) prim_factor_d
     type(c_ptr) ao_factor_d
 
-    type(c_ptr) ao_vgl
-    type(c_ptr) mo_vgl
+    type(c_ptr) ao_vgl_h
+    type(c_ptr) mo_vgl_h
     type(c_ptr) ao_vgl_d
     type(c_ptr) mo_vgl_d
+    real(8), pointer :: ao_vgl(:,:,:)
 
     context = qmckl_context_create_device(0)
 
@@ -331,12 +332,31 @@ program qmckl_test_fortran_interface
     ! AO computations
     !!!
 
-    ao_vgl_d = qmckl_malloc_device(context, 5*point_num*ao_num*c_sizeof(c_double)*2); 
-    rc = qmckl_get_ao_basis_ao_vgl_device(context, ao_vgl_d, 5*point_num*ao_num); 
+    ao_vgl_d = qmckl_malloc_device(context, 5*point_num*ao_num*c_sizeof(c_double)*2);
+    rc = qmckl_get_ao_basis_ao_vgl_device(context, ao_vgl_d, 5*point_num*ao_num);
+    ! Copy values back to CPU in Fortran ptr
+    ao_vgl_h = qmckl_malloc_host(context, 5*point_num*ao_num*c_sizeof(c_double)*2);
+    rc = qmckl_memcpy_H2D(context, ao_vgl_h, ao_vgl_d, 5*point_num*ao_num*c_sizeof(c_double)*2);
+    call c_f_ptr(ao_vgl_h, ao_vgl, [5, int(point_num, kind(4)), int(ao_num, kind(4))]);
+    ! Compare to reference
+    do i = 1, 5
+        do j = 1, point_num
+            do k = 1, ao_num
+                print *, i, j, k
+                print *, ao_vgl(i, j, k)
+            end do
+        end do
+    end do
+
     !!!
     ! MO computations
     !!!
 
     mo_vgl_d = qmckl_malloc_device(context, 5*point_num*mo_num*c_sizeof(c_double)*2); 
-    rc = qmckl_get_mo_basis_mo_vgl_device(context, ao_vgl_d, 5*point_num*mo_num); 
+    rc = qmckl_get_mo_basis_mo_vgl_device(context, ao_vgl_d, 5*point_num*mo_num);
+
+    !!!
+    ! Jastrow computations
+    !!!
+    ! TODO
 end program

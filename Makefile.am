@@ -85,8 +85,10 @@ tests_test_qmckl_jastrow_LDADD = libqmckl_gpu.la
 
 if HAVE_FORTRAN_INTERFACE
   check_PROGRAMS += tests/test_qmckl_fortran_interface
-  tests_test_qmckl_fortran_interface_SOURCES = tests/test_qmckl_fortran_interface.f90 tests/chbrclf_fortran_interface.c
+  tests_test_qmckl_fortran_interface_SOURCES = include/qmckl_gpu_f.f90 tests/test_qmckl_fortran_interface.f90 tests/chbrclf_fortran_interface.c
   tests_test_qmckl_fortran_interface_LDADD = libqmckl_gpu.la
+  test_qmckl_fortran_interface.o : include/qmckl_gpu_f.o
+  CLEANFILES = qmckl_gpu_f.mod
 endif
 
 ###
