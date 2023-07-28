@@ -27,12 +27,15 @@ if HAVE_OMP_DEVICE
   libqmckl_gpu_la_SOURCES += src/qmckl_memory_omp.c \
   src/qmckl_nucleus_omp.c src/qmckl_point_omp.c \
   src/qmckl_blas_omp.c src/qmckl_distance_omp.c \
-  src/qmckl_ao_omp.c src/qmckl_mo_omp.c src/qmckl_jastrow_omp.c
+  src/qmckl_ao_omp.c src/qmckl_mo_omp.c src/qmckl_jastrow_omp.c 
 endif
 
 if HAVE_OMP_DEVICE
 if HAVE_CUBLAS
-    libqmckl_gpu_la_SOURCES += src/qmckl_woodbury_omp.c
+    libqmckl_gpu_la_SOURCES += src/qmckl_woodbury_omp.c src/qmckl_gpu_blas.cpp
+endif
+if HAVE_ROCBLAS
+    libqmckl_gpu_la_SOURCES +=  src/qmckl_gpu_blas.cpp
 endif
 endif
 

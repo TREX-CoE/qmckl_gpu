@@ -40,6 +40,7 @@ AM_INIT_AUTOMAKE([-Wall subdir-objects])
 AM_PROG_AR
 
 AC_PROG_CC
+AC_PROG_CXX
 AC_PROG_FC
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
@@ -275,9 +276,9 @@ AS_CASE([$FC],
 # If rocblas have been anable, define Automake and preprocessor variables
 AS_IF([test "x$have_rocblas" = "xyes"], [
        AC_DEFINE([HAVE_ROCBLAS], [1], [Enable compilation of rocblas functions])
-       case $CC in
+       case $CXX in
 	       *hipcc*)
-			CFLAGS="$CFLAGS -lrocblas"
+			CFLAGS="$CFLAGS -lrocblas -D__HIP_PLATFORM_AMD__ --std=c++14"
 		;;
 		*)
 	esac
