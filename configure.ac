@@ -136,11 +136,11 @@ AS_IF([ test "x$have_floatmos" = "xyes" -a "x$have_cublas" = "xno" ], [
 
 
 
-AC_ARG_ENABLE([rocblas],
+AC_ARG_ENABLE(rocblas,
 	      [AS_HELP_STRING([--enable-rocblas]
-	      		     [Enable compilation of kernels that use rocblas])]
+	      		     [Enable compilation of kernels that use rocblas])],
 	      [have_rocblas=yes],
-	      [have_roblas=no])
+	      [have_rocblas=no])
 
 
 
@@ -308,6 +308,7 @@ Prefix: '${prefix}'
 
 CC.................: ${CC}
 FC.................: ${FC}
+CXX................: ${CXX}
 CFLAGS.............: ${CFLAGS}
 LDFLAGS:...........: ${LDFLAGS}
 
