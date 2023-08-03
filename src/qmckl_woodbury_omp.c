@@ -1,14 +1,14 @@
 #include "include/qmckl_woodbury.h"
 
-qmckl_exit_code qmckl_woodbury_kxk(
-	const qmckl_context context, cublasHandle_t b_handle,
+qmckl_exit_code_device qmckl_woodbury_kxk(
+	const qmckl_context_device context, cublasHandle_t b_handle,
 	cusolverDnHandle_t s_handle, const uint64_t Lds, const uint64_t Dim,
 	const uint64_t N_updates, const double *__restrict Updates,
 	const uint64_t *__restrict Updates_index, const double breakdown,
 	double *__restrict Slater_inv, double *__restrict determinant) {
 
-	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT) {
-		return qmckl_failwith(context, QMCKL_NULL_CONTEXT, "qmckl_woodbury_kxk",
+	if (qmckl_context_check(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith(context, QMCKL_NULL_CONTEXT_DEVICE, "qmckl_woodbury_kxk",
 							  NULL);
 	}
 
@@ -162,5 +162,5 @@ qmckl_exit_code qmckl_woodbury_kxk(
 	free(D);
 	free(T1);
 
-	return QMCKL_SUCCESS;
+	return QMCKL_SUCCESS_DEVICE;
 }
