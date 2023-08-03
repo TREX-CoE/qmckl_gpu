@@ -1864,8 +1864,19 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 	const int64_t bf = elec_num * nucl_num * (cord_num + 1);
 	const int64_t cf = bf;
 
+#ifdef HAVE_CUBLAS
+#pragma omp declare target
+{
+		
+		cublasHandle_t handle;
+		cublasCreate(&handle);
+		cublasStatus_t error = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, een_rescaled_e, LDA, een_rescaled_n, LDB, &beta, tmp_c, LDC ); 
+		printf("%s\n",cublasGetStatusString(error));
+}
+#else
 #pragma omp target is_device_ptr(een_rescaled_e, een_rescaled_n, tmp_c)
 	{
+
 
 #pragma omp teams distribute simd collapse(2)
 		for (int64_t nw = 0; nw < walk_num; ++nw) {
@@ -1891,6 +1902,7 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 			}
 		}
 	}
+#endif
 	return info;
 }
 

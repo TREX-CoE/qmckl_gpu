@@ -15,6 +15,11 @@
 #include "qmckl_memory.h"
 #include "qmckl_distance.h"
 
+#ifdef HAVE_CUBLAS
+	#include <cublas_v2.h>
+	#include <cuda_runtime.h>
+#endif
+
 qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context);
 bool qmckl_jastrow_provided_device(qmckl_context_device context);
 
