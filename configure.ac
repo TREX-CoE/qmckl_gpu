@@ -278,7 +278,12 @@ AS_IF([test "x$have_rocblas" = "xyes"], [
        AC_DEFINE([HAVE_ROCBLAS], [1], [Enable compilation of rocblas functions])
        case $CXX in
 	       *hipcc*)
-			CFLAGS="$CFLAGS -lrocblas -D__HIP_PLATFORM_AMD__ --std=c++14"
+			CXXFLAGS="$CXXFLAGS -lamdhip64 -g  -lrocblas -D__HIP_PLATFORM_AMD__ --std=c++14"
+			CFLAGS+="$CFLAGS -D__HIP_PLATFORM_AMD__ "
+		;;
+		*clang*)
+			CXXFLAGS="$CXXFLAGS -lamdhip64 -g  -lrocblas -D__HIP_PLATFORM_AMD__ --std=c++14"
+			CFLAGS="$CFLAGS -D__HIP_PLATFORM_AMD__ "
 		;;
 		*)
 	esac
