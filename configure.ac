@@ -208,12 +208,15 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_omp" = "xyes"], [
 	case $CC in
 		*gcc*)
 			CFLAGS="$CFLAGS -fopenmp -foffload=-lm"
+			FCFLAGS="$FCFLAGS -fopenmp -foffload=-lm"
 			;;
 		*nvc*)
 			CFLAGS="$CFLAGS -mp=gpu,noautopar"
+			FCFLAGS="$FCFLAGS -mp=gpu,noautopar"
 			;;
 		*clang*)
 			CFLAGS="$CFLAGS -fopenmp "
+			FCFLAGS="$FCFLAGS -fopenmp "
 			;;
 
 
@@ -226,10 +229,12 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc" = "xyes"], [
 	case $CC in
 		*gcc*)
 			CFLAGS="$CFLAGS -fopenacc -foffload=-lm"
+			FCFLAGS="$FCFLAGS -fopenacc -foffload=-lm"
 			LDFLAGS="$LDFLAGS -lm -fopenacc"
 			;;
 		*nvc*)
 			CFLAGS="$CFLAGS -acc=gpu,noautopar -gpu=nordc"
+			FCFLAGS="$FCFLAGS -acc=gpu,noautopar -gpu=nordc"
 		;;
 
 		*)
@@ -272,10 +277,9 @@ AS_IF([test "x$have_floatmos" = "xyes"], [
 
 # Specific options required with some compilers
 AS_CASE([$FC],
- [*ifort*], [FCFLAGS="$FCFLAGS -nofor-main"],
- [*nvfortran*], [FCFLAGS="$FCFLAGS -fPIC -Mnomain"],
- [*pgf90*], [FCFLAGS="$FCFLAGS -fPIC -Mnomain"],
- [*pgf77*], [FCFLAGS="$FCFLAGS -fPIC -Mnomain"],
+ [*nvfortran*], [FCFLAGS="$FCFLAGS -fPIC"],
+ [*pgf90*], [FCFLAGS="$FCFLAGS -fPIC"],
+ [*pgf77*], [FCFLAGS="$FCFLAGS -fPIC"],
  [])
 
 
@@ -294,6 +298,8 @@ AM_CONDITIONAL([HAVE_CUBLAS], [test "x$have_cublas"  = "xyes"])
 # Print configure status
 ####
 
+
+AS_IF([test "x$have_fortran_interface"  = "xyes"], [
 AC_OUTPUT
 
 echo \
@@ -304,6 +310,35 @@ Prefix: '${prefix}'
 
 CC.................: ${CC}
 FC.................: ${FC}
+CFLAGS.............: ${CFLAGS}
+FCFLAGS............: ${CFLAGS}
+LDFLAGS:...........: ${LDFLAGS}
+
+Autoflags .........: ${have_autoflags}
+Fortran interface .: ${have_fortran_interface}
+
+TREXIO ............: ${have_trexio}
+cuBLAS ............: ${have_cublas}
+cuSPARSE ..........: ${have_cusparse}
+
+OpenMP ............: ${have_omp}
+OpenACC ...........: ${have_acc}
+
+Now type 'make @<:@<target>@:>@'
+where the optional <target> is:
+  all           - build ${PACKAGE_NAME}
+  check         - run tests
+  install       - install
+--------------------------------------------------"
+], [
+AC_OUTPUT
+echo \
+"-------------------------------------------------
+${PACKAGE_NAME} Version ${PACKAGE_VERSION}
+
+Prefix: '${prefix}'
+
+CC.................: ${CC}
 CFLAGS.............: ${CFLAGS}
 LDFLAGS:...........: ${LDFLAGS}
 
@@ -323,3 +358,5 @@ where the optional <target> is:
   check         - run tests
   install       - install
 --------------------------------------------------"
+
+])

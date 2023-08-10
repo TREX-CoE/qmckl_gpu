@@ -1,4 +1,4 @@
-module qmckl_gpu
+module qmckl_gpu_f
     use, intrinsic :: iso_c_binding
     integer, parameter :: qmckl_context_device = c_int64_t
     integer, parameter :: qmckl_exit_code_device = c_int32_t
@@ -471,7 +471,7 @@ module qmckl_gpu
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            integer(c_int32_t), intent(in), value :: mo_coefficient ! Elements of type double
+            type(c_ptr), intent(in), value :: mo_coefficient ! Elements of type double
         end function qmckl_set_mo_basis_coefficient_device
 
         ! Basis getters
@@ -998,4 +998,4 @@ module qmckl_gpu
         end function qmckl_get_jastrow_factor_ee_deriv_e_device
 
     end interface
-end module qmckl_gpu
+end module qmckl_gpu_f
