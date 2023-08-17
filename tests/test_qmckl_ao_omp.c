@@ -522,6 +522,7 @@ int main() {
 	}
 
 	double ref;
+	printf("%ld %ld\n", point_num, ao_num);
 	for (int i = 0; i < point_num; i++) {
 		for (int j = 0; j < 5; j++) {
 			for (int k = 0; k < ao_num; k++) {

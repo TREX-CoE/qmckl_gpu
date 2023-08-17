@@ -258,6 +258,8 @@ program qmckl_test_fortran_interface
     real(8), pointer :: ao_vgl(:,:,:)
     real(8), pointer :: mo_vgl(:,:,:)
 
+    real(8) ao_ref
+    real(8) mo_ref
 
     context = qmckl_context_create_device(0)
 
@@ -276,7 +278,7 @@ program qmckl_test_fortran_interface
     nucl_num = get_chbrclf_nucl_num();
     nucl_charge = get_chbrclf_nucl_charge();
     nucl_coord = get_chbrclf_nucl_coord();
-    point_num = elec_num*walk_num;
+    point_num = elec_num;
     mo_num = get_chbrclf_mo_num();
     nucleus_index = get_chbrclf_nucleus_index();
     nucleus_shell_num = get_chbrclf_nucleus_shell_num();
@@ -364,14 +366,20 @@ program qmckl_test_fortran_interface
     ao_vgl_h = qmckl_malloc_host(context, 5*point_num*ao_num*c_sizeof(c_double)*2);
     rc = qmckl_memcpy_D2H(context, ao_vgl_h, ao_vgl_d, 5*point_num*ao_num*c_sizeof(c_double)*2);
 
-    call c_f_pointer(ao_vgl_h, ao_vgl, [5, int(point_num, kind(4)), int(ao_num, kind(4))]);
+    call c_f_pointer(ao_vgl_h, ao_vgl, [int(point_num, kind(4)), 5, int(ao_num, kind(4))]);
 
     ! Compare to reference
-    do i = 1, 5
-        do j = 1, point_num
-            do k = 1, ao_num
-                ! TODO Read ref file
-                print *, ao_vgl(i, j, k)
+    open (unit=1, file='tests/ao_reference.txt', status='old', action='read')
+    do k = 1, ao_num
+        do j = 1, 5
+            do i = 1, point_num
+                read(1, *), ao_ref
+                if (abs(ao_vgl(i,j,k) - ao_ref) > 1e-12) then
+                   print *, "Error at (i,j,k)=", i, j, k
+                   print *, "ao_vgl =", ao_vgl(i,j,k)
+                   print *, "ao_ref =", ao_ref
+                   call exit(1)
+                end if
             end do
         end do
     end do
@@ -380,20 +388,27 @@ program qmckl_test_fortran_interface
     ! MO computations
     !!!
 
-    mo_vgl_d = qmckl_malloc_device(context, 5*point_num*mo_num*c_sizeof(c_double)*2); 
+    mo_vgl_d = qmckl_malloc_device(context, 5*point_num*mo_num*c_sizeof(c_double)*2);
     rc = qmckl_get_mo_basis_mo_vgl_device(context, mo_vgl_d, 5*point_num*mo_num);
 
     ! Copy values back to CPU in Fortran ptr
     mo_vgl_h = qmckl_malloc_host(context, 5*point_num*mo_num*c_sizeof(c_double)*2);
     rc = qmckl_memcpy_D2H(context, mo_vgl_h, mo_vgl_d, 5*point_num*mo_num*c_sizeof(c_double)*2);
 
-    call c_f_pointer(mo_vgl_h, mo_vgl, [5, int(point_num, kind(4)), int(mo_num, kind(4))]);
+    call c_f_pointer(mo_vgl_h, mo_vgl, [int(point_num, kind(4)), 5, int(mo_num, kind(4))]);
 
     ! Compare to reference
-    do i = 1, 5
-        do j = 1, point_num
-            do k = 1, mo_num
-                print *, mo_vgl(i, j, k)
+    open (unit=2, file='tests/mo_reference.txt', status='old', action='read')
+    do k = 1, mo_num
+        do j = 1, 5
+            do i = 1, point_num
+                read(2, *), mo_ref
+                if (abs(mo_vgl(i,j,k) - mo_ref) > 1e-12) then
+                   print *, "Error at (i,j,k)=", i, j, k
+                   print *, "mo_vgl =", mo_vgl(i,j,k)
+                   print *, "mo_ref =", mo_ref
+                   call exit(1)
+                end if
             end do
         end do
     end do
