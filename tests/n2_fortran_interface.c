@@ -16,6 +16,7 @@ int64_t get_n2_walk_num() { return n2_walk_num; }
 
 
 double* get_n2_elec_coord() { return &(n2_elec_coord[0][0][0]); }
+double* get_n2_nucl_coord() { return &(n2_nucl_coord[0][0]); }
 
 int64_t get_n2_type_nucl_num() { return n2_type_nucl_num; }
 int64_t get_n2_aord_num() { return n2_aord_num; }
@@ -30,3 +31,6 @@ double* get_n2_bord_vector() { return &(n2_bord_vector[0]); }
 double* get_n2_cord_vector() { return &(n2_cord_vector[0][0]); }
 double* get_n2_cord_vector_full() { return &(n2_cord_vector_full[0][0]); }
 double* get_n2_lkpm_of_cindex() { return &(n2_lkpm_of_cindex[0][0]); }
+
+double* get_n2_rescale_factor_en() { return &(n2_rescale_factor_en[0]); }
+double get_n2_rescale_factor_ee() { return n2_rescale_factor_ee; }

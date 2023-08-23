@@ -132,9 +132,9 @@ int main() {
 	rc = qmckl_set_nucleus_charge_device(context, nucl_charge, nucl_num);
 
 	rc = qmckl_get_nucleus_charge_device(context, nucl_charge2, nucl_num);
-	for (int64_t i = 0; i < nucl_num; ++i) {
 #pragma acc kernels deviceptr(nucl_charge, nucl_charge2)
-		{
+	{
+		for (int64_t i = 0; i < nucl_num; ++i) {
 			if (nucl_charge[i] != nucl_charge2[i]) {
 				wrongval = true;
 			}
@@ -222,6 +222,8 @@ int main() {
 
 	// calculate asymp_jasb
 	rc = qmckl_get_jastrow_asymp_jasb_device(context, asymp_jasb, 2);
+
+	// BUG nvc 23.7 segfault (passes on gcc)
 #pragma acc kernels deviceptr(asymp_jasb)
 	{
 		if (fabs(asymp_jasb[0] - 0.5323750557252571) > 1.e-12) {
@@ -234,7 +236,6 @@ int main() {
 	if (wrongval) {
 		return 1;
 	}
-
 	double *factor_ee = qmckl_malloc_device(context, walk_num * sizeof(double));
 	rc = qmckl_get_jastrow_factor_ee_device(context, factor_ee, walk_num);
 
@@ -743,12 +744,10 @@ int main() {
 		return 1;
 	}
 
-	printf("16\n");
 	double *factor_een_deriv_e =
 		qmckl_malloc_device(context, 4 * walk_num * elec_num * sizeof(double));
 	rc = qmckl_get_jastrow_factor_een_deriv_e_device(
 		context, factor_een_deriv_e, 4 * walk_num * elec_num);
-	printf("16.1\n");
 
 #pragma acc kernels deviceptr(factor_een_deriv_e)
 	{
