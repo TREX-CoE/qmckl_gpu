@@ -429,6 +429,10 @@ qmckl_exit_code_device qmckl_distance_rescaled_deriv_e_device(
 					y = A[1 + i * lda] - B[1 + j * ldb];
 					z = A[2 + i * lda] - B[2 + j * ldb];
 					dist = sqrt(x * x + y * y + z * z);
+					// Avoid floating-point exception
+					if (dist == 0.) {
+						dist = 69./rescale_factor_kappa;
+					}
 					dist_inv = 1.0 / dist;
 					rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
 						  rescale_factor_kappa_inv;
@@ -452,6 +456,10 @@ qmckl_exit_code_device qmckl_distance_rescaled_deriv_e_device(
 					y = A[i + 1 * lda] - B[1 + j * ldb];
 					z = A[i + 2 * lda] - B[2 + j * ldb];
 					dist = sqrt(x * x + y * y + z * z);
+					// Avoid floating-point exception
+					if (dist == 0.) {
+						dist = 69./rescale_factor_kappa;
+					}
 					dist_inv = 1.0 / dist;
 					rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
 						  rescale_factor_kappa_inv;
@@ -474,6 +482,10 @@ qmckl_exit_code_device qmckl_distance_rescaled_deriv_e_device(
 					y = A[1 + i * lda] - B[j + 1 * ldb];
 					z = A[2 + i * lda] - B[j + 2 * ldb];
 					dist = sqrt(x * x + y * y + z * z);
+					// Avoid floating-point exception
+					if (dist == 0.) {
+						dist = 69./rescale_factor_kappa;
+					}
 					dist_inv = 1.0 / dist;
 					rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
 						  rescale_factor_kappa_inv;
@@ -497,6 +509,10 @@ qmckl_exit_code_device qmckl_distance_rescaled_deriv_e_device(
 					y = A[i + 1 * lda] - B[j + 1 * ldb];
 					z = A[i + 2 * lda] - B[j + 2 * ldb];
 					dist = sqrt(x * x + y * y + z * z);
+					// Avoid floating-point exception
+					if (dist == 0.) {
+						dist = 69./rescale_factor_kappa;
+					}
 					dist_inv = 1.0 / dist;
 					rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
 						  rescale_factor_kappa_inv;

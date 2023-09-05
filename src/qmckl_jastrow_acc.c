@@ -107,7 +107,12 @@ qmckl_compute_jastrow_value_device(const qmckl_context_device context,
 #pragma acc kernels deviceptr(value, f_ee, f_en, f_een)
 	{
 		for (int64_t i = 0; i < walk_num; ++i) {
-			value[i] = exp(f_ee[i] + f_en[i] + f_een[i]);
+			double arg = exp(f_ee[i] + f_en[i] + f_een[i]);
+			if (arg < -100) {
+				value[i] = 0;
+			} else {
+				value[i] = arg;
+			}
 		}
 	}
 
