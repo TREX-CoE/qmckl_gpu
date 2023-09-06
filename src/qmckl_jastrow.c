@@ -2599,6 +2599,44 @@ qmckl_get_jastrow_value_device(qmckl_context_device context,
 	return QMCKL_SUCCESS_DEVICE;
 }
 
+qmckl_exit_code_device
+qmckl_get_jastrow_value_inplace_device(qmckl_context_device context,
+							   double *const value, const int64_t size_max) {
+	qmckl_exit_code_device rc;
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
+									 "qmckl_get_jastrow_value_inplace", NULL);
+	}
+
+	qmckl_context_struct_device *const ctx =
+		(qmckl_context_struct_device *)context;
+	assert(ctx != NULL);
+
+	int64_t sze = ctx->electron.walker.num;
+	if (size_max < sze) {
+		return qmckl_failwith_device(context, QMCKL_INVALID_ARG_3_DEVICE,
+									 "qmckl_get_jastrow_value_inplace",
+									 "Array too small. Expected walker.num");
+	}
+
+	rc = qmckl_context_touch_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	double *old_array = ctx->jastrow.value;
+
+	ctx->jastrow.value = value;
+
+	rc = qmckl_provide_jastrow_value_device(context);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	ctx->jastrow.value = old_array;
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
 qmckl_exit_code_device qmckl_get_jastrow_gl_device(qmckl_context_device context,
 												   double *const gl,
 												   const int64_t size_max) {
