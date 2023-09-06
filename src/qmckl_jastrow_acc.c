@@ -406,19 +406,19 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_device(
 					factor_en[nw] =
 						factor_en[nw] +
 						a_vector[0 +
-								 (type_nucl_vector[a] - 1) * (aord_num + 1)] *
+								 type_nucl_vector[a] * (aord_num + 1)] *
 							x /
-							(1.0 + a_vector[1 + (type_nucl_vector[a] - 1) *
+							(1.0 + a_vector[1 + type_nucl_vector[a] *
 													(aord_num + 1)] *
 									   x) -
-						asymp_jasa[type_nucl_vector[a] - 1];
+						asymp_jasa[type_nucl_vector[a]];
 
 					for (p = 1; p < aord_num; p++) {
 						x = x * en_distance_rescaled[i + a * elec_num +
 													 nw * elec_num * nucl_num];
 						factor_en[nw] =
 							factor_en[nw] + a_vector[p + 1 +
-													 (type_nucl_vector[a] - 1) *
+													 type_nucl_vector[a] *
 														 (aord_num + 1)] *
 												x;
 					}
@@ -491,9 +491,8 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_deriv_e_device(
 					power_ser_g[0] = 0.0;
 					power_ser_g[1] = 0.0;
 					power_ser_g[2] = 0.0;
-					den =
-						1.0 +
-						a_vector[1 + type_nucl_vector[a] * (aord_num + 1)] * x;
+					den = 1.0 +
+						a_vector[1 + (type_nucl_vector[a] + 1) * (aord_num + 1)] * x;
 					invden = 1.0 / den;
 					invden2 = invden * invden;
 					invden3 = invden2 * invden;
@@ -516,7 +515,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_deriv_e_device(
 
 						for (p = 1; p < aord_num; p++) {
 							y = (p + 1) *
-								a_vector[(p + 1) + (type_nucl_vector[a] - 1) *
+								a_vector[(p + 1) + type_nucl_vector[a] *
 													   (aord_num + 1)] *
 								x;
 							power_ser_g[ii] = power_ser_g[ii] + y * dx[ii];
@@ -529,7 +528,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_deriv_e_device(
 
 						lap3 =
 							lap3 - 2.0 *
-									   a_vector[1 + (type_nucl_vector[a] - 1) *
+									   a_vector[1 + type_nucl_vector[a] *
 														(aord_num + 1)] *
 									   dx[ii] * dx[ii];
 
@@ -537,7 +536,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_deriv_e_device(
 										  nw * elec_num * 4] =
 							factor_en_deriv_e[i + ii * elec_num +
 											  nw * elec_num * 4] +
-							a_vector[0 + (type_nucl_vector[a] - 1) *
+							a_vector[0 + type_nucl_vector[a] *
 											 (aord_num + 1)] *
 								dx[ii] * invden2 +
 							power_ser_g[ii];
@@ -547,7 +546,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_deriv_e_device(
 					lap2 = lap2 * dx[ii] * third;
 					lap3 = lap3 + den * dx[ii];
 					lap3 = lap3 *
-						   a_vector[0 + (type_nucl_vector[a] - 1) *
+						   a_vector[0 + type_nucl_vector[a] *
 											(aord_num + 1)] *
 						   invden3;
 					factor_en_deriv_e[i + ii * elec_num + nw * elec_num * 4] =
@@ -611,7 +610,7 @@ qmckl_exit_code_device qmckl_compute_en_distance_rescaled_deriv_e_device(
 				elec_num * walk_num, coord, 1,
 				en_distance_rescaled_deriv_e + (0 + 0 * 4 + i * 4 * elec_num +
 												k * 4 * elec_num * nucl_num),
-				elec_num, rescale_factor_en_h[type_nucl_vector_h[i] - 1]);
+				elec_num, rescale_factor_en_h[type_nucl_vector_h[i]]);
 			if (info != QMCKL_SUCCESS_DEVICE) {
 				qmckl_free_device(context, coord);
 				return info;
@@ -686,7 +685,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
 					power_ser_g[2] = 0.0;
 					den =
 						1.0 +
-						a_vector[1 + type_nucl_vector[a] * (aord_num + 1)] * x;
+						a_vector[1 + (type_nucl_vector[a]+1) * (aord_num + 1)] * x;
 					invden = 1.0 / den;
 					invden2 = invden * invden;
 					invden3 = invden2 * invden;
@@ -709,7 +708,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
 						for (int p = 1; p < aord_num; p++) {
 							y = p *
 								a_vector[p +
-										 type_nucl_vector[a] * (aord_num + 1)] *
+										 (type_nucl_vector[a]+1) * (aord_num + 1)] *
 								x;
 							power_ser_g[ii] = power_ser_g[ii] + y * dx[ii];
 							lap1 = lap1 + (p - 1) * y * xinv * dx[ii] * dx[ii];
@@ -720,7 +719,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
 						}
 
 						lap3 = lap3 - 2.0 *
-										  a_vector[1 + type_nucl_vector[a] *
+										  a_vector[1 + (type_nucl_vector[a]+1) *
 														   (aord_num + 1)] *
 										  dx[ii] * dx[ii];
 
@@ -728,7 +727,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
 										  nw * elec_num * 4] =
 							factor_en_deriv_e[i + ii * elec_num * +nw *
 													  elec_num * 4] +
-							a_vector[0 + type_nucl_vector[a] * (aord_num + 1)] *
+							a_vector[0 + (type_nucl_vector[a]+1) * (aord_num + 1)] *
 								dx[ii] * invden2 +
 							power_ser_g[ii];
 					}
@@ -737,7 +736,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
 					lap2 = lap2 * dx[ii] * third;
 					lap3 = lap3 + den * dx[ii];
 					lap3 = lap3 *
-						   a_vector[0 + type_nucl_vector[a] * (aord_num + 1)] *
+						   a_vector[0 + (type_nucl_vector[a]+1) * (aord_num + 1)] *
 						   invden3;
 					factor_en_deriv_e[i + ii * elec_num + nw * elec_num * 4] =
 						factor_en_deriv_e[i + ii * elec_num +
@@ -1292,7 +1291,7 @@ qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
 			for (int l = 0; l < cord_num; l++) {
 				for (int a = 0; a < (nucl_num + 1); a++) {
 					kappa_l = -((double)l) *
-							  rescale_factor_en[type_nucl_vector[a] - 1];
+							  rescale_factor_en[type_nucl_vector[a]];
 					for (int i = 0; i < elec_num; i++) {
 
 						een_rescaled_n_deriv_e[i + 0 * elec_num +
@@ -1481,7 +1480,7 @@ qmckl_exit_code_device qmckl_compute_en_distance_rescaled_device(
 				context, 'T', 'T', elec_num, 1, elec_coord + k * elec_num,
 				elec_num * walk_num, coord, 1,
 				en_distance_rescaled + i * elec_num + k * elec_num * nucl_num,
-				elec_num, rescale_factor_en_h[type_nucl_vector_h[i] - 1]);
+				elec_num, rescale_factor_en_h[type_nucl_vector_h[i]]);
 			if (info != QMCKL_SUCCESS_DEVICE) {
 				break;
 			}
@@ -1649,7 +1648,7 @@ qmckl_exit_code_device qmckl_compute_een_rescaled_n_device(
 						1.0;
 					een_rescaled_n[i + a * elec_num + elec_num * nucl_num +
 								   nw * elec_num * nucl_num * (cord_num + 1)] =
-						exp(-rescale_factor_en[type_nucl_vector[a] - 1] *
+						exp(-rescale_factor_en[type_nucl_vector[a]] *
 							en_distance[a + i * nucl_num +
 										nw * elec_num * nucl_num]);
 				}
@@ -1705,7 +1704,7 @@ qmckl_exit_code_device qmckl_compute_c_vector_full_device(
 		for (int i = 0; i < dim_c_vector; ++i) {
 			for (int a = 0; a < nucl_num; ++a) {
 				c_vector_full[a + i * nucl_num] =
-					c_vector[(type_nucl_vector[a] - 1) + i * type_nucl_num];
+					c_vector[(type_nucl_vector[a]) + i * type_nucl_num];
 			}
 		}
 	}
