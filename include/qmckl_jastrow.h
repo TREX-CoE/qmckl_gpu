@@ -15,6 +15,10 @@
 #include "qmckl_memory.h"
 #include "qmckl_distance.h"
 
+#ifdef HAVE_LIBGPUBLAS
+	#include "libgpublas.h"
+#endif
+
 #ifdef HAVE_CUBLAS
 	#include <cublas_v2.h>
 	#include <cuda_runtime.h>

@@ -198,6 +198,17 @@ AS_IF([test "x$have_omp" = "xyes" -a  "x$have_acc" = "xyes"], [
 	exit 1
 ])
 
+####
+## Enable gpu_blas lib
+####
+
+AC_ARG_ENABLE(libgpublas, [AS_HELP_STRING([--enable-libgpublas],[Enable the support of blas for GPU])], have_gpublas=yes, have_gpublas=no)
+
+AS_IF([test "x$have_gpublas" = "xyes"], [
+       echo "test"
+       AC_DEFINE([HAVE_LIBGPUBLAS], [1], [Enable libgpublas])
+       CFLAGS="$CFLAGS -llibgpublas"
+       ])
 
 ####
 ## Set compiler flags
@@ -293,6 +304,7 @@ AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc"  = "xyes"])
 AM_CONDITIONAL([HAVE_FORTRAN_INTERFACE],  [test "x$have_fortran_interface"  = "xyes"])
 AM_CONDITIONAL([HAVE_DEVICE_POINTERS], [test "x$have_omp"  = "xyes" -o "x$have_acc"  = "xyes"])
 AM_CONDITIONAL([HAVE_CUBLAS], [test "x$have_cublas"  = "xyes"])
+AM_CONDITIONAL([HAVE_LIBGPUBLAS], [test "xhave_gpublas" = "xyes"])
 
 ####
 # Print configure status
@@ -317,6 +329,7 @@ LDFLAGS:...........: ${LDFLAGS}
 Autoflags .........: ${have_autoflags}
 Fortran interface .: ${have_fortran_interface}
 
+GPUBLAS ...........: ${have_gpublas}
 TREXIO ............: ${have_trexio}
 cuBLAS ............: ${have_cublas}
 cuSPARSE ..........: ${have_cusparse}
@@ -345,6 +358,7 @@ LDFLAGS:...........: ${LDFLAGS}
 Autoflags .........: ${have_autoflags}
 Fortran interface .: ${have_fortran_interface}
 
+GPUBLAS ...........: ${have_gpublas}
 TREXIO ............: ${have_trexio}
 cuBLAS ............: ${have_cublas}
 cuSPARSE ..........: ${have_cusparse}
