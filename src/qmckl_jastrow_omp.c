@@ -1868,10 +1868,8 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 	const int64_t af = elec_num * elec_num;
 	const int64_t bf = elec_num * nucl_num * (cord_num + 1);
 	const int64_t cf = bf;
-	printf("chuilaaaaa\n");
 #ifdef HAVE_LIBGPUBLAS
 
-	printf("ici\n");
 	gpu_dgemm('N', 'N', M, N, K, alpha, een_rescaled_e, LDA, een_rescaled_n, LDB, beta, tmp_c, LDC);
 
 #elif HAVE_CUBLAS
@@ -1886,7 +1884,6 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 
 #else
 
-	printf("go openMP\n");
 #pragma omp target is_device_ptr(een_rescaled_e, een_rescaled_n, tmp_c)
 	{
 
