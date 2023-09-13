@@ -1203,7 +1203,7 @@ qmckl_compute_jastrow_factor_een_rescaled_e_deriv_e_device(
 										   nw * elec_num * elec_num *
 											   (cord_num + 1)];
 
-						een_rescaled_e_deriv_e[i + 2 * elec_num +
+						een_rescaled_e_deriv_e[i + 1 * elec_num +
 											   j * elec_num * 4 +
 											   l * elec_num * 4 * elec_num +
 											   nw * elec_num * 4 * elec_num *
@@ -1763,7 +1763,7 @@ qmckl_exit_code_device qmckl_compute_c_vector_full_device(
 		for (int i = 0; i < dim_c_vector; ++i) {
 			for (int a = 0; a < nucl_num; ++a) {
 				c_vector_full[a + i * nucl_num] =
-					c_vector[(type_nucl_vector[a]) + i * type_nucl_num];
+					c_vector[ i + type_nucl_vector[a] * dim_c_vector];
 			}
 		}
 	}
