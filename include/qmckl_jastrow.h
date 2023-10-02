@@ -16,12 +16,12 @@
 #include "qmckl_distance.h"
 
 #ifdef HAVE_LIBGPUBLAS
-	#include "libgpublas.h"
+#include "libgpublas.h"
 #endif
 
 #ifdef HAVE_CUBLAS
-	#include <cublas_v2.h>
-	#include <cuda_runtime.h>
+#include <cublas_v2.h>
+#include <cuda_runtime.h>
 #endif
 
 qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context);

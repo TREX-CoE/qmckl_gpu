@@ -431,20 +431,15 @@ qmckl_exit_code_device qmckl_distance_rescaled_deriv_e_device(
 					dist = sqrt(x * x + y * y + z * z);
 					// Avoid floating-point exception
 					if (dist == 0.) {
-						dist = 69./rescale_factor_kappa;
+						dist = 69. / rescale_factor_kappa;
 					}
 					dist_inv = 1.0 / dist;
-					rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
-						  rescale_factor_kappa_inv;
-					C[0 + i * 4 + j * 4 * ldc] =
-						x * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-					C[1 + i * 4 + j * 4 * ldc] =
-						y * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-					C[2 + i * 4 + j * 4 * ldc] =
-						z * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					rij = exp(-rescale_factor_kappa * dist);
+					C[0 + i * 4 + j * 4 * ldc] = x * dist_inv * rij;
+					C[1 + i * 4 + j * 4 * ldc] = y * dist_inv * rij;
+					C[2 + i * 4 + j * 4 * ldc] = z * dist_inv * rij;
 					C[3 + i * 4 + j * 4 * ldc] =
-						(2.0 * dist_inv - rescale_factor_kappa_inv) *
-						(1.0 - rescale_factor_kappa_inv * rij);
+						(2.0 * dist_inv - rescale_factor_kappa) * rij;
 				}
 			}
 			break;
@@ -458,19 +453,15 @@ qmckl_exit_code_device qmckl_distance_rescaled_deriv_e_device(
 					dist = sqrt(x * x + y * y + z * z);
 					// Avoid floating-point exception
 					if (dist == 0.) {
-						dist = 69./rescale_factor_kappa;
+						dist = 69. / rescale_factor_kappa;
 					}
 					dist_inv = 1.0 / dist;
-					rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
-						  rescale_factor_kappa_inv;
-					C[0 + i + j] =
-						x * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-					C[1 + i + j] =
-						y * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-					C[2 + i + j] =
-						z * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-					C[3 + i + j] = (2.0 * dist_inv - rescale_factor_kappa_inv) *
-								   (1.0 - rescale_factor_kappa_inv * rij);
+					rij = exp(-rescale_factor_kappa * dist);
+					C[0 + i + j] = x * dist_inv * rij;
+					C[1 + i + j] = y * dist_inv * rij;
+					C[2 + i + j] = z * dist_inv * rij;
+					C[3 + i + j] =
+						(2.0 * dist_inv - rescale_factor_kappa) * rij;
 				}
 			}
 			break;
@@ -484,20 +475,16 @@ qmckl_exit_code_device qmckl_distance_rescaled_deriv_e_device(
 					dist = sqrt(x * x + y * y + z * z);
 					// Avoid floating-point exception
 					if (dist == 0.) {
-						dist = 69./rescale_factor_kappa;
+						dist = 69. / rescale_factor_kappa;
 					}
 					dist_inv = 1.0 / dist;
 					rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
 						  rescale_factor_kappa_inv;
-					C[0 + i * 4 + j * 4 * ldc] =
-						x * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-					C[1 + i * 4 + j * 4 * ldc] =
-						y * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-					C[2 + i * 4 + j * 4 * ldc] =
-						z * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					C[0 + i * 4 + j * 4 * ldc] = x * dist_inv * rij;
+					C[1 + i * 4 + j * 4 * ldc] = y * dist_inv * rij;
+					C[2 + i * 4 + j * 4 * ldc] = z * dist_inv * rij;
 					C[3 + i * 4 + j * ldc] =
-						(2.0 * dist_inv - rescale_factor_kappa_inv) *
-						(1.0 - rescale_factor_kappa_inv * rij);
+						(2.0 * dist_inv - rescale_factor_kappa) * rij;
 				}
 			}
 			break;
@@ -511,20 +498,15 @@ qmckl_exit_code_device qmckl_distance_rescaled_deriv_e_device(
 					dist = sqrt(x * x + y * y + z * z);
 					// Avoid floating-point exception
 					if (dist == 0.) {
-						dist = 69./rescale_factor_kappa;
+						dist = 69. / rescale_factor_kappa;
 					}
 					dist_inv = 1.0 / dist;
-					rij = (1.0 - exp(-rescale_factor_kappa * dist)) *
-						  rescale_factor_kappa_inv;
-					C[0 + i * 4 + j * 4 * ldc] =
-						x * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-					C[1 + i * 4 + j * 4 * ldc] =
-						y * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
-					C[2 + i * 4 + j * 4 * ldc] =
-						z * dist_inv * (1.0 - rescale_factor_kappa_inv * rij);
+					rij = exp(-rescale_factor_kappa * dist);
+					C[0 + i * 4 + j * 4 * ldc] = x * dist_inv * rij;
+					C[1 + i * 4 + j * 4 * ldc] = y * dist_inv * rij;
+					C[2 + i * 4 + j * 4 * ldc] = z * dist_inv * rij;
 					C[3 + i * 4 + j * 4 * ldc] =
-						(2.0 * dist_inv - rescale_factor_kappa_inv) *
-						(1.0 - rescale_factor_kappa_inv * rij);
+						(2.0 * dist_inv - rescale_factor_kappa) * rij;
 				}
 			}
 			break;

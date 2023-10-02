@@ -68,17 +68,19 @@ qmckl_exit_code_device qmckl_compute_jastrow_asymp_jasb_device(
 
 #pragma acc kernels deviceptr(asymp_jasb, b_vector)
 	{
-		asym_one = b_vector[0] * kappa_inv / (1.0 + b_vector[1] * kappa_inv);
+		const double kappa_inv = 1.0 / rescale_factor_ee;
+		const double asym_one =
+			b_vector[0] * kappa_inv / (1.0 + b_vector[1] * kappa_inv);
 
-		asymp_jasb[0] = asym_one;
-		asymp_jasb[1] = 0.5 * asym_one;
-		for (int i = 0; i < 2; i++) {
-			x = kappa_inv;
-			for (int p = 1; p < bord_num; p++) {
-				x = x * kappa_inv;
-				asymp_jasb[i] = asymp_jasb[i] + b_vector[p + 1] * x;
-			}
+		double f = 0.;
+		double x = kappa_inv;
+		for (int k = 2; k <= bord_num; ++k) {
+			x *= kappa_inv;
+			f += b_vector[k] * x;
 		}
+
+		asymp_jasb[0] = 0.5 * asym_one + f;
+		asymp_jasb[1] = asym_one + f;
 	}
 
 	return QMCKL_SUCCESS_DEVICE;
@@ -204,29 +206,49 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_ee_device(
 							  asymp_jasb)
 	{
 		for (int nw = 0; nw < walk_num; ++nw) {
-			factor_ee[nw] = 0.0; // put init array here.
+			const int64_t dn_num = elec_num - up_num;
+			const double fshift =
+				0.5 * (double)((dn_num - 1) * dn_num + (up_num - 1) * up_num) *
+					asymp_jasb[0] +
+				(float)(up_num * dn_num) * asymp_jasb[1];
+
+			factor_ee[nw] = 0.;
+
 			size_t ishift = nw * elec_num * elec_num;
-			for (int i = 0; i < elec_num; ++i) {
-				for (int j = 0; j < i; ++j) {
-					double x = ee_distance_rescaled[j + i * elec_num + ishift];
-					const double x1 = x;
-					double power_ser = 0.0;
-					double spin_fact = 1.0;
-					int ipar = 0; // index of asymp_jasb
+			for (int j = 0; j < up_num; ++j) {
+				const double *xj =
+					&(ee_distance_rescaled[j * elec_num + ishift]);
+				for (int i = 0; i < j; ++i) {
+					factor_ee[nw] +=
+						0.5 * b_vector[0] * xj[i] / (1. + b_vector[1] * xj[i]);
+				}
+			}
 
-					for (int p = 1; p < bord_num; ++p) {
-						x = x * x1;
-						power_ser += b_vector[p + 1] * x;
+			for (int j = up_num; j < elec_num; ++j) {
+				const double *xj =
+					&(ee_distance_rescaled[j * elec_num + ishift]);
+				for (int i = 0; i < up_num; ++i) {
+					factor_ee[nw] +=
+						b_vector[0] * xj[i] / (1. + b_vector[1] * xj[i]);
+				}
+				for (int i = up_num; i < j; ++i) {
+					factor_ee[nw] +=
+						0.5 * b_vector[0] * xj[i] / (1. + b_vector[1] * xj[i]);
+				}
+			}
+
+			factor_ee[nw] -= fshift;
+
+			for (int j = 0; j < elec_num; ++j) {
+				const double *xj =
+					&(ee_distance_rescaled[j * elec_num + ishift]);
+				for (int i = 0; i < j; ++i) {
+					const double x = xj[i];
+					double xk = x;
+					for (int k = 2; k <= bord_num; ++k) {
+						xk *= x;
+						factor_ee[nw] += b_vector[k] * xk;
 					}
-
-					if (i < up_num || j >= up_num) {
-						spin_fact = 0.5;
-						ipar = 1;
-					}
-
-					factor_ee[nw] += spin_fact * b_vector[0] * x1 /
-										 (1.0 + b_vector[1] * x1) -
-									 asymp_jasb[ipar] + power_ser;
 				}
 			}
 		}
@@ -258,95 +280,87 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_ee_deriv_e_device(
 		return QMCKL_INVALID_ARG_4_DEVICE;
 	}
 
+	double *kf = qmckl_malloc_device(context, (bord_num + 1));
+	double *xk = qmckl_malloc_device(context, (bord_num + 1));
+
 #pragma acc kernels deviceptr(b_vector, ee_distance_rescaled,                  \
-							  ee_distance_rescaled_deriv_e, factor_ee_deriv_e)
+							  ee_distance_rescaled_deriv_e, factor_ee_deriv_e, \
+							  kf, xk)
 	{
 
-		for (int nw = 0; nw < walk_num; ++nw) {
-			for (int ii = 0; ii < 4; ++ii) {
-				for (int j = 0; j < elec_num; ++j) {
-					factor_ee_deriv_e[j + ii * elec_num + nw * elec_num * 4] =
-						0.0;
-				}
-			}
+		for (int i = 0; i < elec_num * 4 * walk_num; i++) {
+			factor_ee_deriv_e[i] = 0.;
 		}
 
-		const double third = 1.0 / 3.0;
+		for (int k = 0; k <= bord_num; ++k) {
+			kf[k] = (double)k;
+		}
 
 		for (int nw = 0; nw < walk_num; ++nw) {
-			for (int i = 0; i < elec_num; ++i) {
-				for (int j = 0; j < elec_num; ++j) {
-					const double x0 =
-						ee_distance_rescaled[j + i * elec_num +
-											 nw * elec_num * elec_num];
-					if (fabs(x0) < 1.0e-18)
+			for (int j = 0; j < elec_num; ++j) {
+				const double *dxj =
+					&ee_distance_rescaled_deriv_e[4 * elec_num *
+												  (j + nw * elec_num)];
+				const double *xj =
+					&ee_distance_rescaled[elec_num * (j + nw * elec_num)];
+
+				double *restrict factor_ee_deriv_e_0 =
+					&(factor_ee_deriv_e[nw * elec_num * 4]);
+				double *restrict factor_ee_deriv_e_1 =
+					factor_ee_deriv_e_0 + elec_num;
+				double *restrict factor_ee_deriv_e_2 =
+					factor_ee_deriv_e_1 + elec_num;
+				double *restrict factor_ee_deriv_e_3 =
+					factor_ee_deriv_e_2 + elec_num;
+
+				for (int i = 0; i < elec_num; ++i) {
+					if (j == i)
 						continue;
-					double spin_fact = 1.0;
-					const double den = 1.0 + b_vector[1] * x0;
-					const double invden = 1.0 / den;
-					const double invden2 = invden * invden;
-					const double invden3 = invden2 * invden;
-					const double xinv = 1.0 / (x0 + 1.0e-18);
 
-					double dx[4];
-					dx[0] = ee_distance_rescaled_deriv_e[0 + j * 4 +
-														 i * 4 * elec_num +
-														 nw * 4 * elec_num *
-															 elec_num];
-					dx[1] = ee_distance_rescaled_deriv_e[1 + j * 4 +
-														 i * 4 * elec_num +
-														 nw * 4 * elec_num *
-															 elec_num];
-					dx[2] = ee_distance_rescaled_deriv_e[2 + j * 4 +
-														 i * 4 * elec_num +
-														 nw * 4 * elec_num *
-															 elec_num];
-					dx[3] = ee_distance_rescaled_deriv_e[3 + j * 4 +
-														 i * 4 * elec_num +
-														 nw * 4 * elec_num *
-															 elec_num];
+					double x = xj[i];
 
-					if ((i <= (up_num - 1) && j <= (up_num - 1)) ||
-						(i > (up_num - 1) && j > (up_num - 1))) {
-						spin_fact = 0.5;
+					const double denom = 1.0 + b_vector[1] * x;
+					const double invdenom = 1.0 / denom;
+					const double invdenom2 = invdenom * invdenom;
+
+					const double *restrict dx = dxj + 4 * i;
+
+					const double grad_c2 =
+						dx[0] * dx[0] + dx[1] * dx[1] + dx[2] * dx[2];
+
+					double f = (i < up_num && j < up_num) ||
+									   (i >= up_num && j >= up_num)
+								   ? 0.5 * b_vector[0] * invdenom2
+								   : b_vector[0] * invdenom2;
+
+					factor_ee_deriv_e_0[i] += f * dx[0];
+					factor_ee_deriv_e_1[i] += f * dx[1];
+					factor_ee_deriv_e_2[i] += f * dx[2];
+					factor_ee_deriv_e_3[i] += f * dx[3];
+					factor_ee_deriv_e_3[i] -=
+						f * grad_c2 * invdenom * 2.0 * b_vector[1];
+
+					xk[0] = 1.0;
+					for (int k = 1; k <= bord_num; ++k) {
+						xk[k] = xk[k - 1] * x;
 					}
 
-					double lap1 = 0.0;
-					double lap2 = 0.0;
-					double lap3 = 0.0;
-					double pow_ser_g[3] = {0., 0., 0.};
-					for (int ii = 0; ii < 3; ++ii) {
-						double x = x0;
-						if (fabs(x) < 1.0e-18)
-							continue;
-						for (int p = 2; p < bord_num + 1; ++p) {
-							const double y = p * b_vector[(p - 1) + 1] * x;
-							pow_ser_g[ii] = pow_ser_g[ii] + y * dx[ii];
-							lap1 = lap1 + (p - 1) * y * xinv * dx[ii] * dx[ii];
-							lap2 = lap2 + y;
-							x = x *
-								ee_distance_rescaled[j + i * elec_num +
-													 nw * elec_num * elec_num];
-						}
-
-						lap3 = lap3 - 2.0 * b_vector[1] * dx[ii] * dx[ii];
-
-						factor_ee_deriv_e[i + ii * elec_num +
-										  nw * elec_num * 4] +=
-							+spin_fact * b_vector[0] * dx[ii] * invden2 +
-							pow_ser_g[ii];
+					for (int k = 2; k <= bord_num; ++k) {
+						const double f1 = b_vector[k] * kf[k] * xk[k - 2];
+						const double f2 = f1 * xk[1];
+						factor_ee_deriv_e_0[i] += f2 * dx[0];
+						factor_ee_deriv_e_1[i] += f2 * dx[1];
+						factor_ee_deriv_e_2[i] += f2 * dx[2];
+						factor_ee_deriv_e_3[i] += f2 * dx[3];
+						factor_ee_deriv_e_3[i] += f1 * kf[k - 1] * grad_c2;
 					}
-
-					int ii = 3;
-					lap2 = lap2 * dx[ii] * third;
-					lap3 = lap3 + den * dx[ii];
-					lap3 = lap3 * (spin_fact * b_vector[0] * invden3);
-					factor_ee_deriv_e[i + ii * elec_num + nw * elec_num * 4] +=
-						lap1 + lap2 + lap3;
 				}
 			}
 		}
 	}
+
+	qmckl_free_device(context, kf);
+	qmckl_free_device(context, xk);
 
 	return QMCKL_SUCCESS_DEVICE;
 }
@@ -405,9 +419,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_device(
 
 					factor_en[nw] =
 						factor_en[nw] +
-						a_vector[0 +
-								 type_nucl_vector[a] * (aord_num + 1)] *
-							x /
+						a_vector[0 + type_nucl_vector[a] * (aord_num + 1)] * x /
 							(1.0 + a_vector[1 + type_nucl_vector[a] *
 													(aord_num + 1)] *
 									   x) -
@@ -417,10 +429,10 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_device(
 						x = x * en_distance_rescaled[i + a * elec_num +
 													 nw * elec_num * nucl_num];
 						factor_en[nw] =
-							factor_en[nw] + a_vector[p + 1 +
-													 type_nucl_vector[a] *
-														 (aord_num + 1)] *
-												x;
+							factor_en[nw] +
+							a_vector[p + 1 +
+									 type_nucl_vector[a] * (aord_num + 1)] *
+								x;
 					}
 				}
 			}
@@ -483,6 +495,9 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_deriv_e_device(
 		for (nw = 0; nw < walk_num; nw++) {
 			for (a = 0; a < nucl_num; a++) {
 				for (i = 0; i < elec_num; i++) {
+					double power_ser_g[3];
+					double dx[4];
+
 					x = en_distance_rescaled[i + a * elec_num +
 											 nw * elec_num * nucl_num];
 					if (fabs(x) < 1.0e-18) {
@@ -492,7 +507,8 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_deriv_e_device(
 					power_ser_g[1] = 0.0;
 					power_ser_g[2] = 0.0;
 					den = 1.0 +
-						a_vector[1 + (type_nucl_vector[a] + 1) * (aord_num + 1)] * x;
+						  a_vector[1 + (type_nucl_vector[a]) * (aord_num + 1)] *
+							  x;
 					invden = 1.0 / den;
 					invden2 = invden * invden;
 					invden3 = invden2 * invden;
@@ -515,8 +531,8 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_deriv_e_device(
 
 						for (p = 1; p < aord_num; p++) {
 							y = (p + 1) *
-								a_vector[(p + 1) + type_nucl_vector[a] *
-													   (aord_num + 1)] *
+								a_vector[(p + 1) +
+										 type_nucl_vector[a] * (aord_num + 1)] *
 								x;
 							power_ser_g[ii] = power_ser_g[ii] + y * dx[ii];
 							lap1 = lap1 + p * y * xinv * dx[ii] * dx[ii];
@@ -526,18 +542,16 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_deriv_e_device(
 													 nw * elec_num * nucl_num];
 						}
 
-						lap3 =
-							lap3 - 2.0 *
-									   a_vector[1 + type_nucl_vector[a] *
-														(aord_num + 1)] *
-									   dx[ii] * dx[ii];
+						lap3 = lap3 - 2.0 *
+										  a_vector[1 + type_nucl_vector[a] *
+														   (aord_num + 1)] *
+										  dx[ii] * dx[ii];
 
 						factor_en_deriv_e[i + ii * elec_num +
 										  nw * elec_num * 4] =
 							factor_en_deriv_e[i + ii * elec_num +
 											  nw * elec_num * 4] +
-							a_vector[0 + type_nucl_vector[a] *
-											 (aord_num + 1)] *
+							a_vector[0 + type_nucl_vector[a] * (aord_num + 1)] *
 								dx[ii] * invden2 +
 							power_ser_g[ii];
 					}
@@ -546,8 +560,7 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_en_deriv_e_device(
 					lap2 = lap2 * dx[ii] * third;
 					lap3 = lap3 + den * dx[ii];
 					lap3 = lap3 *
-						   a_vector[0 + type_nucl_vector[a] *
-											(aord_num + 1)] *
+						   a_vector[0 + type_nucl_vector[a] * (aord_num + 1)] *
 						   invden3;
 					factor_en_deriv_e[i + ii * elec_num + nw * elec_num * 4] =
 						factor_en_deriv_e[i + ii * elec_num +
@@ -670,22 +683,22 @@ qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
 			factor_en_deriv_e[i] = 0.0;
 		third = 1.0 / 3.0;
 
-		double power_ser_g[3];
-		double dx[4];
-
 		for (nw = 0; nw < walk_num; nw++) {
 			for (a = 0; a < nucl_num; a++) {
 				for (i = 0; i < elec_num; i++) {
+					double power_ser_g[3];
+					double dx[4];
+
 					x = en_distance_rescaled[i + a * elec_num +
 											 nw * elec_num * nucl_num];
-					if (abs(x) < 1.0e-18)
+					if (fabs(x) < 1.0e-18)
 						continue;
 					power_ser_g[0] = 0.0;
 					power_ser_g[1] = 0.0;
 					power_ser_g[2] = 0.0;
-					den =
-						1.0 +
-						a_vector[1 + (type_nucl_vector[a]+1) * (aord_num + 1)] * x;
+					den = 1.0 + a_vector[1 + (type_nucl_vector[a] + 1) *
+												 (aord_num + 1)] *
+									x;
 					invden = 1.0 / den;
 					invden2 = invden * invden;
 					invden3 = invden2 * invden;
@@ -707,8 +720,8 @@ qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
 												 nw * elec_num * nucl_num];
 						for (int p = 1; p < aord_num; p++) {
 							y = p *
-								a_vector[p +
-										 (type_nucl_vector[a]+1) * (aord_num + 1)] *
+								a_vector[p + (type_nucl_vector[a] + 1) *
+												 (aord_num + 1)] *
 								x;
 							power_ser_g[ii] = power_ser_g[ii] + y * dx[ii];
 							lap1 = lap1 + (p - 1) * y * xinv * dx[ii] * dx[ii];
@@ -718,16 +731,18 @@ qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
 													 nw * elec_num * nucl_num];
 						}
 
-						lap3 = lap3 - 2.0 *
-										  a_vector[1 + (type_nucl_vector[a]+1) *
-														   (aord_num + 1)] *
-										  dx[ii] * dx[ii];
+						lap3 =
+							lap3 - 2.0 *
+									   a_vector[1 + (type_nucl_vector[a] + 1) *
+														(aord_num + 1)] *
+									   dx[ii] * dx[ii];
 
 						factor_en_deriv_e[i + ii * elec_num +
 										  nw * elec_num * 4] =
 							factor_en_deriv_e[i + ii * elec_num * +nw *
 													  elec_num * 4] +
-							a_vector[0 + (type_nucl_vector[a]+1) * (aord_num + 1)] *
+							a_vector[0 + (type_nucl_vector[a] + 1) *
+											 (aord_num + 1)] *
 								dx[ii] * invden2 +
 							power_ser_g[ii];
 					}
@@ -736,7 +751,8 @@ qmckl_exit_code_device qmckl_compute_jastrow_champ_factor_en_deriv_e(
 					lap2 = lap2 * dx[ii] * third;
 					lap3 = lap3 + den * dx[ii];
 					lap3 = lap3 *
-						   a_vector[0 + (type_nucl_vector[a]+1) * (aord_num + 1)] *
+						   a_vector[0 + (type_nucl_vector[a] + 1) *
+											(aord_num + 1)] *
 						   invden3;
 					factor_en_deriv_e[i + ii * elec_num + nw * elec_num * 4] =
 						factor_en_deriv_e[i + ii * elec_num +
@@ -862,135 +878,152 @@ qmckl_exit_code_device qmckl_compute_jastrow_factor_een_deriv_e_device(
 		const size_t elec_num3 = elec_num * 3;
 
 		for (size_t nw = 0; nw < (size_t)walk_num; ++nw) {
-			double *const restrict factor_een_deriv_e_0nw =
-				&(factor_een_deriv_e[elec_num * 4 * nw]);
 			for (size_t n = 0; n < (size_t)dim_c_vector; ++n) {
-				const size_t l = lkpm_combined_index[n];
-				const size_t k = lkpm_combined_index[n + dim_c_vector];
-				const size_t m = lkpm_combined_index[n + 3 * dim_c_vector];
 
-				const size_t en = elec_num * nucl_num;
-				const size_t len = l * en;
-				const size_t len4 = len << 2;
-				const size_t cn = cord_num * nw;
-				const size_t c1 = cord_num + 1;
-				const size_t addr0 = en * (m + c1 * (k + cn));
-				const size_t addr1 = en * (m + cn);
-
-				const double *restrict tmp_c_mkn = tmp_c + addr0;
-				const double *restrict tmp_c_mlkn = tmp_c_mkn + len;
-				const double *restrict een_rescaled_n_mnw =
-					een_rescaled_n + addr1;
-				const double *restrict een_rescaled_n_mlnw =
-					een_rescaled_n_mnw + len;
-				const double *restrict dtmp_c_mknw = &(dtmp_c[addr0 << 2]);
-				const double *restrict dtmp_c_mlknw = dtmp_c_mknw + len4;
-				const double *restrict een_rescaled_n_deriv_e_mnw =
-					een_rescaled_n_deriv_e + (addr1 << 2);
-				const double *restrict een_rescaled_n_deriv_e_mlnw =
-					een_rescaled_n_deriv_e_mnw + len4;
+				int l = lkpm_combined_index[n];
+				int k = lkpm_combined_index[n + dim_c_vector];
+				int m = lkpm_combined_index[n + 3 * dim_c_vector];
 
 				for (size_t a = 0; a < (size_t)nucl_num; a++) {
 					double cn = c_vector_full[a + n * nucl_num];
-					if (cn == 0.0)
-						continue;
+					if (cn != 0.0) {
 
-					const size_t ishift = elec_num * a;
-					const size_t ishift4 = ishift << 2;
+						for (int ii = 0; ii < 4; ii++) {
+							for (int j = 0; j < elec_num; j++) {
+								factor_een_deriv_e[j + ii * elec_num +
+												   nw * elec_num * 4] =
+									factor_een_deriv_e[j + ii * elec_num +
+													   nw * elec_num * 4] +
+									(tmp_c[j + a * elec_num +
+										   m * elec_num * nucl_num +
+										   k * elec_num * nucl_num *
+											   (cord_num + 1) +
+										   nw * elec_num * nucl_num *
+											   (cord_num + 1) * cord_num] *
+										 een_rescaled_n_deriv_e
+											 [j + ii * elec_num +
+											  a * elec_num * 4 +
+											  (m + l) * elec_num * 4 *
+												  nucl_num +
+											  nw * elec_num * 4 * nucl_num *
+												  (cord_num + 1)] +
+									 dtmp_c[j + ii * elec_num +
+											a * elec_num * 4 +
+											m * elec_num * 4 * nucl_num +
+											k * elec_num * 4 * nucl_num *
+												(cord_num + 1) +
+											nw * elec_num * 4 * nucl_num *
+												(cord_num + 1) * cord_num] *
+										 een_rescaled_n[j + a * elec_num +
+														(m + l) * elec_num *
+															nucl_num +
+														nw * elec_num *
+															nucl_num *
+															(cord_num + 1)] +
+									 dtmp_c[j + ii * elec_num +
+											a * elec_num * 4 +
+											(m + l) * elec_num * 4 * nucl_num +
+											k * elec_num * 4 * nucl_num *
+												(cord_num + 1) +
+											nw * elec_num * 4 * nucl_num *
+												(cord_num + 1) * cord_num] *
+										 een_rescaled_n[j + a * elec_num +
+														m * elec_num *
+															nucl_num +
+														nw * elec_num *
+															nucl_num *
+															(cord_num + 1)] +
+									 tmp_c[j + a * elec_num +
+										   (m + l) * elec_num * nucl_num +
+										   k * elec_num * nucl_num *
+											   (cord_num + 1) +
+										   nw * elec_num * nucl_num *
+											   (cord_num + 1) * cord_num] *
+										 een_rescaled_n_deriv_e
+											 [j + ii * elec_num +
+											  a * elec_num * 4 +
+											  m * elec_num * 4 * nucl_num +
+											  nw * elec_num * 4 * nucl_num *
+												  (cord_num + 1)]) *
+										cn;
+							}
+						}
 
-					const double *restrict tmp_c_amlkn = tmp_c_mlkn + ishift;
-					const double *restrict tmp_c_amkn = tmp_c_mkn + ishift;
-					const double *restrict een_rescaled_n_amnw =
-						een_rescaled_n_mnw + ishift;
-					const double *restrict een_rescaled_n_amlnw =
-						een_rescaled_n_mlnw + ishift;
-					const double *restrict dtmp_c_0amknw =
-						dtmp_c_mknw + ishift4;
-					const double *restrict dtmp_c_0amlknw =
-						dtmp_c_mlknw + ishift4;
-					const double *restrict een_rescaled_n_deriv_e_0amnw =
-						een_rescaled_n_deriv_e_mnw + ishift4;
-					const double *restrict een_rescaled_n_deriv_e_0amlnw =
-						een_rescaled_n_deriv_e_mlnw + ishift4;
+						cn = cn + cn;
 
-					const double *restrict dtmp_c_1amknw =
-						dtmp_c_0amknw + elec_num;
-					const double *restrict dtmp_c_1amlknw =
-						dtmp_c_0amlknw + elec_num;
-					const double *restrict dtmp_c_2amknw =
-						dtmp_c_0amknw + elec_num2;
-					const double *restrict dtmp_c_2amlknw =
-						dtmp_c_0amlknw + elec_num2;
-					const double *restrict dtmp_c_3amknw =
-						dtmp_c_0amknw + elec_num3;
-					const double *restrict dtmp_c_3amlknw =
-						dtmp_c_0amlknw + elec_num3;
-					const double *restrict een_rescaled_n_deriv_e_1amnw =
-						een_rescaled_n_deriv_e_0amnw + elec_num;
-					const double *restrict een_rescaled_n_deriv_e_1amlnw =
-						een_rescaled_n_deriv_e_0amlnw + elec_num;
-					const double *restrict een_rescaled_n_deriv_e_2amnw =
-						een_rescaled_n_deriv_e_0amnw + elec_num2;
-					const double *restrict een_rescaled_n_deriv_e_2amlnw =
-						een_rescaled_n_deriv_e_0amlnw + elec_num2;
-					const double *restrict een_rescaled_n_deriv_e_3amnw =
-						een_rescaled_n_deriv_e_0amnw + elec_num3;
-					const double *restrict een_rescaled_n_deriv_e_3amlnw =
-						een_rescaled_n_deriv_e_0amlnw + elec_num3;
-					double *const restrict factor_een_deriv_e_1nw =
-						factor_een_deriv_e_0nw + elec_num;
-					double *const restrict factor_een_deriv_e_2nw =
-						factor_een_deriv_e_0nw + elec_num2;
-					double *const restrict factor_een_deriv_e_3nw =
-						factor_een_deriv_e_0nw + elec_num3;
-
-					for (size_t j = 0; j < (size_t)elec_num; ++j) {
-						factor_een_deriv_e_0nw[j] +=
-							cn *
-							(tmp_c_amkn[j] * een_rescaled_n_deriv_e_0amlnw[j] +
-							 dtmp_c_0amknw[j] * een_rescaled_n_amlnw[j] +
-							 dtmp_c_0amlknw[j] * een_rescaled_n_amnw[j] +
-							 tmp_c_amlkn[j] * een_rescaled_n_deriv_e_0amnw[j]);
-						tmp3[j] =
-							dtmp_c_0amknw[j] *
-								een_rescaled_n_deriv_e_0amlnw[j] +
-							dtmp_c_0amlknw[j] * een_rescaled_n_deriv_e_0amnw[j];
-					}
-
-					for (size_t j = 0; j < (size_t)elec_num; ++j) {
-						factor_een_deriv_e_1nw[j] +=
-							cn *
-							(tmp_c_amkn[j] * een_rescaled_n_deriv_e_1amlnw[j] +
-							 dtmp_c_1amknw[j] * een_rescaled_n_amlnw[j] +
-							 dtmp_c_1amlknw[j] * een_rescaled_n_amnw[j] +
-							 tmp_c_amlkn[j] * een_rescaled_n_deriv_e_1amnw[j]);
-						tmp3[j] +=
-							dtmp_c_1amknw[j] *
-								een_rescaled_n_deriv_e_1amlnw[j] +
-							dtmp_c_1amlknw[j] * een_rescaled_n_deriv_e_1amnw[j];
-					}
-
-					for (size_t j = 0; j < (size_t)elec_num; ++j) {
-						factor_een_deriv_e_2nw[j] +=
-							cn *
-							(tmp_c_amkn[j] * een_rescaled_n_deriv_e_2amlnw[j] +
-							 dtmp_c_2amknw[j] * een_rescaled_n_amlnw[j] +
-							 dtmp_c_2amlknw[j] * een_rescaled_n_amnw[j] +
-							 tmp_c_amlkn[j] * een_rescaled_n_deriv_e_2amnw[j]);
-						tmp3[j] +=
-							dtmp_c_2amknw[j] *
-								een_rescaled_n_deriv_e_2amlnw[j] +
-							dtmp_c_2amlknw[j] * een_rescaled_n_deriv_e_2amnw[j];
-					}
-
-					for (size_t j = 0; j < (size_t)elec_num; ++j) {
-						factor_een_deriv_e_3nw[j] +=
-							cn *
-							(tmp_c_amkn[j] * een_rescaled_n_deriv_e_3amlnw[j] +
-							 dtmp_c_3amknw[j] * een_rescaled_n_amlnw[j] +
-							 dtmp_c_3amlknw[j] * een_rescaled_n_amnw[j] +
-							 tmp_c_amlkn[j] * een_rescaled_n_deriv_e_3amnw[j] +
-							 tmp3[j] * 2.0);
+						for (int j = 0; j < elec_num; j++) {
+							factor_een_deriv_e[j + 3 * elec_num +
+											   nw * elec_num * 4] =
+								factor_een_deriv_e[j + 3 * elec_num +
+												   nw * elec_num * 4] +
+								(dtmp_c[j + 0 * elec_num + a * elec_num * 4 +
+										m * elec_num * 4 * nucl_num +
+										k * elec_num * 4 * nucl_num *
+											(cord_num + 1) +
+										nw * elec_num * 4 * nucl_num *
+											(cord_num + 1) * cord_num] *
+									 een_rescaled_n_deriv_e
+										 [j + 0 * elec_num + a * elec_num * 4 +
+										  (m + l) * elec_num * 4 * nucl_num +
+										  nw * elec_num * 4 * nucl_num *
+											  (cord_num + 1)] +
+								 dtmp_c[j + 1 * elec_num + a * elec_num * 4 +
+										m * elec_num * 4 * nucl_num +
+										k * elec_num * 4 * nucl_num *
+											(cord_num + 1) +
+										nw * elec_num * 4 * nucl_num *
+											(cord_num + 1) * cord_num] *
+									 een_rescaled_n_deriv_e
+										 [j + 1 * elec_num + a * elec_num * 4 +
+										  (m + l) * elec_num * 4 * nucl_num +
+										  nw * elec_num * 4 * nucl_num *
+											  (cord_num + 1)] +
+								 dtmp_c[j + 2 * elec_num + a * elec_num * 4 +
+										m * elec_num * 4 * nucl_num +
+										k * elec_num * 4 * nucl_num *
+											(cord_num + 1) +
+										nw * elec_num * 4 * nucl_num *
+											(cord_num + 1) * cord_num] *
+									 een_rescaled_n_deriv_e
+										 [j + 2 * elec_num + a * elec_num * 4 +
+										  (m + l) * elec_num * 4 * nucl_num +
+										  nw * elec_num * 4 * nucl_num *
+											  (cord_num + 1)] +
+								 dtmp_c[j + 0 * elec_num + a * elec_num * 4 +
+										(m + l) * elec_num * 4 * nucl_num +
+										k * elec_num * 4 * nucl_num *
+											(cord_num + 1) +
+										nw * elec_num * 4 * nucl_num *
+											(cord_num + 1) * cord_num] *
+									 een_rescaled_n_deriv_e
+										 [j + 0 * elec_num + a * elec_num * 4 +
+										  m * elec_num * 4 * nucl_num +
+										  nw * elec_num * 4 * nucl_num *
+											  (cord_num + 1)] +
+								 dtmp_c[j + 1 * elec_num + a * elec_num * 4 +
+										(m + l) * elec_num * 4 * nucl_num +
+										k * elec_num * 4 * nucl_num *
+											(cord_num + 1) +
+										nw * elec_num * 4 * nucl_num *
+											(cord_num + 1) * cord_num] *
+									 een_rescaled_n_deriv_e
+										 [j + 1 * elec_num + a * elec_num * 4 +
+										  m * elec_num * 4 * nucl_num +
+										  nw * elec_num * 4 * nucl_num *
+											  (cord_num + 1)] +
+								 dtmp_c[j + 2 * elec_num + a * elec_num * 4 +
+										(m + l) * elec_num * 4 * nucl_num +
+										k * elec_num * 4 * nucl_num *
+											(cord_num + 1) +
+										nw * elec_num * 4 * nucl_num *
+											(cord_num + 1) * cord_num] *
+									 een_rescaled_n_deriv_e
+										 [j + 2 * elec_num + a * elec_num * 4 +
+										  m * elec_num * 4 * nucl_num +
+										  nw * elec_num * 4 * nucl_num *
+											  (cord_num + 1)]) *
+									cn;
+						}
 					}
 				}
 			}
@@ -1162,7 +1195,7 @@ qmckl_compute_jastrow_factor_een_rescaled_e_deriv_e_device(
 										   nw * elec_num * elec_num *
 											   (cord_num + 1)];
 
-						een_rescaled_e_deriv_e[i + 2 * elec_num +
+						een_rescaled_e_deriv_e[i + 1 * elec_num +
 											   j * elec_num * 4 +
 											   l * elec_num * 4 * elec_num +
 											   nw * elec_num * 4 * elec_num *
@@ -1260,9 +1293,9 @@ qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
 		return info;
 	}
 
-#pragma acc kernels deviceptr(rescale_factor_en, coord_ee, coord_en,           \
-							  en_distance, een_rescaled_n,                     \
-							  een_rescaled_n_deriv_e, elnuc_dist_deriv_e, type_nucl_vector)
+#pragma acc kernels deviceptr(                                                 \
+	rescale_factor_en, coord_ee, coord_en, en_distance, een_rescaled_n,        \
+	een_rescaled_n_deriv_e, elnuc_dist_deriv_e, type_nucl_vector)
 	{
 		// Prepare table of exponentiated distances raised to appropriate power
 		for (int i = 0; i < elec_num * 4 * nucl_num * (cord_num + 1) * walk_num;
@@ -1289,9 +1322,10 @@ qmckl_compute_jastrow_factor_een_rescaled_n_deriv_e_device(
 			}
 
 			for (int l = 0; l < cord_num; l++) {
-				for (int a = 0; a < (nucl_num + 1); a++) {
-					kappa_l = -((double)l) *
-							  rescale_factor_en[type_nucl_vector[a]];
+				// NOTE In CPU, bound is up to (nucl_num+1), but seems
+				for (int a = 0; a < nucl_num; a++) {
+					kappa_l =
+						-((double)l) * rescale_factor_en[type_nucl_vector[a]];
 					for (int i = 0; i < elec_num; i++) {
 
 						een_rescaled_n_deriv_e[i + 0 * elec_num +
@@ -1890,22 +1924,22 @@ qmckl_exit_code_device qmckl_compute_dtmp_c_device(
 	{
 		for (int64_t nw = 0; nw < walk_num; ++nw) {
 			for (int64_t i = 0; i < cord_num; ++i) {
-
 				// Single DGEMM
 				double *A =
-					een_rescaled_e_deriv_e + (af * (i + nw * (cord_num + 1)));
-				double *B = een_rescaled_n + (bf * nw);
-				double *C = dtmp_c + (cf * (i + nw * cord_num));
+					&(een_rescaled_e_deriv_e[af * (i + nw * (cord_num + 1))]);
+				double *B = &(een_rescaled_n[bf * nw]);
+				double *C = &(dtmp_c[cf * (i + nw * cord_num)]);
 
-				// Row of A
-				for (int i = 0; i < M; i++) {
-					// Cols of B
-					for (int j = 0; j < N; j++) {
+				// Moving along cols of B / C
+				for (int j = 0; j < N; j++) {
+					// Moving along cols of A / C
+					for (int ii = 0; ii < M; ii++) {
 
 						// Compute C(i,j)
-						C[i + LDC * j] = 0.;
+						C[ii + LDC * j] = 0.;
 						for (int k = 0; k < K; k++) {
-							C[i + LDC * j] += A[i + k * LDA] * B[k + j * LDB];
+							C[ii + LDC * j] = C[ii + LDC * j] +
+											  A[ii + k * LDA] * B[k + j * LDB];
 						}
 					}
 				}
