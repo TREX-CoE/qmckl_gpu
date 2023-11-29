@@ -1,4 +1,4 @@
-#include "include/qmckl_mo.h"
+#include "../include/qmckl_mo.h"
 
 //**********
 // COMPUTE
@@ -15,6 +15,14 @@ qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_device(
 
 #pragma omp target is_device_ptr(coefficient_t, ao_vgl, mo_vgl)
 	{
+
+
+
+#ifdef HAVE_LIBGPUBLAS
+
+		gpu_dgemm('N', 'N', mo_num, point_num*5, ao_num, 1., coefficient_t, mo_num, ao_vgl, ao_num, 0., mo_vgl, mo_num);
+
+#elif
 #pragma omp teams distribute parallel for
 		for (int64_t j = 0; j < point_num; ++j) {
 
@@ -61,7 +69,9 @@ qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_device(
 				}
 			}
 		}
+#endif
 	}
+
 	// End of GPU region
 
 	return QMCKL_SUCCESS_DEVICE;

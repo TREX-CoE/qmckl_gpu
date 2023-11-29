@@ -1,4 +1,4 @@
-#include "include/qmckl_mo.h"
+#include "../include/qmckl_mo.h"
 #include "include/qmckl_ao.h"
 #ifdef HAVE_CUBLAS
 #include <cublas_v2.h>
