@@ -32,6 +32,14 @@ By default, the configure will try to enable TREXIO by autodetecting it, but wil
 - If TREXIO can not be found, but you want to use it : specify the path by using the `--enable-trexio=...` configure option. Specify the TREXIO install path that contains the `lib` and `include` subdirectories. If you specified an incorrect path, the configure will fail.
 - If TREXIO is found on your machine but you don't want to use it : explicitely disable it by using the `--disable-trexio` configure option.
 
+## Enabling fortran interface
+
+To enable fortran interface:
+
+```
+./configure [arguments] --enable-fortran-interface
+```
+
 
 ## Enabling either OpenMP or OpenACC
 
