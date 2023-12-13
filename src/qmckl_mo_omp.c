@@ -18,7 +18,7 @@ qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_device(
 
 		gpu_dgemm('N', 'N', mo_num, point_num*5, ao_num, 1., coefficient_t, mo_num, ao_vgl, ao_num, 0., mo_vgl, mo_num);
 
-#elif
+#else
 
 #pragma omp target is_device_ptr(coefficient_t, ao_vgl, mo_vgl)
 	{
