@@ -457,7 +457,7 @@ module qmckl_gpu_f
             integer(qmckl_context_device), intent(in), value :: context
             type(c_ptr), intent(in), value         :: ao_value
             integer(c_int64_t), intent(in), value :: size_max
-        end function qmckl_get_ao_basis_ao_value_device
+        end function qmckl_get_ao_basis_ao_value_inplace_device
 
 
         integer(qmckl_exit_code_device) function qmckl_get_ao_basis_ao_vgl_inplace_device(context, ao_value, size_max) &
@@ -469,7 +469,7 @@ module qmckl_gpu_f
             integer(qmckl_context_device), intent(in), value :: context
             type(c_ptr), intent(in), value         :: ao_value
             integer(c_int64_t), intent(in), value :: size_max
-        end function qmckl_get_ao_basis_ao_value_device
+        end function qmckl_get_ao_basis_ao_vgl_inplace_device
 
 
 
