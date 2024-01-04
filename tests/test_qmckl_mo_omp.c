@@ -1,4 +1,4 @@
-#include "qmckl.h"
+#include "qmckl_gpu.h"
 #include "assert.h"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -56,26 +56,26 @@ int main() {
 
 	// Set nucleus stuff in context
 
-	qmckl_exit_code rc;
+	qmckl_exit_code_device rc;
 
 	rc = qmckl_set_electron_num_device(context, elec_up_num, elec_dn_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	assert(qmckl_electron_provided_device(context));
 
 	rc = qmckl_set_point_device(context, 'N', point_num, elec_coord_d,
 								point_num * 3);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_set_nucleus_num_device(context, nucl_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_set_nucleus_coord_device(context, 'T', nucl_coord_d,
 										nucl_num * 3);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_set_nucleus_charge_device(context, nucl_charge_d, nucl_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	assert(qmckl_nucleus_provided_device(context));
 
@@ -136,67 +136,67 @@ int main() {
 	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_type_device(context, typ);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_shell_num_device(context, chbrclf_shell_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_prim_num_device(context, chbrclf_prim_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index_d,
 												 nucl_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_nucleus_shell_num_device(
 		context, nucleus_shell_num_d, nucl_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_shell_ang_mom_device(context, shell_ang_mom_d,
 												 chbrclf_shell_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_shell_factor_device(context, shell_factor_d,
 												chbrclf_shell_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_shell_prim_num_device(context, shell_prim_num_d,
 												  chbrclf_shell_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_shell_prim_index_device(context, shell_prim_index_d,
 													chbrclf_shell_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_exponent_device(context, exponent_d,
 											chbrclf_prim_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_coefficient_device(context, coefficient_d,
 											   chbrclf_prim_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 	assert(!qmckl_ao_basis_provided_device(context));
 
 	rc = qmckl_set_ao_basis_prim_factor_device(context, prim_factor_d,
 											   chbrclf_prim_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_set_ao_basis_ao_num_device(context, chbrclf_ao_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	rc = qmckl_set_ao_basis_ao_factor_device(context, ao_factor_d,
 											 chbrclf_ao_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	assert(qmckl_ao_basis_provided_device(context));
 
@@ -269,13 +269,13 @@ int main() {
 	if (fabs(ao_value[AO_VALUE_ID(26, 222)] - (7.514816980753531e-09)) > 1.e-14)
 		return 1;
 
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	/* Set up MO data */
 
 	int64_t mo_num = chbrclf_mo_num;
 	rc = qmckl_set_mo_basis_mo_num_device(context, mo_num);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	double *mo_coefficient = &(chbrclf_mo_coef[0]);
 	double *mo_coefficient_d =
@@ -284,12 +284,12 @@ int main() {
 					 mo_num * ao_num * sizeof(double));
 
 	rc = qmckl_set_mo_basis_coefficient_device(context, mo_coefficient_d);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	assert(qmckl_mo_basis_provided_device(context));
 
 	rc = qmckl_context_touch_device(context);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	/* Get MO value (from scratch) */
 	double *mo_value = malloc(point_num * chbrclf_mo_num * sizeof(double));
@@ -300,7 +300,7 @@ int main() {
 	qmckl_memcpy_D2H(context, mo_value, mo_value_d,
 					 point_num * chbrclf_mo_num * sizeof(double));
 
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	/* Get MO vgl */
 	double *mo_vgl = malloc(point_num * 5 * chbrclf_mo_num * sizeof(double));
@@ -322,7 +322,7 @@ int main() {
 	}
 
 	rc = qmckl_context_touch_device(context);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	/* Get MO value (from MO vgl array) */
 	rc = qmckl_get_mo_basis_mo_value_device(context, mo_value_d,
@@ -330,7 +330,7 @@ int main() {
 	qmckl_memcpy_D2H(context, mo_value, mo_value_d,
 					 point_num * chbrclf_mo_num * sizeof(double));
 
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	// Making sure that value element of vgl == value
 	for (int i = 0; i < point_num; ++i) {
@@ -347,7 +347,7 @@ int main() {
 	qmckl_memcpy_D2H(context, mo_value, mo_value_d,
 					 point_num * chbrclf_mo_num * sizeof(double));
 
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	// Making sure that value element of vgl == value
 	for (int i = 0; i < point_num; ++i) {
@@ -409,7 +409,7 @@ int main() {
 
 	// TODO
 	rc = qmckl_context_destroy_device(context);
-	assert(rc == QMCKL_SUCCESS);
+	assert(rc == QMCKL_SUCCESS_DEVICE);
 
 	return 0;
 }
