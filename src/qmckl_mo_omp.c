@@ -37,19 +37,15 @@ qmckl_exit_code_device qmckl_compute_mo_basis_mo_vgl_device(
 			for (int64_t k = 0; k < ao_num; k++) {
 				for (int l = 0; l < 5; l++) {
 					if (ao_vgl[k + ao_num * 5 * j] != 0.) {
-						//double c1 = ao_vgl[k + ao_num * l + ao_num * 5 * j];
 						double c1 = ao_vgl[k + ao_num * l + ao_num * 5 * j];
 					
 #pragma omp simd
 
 						for (int i = 0; i < mo_num; i++) {
-				/*			mo_vgl[i + mo_num * l + mo_num * 5 * j] =
+							mo_vgl[i + mo_num * l + mo_num * 5 * j] =
 								mo_vgl[i + mo_num * l + mo_num * 5 * j] +
-								coefficient_t[i + mo_num * k] * c1; */
-							mo_vgl[j + point_num * l + point_num * 5 * i] =
-								mo_vgl[j + point_num * l + point_num * 5 * i] +
-								coefficient_t[k + ao_num * i] * c1;
-				
+								coefficient_t[i + mo_num * k] * c1; 
+
 
 						}
 					}
