@@ -35,7 +35,7 @@
 
 AC_PREREQ([2.69])
 
-AC_INIT([qmckl_gpu],[0.0.1],[https://github.com/TREX-CoE/qmckl_gpu/issues],[],[https://trex-coe.github.io/qmckl/index.html]	)
+AC_INIT([qmckl_gpu],[1.0.0],[https://github.com/TREX-CoE/qmckl_gpu/issues],[],[https://trex-coe.github.io/qmckl/index.html]	)
 AM_INIT_AUTOMAKE([-Wall subdir-objects])
 AM_PROG_AR
 
