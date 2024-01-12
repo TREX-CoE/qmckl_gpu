@@ -10,7 +10,7 @@
 // ALLOCS / FREES
 //**********
 
-void *qmckl_malloc_device(qmckl_context_device context, size_t size) {
+void *qmckl_malloc_device(qmckl_context_device context, int64_t size) {
 
 	assert(qmckl_context_check_device(context) != QMCKL_NULL_CONTEXT_DEVICE);
 
@@ -118,7 +118,7 @@ qmckl_exit_code_device qmckl_free_device(qmckl_context_device context,
 
 qmckl_exit_code_device qmckl_memcpy_H2D(qmckl_context_device context,
 										void *const dest, void *const src,
-										size_t size) {
+										int64_t size) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
@@ -154,7 +154,7 @@ qmckl_exit_code_device qmckl_memcpy_H2D(qmckl_context_device context,
 
 qmckl_exit_code_device qmckl_memcpy_D2H(qmckl_context_device context,
 										void *const dest, void *const src,
-										size_t size) {
+										int64_t size) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
