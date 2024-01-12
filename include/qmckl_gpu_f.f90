@@ -363,6 +363,20 @@ module qmckl_gpu_f
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_electron_coord_device
 
+        integer(qmckl_exit_code_device) function qmckl_set_electron_coord_device_from_host(context, transp, walk_num, coord, size_max) &
+            bind(C, name="qmckl_set_electron_coord_device")
+            use, intrinsic :: iso_c_binding
+            import
+            implicit none
+
+            integer(qmckl_context_device), intent(in), value :: context
+            character, intent(in), value :: transp
+            integer(c_int64_t), intent(in), value :: walk_num
+            type(c_ptr), intent(in), value :: coord
+            integer(c_int64_t), intent(in), value :: size_max
+        end function qmckl_set_electron_coord_device_from_host
+
+
         ! Getters
 
         integer(qmckl_exit_code_device) function qmckl_get_electron_coord_device(context, transp, coord, size_max) &
