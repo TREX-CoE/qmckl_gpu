@@ -102,6 +102,57 @@ qmckl_set_electron_coord_device(qmckl_context_device context, char transp,
 	return QMCKL_SUCCESS_DEVICE;
 }
 
+
+
+qmckl_exit_code_device
+qmckl_set_electron_coord_device_from_host(qmckl_context_device context, char transp,
+								int64_t walk_num, double *coord,
+								int64_t size_max) {
+
+	size_t device_id = qmckl_get_device_id(context);
+	int32_t mask = 0; // coord can be changed
+
+	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
+		return QMCKL_NULL_CONTEXT_DEVICE;
+	}
+
+	qmckl_context_struct_device *ctx = (qmckl_context_struct_device *)context;
+
+	int64_t elec_num = ctx->electron.num;
+
+	if (elec_num == 0L) {
+		return qmckl_failwith_device(context, QMCKL_FAILURE_DEVICE,
+									 "qmckl_set_electron_coord_device",
+									 "elec_num is not set");
+	}
+
+	/* Swap pointers */
+	qmckl_walker_device tmp = ctx->electron.walker_old;
+	ctx->electron.walker_old = ctx->electron.walker;
+	ctx->electron.walker = tmp;
+
+	memcpy(&(ctx->point), &(ctx->electron.walker.point),
+		   sizeof(qmckl_point_struct_device));
+
+	qmckl_exit_code_device rc;
+
+
+	rc = qmckl_set_point_device_from_host(context, transp, walk_num * elec_num, coord,
+								size_max);
+	if (rc != QMCKL_SUCCESS_DEVICE)
+		return rc;
+
+	ctx->electron.walker.num = walk_num;
+	memcpy(&(ctx->electron.walker.point), &(ctx->point),
+		   sizeof(qmckl_point_struct_device));
+
+	return QMCKL_SUCCESS_DEVICE;
+}
+
+
+
+
+
 //**********
 // GETTERS
 //**********
