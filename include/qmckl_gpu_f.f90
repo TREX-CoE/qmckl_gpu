@@ -95,7 +95,8 @@ module qmckl_gpu_f
         end function qmckl_memcpy_H2D
 
         integer(qmckl_exit_code_device) function qmckl_memcpy_H2D_double(context, dest, src, size) &
-            bind(C, name="qmckl_memcpy_H2D_double")
+             !bind(C, name="qmckl_memcpy_H2D_double")
+             bind(C, name="qmckl_memcpy_H2D")
             use, intrinsic :: iso_c_binding
             import
             implicit none
@@ -142,9 +143,13 @@ module qmckl_gpu_f
             integer(c_int64_t), intent(in), value :: size
         end function qmckl_memcpy_D2H
 
+
+
+        
         integer(qmckl_exit_code_device) function qmckl_memcpy_D2H_double(context, dest, src, size) &
-            bind(C, name="qmckl_memcpy_D2H_double")
-            use, intrinsic :: iso_c_binding
+             !bind(C, name="qmckl_memcpy_D2H_double")
+             bind(C, name="qmckl_memcpy_D2H")
+          use, intrinsic :: iso_c_binding
             import
             implicit none
 
@@ -187,7 +192,7 @@ module qmckl_gpu_f
             integer(qmckl_context_device), value :: context
             type(c_ptr), intent(in), value :: dest
             type(c_ptr), intent(in), value :: src
-            integer(c_size_t), value :: size
+            integer(c_int64_t), value :: size
         end function qmckl_memcpy_D2D
 
     !!!!!!!!!!!
@@ -332,7 +337,9 @@ module qmckl_gpu_f
             character(c_char), intent(in), value :: transp
             double precision, intent(out) :: coord(*)
             integer(c_int64_t), intent(in), value :: size_max
-        end function qmckl_get_point_device_to_host
+          end function qmckl_get_point_device_to_host
+
+
 
     !!!!!!!!!!!
         ! ELECTRON
