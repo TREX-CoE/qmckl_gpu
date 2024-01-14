@@ -11,7 +11,7 @@ include_HEADERS = include/qmckl_gpu.h
 
 # Optionally distribure the Fortran interface header
 if HAVE_FORTRAN_INTERFACE
-  include_HEADERS += include/qmckl_gpu_f.f90
+  include_HEADERS += include/qmckl_gpu_f.F90
 endif
 
 lib_LTLIBRARIES = libqmckl_gpu.la
