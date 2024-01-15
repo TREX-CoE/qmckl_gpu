@@ -466,7 +466,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in) :: context
-            integer(c_int64_t), intent(in) :: shell_ang_mom(*) ! Elements of type int32_t
+            integer(c_int32_t), intent(in) :: shell_ang_mom(*) ! Elements of type int32_t
             integer(c_int64_t), intent(in) :: shell_num
         end function qmckl_set_ao_basis_shell_ang_mom_device
 
