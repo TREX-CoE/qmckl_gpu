@@ -218,8 +218,8 @@ module qmckl_gpu_f
             import
             implicit none
 
-            integer(qmckl_context_device), intent(in) :: context
-            integer(c_int64_t), intent(in) :: num
+            integer(qmckl_context_device), intent(in), value :: context
+            integer(c_int64_t), intent(in), value :: num
         end function qmckl_set_nucleus_num_device
 
         integer(qmckl_exit_code_device) function qmckl_set_nucleus_coord_device(context, transp, nucl_coord, size_max) &
