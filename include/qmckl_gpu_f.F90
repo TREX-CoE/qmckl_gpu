@@ -521,7 +521,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            real(double), intent(in), value :: coefficient ! Elements of type double
+            real(c_double), intent(in), value :: coefficient ! Elements of type double
             integer(c_int64_t), intent(in), value :: prim_num
         end function qmckl_set_ao_basis_coefficient_device
 
