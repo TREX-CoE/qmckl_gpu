@@ -202,7 +202,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: file_name
+            character(c_char), intent(in), value :: file_name
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_trexio_read_device
 
@@ -230,7 +230,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             character(c_char), intent(in), value :: transp
-            type(c_ptr), intent(in), value :: nucl_coord
+            real(c_double), intent(in), value :: nucl_coord
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_nucleus_coord_device
 
@@ -241,7 +241,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: nucl_charge
+            real(c_double), intent(in), value :: nucl_charge
             integer(c_int64_t), intent(in), value :: nucl_num
         end function qmckl_set_nucleus_charge_device
 
@@ -254,7 +254,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: num ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: num ! Elements of type int64_t
         end function qmckl_get_nucleus_num_device
 
         integer(qmckl_exit_code_device) function qmckl_get_nucleus_coord_device(context, transp, nucl_coord, size_max) &
@@ -265,7 +265,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             character(c_char), intent(in), value :: transp
-            type(c_ptr), intent(in), value :: nucl_coord ! Elements of type double*
+            real(c_double), intent(in), value :: nucl_coord ! Elements of type double*
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_nucleus_coord_device
 
@@ -276,7 +276,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: nucl_charge ! Elements of type double
+            type(c_ptr), intent(out), value :: nucl_charge ! Elements of type double
             integer(c_int64_t), intent(in), value :: nucl_num
         end function qmckl_get_nucleus_charge_device
 
@@ -293,7 +293,7 @@ module qmckl_gpu_f
             integer(qmckl_context_device), intent(in), value :: context
             character(c_char), intent(in), value :: transp
             integer(c_int64_t), intent(in), value :: num
-            type(c_ptr), intent(in), value :: coord ! Elements of type double
+            real(c_double), intent(in), value :: coord ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_point_device
 
@@ -318,7 +318,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             character(c_char), intent(in), value :: transp
-            type(c_ptr), intent(in), value :: coord ! Elements of type double
+            real(c_double), intent(out), value :: coord ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_point_device
 
@@ -359,7 +359,7 @@ module qmckl_gpu_f
             integer(qmckl_context_device), intent(in), value :: context
             character, intent(in), value :: transp
             integer(c_int64_t), intent(in), value :: walk_num
-            type(c_ptr), intent(in), value :: coord
+            real(c_double), intent(in), value :: coord
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_electron_coord_device
 
@@ -387,7 +387,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             character, intent(in), value :: transp
-            type(c_ptr), intent(in), value :: coord ! Elements of type double
+            real(c_double), intent(out), value :: coord ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_electron_coord_device
 
@@ -444,7 +444,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: nucleus_index ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: nucleus_index ! Elements of type int64_t
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_ao_basis_nucleus_index_device
 
@@ -455,7 +455,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: nucleus_shell_num ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: nucleus_shell_num ! Elements of type int64_t
             integer(c_int64_t), intent(in), value :: nucl_num
         end function qmckl_set_ao_basis_nucleus_shell_num_device
 
@@ -466,7 +466,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: shell_ang_mom ! Elements of type int32_t
+            integer(c_int64_t), intent(in), value :: shell_ang_mom ! Elements of type int32_t
             integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_ang_mom_device
 
@@ -477,7 +477,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: shell_factor ! Elements of type double
+            real(c_double), intent(in), value :: shell_factor ! Elements of type double
             integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_factor_device
 
@@ -488,7 +488,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: shell_prim_num ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: shell_prim_num ! Elements of type int64_t
             integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_prim_num_device
 
@@ -499,7 +499,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: shell_prim_index ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: shell_prim_index ! Elements of type int64_t
             integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_prim_index_device
 
@@ -510,7 +510,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: exponent ! Elements of type double
+            real(c_double), intent(in), value :: exponent ! Elements of type double
             integer(c_int64_t), intent(in), value :: prim_num
         end function qmckl_set_ao_basis_exponent_device
 
@@ -521,7 +521,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: coefficient ! Elements of type double
+            real(double), intent(in), value :: coefficient ! Elements of type double
             integer(c_int64_t), intent(in), value :: prim_num
         end function qmckl_set_ao_basis_coefficient_device
 
@@ -532,7 +532,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: prim_factor ! Elements of type double
+            real(c_double), intent(in), value :: prim_factor ! Elements of type double
             integer(c_int64_t), intent(in), value :: prim_num
         end function qmckl_set_ao_basis_prim_factor_device
 
@@ -543,7 +543,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: ao_factor ! Elements of type double
+            real(c_double), intent(in), value :: ao_factor ! Elements of type double
             integer(c_int64_t), intent(in), value :: ao_num
         end function qmckl_set_ao_basis_ao_factor_device
 
