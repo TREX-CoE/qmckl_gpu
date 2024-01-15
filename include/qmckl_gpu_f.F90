@@ -276,7 +276,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in) :: context
-            type(c_ptr), intent(out) :: nucl_charge(*) ! Elements of type double
+            real(c_double), intent(out) :: nucl_charge(*) ! Elements of type double
             integer(c_int64_t), intent(in) :: nucl_num
         end function qmckl_get_nucleus_charge_device
 
