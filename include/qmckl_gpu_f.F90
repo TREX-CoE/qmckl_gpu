@@ -202,7 +202,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in) :: context
-            character(c_char, len=*), intent(in) :: file_name
+            character(c_char), intent(in) :: file_name(max_size)
             integer(c_int64_t), intent(in) :: size_max
         end function qmckl_trexio_read_device
 
