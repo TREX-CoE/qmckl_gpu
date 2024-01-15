@@ -778,7 +778,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            integet(c_int64_t), intent(in), value :: type_nucl_vector ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: type_nucl_vector ! Elements of type int64_t
             integer(c_int64_t), intent(in), value :: nucl_num
         end function qmckl_set_jastrow_type_nucl_vector_device
 
