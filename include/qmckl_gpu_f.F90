@@ -264,9 +264,9 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            character(c_char), intent(in) :: transp
-            real(c_double), intent(out) :: nucl_coord(*) ! Elements of type double*
-            integer(c_int64_t), intent(in) :: size_max
+            character(c_char), intent(in), value :: transp
+            real(c_double), intent(out) :: nucl_coord(*) ! Elements of type double
+            integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_nucleus_coord_device
 
         integer(qmckl_exit_code_device) function qmckl_get_nucleus_charge_device(context, nucl_charge, nucl_num) &
@@ -277,7 +277,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             real(c_double), intent(out) :: nucl_charge(*) ! Elements of type double
-            integer(c_int64_t), intent(in) :: nucl_num
+            integer(c_int64_t), intent(in), value :: nucl_num
         end function qmckl_get_nucleus_charge_device
 
     !!!!!!!!!!!
@@ -291,10 +291,10 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            character(c_char), intent(in) :: transp
-            integer(c_int64_t), intent(in) :: num
+            character(c_char), intent(in), value :: transp
+            integer(c_int64_t), intent(in), value :: num
             real(c_double), intent(in) :: coord(*) ! Elements of type double
-            integer(c_int64_t), intent(in) :: size_max
+            integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_point_device
 
         integer(qmckl_exit_code_device) function qmckl_set_point_device_from_host(context, transp, num, coord, size_max) &
@@ -304,10 +304,10 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            character(c_char), intent(in) :: transp
-            integer(c_int64_t), intent(in) :: num
+            character(c_char), intent(in), value :: transp
+            integer(c_int64_t), intent(in), value :: num
             double precision, intent(in) :: coord(*)
-            integer(c_int64_t), intent(in) :: size_max
+            integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_point_device_from_host
 
         integer(qmckl_exit_code_device) function qmckl_get_point_device(context, transp, coord, size_max) &
@@ -317,9 +317,9 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            character(c_char), intent(in) :: transp
+            character(c_char), intent(in), value :: transp
             real(c_double), intent(out) :: coord(*) ! Elements of type double
-            integer(c_int64_t), intent(in) :: size_max
+            integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_point_device
 
         integer(qmckl_exit_code_device) function qmckl_get_point_device_to_host(context, transp, coord, size_max) &
@@ -329,9 +329,9 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            character(c_char), intent(in) :: transp
+            character(c_char), intent(in), value :: transp
             double precision, intent(out) :: coord(*)
-            integer(c_int64_t), intent(in) :: size_max
+            integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_point_device_to_host
 
     !!!!!!!!!!!
@@ -346,8 +346,8 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            integer(c_int64_t), intent(in) :: elec_up_num
-            integer(c_int64_t), intent(in) :: elec_dn_num
+            integer(c_int64_t), intent(in), value :: elec_up_num
+            integer(c_int64_t), intent(in), value :: elec_dn_num
         end function qmckl_set_electron_num_device
 
         integer(qmckl_exit_code_device) function qmckl_set_electron_coord_device(context, transp, walk_num, coord, size_max) &
@@ -357,10 +357,10 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            character, intent(in) :: transp
-            integer(c_int64_t), intent(in) :: walk_num
+            character, intent(in), value :: transp
+            integer(c_int64_t), intent(in), value :: walk_num
             real(c_double), intent(in) :: coord(*) ! Elements of type double
-            integer(c_int64_t), intent(in) :: size_max
+            integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_electron_coord_device
 
         integer(qmckl_exit_code_device) function qmckl_set_electron_coord_device_from_host(context, transp, walk_num, coord, size_max) &
@@ -370,10 +370,10 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            character, intent(in) :: transp
-            integer(c_int64_t), intent(in) :: walk_num
+            character, intent(in), value :: transp
+            integer(c_int64_t), intent(in), value :: walk_num
             real(c_double), intent(in) :: coord(*)
-            integer(c_int64_t), intent(in) :: size_max
+            integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_electron_coord_device_from_host
 
 
@@ -386,9 +386,9 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            character, intent(in) :: transp
+            character, intent(in), value :: transp
             real(c_double), intent(out) :: coord(*) ! Elements of type double
-            integer(c_int64_t), intent(in) :: size_max
+            integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_electron_coord_device
 
     !!!!!!!!!!!
@@ -404,7 +404,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            integer(c_int64_t), intent(in) :: num
+            integer(c_int64_t), intent(in), value :: num
         end function qmckl_set_ao_basis_ao_num_device
 
         integer(qmckl_exit_code_device) function qmckl_set_ao_basis_type_device(context, type) &
@@ -414,7 +414,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            character(c_signed_char), intent(in) :: type
+            character(c_signed_char), intent(in), value :: type
         end function qmckl_set_ao_basis_type_device
 
         integer(qmckl_exit_code_device) function qmckl_set_ao_basis_shell_num_device(context, shell_num) &
@@ -424,7 +424,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            integer(c_int64_t), intent(in) :: shell_num
+            integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_num_device
 
         integer(qmckl_exit_code_device) function qmckl_set_ao_basis_prim_num_device(context, prim_num) &
@@ -434,7 +434,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            integer(c_int64_t), intent(in) :: prim_num
+            integer(c_int64_t), intent(in), value :: prim_num
         end function qmckl_set_ao_basis_prim_num_device
 
         integer(qmckl_exit_code_device) function qmckl_set_ao_basis_nucleus_index_device(context, nucleus_index, size_max) &
@@ -445,7 +445,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             integer(c_int64_t), intent(in) :: nucleus_index(*) ! Elements of type int64_t
-            integer(c_int64_t), intent(in) :: size_max
+            integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_ao_basis_nucleus_index_device
 
         integer(qmckl_exit_code_device) function qmckl_set_ao_basis_nucleus_shell_num_device(context, nucleus_shell_num, nucl_num) &
@@ -456,7 +456,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             integer(c_int64_t), intent(in) :: nucleus_shell_num(*) ! Elements of type int64_t
-            integer(c_int64_t), intent(in) :: nucl_num
+            integer(c_int64_t), intent(in), value :: nucl_num
         end function qmckl_set_ao_basis_nucleus_shell_num_device
 
         integer(qmckl_exit_code_device) function qmckl_set_ao_basis_shell_ang_mom_device(context, shell_ang_mom, shell_num) &
@@ -467,7 +467,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             integer(c_int32_t), intent(in) :: shell_ang_mom(*) ! Elements of type int32_t
-            integer(c_int64_t), intent(in) :: shell_num
+            integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_ang_mom_device
 
         integer(qmckl_exit_code_device) function qmckl_set_ao_basis_shell_factor_device(context, shell_factor, shell_num) &
@@ -478,7 +478,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             real(c_double), intent(in) :: shell_factor(*) ! Elements of type double
-            integer(c_int64_t), intent(in) :: shell_num
+            integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_factor_device
 
         integer(qmckl_exit_code_device) function qmckl_set_ao_basis_shell_prim_num_device(context, shell_prim_num, shell_num) &
@@ -489,7 +489,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             integer(c_int64_t), intent(in) :: shell_prim_num(*) ! Elements of type int64_t
-            integer(c_int64_t), intent(in) :: shell_num
+            integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_prim_num_device
 
         integer(qmckl_exit_code_device) function qmckl_set_ao_basis_shell_prim_index_device(context, shell_prim_index, shell_num) &
@@ -500,7 +500,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             integer(c_int64_t), intent(in) :: shell_prim_index(*) ! Elements of type int64_t
-            integer(c_int64_t), intent(in) :: shell_num
+            integer(c_int64_t), intent(in), value :: shell_num
         end function qmckl_set_ao_basis_shell_prim_index_device
 
         integer(qmckl_exit_code_device) function qmckl_set_ao_basis_exponent_device(context, exponent, prim_num) &
@@ -511,7 +511,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             real(c_double), intent(in) :: exponent(*) ! Elements of type double
-            integer(c_int64_t), intent(in) :: prim_num
+            integer(c_int64_t), intent(in), value :: prim_num
         end function qmckl_set_ao_basis_exponent_device
 
         integer(qmckl_exit_code_device) function qmckl_set_ao_basis_coefficient_device(context, coefficient, prim_num) &
@@ -522,7 +522,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             real(c_double), intent(in) :: coefficient(*) ! Elements of type double
-            integer(c_int64_t), intent(in) :: prim_num
+            integer(c_int64_t), intent(in), value :: prim_num
         end function qmckl_set_ao_basis_coefficient_device
 
         integer(qmckl_exit_code_device) function qmckl_set_ao_basis_prim_factor_device(context, prim_factor, prim_num) &
@@ -533,7 +533,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             real(c_double), intent(in) :: prim_factor(*) ! Elements of type double
-            integer(c_int64_t), intent(in) :: prim_num
+            integer(c_int64_t), intent(in), value :: prim_num
         end function qmckl_set_ao_basis_prim_factor_device
 
         integer(qmckl_exit_code_device) function qmckl_set_ao_basis_ao_factor_device(context, ao_factor, ao_num) &
@@ -544,7 +544,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             real(c_double), intent(in) :: ao_factor(*) ! Elements of type double
-            integer(c_int64_t), intent(in) :: ao_num
+            integer(c_int64_t), intent(in), value :: ao_num
         end function qmckl_set_ao_basis_ao_factor_device
 
         ! Getters (calling compute)
@@ -556,7 +556,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            integer(c_int64_t), intent(in) :: ao_num
+            integer(c_int64_t), intent(out) :: ao_num
         end function qmckl_get_ao_basis_ao_num_device
 
 
@@ -622,7 +622,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            integer(c_int64_t), intent(in) :: num
+            integer(c_int64_t), intent(in), value :: num
         end function qmckl_set_mo_basis_mo_num_device
 
         integer(qmckl_exit_code_device) function qmckl_set_mo_basis_coefficient_device(context, mo_coefficient) &
