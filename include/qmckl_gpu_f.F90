@@ -254,7 +254,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            integer(c_int64_t), intent(in), value :: num ! Elements of type int64_t
+            integer(c_int64_t), intent(out), value :: num ! Elements of type int64_t
         end function qmckl_get_nucleus_num_device
 
         integer(qmckl_exit_code_device) function qmckl_get_nucleus_coord_device(context, transp, nucl_coord, size_max) &
@@ -265,7 +265,7 @@ module qmckl_gpu_f
 
             integer(qmckl_context_device), intent(in), value :: context
             character(c_char), intent(in), value :: transp
-            real(c_double), intent(in), value :: nucl_coord ! Elements of type double*
+            real(c_double), intent(out), value :: nucl_coord ! Elements of type double*
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_nucleus_coord_device
 
@@ -567,7 +567,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: ao_vgl
+            real(c_double), intent(in), value :: ao_vgl
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_ao_basis_ao_vgl_device
 
@@ -580,7 +580,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value         :: ao_value
+            real(c_double), intent(in), value         :: ao_value
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_ao_basis_ao_value_device
 
@@ -591,7 +591,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value         :: ao_value
+            real(c_double), intent(in), value         :: ao_value
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_ao_basis_ao_value_inplace_device
 
@@ -603,7 +603,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value         :: ao_value
+            real(c_double), intent(in), value         :: ao_value
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_ao_basis_ao_vgl_inplace_device
 
@@ -632,7 +632,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: mo_coefficient ! Elements of type double
+            real(c_double), intent(in), value :: mo_coefficient ! Elements of type double
         end function qmckl_set_mo_basis_coefficient_device
 
         ! Basis getters
@@ -656,7 +656,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: mo_vgl
+            real(c_double), intent(in), value :: mo_vgl
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_vgl_device
 
@@ -667,7 +667,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: mo_value
+            real(c_double), intent(in), value :: mo_value
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_value_device
 
@@ -678,7 +678,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: mo_vgl
+            real(c_double), intent(in), value :: mo_vgl
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_vgl_inplace_device
 
@@ -689,7 +689,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: mo_value
+            real(c_double), intent(in), value :: mo_value
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_mo_basis_mo_value_inplace_device
 
@@ -700,7 +700,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: keep
+            integer(c_int32_t), intent(in), value :: keep
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_mo_basis_select_mo_device
 
@@ -727,7 +727,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: kappa_en ! Elements of type double
+            real(c_double), intent(in), value :: kappa_en ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_jastrow_rescale_factor_en_device
 
@@ -778,7 +778,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: type_nucl_vector ! Elements of type int64_t
+            integet(c_int64_t), intent(in), value :: type_nucl_vector ! Elements of type int64_t
             integer(c_int64_t), intent(in), value :: nucl_num
         end function qmckl_set_jastrow_type_nucl_vector_device
 
@@ -789,7 +789,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: a_vector ! Elements of type double
+            real(c_double), intent(in), value :: a_vector ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_jastrow_a_vector_device
 
@@ -800,7 +800,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: b_vector ! Elements of type double
+            real(c_double), intent(in), value :: b_vector ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_jastrow_b_vector_device
 
@@ -811,7 +811,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: c_vector ! Elements of type double
+            real(c_double), intent(in), value :: c_vector ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_set_jastrow_c_vector_device
 
@@ -824,7 +824,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: aord_num ! Type int64_t
+            integer(c_int64_t), intent(in), value :: aord_num ! Type int64_t
         end function qmckl_get_jastrow_aord_num_device
 
         integer(qmckl_exit_code_device) function qmckl_get_jastrow_bord_num_device(context, bord_num) &
@@ -834,7 +834,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: bord_num ! Type int64_t
+            integer(c_int64_t), intent(in), value :: bord_num ! Type int64_t
         end function qmckl_get_jastrow_bord_num_device
 
         integer(qmckl_exit_code_device) function qmckl_get_jastrow_cord_num_device(context, cord_num) &
@@ -844,7 +844,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: cord_num ! Type int64_t
+            integer(c_int64_t), intent(in), value :: cord_num ! Type int64_t
         end function qmckl_get_jastrow_cord_num_device
 
         integer(qmckl_exit_code_device) function qmckl_get_jastrow_type_nucl_num_device(context, type_nucl_num) &
@@ -854,7 +854,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: type_nucl_num ! Type int64_t
+            integer(c_int64_t), intent(in), value :: type_nucl_num ! Type int64_t
         end function qmckl_get_jastrow_type_nucl_num_device
 
         integer(qmckl_exit_code_device) function qmckl_get_jastrow_type_nucl_vector_device(context, type_nucl_vector, size_max) &
@@ -864,7 +864,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: type_nucl_vector ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: type_nucl_vector ! Elements of type int64_t
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_type_nucl_vector_device
 
@@ -875,7 +875,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: a_vector ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: a_vector ! Elements of type int64_t
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_a_vector_device
 
@@ -886,7 +886,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: b_vector ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: b_vector ! Elements of type int64_t
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_b_vector_device
 
@@ -897,7 +897,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: c_vector ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: c_vector ! Elements of type int64_t
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_c_vector_device
 
@@ -908,7 +908,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: rescale_factor_ee ! Elements of type double
+            real(c_double), intent(out), value :: rescale_factor_ee ! Elements of type double
         end function qmckl_get_jastrow_rescale_factor_ee_device
 
         integer(qmckl_exit_code_device) function qmckl_get_jastrow_rescale_factor_en_device(context, rescale_factor_en, size_max) &
@@ -918,7 +918,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: rescale_factor_en ! Elements of type double
+            real(c_double), intent(in), value :: rescale_factor_en ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_rescale_factor_en_device
 
@@ -929,7 +929,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: rescale_factor_en ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: rescale_factor_en ! Elements of type int64_t
         end function qmckl_get_jastrow_dim_c_vector_device
 
         integer(qmckl_exit_code_device) function qmckl_get_jastrow_asymp_jasa_device(context, asymp_jasa, size_max) &
@@ -939,7 +939,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: asymp_jasa ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: asymp_jasa ! Elements of type int64_t
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_asymp_jasa_device
 
@@ -950,7 +950,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: asymp_jasb ! Elements of type int64_t
+            integer(c_int64_t), intent(in), value :: asymp_jasb ! Elements of type int64_t
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_asymp_jasb_device
 
@@ -964,7 +964,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: jastrow_value ! Elements of type double
+            real(c_double), intent(in), value :: jastrow_value ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_value_device
 
@@ -975,7 +975,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: jastrow_value ! Elements of type double
+            real(c_double), intent(in), value :: jastrow_value ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_gl_device
 
@@ -987,7 +987,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: factor_ee ! Elements of type double
+            real(c_double), intent(in), value :: factor_ee ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_factor_ee_device
 
@@ -999,7 +999,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: factor_en ! Elements of type double
+            real(c_double), intent(in), value :: factor_en ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_factor_en_device
 
@@ -1010,7 +1010,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: factor_en_deriv_e ! Elements of type double
+            real(c_double), intent(in), value :: factor_en_deriv_e ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_factor_en_deriv_e_device
 
@@ -1022,7 +1022,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: factor_een ! Elements of type double
+            real(c_double), intent(in), value :: factor_een ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_factor_een_device
 
@@ -1034,7 +1034,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: factor_een_deriv_e ! Elements of type double
+            real(c_double), intent(in), value :: factor_een_deriv_e ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_factor_een_deriv_e_device
 
@@ -1046,7 +1046,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
+            real(c_double), intent(in), value :: distance_rescaled ! Elements of type double
         end function qmckl_get_jastrow_ee_distance_rescaled_device
 
         integer(qmckl_exit_code_device) function qmckl_get_jastrow_ee_distance_rescaled_deriv_e_device &
@@ -1057,7 +1057,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: distance_rescaled_deriv_e ! Elements of type double
+            real(c_double), intent(in), value :: distance_rescaled_deriv_e ! Elements of type double
         end function qmckl_get_jastrow_ee_distance_rescaled_deriv_e_device
 
         integer(qmckl_exit_code_device) function qmckl_get_electron_en_distance_rescaled_device(context, distance_rescaled) &
@@ -1067,7 +1067,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
+            real(c_double), intent(in), value :: distance_rescaled ! Elements of type double
         end function qmckl_get_electron_en_distance_rescaled_device
 
         integer(qmckl_exit_code_device) function qmckl_get_electron_en_distance_rescaled_deriv_e_device &
@@ -1078,7 +1078,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: distance_rescaled_deriv_e ! Elements of type double
+            real(c_double), intent(in), value :: distance_rescaled_deriv_e ! Elements of type double
         end function qmckl_get_electron_en_distance_rescaled_deriv_e_device
 
         integer(qmckl_exit_code_device) function qmckl_get_jastrow_een_rescaled_e_device(context, distance_rescaled, size_max) &
@@ -1088,7 +1088,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
+            real(c_double), intent(in), value :: distance_rescaled ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_een_rescaled_e_device
 
@@ -1100,7 +1100,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
+            real(c_double), intent(in), value :: distance_rescaled ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_een_rescaled_e_deriv_e_device
 
@@ -1111,7 +1111,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
+            real(c_double), intent(in), value :: distance_rescaled ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_een_rescaled_n_device
 
@@ -1123,7 +1123,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: distance_rescaled ! Elements of type double
+            real(c_double), intent(in), value :: distance_rescaled ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_een_rescaled_n_deriv_e_device
 
@@ -1134,7 +1134,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: tmp_c ! Elements of type double
+            real(c_double), intent(in), value :: tmp_c ! Elements of type double
         end function qmckl_get_jastrow_tmp_c_device
 
         integer(qmckl_exit_code_device) function qmckl_get_jastrow_dtmp_c_device(context, dtmp_c) &
@@ -1144,7 +1144,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: dtmp_c ! Elements of type double
+            real(c_double), intent(in), value :: dtmp_c ! Elements of type double
         end function qmckl_get_jastrow_dtmp_c_device
 
         integer(qmckl_exit_code_device) function qmckl_get_jastrow_factor_ee_deriv_e_device(context, factor_ee_deriv_e, size_max) &
@@ -1154,7 +1154,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: factor_ee_deriv_e ! Elements of type double
+            real(c_double), intent(in), value :: factor_ee_deriv_e ! Elements of type double
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_get_jastrow_factor_ee_deriv_e_device
 
