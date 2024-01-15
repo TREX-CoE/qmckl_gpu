@@ -31,5 +31,5 @@ fi
 
 
 # Apply formatting
-fprettify -i 4 $qmckl_gpu_path/include/qmckl_gpu_f.f90
+fprettify -i 4 $qmckl_gpu_path/include/qmckl_gpu_f.F90
 fprettify -i 4 $qmckl_gpu_path/tests/test_qmckl_fortran_interface.f90

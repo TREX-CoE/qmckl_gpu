@@ -1,4 +1,4 @@
-include '../include/qmckl_gpu_f.f90'
+include '../include/qmckl_gpu_f.F90'
 
 program qmckl_test_fortran_interface
     use, intrinsic :: iso_c_binding
