@@ -11,7 +11,7 @@
 // ALLOCS / FREES
 //**********
 
-void *qmckl_malloc_device(qmckl_context_device context, size_t size) {
+void *qmckl_malloc_device(qmckl_context_device context, int64_t size) {
 	assert(qmckl_context_check_device(context) != QMCKL_NULL_CONTEXT_DEVICE);
 
 	qmckl_context_struct_device *const ctx =
@@ -118,7 +118,7 @@ qmckl_exit_code_device qmckl_free_device(qmckl_context_device context,
 
 qmckl_exit_code_device qmckl_memcpy_H2D(qmckl_context_device context,
 										void *const dest, void *const src,
-										size_t size) {
+										int64_t size) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
@@ -144,9 +144,32 @@ qmckl_exit_code_device qmckl_memcpy_H2D(qmckl_context_device context,
 	return QMCKL_SUCCESS_DEVICE;
 }
 
+
+
+
+qmckl_exit_code_device qmckl_memcpy_H2D_int32(qmckl_context_device context, int32_t *const dest, double *const src, int64_t numberElements)
+{
+	qmckl_memcpy_H2D(context, dest, src, numberElements*sizeof(int32_t));
+}
+
+
+
+qmckl_exit_code_device qmckl_memcpy_H2D_int64(qmckl_context_device context, int64_t *const dest, double *const src, int64_t numberElements)
+{
+	qmckl_memcpy_H2D(context, dest, src, numberElements*sizeof(int64_t));
+}
+
+
+qmckl_exit_code_device qmckl_memcpy_H2D_double(qmckl_context_device context, double *const dest, double *const src, int64_t numberElements)
+{
+	qmckl_memcpy_H2D(context, dest, src, numberElements*sizeof(double));
+}
+
+
+
 qmckl_exit_code_device qmckl_memcpy_D2H(qmckl_context_device context,
 										void *const dest, void *const src,
-										size_t size) {
+										int64_t size) {
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {
 		return qmckl_failwith_device(context, QMCKL_INVALID_CONTEXT_DEVICE,
@@ -171,6 +194,28 @@ qmckl_exit_code_device qmckl_memcpy_D2H(qmckl_context_device context,
 
 	return QMCKL_SUCCESS_DEVICE;
 }
+
+
+
+qmckl_exit_code_device qmckl_memcpy_D2H_int32(qmckl_context_device context, int32_t *const dest, double *const src, int64_t numberElements)
+{
+	qmckl_memcpy_D2H(context, dest, src, numberElements*sizeof(int32_t));
+}
+
+
+
+qmckl_exit_code_device qmckl_memcpy_D2H_int64(qmckl_context_device context, int64_t *const dest, double *const src, int64_t numberElements)
+{
+	qmckl_memcpy_D2H(context, dest, src, numberElements*sizeof(int64_t));
+}
+
+
+qmckl_exit_code_device qmckl_memcpy_D2H_double(qmckl_context_device context, double *const dest, double *const src, int64_t numberElements)
+{
+	qmckl_memcpy_D2H(context, dest, src, numberElements*sizeof(double));
+}
+
+
 
 qmckl_exit_code_device qmckl_memcpy_D2D(qmckl_context_device context,
 										void *dest, void *src, size_t size) {
