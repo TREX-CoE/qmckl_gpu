@@ -707,7 +707,7 @@ module qmckl_gpu_f
             implicit none
 
             integer(qmckl_context_device), intent(in), value :: context
-            type(c_ptr), intent(in), value :: keep
+            integer(c_int32_t), intent(in) :: keep(*)
             integer(c_int64_t), intent(in), value :: size_max
         end function qmckl_mo_basis_select_mo_device
 
