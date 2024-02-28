@@ -1,5 +1,7 @@
 #include "../include/qmckl_jastrow.h"
 
+#include <rocblas.h>
+
 //**********
 // COMPUTES
 //**********
@@ -1857,9 +1859,9 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 	const double alpha = 1.0;
 	const double beta = 0.0;
 
-	const int64_t M = elec_num;
-	const int64_t N = nucl_num * (cord_num + 1);
-	const int64_t K = elec_num;
+	const int64_t m = elec_num;
+	const int64_t n = nucl_num * (cord_num + 1);
+	const int64_t k = elec_num;
 
 	const int64_t LDA = elec_num;
 	const int64_t LDB = elec_num;
@@ -1868,51 +1870,66 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 	const int64_t af = elec_num * elec_num;
 	const int64_t bf = elec_num * nucl_num * (cord_num + 1);
 	const int64_t cf = bf;
-#ifdef HAVE_LIBGPUBLAS
-
-	gpu_dgemm('N', 'N', M, N, K, alpha, een_rescaled_e, LDA, een_rescaled_n, LDB, beta, tmp_c, LDC);
-
-#elif HAVE_CUBLAS
-#pragma omp declare target
-{
-		
-		cublasHandle_t handle;
-		cublasCreate(&handle);
-		cublasStatus_t error = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, een_rescaled_e, LDA, een_rescaled_n, LDB, &beta, tmp_c, LDC ); 
-		printf("%s\n",cublasGetStatusString(error));
-}
-
-#else
-
-#pragma omp target is_device_ptr(een_rescaled_e, een_rescaled_n, tmp_c)
-	{
+	rocblas_handle handle;
+	rocblas_operation transa = rocblas_operation_none;
+	rocblas_operation transb = rocblas_operation_none;
 
 
-#pragma omp teams distribute simd collapse(2)
-		for (int64_t nw = 0; nw < walk_num; ++nw) {
-			for (int64_t i = 0; i < cord_num; ++i) {
 
-				// Single DGEMM
-				double *A = een_rescaled_e + (af * (i + nw * (cord_num + 1)));
-				double *B = een_rescaled_n + (bf * nw);
-				double *C = tmp_c + (cf * (i + nw * cord_num));
+	rocblas_create_handle(&handle);
+    	rocblas_dgemm(handle, transa, transb, m, n, k, &alpha, een_rescaled_e, LDA, een_rescaled_n, LDB, &beta, tmp_c, LDC);
+    	rocblas_destroy_handle(handle);
 
-				// Row of A
-				for (int i = 0; i < M; i++) {
-					// Cols of B
-					for (int j = 0; j < N; j++) {
 
-						// Compute C(i,j)
-						C[i + LDC * j] = 0.;
-						for (int k = 0; k < K; k++) {
-							C[i + LDC * j] += A[i + k * LDA] * B[k + j * LDB];
-						}
-					}
-				}
-			}
-		}
-	}
-#endif
+
+
+
+
+//#ifdef HAVE_LIBGPUBLAS
+//
+//	gpu_dgemm('N', 'N', M, N, K, alpha, een_rescaled_e, LDA, een_rescaled_n, LDB, beta, tmp_c, LDC);
+//
+//#elif HAVE_CUBLAS
+//#pragma omp declare target
+//{
+//		
+//		cublasHandle_t handle;
+//		cublasCreate(&handle);
+//		cublasStatus_t error = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, een_rescaled_e, LDA, een_rescaled_n, LDB, &beta, tmp_c, LDC ); 
+//		printf("%s\n",cublasGetStatusString(error));
+//}
+//
+//#else
+//
+//#pragma omp target is_device_ptr(een_rescaled_e, een_rescaled_n, tmp_c)
+//	{
+//
+//
+//#pragma omp teams distribute simd collapse(2)
+//		for (int64_t nw = 0; nw < walk_num; ++nw) {
+//			for (int64_t i = 0; i < cord_num; ++i) {
+//
+//				// Single DGEMM
+//				double *A = een_rescaled_e + (af * (i + nw * (cord_num + 1)));
+//				double *B = een_rescaled_n + (bf * nw);
+//				double *C = tmp_c + (cf * (i + nw * cord_num));
+//
+//				// Row of A
+//				for (int i = 0; i < M; i++) {
+//					// Cols of B
+//					for (int j = 0; j < N; j++) {
+//
+//						// Compute C(i,j)
+//						C[i + LDC * j] = 0.;
+//						for (int k = 0; k < K; k++) {
+//							C[i + LDC * j] += A[i + k * LDA] * B[k + j * LDB];
+//						}
+//					}
+//				}
+//			}
+//		}
+//	}
+//#endif
 	return info;
 }
 
