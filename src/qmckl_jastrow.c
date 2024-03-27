@@ -2599,9 +2599,8 @@ qmckl_get_jastrow_value_device(qmckl_context_device context,
 	return QMCKL_SUCCESS_DEVICE;
 }
 
-qmckl_exit_code_device
-qmckl_get_jastrow_value_inplace_device(qmckl_context_device context,
-							   double *const value, const int64_t size_max) {
+qmckl_exit_code_device qmckl_get_jastrow_value_inplace_device(
+	qmckl_context_device context, double *const value, const int64_t size_max) {
 	qmckl_exit_code_device rc;
 
 	if (qmckl_context_check_device(context) == QMCKL_NULL_CONTEXT_DEVICE) {

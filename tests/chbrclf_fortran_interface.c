@@ -29,17 +29,25 @@ double *get_chbrclf_nucl_charge() { return chbrclf_charge; }
 
 double *get_chbrclf_nucl_coord() { return &(chbrclf_nucl_coord[0][0]); }
 
-int64_t *get_chbrclf_nucleus_index() { return &(chbrclf_basis_nucleus_index[0]); }
+int64_t *get_chbrclf_nucleus_index() {
+	return &(chbrclf_basis_nucleus_index[0]);
+}
 
 int64_t *get_chbrclf_nucleus_shell_num() {
 	return &(chbrclf_basis_nucleus_shell_num[0]);
 }
 
-int32_t *get_chbrclf_shell_ang_mom() { return &(chbrclf_basis_shell_ang_mom[0]); }
+int32_t *get_chbrclf_shell_ang_mom() {
+	return &(chbrclf_basis_shell_ang_mom[0]);
+}
 
-int64_t *get_chbrclf_shell_prim_num() { return &(chbrclf_basis_shell_prim_num[0]); }
+int64_t *get_chbrclf_shell_prim_num() {
+	return &(chbrclf_basis_shell_prim_num[0]);
+}
 
-int64_t *get_chbrclf_shell_prim_index() { return &(chbrclf_basis_shell_prim_index[0]); }
+int64_t *get_chbrclf_shell_prim_index() {
+	return &(chbrclf_basis_shell_prim_index[0]);
+}
 
 double *get_chbrclf_shell_factor() { return &(chbrclf_basis_shell_factor[0]); }
 

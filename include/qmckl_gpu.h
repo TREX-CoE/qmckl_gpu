@@ -1055,8 +1055,8 @@ qmckl_exit_code_device qmckl_provide_en_distance_device(
 qmckl_exit_code_device
 qmckl_get_jastrow_value_device(qmckl_context_device context,
 							   double *const value, const int64_t size_max);
-qmckl_exit_code_device qmckl_get_jastrow_value_inplace_device(qmckl_context_device context,
-							   double *const value, const int64_t size_max);
+qmckl_exit_code_device qmckl_get_jastrow_value_inplace_device(
+	qmckl_context_device context, double *const value, const int64_t size_max);
 qmckl_exit_code_device qmckl_get_jastrow_gl_device(qmckl_context_device context,
 												   double *const gl,
 												   const int64_t size_max);
