@@ -1878,7 +1878,8 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 		
 		cublasHandle_t handle;
 		cublasCreate(&handle);
-		cublasStatus_t error = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, een_rescaled_e, LDA, een_rescaled_n, LDB, &beta, tmp_c, LDC ); 
+		//cublasStatus_t error = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, een_rescaled_e, LDA, een_rescaled_n, LDB, &beta, tmp_c, LDC ); 
+		cublasStatus_t error = cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, een_rescaled_e, LDA, af, een_rescaled_n, LDB, bf, &beta, tmp_c, LDC, cf, walk_num ); 
 		printf("%s\n",cublasGetStatusString(error));
 }
 
