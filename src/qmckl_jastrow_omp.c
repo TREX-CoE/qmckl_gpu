@@ -1887,9 +1887,10 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 #pragma omp declare target
 {
 		rocblas_status rstatus = rocblas_status_success;
-		rocblas_handle handle;
-    		rstatus = rocblas_create_handle(&handle);	
-		error = cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, een_rescaled_e, LDA, af, een_rescaled_n, LDB, bf, &beta, tmp_c, LDC, cf, walk_num ); 
+                rocblas_handle handle;
+                rstatus = rocblas_create_handle(&handle);
+                rstatus =  rocblas_dgemm_strided_batched(handle, rocblas_operation_none, rocblas_operation_none, M, N, K, &alpha, een_rescaled_e, LDA, af, een_rescaled_n, LDB, bf, &beta, tmp_c, LDC, cf, walk_num );
+
 }
 #else
 
