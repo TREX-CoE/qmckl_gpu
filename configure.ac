@@ -122,6 +122,12 @@ AC_ARG_ENABLE([cublas],
             [have_cublas=yes],
             [have_cublas=no])
 
+AC_ARG_ENABLE([rocblas],
+	    [AS_HELP_STRING([--enable-rocblas],
+			    [Enable compilation of kernels that use rocblas])],
+	    [have_rocblas=yes],
+	    [have_rocblas=no])
+
 AC_ARG_ENABLE([floatmos],
             [AS_HELP_STRING([--enable-floatmos],
                             [Use single precision to compute MOs (with --enable-cublas only)])],
@@ -256,6 +262,18 @@ AS_IF([test "x$have_autoflags" = "xyes" -a "x$have_acc" = "xyes"], [
 AS_IF([test "x$have_trexio" = "xyes"], [
 	AC_DEFINE([HAVE_TREXIO], [1], [Enable compilation of TREXIO functions])
 ])
+
+AS_IF([test "x$have_rocblas" = "xyes"] [
+       AC_DEFINE([HAVE_ROCBLAS], [1], [Enable compilation of rocblas functions])
+       case $CC in
+	       *clang*)
+			CFLAGS="$CFLAGS -lrocblas"
+		;;
+		*)
+			echo "Warning: compiler not supported for rocblas"
+	esac
+])
+
 AS_IF([test "x$have_cublas" = "xyes"], [
 	AC_DEFINE([HAVE_CUBLAS], [1], [Enable compilation of cuBLAS/cuSolver functions])
 	case $CC in
@@ -303,6 +321,7 @@ AM_CONDITIONAL([HAVE_ACC_DEVICE],  [test "x$have_acc"  = "xyes"])
 AM_CONDITIONAL([HAVE_FORTRAN_INTERFACE],  [test "x$have_fortran_interface"  = "xyes"])
 AM_CONDITIONAL([HAVE_DEVICE_POINTERS], [test "x$have_omp"  = "xyes" -o "x$have_acc"  = "xyes"])
 AM_CONDITIONAL([HAVE_CUBLAS], [test "x$have_cublas"  = "xyes"])
+AM_CONDITIONAL([HAVE_ROCBLAS], [test "x$have_rocblas" = "xyes"])
 AM_CONDITIONAL([HAVE_LIBGPUBLAS], [test "xhave_gpublas" != "xno"])
 
 ####
@@ -331,6 +350,7 @@ Fortran interface .: ${have_fortran_interface}
 GPUBLAS ...........: ${have_gpublas}
 TREXIO ............: ${have_trexio}
 cuBLAS ............: ${have_cublas}
+rocblas ...........: ${have_rocblas}
 cuSPARSE ..........: ${have_cusparse}
 
 OpenMP ............: ${have_omp}
@@ -360,6 +380,7 @@ Fortran interface .: ${have_fortran_interface}
 GPUBLAS ...........: ${have_gpublas}
 TREXIO ............: ${have_trexio}
 cuBLAS ............: ${have_cublas}
+rocblas ...........: ${have_rocblas}
 cuSPARSE ..........: ${have_cusparse}
 
 OpenMP ............: ${have_omp}

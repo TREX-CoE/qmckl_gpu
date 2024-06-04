@@ -1883,6 +1883,14 @@ qmckl_compute_tmp_c_device(const qmckl_context_device context,
 		printf("%s\n",cublasGetStatusString(error));
 }
 
+#elif HAVE_ROCBLAS
+#pragma omp declare target
+{
+		rocblas_status rstatus = rocblas_status_success;
+		rocblas_handle handle;
+    		rstatus = rocblas_create_handle(&handle);	
+		error = cublasDgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, een_rescaled_e, LDA, af, een_rescaled_n, LDB, bf, &beta, tmp_c, LDC, cf, walk_num ); 
+}
 #else
 
 #pragma omp target is_device_ptr(een_rescaled_e, een_rescaled_n, tmp_c)

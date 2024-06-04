@@ -24,6 +24,10 @@
 	#include <cuda_runtime.h>
 #endif
 
+#ifdef HAVE_ROCBLAS
+	#include <rocblas/rocblas.h>
+#endif
+
 qmckl_exit_code_device qmckl_init_jastrow_device(qmckl_context_device context);
 bool qmckl_jastrow_provided_device(qmckl_context_device context);
 
