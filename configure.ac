@@ -263,7 +263,7 @@ AS_IF([test "x$have_trexio" = "xyes"], [
 	AC_DEFINE([HAVE_TREXIO], [1], [Enable compilation of TREXIO functions])
 ])
 
-AS_IF([test "x$have_rocblas" = "xyes"] [
+AS_IF([test "x$have_rocblas" = "xyes"], [
        AC_DEFINE([HAVE_ROCBLAS], [1], [Enable compilation of rocblas functions])
        case $CC in
 	       *clang*)
